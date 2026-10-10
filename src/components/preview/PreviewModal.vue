@@ -3,6 +3,7 @@
     :visible="visible"
     :footer="false"
     :header="false"
+    :closable="false"
     :width="'min(95vw, 1400px)'"
     modal-class="preview-arco-modal"
     :modal-style="{
@@ -37,10 +38,7 @@
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
-          <!-- 语言切换组件 -->
-          <LanguageSwitcher />
-
+        <div class="flex items-center gap-2.5">
           <a-button
             type="secondary"
             size="small"
@@ -176,17 +174,55 @@
                   ref="phoneContentRef"
                   class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar"
                 >
-                  <div
-                    v-if="pages.length > 1"
-                    class="mb-3 text-[12px] font-medium tracking-wider text-[#1677ff]"
-                  >
-                    {{ store.currentLocale === 'en' ? `Step ${currentStep + 1} of ${pages.length}` : `第 ${currentStep + 1} 步 / 共 ${pages.length} 步` }}
+                  <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (对齐 AlgoCandy 规范) -->
+                  <div class="flex items-center justify-between pb-3 mb-2.5 border-b border-slate-100">
+                    <div class="flex items-center gap-2 min-w-0 pr-2">
+                      <img src="/img/algocandy-logo.png" alt="AlgoCandy" class="w-6 h-auto shrink-0 object-contain" />
+                      <span class="text-xs font-semibold text-slate-800 truncate leading-snug">
+                        {{ formBrandTitle }}
+                      </span>
+                    </div>
+
+                    <!-- 嵌入手机内的双语切换胶囊 -->
+                    <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shrink-0 select-none">
+                      <button
+                        type="button"
+                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer"
+                        :class="store.currentLocale === 'zh' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
+                        @click="store.currentLocale = 'zh'"
+                      >
+                        中
+                      </button>
+                      <button
+                        type="button"
+                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer"
+                        :class="store.currentLocale === 'en' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
+                        @click="store.currentLocale = 'en'"
+                      >
+                        EN
+                      </button>
+                    </div>
                   </div>
 
-                  <h3 class="m-0 text-xl font-bold leading-7 text-slate-800 tracking-tight">
-                    {{ currentLocalizedTitle }}
-                  </h3>
-                  <p class="mb-5 mt-1 text-xs text-slate-500 leading-relaxed">
+                  <!-- 步骤与进度条 (对齐 AlgoCandy 样式) -->
+                  <div class="flex items-center justify-between mt-2 mb-3">
+                    <h3 class="m-0 text-base font-bold text-slate-900 tracking-tight">
+                      {{ currentLocalizedTitle }}
+                    </h3>
+                    <div v-if="pages.length > 1" class="flex items-center gap-2">
+                      <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          class="h-full bg-blue-600 rounded-full transition-all duration-300"
+                          :style="{ width: `${((currentStep + 1) / pages.length) * 100}%` }"
+                        ></div>
+                      </div>
+                      <span class="text-xs font-medium text-slate-400 font-mono">
+                        {{ currentStep + 1 }} / {{ pages.length }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p v-if="currentLocalizedDesc" class="mb-4 text-xs text-slate-500 leading-relaxed">
                     {{ currentLocalizedDesc }}
                   </p>
 
@@ -315,7 +351,6 @@ import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from
 import type { FormSchema, FormElement } from '@/types/schema';
 import { store } from '@/core/store';
 import { getPageText, getFieldText } from '@/core/i18n';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -622,6 +657,15 @@ const currentLocalizedTitle = computed(() => {
     return getPageText(currentPage.value, 'title') || currentPage.value.title || (store.currentLocale === 'en' ? 'Untitled Page' : '未命名页面');
   }
   return props.schema.meta?.title || (store.currentLocale === 'en' ? 'Untitled Form' : '未命名表单');
+});
+
+const formBrandTitle = computed(() => {
+  return (
+    props.schema.meta?.title ||
+    (store.currentLocale === 'en'
+      ? 'Beijing Branch of Shanghai Qingmo Information Co., Ltd'
+      : '上海青墨信息技术有限公司北京分公司')
+  );
 });
 
 const currentLocalizedDesc = computed(() => {

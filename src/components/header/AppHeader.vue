@@ -1,12 +1,12 @@
 <template>
-  <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] bg-white px-6 relative z-40">
+  <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/50 bg-white/75 backdrop-blur-md px-6 relative z-40 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
     <!-- 左侧标题与标识 -->
     <div class="flex min-w-0 items-center gap-2.5">
-      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#1677ff] shrink-0">
+      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#1677ff] shrink-0 shadow-2xs border border-blue-100/60">
         <Layers class="h-4 w-4" />
       </div>
       <div>
-        <div class="m-0 text-[15px] font-semibold leading-5 text-slate-800 tracking-tight">
+        <div class="m-0 text-[14px] font-semibold leading-5 text-slate-800 tracking-tight">
           {{ t('app.title') }}
         </div>
         <p class="m-0 text-[11px] leading-4 text-slate-400">
@@ -16,7 +16,7 @@
     </div>
 
     <!-- 右侧操作与状态组 -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2.5">
       <!-- 保存状态标签 -->
       <a-tag v-if="store.isDirty" color="orangered" size="small" class="!flex items-center gap-1.5">
         <template #icon>
@@ -38,22 +38,22 @@
       </a-tag>
 
       <!-- 主要操作按钮 -->
-      <a-space size="medium">
-        <a-button type="secondary" :loading="isSaving" @click="handleSave">
+      <a-space size="small">
+        <a-button type="secondary" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs backdrop-blur-xs" :loading="isSaving" @click="handleSave">
           <template #icon>
             <Save class="h-4 w-4" />
           </template>
           {{ t('app.save') }}
         </a-button>
 
-        <a-button type="secondary" @click="$emit('open-preview')">
+        <a-button type="secondary" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs backdrop-blur-xs" @click="$emit('open-preview')">
           <template #icon>
             <Eye class="h-4 w-4" />
           </template>
           {{ t('app.preview') }}
         </a-button>
 
-        <a-button type="primary" @click="$emit('open-deploy')">
+        <a-button type="primary" class="!shadow-xs" @click="$emit('open-deploy')">
           <template #icon>
             <CloudUpload class="h-4 w-4" />
           </template>
@@ -61,14 +61,14 @@
         </a-button>
       </a-space>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5" />
+      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-200" />
 
       <!-- 语言切换组件 -->
       <LanguageSwitcher />
 
       <!-- 布局折叠快捷菜单 -->
       <a-dropdown trigger="click" position="br">
-        <a-button type="secondary" shape="circle" size="medium" :title="t('app.settings')">
+        <a-button type="secondary" shape="circle" size="medium" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs" :title="t('app.settings')">
           <template #icon>
             <Settings class="h-4 w-4 text-slate-500" />
           </template>
@@ -88,28 +88,22 @@
         </template>
       </a-dropdown>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5" />
+      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-200" />
 
-      <!-- 最右侧：用户头像与昵称 -->
+      <!-- 最右侧：纯头像徽章 (参考 Stitch 设计，无多余名字与箭头) -->
       <a-dropdown trigger="click" position="br" v-model:popup-visible="isUserDropdownOpen">
         <div
-          class="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-slate-100/80 cursor-pointer transition select-none group"
-          :class="{ 'bg-slate-100': isUserDropdownOpen }"
+          class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-blue-400/50 cursor-pointer transition-all select-none"
+          :class="{ 'ring-2 ring-[#1677ff]': isUserDropdownOpen }"
+          title="ceshi"
         >
-          <!-- 头像 -->
+          <!-- 纯圆形头像 -->
           <a-avatar
-            :size="28"
-            class="!bg-gradient-to-tr !from-[#1677ff] !to-[#69b1ff] !text-white !font-medium text-xs shadow-xs shrink-0 flex items-center justify-center"
+            :size="30"
+            class="!bg-gradient-to-tr !from-[#1677ff] !to-[#69b1ff] !text-white !font-semibold text-xs shadow-xs shrink-0 flex items-center justify-center transition-transform hover:scale-105"
           >
-            ceshi
+            <IconUser class="text-white text-[15px]" />
           </a-avatar>
-          <!-- 昵称 -->
-          <span class="text-[13px] font-medium text-slate-700 tracking-tight">ceshi</span>
-          <!-- 折叠指示箭头 -->
-          <IconDown
-            class="text-[11px] text-slate-400 group-hover:text-slate-600 transition-transform duration-200"
-            :class="{ 'rotate-180': isUserDropdownOpen }"
-          />
         </div>
 
         <template #content>
@@ -150,7 +144,6 @@ import { t } from '@/core/i18n';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 import { Message } from '@arco-design/web-vue';
 import {
-  IconDown,
   IconUser,
   IconSettings,
   IconHistory,
