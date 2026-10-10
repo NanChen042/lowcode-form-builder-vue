@@ -1,10 +1,30 @@
 <template>
-  <div
-    v-if="visible"
-    class="fixed inset-0 z-[1000] flex bg-black/45 p-8 transition-opacity duration-200"
+  <a-modal
+    :visible="visible"
+    :footer="false"
+    :header="false"
+    :width="'min(95vw, 1400px)'"
+    modal-class="preview-arco-modal"
+    :modal-style="{
+      height: '92vh',
+      maxHeight: '92vh',
+      padding: 0,
+      borderRadius: '16px',
+      overflow: 'hidden'
+    }"
+    :body-style="{
+      padding: 0,
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }"
+    unmount-on-close
+    :mask-closable="true"
+    @cancel="handleClose"
   >
     <div
-      class="mx-auto flex h-full w-[95vw] max-w-[1400px] scale-100 flex-col overflow-hidden rounded-xl bg-white shadow-[0_6px_16px_rgba(0,0,0,0.08),0_9px_28px_rgba(0,0,0,0.12),0_12px_48px_rgba(0,0,0,0.16)] transition-all duration-200"
+      class="flex h-full w-full flex-col overflow-hidden bg-white rounded-2xl"
     >
       <!-- 头部 -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
@@ -287,7 +307,7 @@
         </div>
       </footer>
     </div>
-  </div>
+  </a-modal>
 </template>
 
 <script setup lang="ts">
@@ -646,5 +666,17 @@ async function handlePublish() {
 
 .animate-fade-in {
   animation: fadeIn 0.25s ease-out forwards;
+}
+
+:deep(.preview-arco-modal .arco-modal) {
+  padding: 0 !important;
+}
+
+:deep(.preview-arco-modal .arco-modal-body) {
+  padding: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
 }
 </style>
