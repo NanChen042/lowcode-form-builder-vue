@@ -5,8 +5,8 @@ import type {
   FormElement,
   ComponentType,
   CanvasState
-} from '@/types/schema';
-import { componentRegistry } from '@/registry/components';
+} from '../types/schema';
+import { componentRegistry } from '../registry/components';
 
 const PAGE_WIDTH = 390;
 const PAGE_GAP = 160;
