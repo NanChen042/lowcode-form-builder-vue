@@ -146,7 +146,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布
     'canvas.clear': '清空',
-    'canvas.signatureArea': '（手写签名感应区域）',
+    'canvas.signatureArea': '请在此处手写签名',
     'canvas.unnamed': '未命名字段',
 
     // 侧边栏物料库
@@ -311,7 +311,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // Canvas
     'canvas.clear': 'Clear',
-    'canvas.signatureArea': '(Signature Sensing Area)',
+    'canvas.signatureArea': 'Please sign here',
     'canvas.unnamed': 'Untitled Field',
 
     // Sidebar Materials

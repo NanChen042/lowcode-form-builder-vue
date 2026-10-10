@@ -227,13 +227,13 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     category: 'business',
     icon: 'PenTool',
     defaultData: () => ({
-      label: '声明与签名',
-      label_en: 'Declarations & Signature',
-      placeholder: '请在下方指定区域签名：',
-      placeholder_en: 'Please sign in the designated area below:',
+      label: '电子签名',
+      label_en: 'E-Signature',
+      placeholder: '请在此处手写签名',
+      placeholder_en: 'Please sign here',
       help: '',
       help_en: '',
-      showLabel: false,
+      showLabel: true,
       required: true,
       declarationRequired: true,
       options: [

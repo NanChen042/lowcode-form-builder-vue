@@ -329,14 +329,18 @@
             <span class="text-base italic font-semibold text-slate-800 tracking-wider">Signed: Verified Representative ✓</span>
             <button
               type="button"
-              class="absolute right-2 bottom-2 text-[11px] text-slate-500 hover:text-red-600 bg-white px-2 py-0.5 rounded border border-slate-200"
+              class="absolute right-2 bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 border border-slate-200 shadow-xs transition-colors cursor-pointer"
+              title="Clear"
               @click.stop="clearSignature"
             >
-              {{ store.currentLocale === 'en' ? 'Clear' : '清空' }}
+              <Eraser class="w-3.5 h-3.5" />
             </button>
           </template>
           <template v-else>
-            <span>{{ store.currentLocale === 'en' ? '(Click to Sign)' : '（点击模拟手写签名）' }}</span>
+            <span class="flex items-center gap-1.5 text-slate-400 text-xs">
+              <PenLine class="w-3.5 h-3.5 opacity-60" />
+              <span>{{ store.currentLocale === 'en' ? 'Click to sign' : '点击此处手写签名' }}</span>
+            </span>
           </template>
         </div>
       </div>
@@ -372,7 +376,7 @@ import type { FormElement } from '@/types/schema';
 import { store } from '@/core/store';
 import { getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { Info, Mail } from '@lucide/vue';
+import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
 
 const props = defineProps<{

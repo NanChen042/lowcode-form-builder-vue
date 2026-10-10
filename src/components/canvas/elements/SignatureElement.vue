@@ -33,11 +33,19 @@
       </div>
 
       <!-- 模拟签名板 -->
-      <div class="relative h-32 w-full rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 text-xs select-none">
-        <span>{{ t('canvas.signatureArea') }}</span>
-        <a-button size="mini" type="secondary" class="!absolute !right-2 !bottom-2" @click.stop>
-          {{ t('canvas.clear') }}
-        </a-button>
+      <div class="relative h-28 w-full rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 text-xs select-none">
+        <span class="flex items-center gap-1.5 text-slate-400 text-xs font-normal">
+          <PenLine class="w-3.5 h-3.5 opacity-60" />
+          <span>{{ t('canvas.signatureArea') }}</span>
+        </span>
+        <button
+          type="button"
+          class="!absolute !right-2 !bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-colors cursor-pointer shadow-xs"
+          title="Clear"
+          @click.stop
+        >
+          <Eraser class="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   </div>
@@ -49,6 +57,7 @@ import { store, markDirty } from '@/core/store';
 import { t, getFieldText, getOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
+import { Eraser, PenLine } from '@lucide/vue';
 
 const props = defineProps<{ element: FormElement }>();
 
