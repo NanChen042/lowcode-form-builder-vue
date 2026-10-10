@@ -372,6 +372,27 @@
               <a-switch v-model="isSelectMultiple" size="small" />
             </div>
 
+            <!-- 点击开启多选时，最大允许选择数紧跟在开启多选正下方 (或多选框组 checkbox 自带多选) -->
+            <div
+              v-if="canHaveMaxSelections"
+              class="flex items-center justify-between py-1.5 border-t border-slate-50"
+            >
+              <div class="flex items-center gap-1.5">
+                <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
+                <a-tooltip :content="t('prop.maxSelectionsTip')" position="top">
+                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                </a-tooltip>
+              </div>
+              <a-input-number
+                v-model="currentMaxSelections"
+                :min="1"
+                :max="20"
+                size="small"
+                style="width: 100px"
+                @change="onMaxSelectionsChange"
+              />
+            </div>
+
             <!-- 单行文本格式类型 (文本 / 数字) -->
             <div v-if="selectedElement.type === 'input'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
@@ -460,12 +481,12 @@
               <button
                 type="button"
                 class="w-full h-8 px-2.5 rounded-md bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 flex items-center justify-between text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer group select-none shadow-xs"
-                @click="openCountryListModal('phone')"
+                @click="openCountryListModal"
               >
                 <div class="flex items-center gap-1.5 min-w-0">
                   <Globe class="w-3.5 h-3.5 text-blue-500 shrink-0" />
                   <span class="text-[12px] font-medium text-slate-700 group-hover:text-blue-600 transition-colors truncate whitespace-nowrap">
-                    {{ store.currentLocale === 'en' ? 'Supported 244 Regions' : '全球 244 国/区号支持列表' }}
+                    {{ store.currentLocale === 'en' ? 'Preset 244 Global Directory' : '全球 244 国/籍/区号支持列表' }}
                   </span>
                 </div>
                 <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0 whitespace-nowrap ml-2">
@@ -525,16 +546,12 @@
             <button
               type="button"
               class="w-full h-8 px-2.5 rounded-md bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 flex items-center justify-between text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer group select-none shadow-xs"
-              @click="openCountryListModal(selectedElement.type as ('country' | 'nationality'))"
+              @click="openCountryListModal"
             >
               <div class="flex items-center gap-1.5 min-w-0">
-                <Globe v-if="selectedElement.type === 'country'" class="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                <Flag v-else class="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <Globe class="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 <span class="text-[12px] font-medium text-slate-700 group-hover:text-blue-600 transition-colors truncate whitespace-nowrap">
-                  {{ selectedElement.type === 'country'
-                    ? (store.currentLocale === 'en' ? 'Supported 244 Countries/Regions' : '全球 244 国/地区预设支持列表')
-                    : (store.currentLocale === 'en' ? 'Supported 244 Nationalities' : '全球 244 预设国籍支持列表')
-                  }}
+                  {{ store.currentLocale === 'en' ? 'Preset 244 Global Directory' : '全球 244 国/籍/区号支持列表' }}
                 </span>
               </div>
               <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0 whitespace-nowrap ml-2">
@@ -605,18 +622,7 @@
             </div>
           </div>
 
-          <!-- 最大选择数量限制 -->
-          <div v-if="canHaveMaxSelections" class="space-y-2 pt-3.5 border-t border-slate-100">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
-                <a-tooltip :content="t('prop.maxSelectionsTip')" position="top">
-                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-                </a-tooltip>
-              </div>
-              <a-input-number v-model="currentMaxSelections" :min="1" :max="20" size="small" style="width: 100px" @change="onMaxSelectionsChange" />
-            </div>
-          </div>
+
 
           <!-- 日期选择器专属配置 (现代化 Arco 原生组件) -->
           <div v-if="selectedElement.type === 'date'" class="space-y-3 pt-3.5 border-t border-slate-100">
@@ -685,7 +691,7 @@
   </div>
 </aside>
 
-<!-- 全球国家/地区/国籍与国际区号支持列表弹窗 (自适应宽度 width="auto"，全量 244 个国家/地区) -->
+<!-- 全球国家/国籍/区号统一预设清单弹窗 (单一弹窗：分别是国籍、国家、代码、国际区号) -->
 <a-modal
   v-model:visible="isCountryListModalVisible"
   :title="countryModalTitle"
@@ -693,88 +699,102 @@
   :footer="false"
   unmount-on-close
 >
-  <div class="w-[580px] max-w-[90vw] space-y-3">
-    <!-- 顶部类型快速切换标签 (支持在国家/区号/国籍间自由穿梭) -->
-    <div class="flex items-center gap-1.5 p-1 rounded-lg bg-slate-100/90 border border-slate-200/70 select-none">
-      <button
-        type="button"
-        class="flex-1 py-1.5 px-2.5 rounded-md text-xs font-medium transition-all text-center cursor-pointer"
-        :class="countryModalType === 'phone' ? 'bg-white text-[#1677ff] shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'"
-        @click="countryModalType = 'phone'"
+  <div class="w-[600px] max-w-[92vw] space-y-3">
+    <!-- 搜索输入框与条数统计 -->
+    <div class="flex items-center gap-2">
+      <a-input
+        v-model="countrySearchKeyword"
+        allow-clear
+        :placeholder="store.currentLocale === 'en'
+          ? 'Search by nationality, country, code or dial code (e.g. Singapore, SG, +65)...'
+          : '搜索国籍、国家名称、代码或区号 (如 新加坡籍, 中国, SG, +65)...'
+        "
+        class="flex-1"
       >
-        <span class="flex items-center justify-center gap-1.5">
-          <Globe class="w-3.5 h-3.5" />
-          <span>{{ store.currentLocale === 'en' ? 'Countries & Dial Codes' : '国家与国际区号' }}</span>
-        </span>
-      </button>
-      <button
-        type="button"
-        class="flex-1 py-1.5 px-2.5 rounded-md text-xs font-medium transition-all text-center cursor-pointer"
-        :class="countryModalType === 'country' ? 'bg-white text-[#1677ff] shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'"
-        @click="countryModalType = 'country'"
-      >
-        <span class="flex items-center justify-center gap-1.5">
-          <Globe class="w-3.5 h-3.5" />
-          <span>{{ store.currentLocale === 'en' ? 'Countries (244)' : '国家/地区预设 (244)' }}</span>
-        </span>
-      </button>
-      <button
-        type="button"
-        class="flex-1 py-1.5 px-2.5 rounded-md text-xs font-medium transition-all text-center cursor-pointer"
-        :class="countryModalType === 'nationality' ? 'bg-white text-[#1677ff] shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'"
-        @click="countryModalType = 'nationality'"
-      >
-        <span class="flex items-center justify-center gap-1.5">
-          <Flag class="w-3.5 h-3.5" />
-          <span>{{ store.currentLocale === 'en' ? 'Nationalities (244)' : '国籍预设 (244)' }}</span>
-        </span>
-      </button>
+        <template #prefix>
+          <Search class="w-3.5 h-3.5 text-slate-400" />
+        </template>
+      </a-input>
+      <div class="text-[12px] text-slate-500 whitespace-nowrap px-2.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-md shrink-0 font-medium font-mono">
+        {{ filteredUnifiedList.length }} / 244
+      </div>
     </div>
 
-    <!-- 搜索框 -->
-    <a-input
-      v-model="countrySearchKeyword"
-      allow-clear
-      :placeholder="store.currentLocale === 'en' ? 'Search by country, nationality, code or dial code (e.g. Singapore, +65, SG)...' : '搜索国家名称、国籍、英文、代码或区号 (如 新加坡, +65, sg)...'"
-      class="w-full"
-    >
-      <template #prefix>
-        <Search class="w-3.5 h-3.5 text-slate-400" />
-      </template>
-    </a-input>
-
-    <!-- 列表展示 -->
-    <div class="rounded-lg border border-slate-200 bg-slate-50/50 p-2 max-h-[420px] overflow-y-auto space-y-1.5 custom-scrollbar">
+    <!-- 企业级标准规整数据表格：4列（国籍、国家、代码、国际区号），中文显示中文，英文显示英文 -->
+    <div class="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
+      <!-- 表头 -->
       <div
-        v-for="item in filteredCountryPhoneRules"
-        :key="item.iso2"
-        class="flex items-center justify-between px-3 py-2 rounded-md bg-white border border-slate-100 text-xs text-slate-700 shadow-xs hover:border-blue-200 hover:bg-blue-50/30 transition-all"
+        class="flex items-center px-3.5 py-2 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 tracking-wider select-none"
       >
-        <div class="flex items-center gap-2.5 min-w-0">
-          <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
-          <span class="font-medium text-slate-800 truncate">
-            <template v-if="countryModalType === 'nationality'">
-              {{ getNationalityLabel(item.iso2) }}
-            </template>
-            <template v-else>
-              {{ store.currentLocale === 'en' ? item.name : item.zh }}
-            </template>
-          </span>
-          <span v-if="countryModalType === 'nationality'" class="text-slate-400 text-[11px] truncate">
-            ({{ store.currentLocale === 'en' ? item.zh : item.name }})
-          </span>
-          <span v-else class="text-slate-400 text-[11px] truncate">
-            ({{ store.currentLocale === 'en' ? item.zh : item.name }})
-          </span>
-          <span class="text-slate-400 text-[11px] font-mono uppercase shrink-0">({{ item.iso2 }})</span>
+        <div style="width: 30%;">
+          {{ store.currentLocale === 'en' ? 'Nationality' : '国籍' }}
         </div>
-        <span class="font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-[11px] shrink-0 ml-2">
-          {{ item.code }}
-        </span>
+        <div style="width: 32%;">
+          {{ store.currentLocale === 'en' ? 'Country' : '国家' }}
+        </div>
+        <div style="width: 18%;">
+          {{ store.currentLocale === 'en' ? 'Code' : '代码' }}
+        </div>
+        <div class="text-right" style="width: 20%;">
+          {{ store.currentLocale === 'en' ? 'Dial Code' : '国际区号' }}
+        </div>
       </div>
-      <div v-if="filteredCountryPhoneRules.length === 0" class="py-8 text-center text-xs text-slate-400">
-        {{ store.currentLocale === 'en' ? 'No matching regions found' : '未找到匹配的国家或区号' }}
+
+      <!-- 表体滚动列表 -->
+      <div class="max-h-[360px] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
+        <div
+          v-for="item in filteredUnifiedList"
+          :key="item.iso2"
+          class="flex items-center px-3.5 py-2 text-xs transition-colors hover:bg-blue-50/40 select-none group"
+        >
+          <!-- 列 1: 国籍 (带国旗) -->
+          <div class="flex items-center gap-2 min-w-0 pr-2" style="width: 30%;">
+            <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
+            <span
+              class="font-medium text-slate-800 truncate"
+              :title="store.currentLocale === 'en' ? item.natEn : item.natZh"
+            >
+              {{ store.currentLocale === 'en' ? item.natEn : item.natZh }}
+            </span>
+          </div>
+          <!-- 列 2: 国家 -->
+          <div
+            class="text-slate-600 truncate min-w-0 pr-2"
+            style="width: 32%;"
+            :title="store.currentLocale === 'en' ? item.countryEn : item.countryZh"
+          >
+            {{ store.currentLocale === 'en' ? item.countryEn : item.countryZh }}
+          </div>
+          <!-- 列 3: 代码 (ISO-2) -->
+          <div class="min-w-0" style="width: 18%;">
+            <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px] text-slate-600 font-medium uppercase">
+              {{ item.iso2 }}
+            </span>
+          </div>
+          <!-- 列 4: 国际区号 -->
+          <div class="text-right min-w-0" style="width: 20%;">
+            <span class="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-mono text-[11px] font-semibold">
+              {{ item.code }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 空态提示 -->
+        <div v-if="filteredUnifiedList.length === 0" class="py-12 text-center text-xs text-slate-400">
+          {{ store.currentLocale === 'en' ? 'No matching records found' : '未找到匹配的数据记录' }}
+        </div>
       </div>
+    </div>
+
+    <!-- 底部标准规范提示 -->
+    <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
+      <span>
+        {{ store.currentLocale === 'en'
+          ? 'Aligned with ISO-3166 & ITU-T E.164 telecommunications standards'
+          : '全量 244 个国家/地区、标准国籍及国际区号已统一内置，对齐 ISO-3166 与 ITU-T E.164 规范'
+        }}
+      </span>
+      <span class="font-mono text-slate-400">244 Total</span>
     </div>
   </div>
 </a-modal>
@@ -802,20 +822,17 @@ import {
   Trash2,
   HelpCircle,
   Globe,
-  Flag,
   PanelRight,
   CornerDownRight,
   ChevronRight,
   Search
 } from '@lucide/vue';
 
-// 全球国家/地区/国籍/区号检索弹窗状态与检索逻辑
+// 全球国家/国籍/区号统一预设清单弹窗状态与检索逻辑
 const isCountryListModalVisible = ref(false);
-const countryModalType = ref<'phone' | 'country' | 'nationality'>('phone');
 const countrySearchKeyword = ref('');
 
-function openCountryListModal(type: 'phone' | 'country' | 'nationality' = 'phone') {
-  countryModalType.value = type;
+function openCountryListModal() {
   countrySearchKeyword.value = '';
   isCountryListModalVisible.value = true;
 }
@@ -831,39 +848,40 @@ const nationalityMap = computed(() => {
   return map;
 });
 
-function getNationalityLabel(iso2: string): string {
-  const entry = nationalityMap.value[iso2.toLowerCase()];
-  if (!entry) return store.currentLocale === 'en' ? `${iso2} Citizen` : `${iso2}籍`;
-  return store.currentLocale === 'en' ? entry.en : entry.zh;
-}
-
-const countryModalTitle = computed(() => {
-  if (countryModalType.value === 'country') {
-    return store.currentLocale === 'en'
-      ? 'Preset Supported Countries & Regions (244 Regions)'
-      : '全球国家与地区预设支持清单 (共 244 个国家/地区)';
-  }
-  if (countryModalType.value === 'nationality') {
-    return store.currentLocale === 'en'
-      ? 'Preset Supported Nationalities (244 Regions)'
-      : '全球国籍预设支持清单 (共 244 个地区国籍)';
-  }
-  return store.currentLocale === 'en'
-    ? 'Supported Countries & Dial Codes (244 Regions)'
-    : '全球国家与国际区号支持清单 (共 244 个地区)';
+const unifiedDirectoryList = computed(() => {
+  return countryPhoneRules.map((c) => {
+    const entry = nationalityMap.value[c.iso2.toLowerCase()];
+    return {
+      iso2: c.iso2,
+      code: c.code,
+      dialCode: c.dialCode,
+      countryZh: c.zh,
+      countryEn: c.name,
+      natZh: entry ? entry.zh : (c.zh.endsWith('籍') ? c.zh : `${c.zh}籍`),
+      natEn: entry ? entry.en : `${c.name} Citizen`
+    };
+  });
 });
 
-const filteredCountryPhoneRules = computed(() => {
+const countryModalTitle = computed(() => {
+  return store.currentLocale === 'en'
+    ? 'Preset Supported Nationalities, Countries & Dial Codes (244)'
+    : '全球国籍、国家与国际区号支持清单 (共 244 项)';
+});
+
+const filteredUnifiedList = computed(() => {
   const kw = countrySearchKeyword.value.trim().toLowerCase();
-  if (!kw) return countryPhoneRules;
-  return countryPhoneRules.filter((item) => {
-    const nat = nationalityMap.value[item.iso2.toLowerCase()];
+  const list = unifiedDirectoryList.value;
+  if (!kw) return list;
+  return list.filter((item) => {
     return (
-      item.code.toLowerCase().includes(kw) ||
+      item.natZh.toLowerCase().includes(kw) ||
+      item.natEn.toLowerCase().includes(kw) ||
+      item.countryZh.toLowerCase().includes(kw) ||
+      item.countryEn.toLowerCase().includes(kw) ||
       item.iso2.toLowerCase().includes(kw) ||
-      item.name.toLowerCase().includes(kw) ||
-      item.zh.toLowerCase().includes(kw) ||
-      (nat && (nat.zh.toLowerCase().includes(kw) || nat.en.toLowerCase().includes(kw)))
+      item.code.toLowerCase().includes(kw) ||
+      item.dialCode.toLowerCase().includes(kw)
     );
   });
 });

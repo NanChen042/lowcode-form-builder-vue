@@ -269,20 +269,20 @@
 
         <div class="flex items-center gap-3">
           <a-button
-            type="secondary"
-            size="small"
-            @click="handleClose"
-          >
-            {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
-          </a-button>
-
-          <a-button
             type="primary"
             size="small"
             :loading="isPublishing"
             @click="handlePublish"
           >
             {{ isPublishing ? (store.currentLocale === 'en' ? 'Publishing...' : '发布中...') : (store.currentLocale === 'en' ? 'Publish Form' : '发布表单') }}
+          </a-button>
+
+          <a-button
+            type="secondary"
+            size="small"
+            @click="handleClose"
+          >
+            {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
           </a-button>
         </div>
       </footer>
