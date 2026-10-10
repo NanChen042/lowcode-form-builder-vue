@@ -75,7 +75,7 @@
         v-else-if="field.type === 'phone'"
         v-model="formData[field.key]"
         v-model:dial-code="phoneDialCode"
-        :custom-placeholder="localizedPlaceholder"
+        :custom-placeholder="phonePlaceholder"
         :required="isFieldRequired"
         :strict="field.strictPhoneValidation !== false"
         :error="Boolean(error)"
@@ -378,6 +378,7 @@ import { getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
+import { getCountryPhoneRule } from '@/registry/phoneRules';
 
 const props = defineProps<{
   field: FormElement;
@@ -395,6 +396,12 @@ function handleFieldInput() {
 
 // 电话组件交互：优先从 formData 读取已保存区号，默认严格采用新加坡区号 '+65'
 const phoneDialCode = ref(props.formData[`${props.field.key}_areacode`] || props.field.dialCode || '+65');
+
+const phonePlaceholder = computed(() => {
+  if (props.field.type !== 'phone') return '';
+  const rule = getCountryPhoneRule(phoneDialCode.value || props.field.dialCode || '+65');
+  return rule?.placeholder || '8123 4567';
+});
 
 function handlePhoneChange(data: any) {
   props.formData[`${props.field.key}_areacode`] = data.areacode ? `+${data.areacode}` : phoneDialCode.value;

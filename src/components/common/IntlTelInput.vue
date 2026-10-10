@@ -163,11 +163,11 @@ function parseIsoFromDialCode(code?: string): string {
 
 function updateInputPlaceholder() {
   if (!inputRef.value) return;
-  if (props.customPlaceholder) {
+  const current = iti ? iti.getSelectedCountryData() : null;
+  const rule = current?.iso2 ? getCountryPhoneRule(current.iso2) : getCountryPhoneRule(props.dialCode || '+65');
+  if (props.customPlaceholder && !/[a-zA-Z]/.test(props.customPlaceholder)) {
     inputRef.value.placeholder = props.customPlaceholder;
   } else {
-    const current = iti ? iti.getSelectedCountryData() : null;
-    const rule = current?.iso2 ? getCountryPhoneRule(current.iso2) : getCountryPhoneRule(props.dialCode || '+65');
     inputRef.value.placeholder = rule?.placeholder || '8123 4567';
   }
 }
@@ -182,6 +182,12 @@ function handleCountryChange() {
 }
 
 function handleInput() {
+  if (inputRef.value) {
+    const sanitized = inputRef.value.value.replace(/[^\d\s\-]/g, '');
+    if (inputRef.value.value !== sanitized) {
+      inputRef.value.value = sanitized;
+    }
+  }
   isDirty.value = true;
   validateAndEmit();
 }

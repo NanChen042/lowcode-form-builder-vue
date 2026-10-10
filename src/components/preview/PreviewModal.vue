@@ -10,10 +10,10 @@
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
         <div>
           <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
-            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Deploy Schema' : '发布结构') : (store.currentLocale === 'en' ? 'Live Form Preview' : '表单真实预览') }}
+            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Deploy Schema' : '发布结构') : (store.currentLocale === 'en' ? 'Preview' : '预览') }}
           </h2>
           <p class="m-0 text-xs leading-5 text-slate-400">
-            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Form schema is ready for deployment' : '当前表单已生成可保存的结构数据') : (store.currentLocale === 'en' ? 'Experience responsive enterprise form interactions and validations' : '在仿真设备中体验企业级表单交互与填写校验') }}
+            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Form schema is ready for deployment' : '当前表单已生成可保存的结构数据') : (store.currentLocale === 'en' ? 'Experience responsive mobile form interactions and validations' : '在手机设备模拟器中体验表单交互与验证') }}
           </p>
         </div>
 
@@ -235,7 +235,7 @@
                         class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]"
                         @click="handleFormSubmit"
                       >
-                        {{ store.currentLocale === 'en' ? 'Submit Form' : '提交表单' }}
+                        {{ store.currentLocale === 'en' ? 'Validate Form' : '表单验证' }}
                       </a-button>
                     </div>
                   </form>

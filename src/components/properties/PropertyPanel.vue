@@ -513,20 +513,24 @@
             </template>
           </div>
 
-          <!-- 国家 / 国籍专属：预设 -->
+          <!-- 国家 / 国籍专属：预设国家 -->
           <div v-if="['country', 'nationality'].includes(selectedElement.type)" class="pt-3.5 border-t border-slate-100">
             <div class="flex items-center justify-between py-1">
               <span class="text-[12px] font-medium text-slate-600">
-                {{ store.currentLocale === 'en' ? 'Preset' : '预设' }}
+                {{ selectedElement.type === 'nationality'
+                  ? (store.currentLocale === 'en' ? 'Preset Nationalities' : '预设国籍')
+                  : (store.currentLocale === 'en' ? 'Preset Countries' : '预设国家')
+                }}
               </span>
-              <button
-                type="button"
-                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer font-medium shadow-xs group"
+              <a-button
+                size="mini"
+                type="secondary"
+                class="!text-[12px] !h-6 !px-2 !rounded-md"
                 @click="openCountryListModal"
               >
                 <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
-                <ChevronRight class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-              </button>
+                <ChevronRight class="w-3 h-3 ml-0.5 text-slate-400" />
+              </a-button>
             </div>
           </div>
 
