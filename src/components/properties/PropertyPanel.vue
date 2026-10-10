@@ -476,25 +476,6 @@
               </a-select>
             </a-form-item>
 
-            <!-- 国家与区号支持列表查看 (紧凑胶囊按钮排布，杜绝文字错位与换行) -->
-            <div class="pt-0.5">
-              <button
-                type="button"
-                class="w-full h-8 px-2.5 rounded-md bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 flex items-center justify-between text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer group select-none shadow-xs"
-                @click="openCountryListModal"
-              >
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <Globe class="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                  <span class="text-[12px] font-medium text-slate-700 group-hover:text-blue-600 transition-colors truncate whitespace-nowrap">
-                    {{ store.currentLocale === 'en' ? 'Preset 244 Global Directory' : '全球 244 国/籍/区号支持列表' }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0 whitespace-nowrap ml-2">
-                  <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
-                  <ChevronRight class="w-3.5 h-3.5 shrink-0" />
-                </div>
-              </button>
-            </div>
           </div>
 
           <!-- 占位提示 -->
@@ -532,33 +513,47 @@
             </template>
           </div>
 
-          <!-- 国家 / 国籍专属：预设支持列表查看 (与手机号码样式展现形式 100% 保持一致) -->
+          <!-- 国家 / 国籍专属：选项数据源展示卡片 -->
           <div v-if="['country', 'nationality'].includes(selectedElement.type)" class="space-y-2 pt-3.5 border-t border-slate-100">
             <div class="flex items-center justify-between">
               <span class="text-[12px] font-semibold text-slate-700">
-                {{ store.currentLocale === 'en' ? 'Preset Dropdown Options' : '预设下拉选项' }}
+                {{ store.currentLocale === 'en' ? 'Options Data Source' : '选项数据源' }}
               </span>
-              <span class="text-[11px] text-slate-400">
-                {{ store.currentLocale === 'en' ? '244 regions' : '共 244 项' }}
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                {{ store.currentLocale === 'en' ? 'Standard Library' : '标准预设库' }}
               </span>
             </div>
 
-            <button
-              type="button"
-              class="w-full h-8 px-2.5 rounded-md bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 flex items-center justify-between text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer group select-none shadow-xs"
+            <!-- 数据源卡片 (点击查看完整清单) -->
+            <div
+              class="group relative rounded-lg border border-slate-200/90 bg-slate-50/80 hover:bg-blue-50/40 hover:border-blue-300 p-2.5 transition-all cursor-pointer shadow-xs select-none"
               @click="openCountryListModal"
             >
-              <div class="flex items-center gap-1.5 min-w-0">
-                <Globe class="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                <span class="text-[12px] font-medium text-slate-700 group-hover:text-blue-600 transition-colors truncate whitespace-nowrap">
-                  {{ store.currentLocale === 'en' ? 'Preset 244 Global Directory' : '全球 244 国/籍/区号支持列表' }}
-                </span>
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-7 h-7 rounded-md bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-xs group-hover:border-blue-200 transition-colors">
+                    <Globe class="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[12px] font-medium text-slate-800 group-hover:text-blue-600 transition-colors truncate">
+                      {{ selectedElement.type === 'country'
+                        ? (store.currentLocale === 'en' ? 'Global Countries & Regions' : '全球国家与地区标准字典')
+                        : (store.currentLocale === 'en' ? 'Global Nationalities Directory' : '全球国家标准国籍字典')
+                      }}
+                    </div>
+                    <div class="text-[11px] text-slate-400 truncate">
+                      {{ store.currentLocale === 'en' ? '244 standard ISO-3166 regions' : '全量 244 个标准地区及代码' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-600 transition-colors shrink-0 ml-1">
+                  <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
+                  <ChevronRight class="w-3.5 h-3.5 shrink-0" />
+                </div>
               </div>
-              <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-500 transition-colors shrink-0 whitespace-nowrap ml-2">
-                <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
-                <ChevronRight class="w-3.5 h-3.5 shrink-0" />
-              </div>
-            </button>
+            </div>
           </div>
 
           <!-- 选项配置 -->
@@ -706,8 +701,8 @@
         v-model="countrySearchKeyword"
         allow-clear
         :placeholder="store.currentLocale === 'en'
-          ? 'Search by nationality, country, code or dial code (e.g. Singapore, SG, +65)...'
-          : '搜索国籍、国家名称、代码或区号 (如 新加坡籍, 中国, SG, +65)...'
+          ? 'Search by country, nationality, code or dial code (e.g. Singapore, SG, +65)...'
+          : '搜索国家、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)...'
         "
         class="flex-1"
       >
@@ -722,15 +717,15 @@
 
     <!-- 企业级标准规整数据表格：4列（国籍、国家、代码、国际区号），中文显示中文，英文显示英文 -->
     <div class="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
-      <!-- 表头 -->
+      <!-- 表头：国家、国籍、代码、国际区号 -->
       <div
         class="flex items-center px-3.5 py-2 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 tracking-wider select-none"
       >
-        <div style="width: 30%;">
-          {{ store.currentLocale === 'en' ? 'Nationality' : '国籍' }}
-        </div>
         <div style="width: 32%;">
           {{ store.currentLocale === 'en' ? 'Country' : '国家' }}
+        </div>
+        <div style="width: 30%;">
+          {{ store.currentLocale === 'en' ? 'Nationality' : '国籍' }}
         </div>
         <div style="width: 18%;">
           {{ store.currentLocale === 'en' ? 'Code' : '代码' }}
@@ -747,23 +742,23 @@
           :key="item.iso2"
           class="flex items-center px-3.5 py-2 text-xs transition-colors hover:bg-blue-50/40 select-none group"
         >
-          <!-- 列 1: 国籍 (带国旗) -->
-          <div class="flex items-center gap-2 min-w-0 pr-2" style="width: 30%;">
+          <!-- 列 1: 国家 (带国旗) -->
+          <div class="flex items-center gap-2 min-w-0 pr-2" style="width: 32%;">
             <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
             <span
               class="font-medium text-slate-800 truncate"
-              :title="store.currentLocale === 'en' ? item.natEn : item.natZh"
+              :title="store.currentLocale === 'en' ? item.countryEn : item.countryZh"
             >
-              {{ store.currentLocale === 'en' ? item.natEn : item.natZh }}
+              {{ store.currentLocale === 'en' ? item.countryEn : item.countryZh }}
             </span>
           </div>
-          <!-- 列 2: 国家 -->
+          <!-- 列 2: 国籍 -->
           <div
             class="text-slate-600 truncate min-w-0 pr-2"
-            style="width: 32%;"
-            :title="store.currentLocale === 'en' ? item.countryEn : item.countryZh"
+            style="width: 30%;"
+            :title="store.currentLocale === 'en' ? item.natEn : item.natZh"
           >
-            {{ store.currentLocale === 'en' ? item.countryEn : item.countryZh }}
+            {{ store.currentLocale === 'en' ? item.natEn : item.natZh }}
           </div>
           <!-- 列 3: 代码 (ISO-2) -->
           <div class="min-w-0" style="width: 18%;">
@@ -865,8 +860,8 @@ const unifiedDirectoryList = computed(() => {
 
 const countryModalTitle = computed(() => {
   return store.currentLocale === 'en'
-    ? 'Preset Supported Nationalities, Countries & Dial Codes (244)'
-    : '全球国籍、国家与国际区号支持清单 (共 244 项)';
+    ? 'Preset Supported Countries, Nationalities & Dial Codes (244)'
+    : '全球国家、国籍与国际区号支持清单 (共 244 项)';
 });
 
 const filteredUnifiedList = computed(() => {
