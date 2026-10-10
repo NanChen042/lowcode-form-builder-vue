@@ -52,25 +52,35 @@
             v-if="pages.length > 1 && !isSubmitted"
             class="w-[240px] shrink-0 flex flex-col gap-1"
           >
+            <div class="mb-2 pb-2 border-b border-slate-200/80 flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span>{{ store.currentLocale === 'en' ? 'Form Steps' : '表单步骤列表' }}</span>
+              <span class="text-[11px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded font-normal">{{ store.currentLocale === 'en' ? 'Free jump' : '支持自由跳转' }}</span>
+            </div>
+
             <div
               v-for="(p, i) in pages"
               :key="p.id"
-              class="preview-step-item cursor-pointer flex items-start gap-3 transition hover:opacity-80"
-              :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-400'"
+              class="preview-step-item cursor-pointer flex items-start gap-3 transition group py-1.5 select-none"
+              :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-600 hover:text-blue-600'"
               @click="handleStepClick(i)"
             >
               <div class="flex flex-col items-center">
                 <span
-                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs transition-colors"
-                  :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff]' : 'border-slate-300 text-slate-500'"
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs transition-all"
+                  :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff] shadow-xs' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:bg-blue-50/40'"
                 >
                   {{ i + 1 }}
                 </span>
                 <div v-if="i < pages.length - 1" class="w-px h-8 bg-slate-200 my-1"></div>
               </div>
-              <span class="pt-1 text-sm font-medium leading-5">
-                {{ getPageText(p, 'title') || (store.currentLocale === 'en' ? `Page ${i + 1}` : `第 ${i + 1} 页`) }}
-              </span>
+              <div class="pt-0.5 flex flex-col min-w-0">
+                <span class="text-sm font-medium leading-5 truncate" :class="{ 'font-semibold': i === currentStep }">
+                  {{ getPageText(p, 'title') || (store.currentLocale === 'en' ? `Page ${i + 1}` : `第 ${i + 1} 页`) }}
+                </span>
+                <span class="text-[11px] text-slate-400">
+                  {{ store.currentLocale === 'en' ? `${p.fields?.length || 0} fields` : `${p.fields?.length || 0} 个字段` }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -171,18 +181,33 @@
 
                   <!-- 真实 Arco Design 表单结构 -->
                   <form
-                    v-else
                     class="w-full flex flex-col"
                     @submit.prevent
                   >
-                    <PreviewField
-                      v-for="field in currentPage.fields"
-                      :key="field.id"
-                      :field="field"
-                      :form-data="formData"
-                      :error="errors[field.key]"
-                      @clear-error="clearFieldError"
-                    />
+                    <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
+                    <div
+                      v-for="(page, stepIdx) in pages"
+                      :key="page.id"
+                      v-show="stepIdx === currentStep"
+                      class="w-full flex flex-col"
+                    >
+                      <!-- 空页面 -->
+                      <div
+                        v-if="!page.fields?.length"
+                        class="py-12 text-center text-slate-400 text-sm"
+                      >
+                        {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                      </div>
+
+                      <PreviewField
+                        v-for="field in page.fields"
+                        :key="field.id"
+                        :field="field"
+                        :form-data="formData"
+                        :error="errors[field.key]"
+                        @clear-error="clearFieldError"
+                      />
+                    </div>
 
                     <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
                     <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
@@ -515,12 +540,8 @@ function handleNextStep() {
 }
 
 function handleStepClick(stepIdx: number) {
-  if (stepIdx <= currentStep.value) {
-    currentStep.value = stepIdx;
-  } else {
-    if (!validateCurrentPage()) return;
-    currentStep.value = stepIdx;
-  }
+  // 预览模式：左侧大纲支持自由快速切换，方便表单设计者随时免填必填项预览任意页面排版与多语言
+  currentStep.value = stepIdx;
 }
 
 function handleFormSubmit() {

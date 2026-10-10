@@ -341,8 +341,8 @@ function handleFieldInput() {
   emit('clear-error', props.field.key);
 }
 
-// 电话组件交互：默认严格采用新加坡区号 '+65'
-const phoneDialCode = ref(props.field.dialCode || '+65');
+// 电话组件交互：优先从 formData 读取已保存区号，默认严格采用新加坡区号 '+65'
+const phoneDialCode = ref(props.formData[`${props.field.key}_areacode`] || props.field.dialCode || '+65');
 
 function handlePhoneChange(data: any) {
   props.formData[`${props.field.key}_areacode`] = data.areacode ? `+${data.areacode}` : phoneDialCode.value;
@@ -354,13 +354,19 @@ function handlePhoneChange(data: any) {
 }
 
 // 长期有效选项
-const isLongTermChecked = ref(Boolean(props.field.defaultLongTerm));
+const isLongTermChecked = ref(
+  props.formData[props.field.key] === (store.currentLocale === 'en' ? 'Long-term' : '长期') ||
+  Boolean(props.formData[`${props.field.key}_isLongTerm`]) ||
+  Boolean(props.field.defaultLongTerm)
+);
 
-if (props.field.type === 'date' && props.field.enableLongTerm && props.field.defaultLongTerm) {
+if (props.field.type === 'date' && props.field.enableLongTerm && props.field.defaultLongTerm && !props.formData[props.field.key]) {
   props.formData[props.field.key] = store.currentLocale === 'en' ? 'Long-term' : '长期';
+  props.formData[`${props.field.key}_isLongTerm`] = true;
 }
 
 function onLongTermChange(val: boolean | (string | number | boolean)[]) {
+  props.formData[`${props.field.key}_isLongTerm`] = Boolean(val);
   if (val) {
     props.formData[props.field.key] = store.currentLocale === 'en' ? 'Long-term' : '长期';
   } else {
@@ -369,10 +375,14 @@ function onLongTermChange(val: boolean | (string | number | boolean)[]) {
   emit('clear-error', props.field.key);
 }
 
-// 声明事项复选勾选状态
-const declarationChecks = reactive<Record<number, boolean>>({});
+// 声明事项复选勾选状态 (持久化存入 formData，避免切换页面时状态丢失)
+if (!props.formData[`${props.field.key}_checks`]) {
+  props.formData[`${props.field.key}_checks`] = {};
+}
+const declarationChecks = reactive<Record<number, boolean>>(props.formData[`${props.field.key}_checks`]);
 
 function onDeclarationChange() {
+  props.formData[`${props.field.key}_checks`] = { ...declarationChecks };
   const allChecked = (props.field.options || []).every((_, idx) => Boolean(declarationChecks[idx]));
   props.formData[`${props.field.key}_declared`] = allChecked;
   emit('clear-error', props.field.key);
