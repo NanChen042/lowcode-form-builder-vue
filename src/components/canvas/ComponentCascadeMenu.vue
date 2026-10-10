@@ -1,0 +1,80 @@
+<template>
+  <a-dsubmenu :value="valuePrefix" :trigger="['hover', 'click']">
+    <template #icon>
+      <PlusCircle class="h-4 w-4 text-[#1677ff]" />
+    </template>
+    <template #default>
+      <span :class="titleClass || 'text-[13px] text-slate-700'">{{ title }}</span>
+    </template>
+    <template #content>
+      <!-- 基础输入 -->
+      <a-dsubmenu :value="`${valuePrefix}-basic`" :trigger="['hover', 'click']">
+        <template #icon>
+          <Layers class="h-4 w-4 text-slate-500" />
+        </template>
+        <template #default>
+          <span class="text-[13px] text-slate-700">
+            {{ store.currentLocale === 'en' ? 'Basic Inputs' : '基础输入' }}
+          </span>
+        </template>
+        <template #content>
+          <a-doption
+            v-for="item in basicComponents"
+            :key="`${valuePrefix}_${item.type}`"
+            @click="emit('select', item.type)"
+          >
+            <template #icon>
+              <component :is="getComponentIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400" />
+            </template>
+            <span class="text-[13px] text-slate-700">
+              {{ store.currentLocale === 'en' ? item.label_en : item.label }}
+            </span>
+          </a-doption>
+        </template>
+      </a-dsubmenu>
+
+      <!-- 业务组件 -->
+      <a-dsubmenu :value="`${valuePrefix}-biz`" :trigger="['hover', 'click']">
+        <template #icon>
+          <Briefcase class="h-4 w-4 text-slate-500" />
+        </template>
+        <template #default>
+          <span class="text-[13px] text-slate-700">
+            {{ store.currentLocale === 'en' ? 'Business Components' : '业务组件' }}
+          </span>
+        </template>
+        <template #content>
+          <a-doption
+            v-for="item in businessComponents"
+            :key="`${valuePrefix}_${item.type}`"
+            @click="emit('select', item.type)"
+          >
+            <template #icon>
+              <component :is="getComponentIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400" />
+            </template>
+            <span class="text-[13px] text-slate-700">
+              {{ store.currentLocale === 'en' ? item.label_en : item.label }}
+            </span>
+          </a-doption>
+        </template>
+      </a-dsubmenu>
+    </template>
+  </a-dsubmenu>
+</template>
+
+<script setup lang="ts">
+import type { ComponentType } from '@/types/schema';
+import { store } from '@/core/store';
+import { basicComponents, businessComponents, getComponentIcon } from '@/registry/components';
+import { PlusCircle, Layers, Briefcase } from '@lucide/vue';
+
+defineProps<{
+  title: string;
+  valuePrefix: string;
+  titleClass?: string;
+}>();
+
+const emit = defineEmits<{
+  (e: 'select', type: ComponentType): void;
+}>();
+</script>

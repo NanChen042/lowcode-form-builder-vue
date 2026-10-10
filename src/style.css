@@ -1,0 +1,1207 @@
+@import "tailwindcss";
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden !important;
+}
+
+.app-main {
+    display: flex !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background-color: #f5f5f5;
+    color: rgba(0, 0, 0, 0.85);
+
+    /* Arco Design 品牌主色定制：统一经典科技蓝 #1677ff (RGB 三元组格式) */
+    --arcoblue-1: 230, 244, 255;
+    --arcoblue-2: 186, 224, 255;
+    --arcoblue-3: 145, 202, 255;
+    --arcoblue-4: 105, 177, 255;
+    --arcoblue-5: 64, 150, 255;
+    --arcoblue-6: 22, 119, 255;
+    --arcoblue-7: 9, 88, 217;
+    --arcoblue-8: 0, 62, 179;
+    --arcoblue-9: 0, 44, 140;
+    --arcoblue-10: 0, 29, 102;
+
+    --primary-1: 230, 244, 255;
+    --primary-2: 186, 224, 255;
+    --primary-3: 145, 202, 255;
+    --primary-4: 105, 177, 255;
+    --primary-5: 64, 150, 255;
+    --primary-6: 22, 119, 255;
+    --primary-7: 9, 88, 217;
+    --primary-8: 0, 62, 179;
+    --primary-9: 0, 44, 140;
+    --primary-10: 0, 29, 102;
+}
+
+/* 开关 Switch 明确蓝底与纯白滑块 */
+.arco-switch {
+    background-color: #cbd5e1 !important;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.arco-switch-checked {
+    background-color: #1677ff !important;
+}
+
+.arco-switch .arco-switch-dot {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 复选框 Checkbox 明确未选与选中状态 */
+.arco-checkbox .arco-checkbox-icon {
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 4px !important;
+    background-color: #ffffff !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.arco-checkbox:hover .arco-checkbox-icon {
+    border-color: #4096ff !important;
+}
+
+.arco-checkbox-checked .arco-checkbox-icon {
+    border-color: #1677ff !important;
+    background-color: #1677ff !important;
+}
+
+.arco-checkbox-checked .arco-checkbox-icon svg {
+    color: #ffffff !important;
+    fill: currentColor !important;
+    stroke: none !important;
+}
+
+/* 现代精致输入控件系统 (统一浅灰边框、优雅圆角、柔蓝聚焦光晕，统一精美 13px 字体规范) */
+.arco-input-wrapper,
+.arco-select-view,
+.arco-textarea-wrapper,
+.arco-picker,
+.component-placeholder,
+.preview-input {
+    border-radius: 6px !important;
+    border: 1px solid #d9d9d9 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
+    font-size: 13px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.arco-input-wrapper:hover,
+.arco-select-view:hover,
+.arco-textarea-wrapper:hover,
+.arco-picker:hover,
+.component-placeholder:hover,
+.preview-input:hover {
+    border-color: #4096ff !important;
+}
+
+.arco-input-wrapper.arco-input-focus,
+.arco-input-wrapper:focus-within,
+.arco-select-view.arco-select-view-focus,
+.arco-select-view:focus-within,
+.arco-textarea-wrapper.arco-textarea-focus,
+.arco-textarea-wrapper:focus-within,
+.arco-picker.arco-picker-focused,
+.arco-picker:focus-within,
+.component-placeholder:focus,
+.preview-input:focus {
+    border-color: #1677ff !important;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16) !important;
+    outline: none !important;
+    background-color: #ffffff !important;
+}
+
+/* 统一输入框与下拉框内部文字与占位符均为 13px 细腻排版 */
+.arco-input,
+.arco-textarea,
+.arco-select-view-value,
+.arco-select-view-input,
+.arco-picker-input input,
+.component-placeholder,
+.preview-input {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    color: #1e293b !important;
+}
+
+.arco-input::placeholder,
+.arco-textarea::placeholder,
+.arco-select-view-input::placeholder,
+.arco-picker-input input::placeholder,
+.component-placeholder::placeholder,
+.preview-input::placeholder {
+    font-size: 13px !important;
+    color: #94a3b8 !important;
+}
+
+/* 画布内的输入框高度规范 (统一遵循 Arco Design 官方标准 medium: 32px) */
+.canvas-element .arco-input-wrapper,
+.canvas-element .arco-picker,
+.canvas-element .component-placeholder,
+.canvas-ghost-skeleton .arco-input-wrapper,
+.canvas-ghost-skeleton .arco-picker,
+.canvas-ghost-skeleton .component-placeholder,
+.preview-card .arco-input-wrapper,
+.preview-card .arco-picker,
+.preview-field .arco-input-wrapper,
+.preview-field .arco-picker {
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+/* 多选下拉框支持标签自适应高度，避免标签重叠或被截断 */
+.canvas-element .arco-select-view,
+.canvas-ghost-skeleton .arco-select-view,
+.preview-card .arco-select-view,
+.preview-field .arco-select-view {
+    min-height: 32px !important;
+    height: auto !important;
+}
+
+.canvas-element .arco-textarea-wrapper,
+.canvas-ghost-skeleton .arco-textarea-wrapper,
+.preview-card .arco-textarea-wrapper,
+.preview-field .arco-textarea-wrapper {
+    min-height: 72px !important;
+    height: auto !important;
+}
+
+/* 统一侧边栏与属性面板输入框高度与标签字体大小规范 (32px 紧凑专业高度，12px 标签字体) */
+#prop-editor .arco-input-wrapper,
+#prop-editor .arco-picker,
+#page-prop-editor .arco-input-wrapper,
+.sidebar-search-box {
+    height: 32px !important;
+    min-height: 32px !important;
+    font-size: 13px !important;
+}
+
+#prop-editor .arco-select-view {
+    min-height: 32px !important;
+    height: auto !important;
+    font-size: 13px !important;
+}
+
+/* 下拉菜单弹出层 (优化整体留白、圆角柔和阴影，防止顶部/底部项被截断) */
+.arco-select-dropdown {
+    padding: 6px 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.08) !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+}
+
+.arco-select-dropdown .arco-select-dropdown-list {
+    padding: 2px 4px !important;
+    max-height: 240px !important;
+}
+
+.arco-select-dropdown .arco-select-option {
+    min-height: 34px !important;
+    line-height: 34px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    margin: 2px 0 !important;
+    padding: 0 10px !important;
+    color: #334155 !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.arco-select-dropdown .arco-select-option:hover,
+.arco-select-dropdown .arco-select-option.arco-select-option-hover {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.arco-select-dropdown .arco-select-option.arco-select-option-active {
+    background-color: #e6f4ff !important;
+    color: #1677ff !important;
+    font-weight: 500 !important;
+}
+
+.arco-select-dropdown .arco-select-option .arco-checkbox {
+    margin-right: 8px !important;
+}
+
+/* 属性面板问号悬浮提示 (Tooltip) 仿原版精致暗色气泡 */
+.arco-tooltip-content {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+    padding: 8px 12px !important;
+    max-width: 220px !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3) !important;
+    border: none !important;
+}
+
+.arco-tooltip-popup-arrow {
+    background-color: #1e293b !important;
+    border: none !important;
+}
+
+#prop-editor .arco-form-item-label,
+#page-prop-editor .arco-form-item-label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #475569 !important;
+    margin-bottom: 4px !important;
+    line-height: 1.4 !important;
+}
+
+#prop-editor .arco-form-item,
+#page-prop-editor .arco-form-item {
+    margin-bottom: 12px !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #bfbfbf;
+}
+
+body.is-dragging-component,
+body.is-dragging-component * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: grabbing !important;
+}
+
+body.is-panning,
+body.is-panning * {
+    cursor: grabbing !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+/* 现代化通用按钮系统 (统一精致现代设计风格) */
+.arco-btn {
+    gap: 0 !important;
+}
+
+.arco-btn .arco-btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 6px !important;
+}
+
+.arco-btn-only-icon .arco-btn-icon {
+    margin-right: 0 !important;
+}
+
+.arco-btn-secondary:not(.arco-btn-status-danger),
+.arco-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0 !important;
+    border-radius: 6px !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #ffffff !important;
+    color: rgba(0, 0, 0, 0.85) !important;
+    font-weight: 500 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer;
+}
+
+.arco-btn-size-mini.arco-btn-secondary,
+.arco-btn-size-mini.arco-btn-outline {
+    height: 24px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+}
+
+.arco-btn-size-small.arco-btn-secondary,
+.arco-btn-size-small.arco-btn-outline {
+    height: 28px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+}
+
+.arco-btn-size-medium.arco-btn-secondary:not(.arco-btn-status-danger),
+.arco-btn-size-medium.arco-btn-outline {
+    height: 32px;
+    padding: 4px 14px !important;
+    font-size: 13px !important;
+}
+
+.arco-btn-secondary:not(.arco-btn-status-danger):hover,
+.arco-btn-outline:hover {
+    border-color: #4096ff !important;
+    color: #1677ff !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.12) !important;
+}
+
+.arco-btn-secondary:not(.arco-btn-status-danger):active,
+.arco-btn-outline:active {
+    border-color: #0958d9 !important;
+    color: #0958d9 !important;
+    background: #fbfbfb !important;
+}
+
+.arco-btn-primary:not(.arco-btn-status-danger) {
+    display: inline-flex;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    gap: 0 !important;
+    border-radius: 8px !important;
+    border: 1px solid #1677ff !important;
+    background: #1677ff !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 4px 16px !important;
+    box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2), 0 1px 2px rgba(22, 119, 255, 0.12) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer;
+}
+
+.arco-btn-primary:not(.arco-btn-status-danger):hover {
+    border-color: #4096ff !important;
+    background: #4096ff !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(22, 119, 255, 0.28) !important;
+}
+
+.arco-btn-primary:not(.arco-btn-status-danger):active {
+    border-color: #0958d9 !important;
+    background: #0958d9 !important;
+}
+
+.arco-btn-status-danger {
+    border-radius: 8px !important;
+    border: 1px solid #ffa39e !important;
+    background: #fff1f0 !important;
+    color: #f5222d !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.arco-btn-status-danger:hover {
+    border-color: #f5222d !important;
+    background: #ff4d4f !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(245, 34, 45, 0.2) !important;
+}
+
+.arco-btn-size-small {
+    height: 28px !important;
+    padding: 2px 10px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+}
+
+.icon-btn,
+.arco-btn-shape-circle {
+    display: inline-flex;
+    height: 32px !important;
+    width: 32px !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #fff !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+}
+
+.icon-btn:hover,
+.arco-btn-shape-circle:hover {
+    border-color: #4096ff !important;
+    color: #1677ff !important;
+    background: #fff !important;
+}
+
+.icon-btn.danger {
+    border-color: #ffccc7;
+    background: #fff2f0;
+    color: #ff4d4f;
+}
+
+.icon-btn.danger:hover {
+    border-color: #ff4d4f;
+    background: #ff4d4f;
+    color: #fff;
+}
+
+.code-badge {
+    display: inline-flex;
+    min-width: 24px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 0 8px;
+    color: rgba(0, 0, 0, 0.65);
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 11px;
+    line-height: 20px;
+}
+
+/* 谷歌 Bento / Material 极简纯净微点阵画幅 (精确复刻原版设计规范) */
+.canvas-grid {
+    background-color: #f1f3f4;
+    position: relative;
+    cursor: grab;
+    touch-action: none;
+    overflow: hidden !important;
+}
+
+/* 全画幅基础浅灰微点阵 (Ambient Micro-dots: 14px 黄金微点阵间距，精准对齐 Google Stitch 测定值) */
+.canvas-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(
+        circle,
+        rgba(60, 64, 67, 0.20) 0.75px,
+        rgba(60, 64, 67, 0.05) 1.05px,
+        transparent 1.1px
+    );
+    background-size: var(--grid-size, 14px) var(--grid-size, 14px);
+    background-position: var(--grid-pos-x, 0px) var(--grid-pos-y, 0px);
+    z-index: 0;
+}
+
+/* 核心精髓：鼠标交互聚光灯柔和微点阵 (聚焦深点采样值 RGB 58，半径 65px 平滑二次衰减，静止 1.2s 自动淡出) */
+.canvas-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(
+        circle,
+        rgba(60, 64, 67, 0.82) 0.85px,
+        rgba(60, 64, 67, 0.20) 1.15px,
+        transparent 1.2px
+    );
+    background-size: var(--grid-size, 14px) var(--grid-size, 14px);
+    background-position: var(--grid-pos-x, 0px) var(--grid-pos-y, 0px);
+    mask-image: radial-gradient(
+        circle var(--spotlight-radius, 65px) at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 0, 0, 0.92) 0%,
+        rgba(0, 0, 0, 0.72) 22%,
+        rgba(0, 0, 0, 0.32) 52%,
+        rgba(0, 0, 0, 0.05) 80%,
+        transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(
+        circle var(--spotlight-radius, 65px) at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 0, 0, 0.92) 0%,
+        rgba(0, 0, 0, 0.72) 22%,
+        rgba(0, 0, 0, 0.32) 52%,
+        rgba(0, 0, 0, 0.05) 80%,
+        transparent 100%
+    );
+    opacity: var(--spotlight-opacity, 0);
+    transition: opacity 0.25s ease-out;
+    z-index: 0;
+}
+
+.canvas-grid:active {
+    cursor: grabbing;
+}
+
+body.space-panning-ready,
+body.space-panning-ready * {
+    cursor: grab !important;
+}
+
+.canvas-world {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 5;
+    width: 390px;
+    min-height: 720px;
+    transform-origin: 0 0;
+}
+
+.canvas-world.is-animating,
+.canvas-world.is-zooming {
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.mobile-frame {
+    cursor: default;
+    position: absolute;
+    transform-origin: 0 0;
+    transition:
+        transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.2s,
+        border-color 0.2s,
+        opacity 0.25s;
+    animation: frameEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes frameEnter {
+    0% {
+        opacity: 0;
+        scale: 0.94;
+    }
+    100% {
+        opacity: 1;
+        scale: 1;
+    }
+}
+
+.mobile-frame.is-active-frame,
+.mobile-frame.is-selected {
+    z-index: 20 !important;
+}
+
+.mobile-frame.is-selected {
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #1677ff, 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-frame:active {
+    cursor: grabbing;
+}
+
+.connection-path {
+    fill: none;
+    stroke: #cbd5e1;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: stroke;
+    transition:
+        stroke 0.3s ease,
+        stroke-width 0.3s ease;
+    marker-end: url(#arrowhead);
+}
+
+.connection-path:hover {
+    stroke: #94a3b8;
+    stroke-width: 3;
+}
+
+
+
+.canvas-element {
+    position: relative;
+    margin-bottom: 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1.5px solid #edf1f5;
+    background: #fff;
+    padding: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+    transition:
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.canvas-element:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.canvas-element.is-selected {
+    border-color: #1677ff !important;
+    box-shadow: none !important;
+    z-index: 10;
+}
+
+
+.canvas-element .label-text,
+.canvas-element .option-text,
+.canvas-element .signature-declaration-text,
+.canvas-element .signature-pad-text,
+.canvas-element .field-help {
+    display: inline-block;
+    border-bottom: 2px solid transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding-bottom: 1px;
+    margin-bottom: 0;
+    pointer-events: auto !important;
+    cursor: text !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+body.is-dragging-component .canvas-element .label-text,
+body.is-dragging-component .canvas-element .option-text,
+body.is-dragging-component .canvas-element .signature-declaration-text,
+body.is-dragging-component .canvas-element .signature-pad-text,
+body.is-dragging-component .canvas-element .field-help {
+    pointer-events: none !important;
+    cursor: grabbing !important;
+}
+
+.canvas-element .label-text:hover,
+.canvas-element .option-text:hover,
+.canvas-element .signature-declaration-text:hover,
+.canvas-element .signature-pad-text:hover,
+.canvas-element .field-help:hover {
+    color: #1677ff;
+}
+
+[contenteditable] {
+    outline: none !important;
+}
+
+[contenteditable]:focus,
+[contenteditable]:focus-visible {
+    outline: none !important;
+}
+
+.canvas-element [contenteditable]:focus,
+.canvas-element [contenteditable]:focus-visible,
+.canvas-text-focus,
+.canvas-element .label-text:focus,
+.canvas-element .label-text:focus-visible,
+.canvas-element .field-help:focus,
+.canvas-element .field-help:focus-visible,
+.canvas-element .option-text:focus,
+.canvas-element .option-text:focus-visible,
+.canvas-element .signature-declaration-text:focus,
+.canvas-element .signature-declaration-text:focus-visible,
+.canvas-element .signature-pad-text:focus,
+.canvas-element .signature-pad-text:focus-visible {
+    color: #1677ff !important;
+    border-bottom: 2px solid #1677ff !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    caret-color: #1677ff;
+}
+
+.canvas-text-focus::selection,
+.label-text::selection,
+.field-help::selection,
+.option-text::selection,
+.signature-declaration-text::selection,
+.signature-pad-text::selection {
+    background-color: rgba(22, 119, 255, 0.18) !important;
+    color: #1677ff !important;
+}
+
+.canvas-control-focus {
+    border-color: #1677ff !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.component-label {
+    display: block;
+    margin-bottom: 7px;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+}
+
+.req-star {
+    display: inline-block;
+    margin-right: 4px;
+    color: #ff4d4f;
+}
+
+.component-placeholder {
+    min-height: 36px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
+    padding: 6px 12px;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 13px;
+    line-height: 1.5715;
+    outline: 0;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.component-placeholder:hover {
+    border-color: #4096ff;
+}
+
+.component-placeholder:focus {
+    border-color: #1677ff !important;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16) !important;
+    outline: none !important;
+}
+
+.component-placeholder:disabled {
+    cursor: not-allowed;
+    background: #fafafa;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.choice-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+}
+
+.choice-group.choice-stack {
+    flex-direction: column;
+    gap: 10px;
+}
+
+.choice-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.field-help {
+    display: inline-flex;
+    margin-left: 8px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 400;
+    outline: none;
+}
+
+.element-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.canvas-element:hover > .element-actions,
+.canvas-element.is-selected > .element-actions {
+    display: flex;
+}
+
+.element-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.element-actions .action-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.element-actions .action-btn.copy-btn {
+    color: #94a3b8;
+    background: transparent;
+}
+
+.element-actions .action-btn.copy-btn:hover {
+    color: #1677ff;
+    background: #f1f5f9;
+}
+
+.element-actions .action-btn.delete-btn {
+    color: #94a3b8;
+    background: transparent;
+}
+
+.element-actions .action-btn.delete-btn:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+
+/* ========================================================
+   拖拽占位符 (Sortable Ghost) 视觉规范
+   无论是从左侧物料栏拖入，还是在画布内部移动已有组件，
+   画布中的虚拟占位槽均展示完整、逼真的选择器/输入控件外观
+   ======================================================== */
+
+.canvas-dropzone .canvas-element.sortable-ghost {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: #eff6ff !important;
+    border: 1.5px dashed #60a5fa !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    cursor: grabbing !important;
+    position: relative !important;
+}
+
+.canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"] {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.canvas-dropzone .canvas-element.sortable-ghost::before,
+.canvas-dropzone .canvas-element.sortable-ghost::after {
+    display: none !important;
+}
+
+.canvas-dropzone .canvas-element.sortable-ghost > * {
+    opacity: 0.55 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+}
+
+.canvas-dropzone .canvas-element.sortable-ghost .element-actions {
+    display: none !important;
+}
+
+/* 从左侧物料栏拖入全新组件时，在画布中展示该组件的选择器骨架预览 */
+.canvas-dropzone .component-item.sortable-ghost {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: #eff6ff !important;
+    border: 1.5px dashed #60a5fa !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    cursor: grabbing !important;
+    pointer-events: none !important;
+    position: relative !important;
+}
+
+.canvas-dropzone .component-item.sortable-ghost[data-type="alert"] {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.canvas-dropzone .component-item.sortable-ghost::before,
+.canvas-dropzone .component-item.sortable-ghost::after {
+    display: none !important;
+}
+
+.canvas-ghost-skeleton {
+    display: none !important;
+}
+
+.canvas-dropzone .component-item.sortable-ghost .sidebar-btn-view {
+    display: none !important;
+}
+
+.canvas-dropzone .component-item.sortable-ghost .canvas-ghost-skeleton {
+    display: block !important;
+    width: 100% !important;
+    opacity: 0.65 !important;
+}
+
+.canvas-dropzone .component-item.sortable-ghost .label-text,
+.canvas-dropzone .component-item.sortable-ghost .option-text,
+.canvas-dropzone .component-item.sortable-ghost .signature-declaration-text,
+.canvas-dropzone .component-item.sortable-ghost .signature-pad-text,
+.canvas-dropzone .component-item.sortable-ghost .field-help {
+    display: inline-block;
+    border-bottom: 2px solid transparent !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding-bottom: 1px;
+    margin-bottom: 0;
+}
+
+/* 左侧物料栏内部拖拽时的占位效果（恢复紧凑高度与虚线框） */
+#components-basic .sortable-ghost,
+#components-business .sortable-ghost,
+#components-layout .sortable-ghost,
+.sidebar-drag-group .sortable-ghost {
+    min-height: 0 !important;
+    height: 36px !important;
+    margin-bottom: 0 !important;
+    border: 1px dashed rgba(148, 163, 184, 0.4) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+#components-basic .sortable-ghost > *,
+#components-business .sortable-ghost > *,
+#components-layout .sortable-ghost > *,
+.sidebar-drag-group .sortable-ghost > * {
+    display: none !important;
+}
+
+#components-basic .sortable-ghost::before,
+#components-basic .sortable-ghost::after,
+#components-business .sortable-ghost::before,
+#components-business .sortable-ghost::after,
+#components-layout .sortable-ghost::before,
+#components-layout .sortable-ghost::after,
+.sidebar-drag-group .sortable-ghost::before,
+.sidebar-drag-group .sortable-ghost::after {
+    display: none !important;
+}
+
+.sortable-drag {
+    transition: none !important;
+    cursor: grabbing !important;
+    box-shadow:
+        0 25px 50px -12px rgba(15, 23, 42, 0.25),
+        0 0 0 2px #3b82f6 !important;
+}
+
+.drag-fallback:not(.drag-fallback-shell) {
+    transition: none !important;
+    pointer-events: none !important;
+    border: 1.5px solid #1677ff !important;
+    box-shadow:
+        0 16px 36px -8px rgba(15, 23, 42, 0.2),
+        0 0 0 1px rgba(22, 119, 255, 0.1) !important;
+    z-index: 9999 !important;
+    opacity: 0.95 !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+}
+
+.drag-fallback-shell {
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+}
+
+.drag-fallback-visual {
+    margin: 0 !important;
+    transform-origin: 0 0 !important;
+    border: 1.5px solid #1677ff !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25) !important;
+    pointer-events: none !important;
+}
+
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25) !important;
+        border-color: #1677ff !important;
+    }
+    50% {
+        box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.35) !important;
+        border-color: #1677ff !important;
+    }
+    100% {
+        box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16) !important;
+        border-color: #1677ff !important;
+    }
+}
+
+/* 属性输入框聚焦联动样式 (与全站输入框聚焦样式保持 100% 完全一致：纯白背景、1px 品牌蓝边框、柔和 2px 聚焦光晕) */
+.prop-field-focused,
+.pulse-highlight,
+.arco-input-wrapper.prop-field-focused,
+.arco-input-wrapper.pulse-highlight,
+.arco-textarea-wrapper.prop-field-focused,
+.arco-textarea-wrapper.pulse-highlight {
+    border-color: #1677ff !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16) !important;
+    outline: none !important;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.prop-field-focused input,
+.pulse-highlight input,
+.prop-field-focused textarea,
+.pulse-highlight textarea {
+    background-color: #ffffff !important;
+}
+
+/* 画布页面标题规范：默认 text-xl (20px / 28px) 字体排版 */
+.page-title-input,
+.page-title-input.text-xl {
+    font-size: 1.25rem !important; /* 20px */
+    line-height: 1.75rem !important; /* 28px */
+}
+
+.canvas-element[data-type="alert"] {
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    border-radius: 12px;
+}
+
+.canvas-element[data-type="alert"]:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.canvas-element[data-type="alert"].is-selected {
+    border: none !important;
+    box-shadow: 0 0 0 1.5px #1677ff !important;
+}
+
+/* 顶部微拟物/毛玻璃浮动工具图标微动画 */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+/* 缩放下拉菜单微弹动效 */
+.menu-pop-enter-active,
+.menu-pop-leave-active {
+    transition: opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1), transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom right;
+}
+
+.menu-pop-enter-from,
+.menu-pop-leave-to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+}
+
+.menu-pop-enter-to,
+.menu-pop-leave-from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 对标 Google Stitch 原生设计的高质感深黑气泡提示 Tooltip */
+.arco-tooltip-content {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22) !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.01em !important;
+}
+
+.arco-tooltip-arrow,
+.arco-tooltip-popup-arrow {
+    background-color: #111827 !important;
+}
+
+/* 级联多级子菜单无缝贴合（彻底消除 4px 物理空隙，并杜绝产生任何横向滚动条） */
+.arco-dropdown,
+.arco-dropdown-submenu,
+.arco-dropdown-list-wrapper {
+    overflow-x: hidden !important;
+}
+
+/* 当子菜单在右侧弹出 (rt) 时，向左微调 5px，完全抵消 Arco 默认的 4px 偏移，使两级菜单无缝贴合 */
+.arco-trigger-popup.arco-trigger-position-rt .arco-dropdown-submenu {
+    margin-left: -5px !important;
+}
+
+/* 当子菜单贴近屏幕右边缘向左翻转 (lt) 时，向右微调 5px，无缝贴合 */
+.arco-trigger-popup.arco-trigger-position-lt .arco-dropdown-submenu {
+    margin-right: -5px !important;
+}
+
+/* 下拉菜单项统一样式：图标与文本紧凑左对齐，后缀（快捷键/箭头）靠右对齐，消除英文下不规则空隙 */
+.arco-dropdown-option {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 10px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    font-size: 13px !important;
+    box-sizing: border-box !important;
+    min-width: 156px !important;
+}
+
+.arco-dropdown-option-has-suffix {
+    justify-content: flex-start !important;
+}
+
+.arco-dropdown-option-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+.arco-dropdown-option-content {
+    flex: 0 1 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+}
+
+.arco-dropdown-option-suffix {
+    margin-left: auto !important;
+    padding-left: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+
+
+
+
