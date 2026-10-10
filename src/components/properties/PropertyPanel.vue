@@ -513,46 +513,20 @@
             </template>
           </div>
 
-          <!-- 国家 / 国籍专属：选项数据源展示卡片 -->
-          <div v-if="['country', 'nationality'].includes(selectedElement.type)" class="space-y-2 pt-3.5 border-t border-slate-100">
-            <div class="flex items-center justify-between">
-              <span class="text-[12px] font-semibold text-slate-700">
-                {{ store.currentLocale === 'en' ? 'Options Data Source' : '选项数据源' }}
+          <!-- 国家 / 国籍专属：预设 -->
+          <div v-if="['country', 'nationality'].includes(selectedElement.type)" class="pt-3.5 border-t border-slate-100">
+            <div class="flex items-center justify-between py-1">
+              <span class="text-[12px] font-medium text-slate-600">
+                {{ store.currentLocale === 'en' ? 'Preset' : '预设' }}
               </span>
-              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                {{ store.currentLocale === 'en' ? 'Standard Library' : '标准预设库' }}
-              </span>
-            </div>
-
-            <!-- 数据源卡片 (点击查看完整清单) -->
-            <div
-              class="group relative rounded-lg border border-slate-200/90 bg-slate-50/80 hover:bg-blue-50/40 hover:border-blue-300 p-2.5 transition-all cursor-pointer shadow-xs select-none"
-              @click="openCountryListModal"
-            >
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <div class="w-7 h-7 rounded-md bg-white border border-slate-200/80 flex items-center justify-center shrink-0 shadow-xs group-hover:border-blue-200 transition-colors">
-                    <Globe class="w-4 h-4 text-blue-500" />
-                  </div>
-                  <div class="min-w-0">
-                    <div class="text-[12px] font-medium text-slate-800 group-hover:text-blue-600 transition-colors truncate">
-                      {{ selectedElement.type === 'country'
-                        ? (store.currentLocale === 'en' ? 'Global Countries & Regions' : '全球国家与地区标准字典')
-                        : (store.currentLocale === 'en' ? 'Global Nationalities Directory' : '全球国家标准国籍字典')
-                      }}
-                    </div>
-                    <div class="text-[11px] text-slate-400 truncate">
-                      {{ store.currentLocale === 'en' ? '244 standard ISO-3166 regions' : '全量 244 个标准地区及代码' }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-0.5 text-[11px] text-slate-400 group-hover:text-blue-600 transition-colors shrink-0 ml-1">
-                  <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
-                  <ChevronRight class="w-3.5 h-3.5 shrink-0" />
-                </div>
-              </div>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer font-medium shadow-xs group"
+                @click="openCountryListModal"
+              >
+                <span>{{ store.currentLocale === 'en' ? 'View' : '查看' }}</span>
+                <ChevronRight class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+              </button>
             </div>
           </div>
 
@@ -781,12 +755,12 @@
       </div>
     </div>
 
-    <!-- 底部标准规范提示 -->
+    <!-- 底部提示 -->
     <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
       <span>
         {{ store.currentLocale === 'en'
-          ? 'Aligned with ISO-3166 & ITU-T E.164 telecommunications standards'
-          : '全量 244 个国家/地区、标准国籍及国际区号已统一内置，对齐 ISO-3166 与 ITU-T E.164 规范'
+          ? 'Total 244 countries & regions'
+          : '共 244 个预设国家与地区'
         }}
       </span>
       <span class="font-mono text-slate-400">244 Total</span>
@@ -860,8 +834,8 @@ const unifiedDirectoryList = computed(() => {
 
 const countryModalTitle = computed(() => {
   return store.currentLocale === 'en'
-    ? 'Preset Supported Countries, Nationalities & Dial Codes (244)'
-    : '全球国家、国籍与国际区号支持清单 (共 244 项)';
+    ? 'Preset List (244)'
+    : '预设清单 (244)';
 });
 
 const filteredUnifiedList = computed(() => {
