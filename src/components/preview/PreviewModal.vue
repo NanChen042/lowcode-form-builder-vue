@@ -443,6 +443,9 @@ function validateField(field: FormElement): string | null {
       if (isRequired && arr.length === 0) {
         return store.currentLocale === 'en' ? 'Please select an option' : '请选择选项';
       }
+      if (field.maxSelections && arr.length > field.maxSelections) {
+        return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
+      }
     } else {
       if (isRequired && !strVal) {
         return store.currentLocale === 'en' ? 'Please select an option' : '请选择选项';
@@ -453,9 +456,18 @@ function validateField(field: FormElement): string | null {
 
   // 6. 国家 / 国籍
   if (field.type === 'country' || field.type === 'nationality') {
-    const arr = parseMultiValue(rawVal);
-    if (isRequired && arr.length === 0) {
-      return store.currentLocale === 'en' ? 'Please select at least one item' : '请至少选择一项';
+    if (field.multiple) {
+      const arr = parseMultiValue(rawVal);
+      if (isRequired && arr.length === 0) {
+        return store.currentLocale === 'en' ? 'Please select at least one item' : '请至少选择一项';
+      }
+      if (field.maxSelections && arr.length > field.maxSelections) {
+        return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} items allowed` : `最多只能选择 ${field.maxSelections} 项`;
+      }
+    } else {
+      if (isRequired && !strVal) {
+        return store.currentLocale === 'en' ? 'Please select' : '请选择';
+      }
     }
     return null;
   }
@@ -473,6 +485,9 @@ function validateField(field: FormElement): string | null {
     const arr = parseMultiValue(rawVal);
     if (isRequired && arr.length === 0) {
       return store.currentLocale === 'en' ? 'Please select at least one option' : '请至少选择一项';
+    }
+    if (field.maxSelections && arr.length > field.maxSelections) {
+      return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
     }
     return null;
   }

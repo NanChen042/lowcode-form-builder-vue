@@ -202,25 +202,20 @@
     <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
   </div>
 
-  <!-- 确认新建空白画布弹窗 (标准企业级对话框规范，告别居中悬浮卡片) -->
+  <!-- 确认新建空白画布弹窗 (标准普通简洁样式) -->
   <a-modal
     v-model:visible="isBlankConfirmVisible"
     :title="t('sidebar.newBlankConfirmTitle')"
     :title-align="'start'"
-    :width="440"
+    :width="420"
     :ok-text="t('sidebar.confirmOk')"
     :cancel-text="t('sidebar.cancel')"
     :ok-button-props="{ status: 'warning' }"
     unmount-on-close
     @ok="executeNewBlank"
   >
-    <div class="flex items-start gap-3.5 py-1">
-      <div class="w-9 h-9 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200/80">
-        <AlertTriangle class="w-5 h-5" />
-      </div>
-      <div class="flex-1 text-[13px] text-slate-600 leading-relaxed pt-1">
-        {{ t('sidebar.newBlankConfirmContent') }}
-      </div>
+    <div class="text-[13px] text-slate-600 leading-relaxed py-1">
+      {{ t('sidebar.newBlankConfirmContent') }}
     </div>
   </a-modal>
 </aside>
@@ -252,8 +247,7 @@ import {
   ChevronUp,
   LayoutTemplate,
   ArrowRight,
-  PanelLeft,
-  AlertTriangle
+  PanelLeft
 } from '@lucide/vue';
 
 defineEmits(['open-template-gallery']);

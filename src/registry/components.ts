@@ -194,6 +194,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       defaultValue: '',
       required: true,
       showLabel: true,
+      multiple: false,
       maxSelections: 3,
       options: [...defaultCountryOptions]
     })
@@ -214,6 +215,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       defaultValue: '',
       required: true,
       showLabel: true,
+      multiple: false,
       maxSelections: 3,
       options: [...defaultNationalityOptions]
     })

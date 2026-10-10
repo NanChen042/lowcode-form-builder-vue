@@ -362,7 +362,7 @@
               <a-switch v-model="isDeclarationRequired" size="small" />
             </div>
 
-            <div v-if="selectedElement.type === 'select'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
+            <div v-if="['select', 'country', 'nationality'].includes(selectedElement.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
                 <span class="text-[12px] font-medium text-slate-600">{{ t('prop.allowMultiple') }}</span>
                 <a-tooltip :content="t('prop.allowMultipleTip')" position="top">
@@ -1057,8 +1057,8 @@ const canStackChoices = computed(() => {
 
 const canHaveMaxSelections = computed(() => {
   if (!selectedElement.value) return false;
-  if (['country', 'nationality', 'checkbox'].includes(selectedElement.value.type)) return true;
-  if (selectedElement.value.type === 'select' && selectedElement.value.multiple) return true;
+  if (selectedElement.value.type === 'checkbox') return true;
+  if (['select', 'country', 'nationality'].includes(selectedElement.value.type) && selectedElement.value.multiple) return true;
   return false;
 });
 

@@ -137,15 +137,49 @@
         </a-option>
       </a-select>
 
-      <!-- 国家 / 国籍标签选择器 -->
+      <!-- 国家 / 国籍标签选择器 (多选模式) -->
       <a-select
-        v-else-if="field.type === 'country' || field.type === 'nationality'"
+        v-else-if="(field.type === 'country' || field.type === 'nationality') && field.multiple"
         v-model="selectedTags"
         class="w-full"
         :error="Boolean(error)"
         :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择')"
         multiple
+        :limit="field.maxSelections || undefined"
         :max-tag-count="field.maxSelections || 3"
+        allow-clear
+        allow-search
+        @change="handleFieldInput"
+      >
+        <template #label="{ data }">
+          <span class="inline-flex items-center gap-1.5">
+            <span class="iti__flag shrink-0" :class="'iti__' + (data.value ? String(data.value).toLowerCase() : 'sg')"></span>
+            <span>{{ data.label }}</span>
+          </span>
+        </template>
+        <a-option
+          v-for="(opt, idx) in field.options"
+          :key="idx"
+          :value="opt.value"
+          :label="getOptionLabel(opt)"
+        >
+          <div class="flex items-center justify-between w-full text-xs font-sans">
+            <span class="flex items-center gap-2">
+              <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
+              <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono uppercase">{{ opt.value }}</span>
+          </div>
+        </a-option>
+      </a-select>
+
+      <!-- 国家 / 国籍选择器 (单选模式，默认标准交互) -->
+      <a-select
+        v-else-if="field.type === 'country' || field.type === 'nationality'"
+        v-model="formData[field.key]"
+        class="w-full"
+        :error="Boolean(error)"
+        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择')"
         allow-clear
         allow-search
         @change="handleFieldInput"
@@ -202,6 +236,7 @@
       >
         <a-checkbox-group
           v-model="selectedCheckboxTags"
+          :max="field.maxSelections || undefined"
           :direction="field.layout === 'stack' ? 'vertical' : 'horizontal'"
           class="!flex flex-wrap gap-2.5 py-1"
           @change="handleFieldInput"

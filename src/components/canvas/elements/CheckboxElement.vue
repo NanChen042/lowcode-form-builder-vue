@@ -8,7 +8,7 @@
           :title="store.currentLocale === 'en' ? 'Click to toggle default check' : '点击切换默认勾选'"
           @click.stop="toggleDefaultCheckbox(opt.value)"
         >
-          <a-checkbox :model-value="isChecked(opt.value)" class="!pointer-events-none" />
+          <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none!" />
         </span>
         <EditableText
           :model-value="getOptionLabel(opt)"
