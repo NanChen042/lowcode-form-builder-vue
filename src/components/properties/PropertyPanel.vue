@@ -930,12 +930,12 @@ const placeholderFieldLabel = computed(() => {
 });
 
 const englishPlaceholderFieldLabel = computed(() => {
-  if (!selectedElement.value) return 'Placeholder (English)';
-  if (selectedElement.value.type === 'signature') return 'Signature Prompt (English)';
-  if (selectedElement.value.type === 'date') return 'Date Picker Placeholder (English)';
+  if (!selectedElement.value) return 'Placeholder';
+  if (selectedElement.value.type === 'signature') return 'Signature Prompt';
+  if (selectedElement.value.type === 'date') return 'Date Picker Placeholder';
   if (selectedElement.value.type === 'phone') return t('prop.phonePlaceholderLabel', 'en');
   if (selectedElement.value.type === 'email') return t('prop.emailPlaceholderLabel', 'en');
-  return 'Placeholder (English)';
+  return 'Placeholder';
 });
 
 
