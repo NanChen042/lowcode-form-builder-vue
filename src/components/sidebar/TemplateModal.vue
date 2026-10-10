@@ -89,6 +89,10 @@ function selectTemplate(key: 'kyc-individual' | 'kyc-entity') {
     content: t('tpl.confirmContent'),
     okText: t('tpl.confirmOk'),
     cancelText: t('tpl.confirmCancel'),
+    simple: false,
+    width: 440,
+    titleAlign: 'start',
+    okButtonProps: { status: 'warning' },
     onOk() {
       if (key === 'kyc-individual') {
         loadSchema(kycIndividualTemplate);

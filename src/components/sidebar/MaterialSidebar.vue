@@ -201,6 +201,28 @@
   >
     <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
   </div>
+
+  <!-- 确认新建空白画布弹窗 (标准企业级对话框规范，告别居中悬浮卡片) -->
+  <a-modal
+    v-model:visible="isBlankConfirmVisible"
+    :title="t('sidebar.newBlankConfirmTitle')"
+    :title-align="'start'"
+    :width="440"
+    :ok-text="t('sidebar.confirmOk')"
+    :cancel-text="t('sidebar.cancel')"
+    :ok-button-props="{ status: 'warning' }"
+    unmount-on-close
+    @ok="executeNewBlank"
+  >
+    <div class="flex items-start gap-3.5 py-1">
+      <div class="w-9 h-9 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200/80">
+        <AlertTriangle class="w-5 h-5" />
+      </div>
+      <div class="flex-1 text-[13px] text-slate-600 leading-relaxed pt-1">
+        {{ t('sidebar.newBlankConfirmContent') }}
+      </div>
+    </div>
+  </a-modal>
 </aside>
 </template>
 
@@ -208,7 +230,6 @@
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { store, addElement, loadSchema, createElement } from '@/core/store';
 import { t } from '@/core/i18n';
-import { Modal } from '@arco-design/web-vue';
 import { componentRegistry, getComponentIcon, type ComponentMeta } from '@/registry/components';
 import { blankTemplate } from '@/templates/recommend';
 import { syncDragPlaceholderHeight } from '@/utils/helpers';
@@ -231,7 +252,8 @@ import {
   ChevronUp,
   LayoutTemplate,
   ArrowRight,
-  PanelLeft
+  PanelLeft,
+  AlertTriangle
 } from '@lucide/vue';
 
 defineEmits(['open-template-gallery']);
@@ -459,17 +481,15 @@ function handleComponentClick(type: ComponentType) {
   addElement(type, targetPageId);
 }
 
+const isBlankConfirmVisible = ref(false);
+
 function handleNewBlank() {
-  Modal.confirm({
-    title: t('sidebar.newBlankConfirmTitle'),
-    content: t('sidebar.newBlankConfirmContent'),
-    okText: t('sidebar.confirmOk'),
-    cancelText: t('sidebar.cancel'),
-    okButtonProps: { status: 'warning' },
-    onOk: () => {
-      loadSchema(blankTemplate);
-      store.activeTemplateKey = 'blank';
-    }
-  });
+  isBlankConfirmVisible.value = true;
+}
+
+function executeNewBlank() {
+  loadSchema(blankTemplate);
+  store.activeTemplateKey = 'blank';
+  isBlankConfirmVisible.value = false;
 }
 </script>

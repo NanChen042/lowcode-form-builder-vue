@@ -52,9 +52,8 @@
             v-if="pages.length > 1 && !isSubmitted"
             class="w-[240px] shrink-0 flex flex-col gap-1"
           >
-            <div class="mb-2 pb-2 border-b border-slate-200/80 flex items-center justify-between text-xs text-slate-500 font-medium">
+            <div class="mb-2 pb-2 border-b border-slate-200/80 text-xs text-slate-500 font-medium">
               <span>{{ store.currentLocale === 'en' ? 'Form Steps' : '表单步骤列表' }}</span>
-              <span class="text-[11px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded font-normal">{{ store.currentLocale === 'en' ? 'Free jump' : '支持自由跳转' }}</span>
             </div>
 
             <div

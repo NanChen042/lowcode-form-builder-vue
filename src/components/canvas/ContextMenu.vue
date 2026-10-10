@@ -189,6 +189,9 @@ function handleDeletePage() {
       okText: store.currentLocale === 'en' ? 'Delete' : '确认删除',
       cancelText: store.currentLocale === 'en' ? 'Cancel' : '取消',
       okButtonProps: { status: 'danger' },
+      simple: false,
+      width: 440,
+      titleAlign: 'start',
       onOk: () => {
         deletePage(pageId);
       }

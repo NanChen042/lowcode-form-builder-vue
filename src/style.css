@@ -1202,6 +1202,89 @@ body.is-dragging-component .canvas-element .field-help {
     flex-shrink: 0 !important;
 }
 
+/* ========================================================
+   Arco Modal 企业级对话框视觉规范与精致细节
+   ======================================================== */
+.arco-modal {
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
+}
+
+.arco-modal-header {
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 16px 20px 14px 20px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    background-color: #ffffff !important;
+}
+
+.arco-modal-title {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    line-height: 1.4 !important;
+}
+
+.arco-modal-close-btn {
+    top: 14px !important;
+    right: 16px !important;
+    color: #94a3b8 !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+.arco-modal-close-btn:hover {
+    color: #1e293b !important;
+    background-color: #f1f5f9 !important;
+}
+
+.arco-modal-body {
+    padding: 18px 20px !important;
+    font-size: 13px !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+}
+
+.arco-modal-footer {
+    padding: 12px 20px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    background-color: #fafafa !important;
+    text-align: right !important;
+}
+
+.arco-modal-footer .arco-btn {
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    height: 32px !important;
+    padding: 0 16px !important;
+}
+
+/* 兼容处理 simple 模式弹窗，杜绝丑陋居中漂浮 */
+.arco-modal-simple {
+    padding: 20px !important;
+    text-align: left !important;
+}
+
+.arco-modal-simple .arco-modal-title {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+.arco-modal-simple .arco-modal-body {
+    text-align: left !important;
+    padding: 0 0 16px 0 !important;
+}
+
+.arco-modal-simple .arco-modal-footer {
+    text-align: right !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-top: none !important;
+}
+
+
 
 
 
