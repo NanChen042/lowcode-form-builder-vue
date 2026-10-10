@@ -265,8 +265,8 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     defaultData: () => ({
       label: '电子邮箱',
       label_en: 'Email Address',
-      placeholder: 'example@domain.com',
-      placeholder_en: 'example@domain.com',
+      placeholder: '请输入邮箱',
+      placeholder_en: 'Please enter email',
       help: '',
       help_en: '',
       defaultValue: '',

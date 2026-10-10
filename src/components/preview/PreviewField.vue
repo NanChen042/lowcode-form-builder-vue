@@ -61,7 +61,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'example@domain.com' : '请输入电子邮箱地址')"
+        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please enter email' : '请输入邮箱')"
         allow-clear
         @input="handleFieldInput"
       >

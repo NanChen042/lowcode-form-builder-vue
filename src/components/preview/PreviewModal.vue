@@ -380,10 +380,10 @@ function validateField(field: FormElement): string | null {
   // 3. 电子邮箱
   if (field.type === 'email') {
     if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please enter email address' : '请输入电子邮箱地址';
+      return store.currentLocale === 'en' ? 'Please enter email' : '请输入邮箱';
     }
     if (strVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(strVal)) {
-      return store.currentLocale === 'en' ? 'Please enter a valid email address' : '请输入有效的电子邮箱地址';
+      return store.currentLocale === 'en' ? 'Please enter a valid email' : '请输入有效的邮箱地址';
     }
     return null;
   }

@@ -428,10 +428,10 @@
               >
                 <!-- 选中后在输入框内渲染国旗图标和区号 -->
                 <template #label="{ data }">
-                  <div v-if="data" class="flex items-center gap-1.5 font-mono text-xs">
+                  <div v-if="data" class="flex items-center gap-2 text-xs font-sans">
                     <span class="iti__flag shrink-0" :class="'iti__' + (getCountryIso(data.value) || 'sg')"></span>
-                    <span class="font-medium text-slate-800">{{ data.value }}</span>
-                    <span class="text-slate-400 text-[11px] truncate">
+                    <span class="font-mono font-medium text-slate-800">{{ data.value }}</span>
+                    <span class="text-slate-600 truncate font-sans">
                       {{ getCountryZhName(data.value) }}
                     </span>
                   </div>
@@ -442,12 +442,12 @@
                   :value="item.code"
                   :label="`${item.code} ${store.currentLocale === 'en' ? item.name : item.zh}`"
                 >
-                  <div class="flex items-center justify-between gap-2 w-full text-xs">
-                    <span class="flex items-center gap-2 font-mono">
+                  <div class="flex items-center justify-between gap-2 w-full text-xs font-sans">
+                    <span class="flex items-center gap-2">
                       <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
-                      <span class="font-medium text-slate-800">{{ item.code }}</span>
+                      <span class="font-mono font-medium text-slate-800">{{ item.code }}</span>
                     </span>
-                    <span class="text-slate-400 text-[11px] truncate max-w-[120px]">
+                    <span class="text-slate-600 font-sans text-xs truncate max-w-[120px]">
                       {{ store.currentLocale === 'en' ? item.name : item.zh }}
                     </span>
                   </div>
@@ -485,7 +485,7 @@
                   id="prop-placeholder-input"
                   v-model="selectedElement.placeholder_en"
                   allow-clear
-                  :placeholder="englishPlaceholderFieldLabel"
+                  :placeholder="selectedElement.type === 'email' ? 'Please enter email' : englishPlaceholderFieldLabel"
                   class="w-full"
                   :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
                   @focus="setFocus('placeholder')"
@@ -501,7 +501,7 @@
                   id="prop-placeholder-input"
                   v-model="selectedElement.placeholder"
                   allow-clear
-                  :placeholder="placeholderFieldLabel"
+                  :placeholder="selectedElement.type === 'email' ? '请输入邮箱' : placeholderFieldLabel"
                   :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
                   @focus="setFocus('placeholder')"
                   @blur="clearFocus"
