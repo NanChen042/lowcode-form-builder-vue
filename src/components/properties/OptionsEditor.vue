@@ -113,15 +113,19 @@
       </div>
     </template>
 
-    <!-- 底部快捷添加选项按钮 -->
-    <button
-      type="button"
-      class="w-full mt-2 py-1.5 px-3 rounded-md border border-dashed border-slate-200 hover:border-[#1677ff] hover:text-[#1677ff] hover:bg-blue-50/30 active:bg-blue-50/60 text-slate-500 text-[12px] font-medium flex items-center justify-center gap-1.5 transition-all select-none"
+    <!-- 底部快捷添加选项按钮 (采用标准 Arco a-button，配合 long 属性宽度自适应容器) -->
+    <a-button
+      type="dashed"
+      long
+      size="small"
+      class="mt-2.5 !h-7 !text-[12px] !rounded-[6px] !font-medium"
       @click="addOption"
     >
-      <Plus class="h-3.5 w-3.5" />
-      <span>{{ t('prop.addOption') }}</span>
-    </button>
+      <template #icon>
+        <Plus class="h-3.5 w-3.5" />
+      </template>
+      {{ t('prop.addOption') }}
+    </a-button>
   </div>
 </template>
 
@@ -162,7 +166,15 @@ function initSortable() {
     ghostClass: 'option-sortable-ghost',
     chosenClass: 'option-sortable-chosen',
     dragClass: 'option-sortable-drag',
-    forceFallback: false,
+    fallbackClass: 'option-sortable-fallback',
+    forceFallback: true,
+    fallbackOnBody: false,
+    fallbackTolerance: 2,
+    onEnd(evt) {
+      if (document.activeElement && (document.activeElement === evt.item || evt.item?.contains(document.activeElement))) {
+        (document.activeElement as HTMLElement)?.blur?.();
+      }
+    },
     onUpdate(evt) {
       if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
         if (!props.element?.options) return;
@@ -275,6 +287,15 @@ function removeOption(idx: number) {
 </script>
 
 <style scoped>
+.option-row {
+  outline: none !important;
+}
+.option-row:focus,
+.option-row:focus-visible,
+.option-row:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
 .option-del-btn {
   border: none !important;
   outline: none !important;
@@ -284,17 +305,38 @@ function removeOption(idx: number) {
 .drag-handle {
   cursor: grab;
   touch-action: none;
+  outline: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.drag-handle:focus,
+.drag-handle:focus-visible,
+.drag-handle:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 .drag-handle:active {
   cursor: grabbing;
+}
+.option-sortable-fallback {
+  opacity: 0.95;
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+  outline: none !important;
 }
 .option-sortable-ghost {
   opacity: 0.45;
   background-color: #eff6ff !important;
   border: 1px dashed #60a5fa !important;
   border-radius: 6px !important;
+  outline: none !important;
 }
 .option-sortable-chosen {
   background-color: #f8fafc;
+  outline: none !important;
+}
+.option-sortable-drag {
+  outline: none !important;
 }
 </style>

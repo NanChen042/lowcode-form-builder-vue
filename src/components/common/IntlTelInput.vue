@@ -42,7 +42,11 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { store } from '@/core/store';
 import type { IntlTelInputInstance, IntlTelInputOptions } from '@/types/intlTelInput';
-import { getCountryPhoneRule, getCountryExampleNumber } from '@/registry/phoneRules';
+import {
+  getCountryPhoneRule,
+  getCountryPhoneOrder,
+  getCountryI18nMap
+} from '@/registry/phoneRules';
 
 const props = withDefaults(
   defineProps<{
@@ -56,6 +60,7 @@ const props = withDefaults(
     strict?: boolean;
     error?: boolean;
     errorMessage?: string;
+    customErrorMessage?: string;
   }>(),
   {
     modelValue: '',
@@ -67,13 +72,15 @@ const props = withDefaults(
     required: false,
     strict: true,
     error: false,
-    errorMessage: ''
+    errorMessage: '',
+    customErrorMessage: ''
   }
 );
 
 const emit = defineEmits<{
   (e: 'update:modelValue', val: string): void;
   (e: 'update:dialCode', val: string): void;
+  (e: 'update:countryCode', val: string): void;
   (e: 'change', data: {
     valid: boolean;
     areacode: string;
@@ -87,6 +94,7 @@ const emit = defineEmits<{
 const inputRef = ref<HTMLInputElement | null>(null);
 let iti: IntlTelInputInstance | null = null;
 const isDirty = ref(false);
+let isInternalCountryChange = false;
 
 const validationState = ref({
   valid: true,
@@ -103,6 +111,7 @@ const hasError = computed(() => {
 const effectiveErrorMessage = computed(() => {
   if (props.errorMessage) return props.errorMessage;
   if (!isDirty.value || validationState.value.valid) return '';
+  if (props.customErrorMessage) return props.customErrorMessage;
   return store.currentLocale === 'en'
     ? validationState.value.message_en
     : validationState.value.message;
@@ -129,13 +138,17 @@ function initIntlTel() {
   // 默认国家二字码 (优先使用指定的国家 ISO2，否则根据区号反查，默认 'sg')
   const defaultIso = props.countryCode?.toLowerCase() || parseIsoFromDialCode(props.dialCode) || 'sg';
 
+  // 严格对齐 algo 系统配置：优先常用国置顶 (新加坡、中国、美国、英国)，其余按英文 A-Z 严格排序
   const options: IntlTelInputOptions = {
     initialCountry: defaultIso,
-    preferredCountries: ['sg', 'cn', 'hk', 'my', 'us', 'gb'],
+    countryOrder: getCountryPhoneOrder(),
     autoPlaceholder: 'aggressive',
     separateDialCode: true,
     validationNumberType: 'MOBILE',
-    countrySearch: true
+    nationalMode: true,
+    autoInsertDialCode: false,
+    countrySearch: true,
+    i18n: getCountryI18nMap(store.currentLocale)
   };
 
   iti = window.intlTelInput(inputRef.value, options);
@@ -144,7 +157,7 @@ function initIntlTel() {
   if (props.modelValue) {
     const full = props.modelValue.startsWith('+')
       ? props.modelValue
-      : `${props.dialCode || '+65'}${props.modelValue}`;
+      : `+${props.dialCode?.replace(/\D/g, '') || '65'}${props.modelValue}`;
     iti.setNumber(full);
   }
 
@@ -165,12 +178,9 @@ function parseIsoFromDialCode(code?: string): string {
 
 function updateInputPlaceholder() {
   if (!inputRef.value) return;
-  const current = iti ? iti.getSelectedCountryData() : null;
-  const targetIso = current?.iso2 || props.countryCode || parseIsoFromDialCode(props.dialCode) || 'sg';
-  if (props.customPlaceholder && !/[a-zA-Z]/.test(props.customPlaceholder)) {
+  // 若设计器有自定义提示语则显示自定义，否则完全遵循 algo / intlTelInput 原生自动占位
+  if (props.customPlaceholder) {
     inputRef.value.placeholder = props.customPlaceholder;
-  } else {
-    inputRef.value.placeholder = getCountryExampleNumber(targetIso);
   }
 }
 
@@ -178,25 +188,37 @@ function handleCountryChange() {
   if (!iti) return;
   const countryData = iti.getSelectedCountryData();
   const newDialCode = '+' + countryData.dialCode;
+  const newCountryCode = countryData.iso2 || '';
+
+  isInternalCountryChange = true;
   emit('update:dialCode', newDialCode);
+  emit('update:countryCode', newCountryCode);
   updateInputPlaceholder();
   validateAndEmit();
+
+  setTimeout(() => {
+    isInternalCountryChange = false;
+  }, 100);
 }
 
 function handleInput() {
-  if (inputRef.value) {
-    const sanitized = inputRef.value.value.replace(/[^\d\s\-]/g, '');
-    if (inputRef.value.value !== sanitized) {
-      inputRef.value.value = sanitized;
-    }
+  if (!inputRef.value || !iti) return;
+
+  const currentCountry = iti.getSelectedCountryData();
+  // 容错处理：若在台湾(+886)模式下输入了本地前导0 (如 0912...)，自动去掉前导0，无缝匹配国际格式并格式化间距
+  if (currentCountry.iso2 === 'tw' && inputRef.value.value.startsWith('0')) {
+    inputRef.value.value = inputRef.value.value.replace(/^0+/, '');
   }
+
   isDirty.value = true;
   validateAndEmit();
 }
 
 function handleBlur() {
-  isDirty.value = true;
-  validateAndEmit();
+  if (inputRef.value && inputRef.value.value.trim().length > 0) {
+    isDirty.value = true;
+    validateAndEmit();
+  }
 }
 
 function validateAndEmit() {
@@ -205,7 +227,7 @@ function validateAndEmit() {
   const raw = inputRef.value.value.trim();
   const countryData = iti.getSelectedCountryData();
   const nationalNumber = iti.getNumber();
-  const pureMobile = raw.replace(/\D/g, '');
+  const pureMobile = (iti.getNumber('national') || raw).replace(/\D/g, '');
 
   let valid = true;
   let message = '';
@@ -214,16 +236,15 @@ function validateAndEmit() {
   if (!raw) {
     if (props.required) {
       valid = false;
-      message = '请输入手机号码';
-      message_en = 'Please enter phone number';
+      message = props.customErrorMessage || '请输入手机号码';
+      message_en = props.customErrorMessage || 'Please enter phone number';
     }
   } else if (props.strict) {
     valid = iti.isValidNumber();
     if (!valid) {
-      const rule = getCountryPhoneRule(countryData.iso2);
-      const nameZh = rule?.zh || countryData.name || '';
-      message = `请输入有效的${nameZh}手机号码`;
-      message_en = `Please enter a valid ${countryData.name || ''} phone number`;
+      // 严格对齐 algo 系统通用错误提示
+      message = props.customErrorMessage || '请输入有效的手机号码';
+      message_en = props.customErrorMessage || 'Please enter a valid phone number';
     }
   }
 
@@ -244,15 +265,42 @@ function validateAndEmit() {
 watch(
   () => [props.countryCode, props.dialCode],
   ([newIso, newCode]) => {
-    if (!iti) return;
+    if (!iti || isInternalCountryChange) return;
     const current = iti.getSelectedCountryData();
     if (newIso && newIso.toLowerCase() !== current.iso2?.toLowerCase()) {
       iti.setCountry(newIso.toLowerCase());
       updateInputPlaceholder();
-    } else if (newCode && '+' + current.dialCode !== newCode) {
-      const iso = parseIsoFromDialCode(newCode);
-      iti.setCountry(iso);
-      updateInputPlaceholder();
+    } else if (newCode) {
+      const cleanNew = newCode.replace(/\D/g, '');
+      const cleanCur = (current.dialCode || '').replace(/\D/g, '');
+      if (cleanNew && cleanNew !== cleanCur) {
+        const iso = parseIsoFromDialCode(newCode);
+        if (iso && iso.toLowerCase() !== current.iso2?.toLowerCase()) {
+          iti.setCountry(iso);
+          updateInputPlaceholder();
+        }
+      }
+    }
+  }
+);
+
+// 监听全局语言环境切换，动态更新 244 国语言翻译与搜索框文案
+watch(
+  () => store.currentLocale,
+  () => {
+    if (iti && inputRef.value) {
+      const currentVal = inputRef.value.value;
+      const currentCountry = iti.getSelectedCountryData();
+      iti.destroy();
+      iti = null;
+      initIntlTel();
+      const currentIti = iti as IntlTelInputInstance | null;
+      if (currentCountry?.iso2 && currentIti) {
+        currentIti.setCountry(currentCountry.iso2);
+      }
+      if (currentVal && inputRef.value) {
+        inputRef.value.value = currentVal;
+      }
     }
   }
 );
@@ -369,31 +417,39 @@ watch(
   transform: rotate(180deg) !important;
 }
 
-/* 下拉菜单位置与搜索面板 (对齐 algo 240+ 全球国家面板) */
+/* 下拉菜单位置与搜索面板 (对齐属性面板 Flag + Code + Name 精致排布规范) */
 .intl-tel-wrapper .iti__dropdown-content {
   position: absolute !important;
   top: 100% !important;
   left: 0 !important;
-  margin-top: 4px !important;
-  min-width: 290px !important;
-  max-width: 320px !important;
+  margin-top: 6px !important;
+  width: 100% !important;
+  min-width: 300px !important;
+  max-width: 335px !important;
   background: #ffffff !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
   overflow: hidden !important;
   z-index: 1050 !important;
 }
 
 .intl-tel-wrapper .iti__search-input {
   border: 1px solid #e2e8f0 !important;
-  border-radius: 4px !important;
-  font-size: 12px !important;
-  padding: 6px 10px !important;
-  margin: 6px !important;
-  width: calc(100% - 12px) !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 10px !important;
+  margin: 8px !important;
+  width: calc(100% - 16px) !important;
   outline: none !important;
   box-sizing: border-box !important;
+  color: #1e293b !important;
+}
+
+.intl-tel-wrapper .iti__search-input::placeholder {
+  color: #94a3b8 !important;
 }
 
 .intl-tel-wrapper .iti__search-input:focus {
@@ -402,37 +458,70 @@ watch(
 }
 
 .intl-tel-wrapper .iti__country-list {
-  max-height: 240px !important;
+  max-height: 230px !important;
   overflow-y: auto !important;
   list-style: none !important;
-  padding: 0 !important;
+  padding: 2px 4px 6px 4px !important;
   margin: 0 !important;
 }
 
+/* 统一单项排版：国旗(左) + 国家名称(中) + 国际区号(右侧对齐，消除空白断层) */
 .intl-tel-wrapper .iti__country {
-  padding: 7px 10px !important;
+  padding: 0 12px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   font-size: 13px !important;
   color: #334155 !important;
-  transition: background-color 0.15s !important;
+  border-radius: 6px !important;
+  margin: 1px 4px !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 10px !important;
 }
 
-.intl-tel-wrapper .iti__country:hover {
-  background-color: #f1f5f9 !important;
-}
-
+.intl-tel-wrapper .iti__country:hover,
 .intl-tel-wrapper .iti__country.iti__highlight {
-  background-color: #eff6ff !important;
-  color: #1d4ed8 !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
-.intl-tel-wrapper .iti__dial-code {
-  color: #94a3b8 !important;
+.intl-tel-wrapper .iti__country[aria-selected="true"] {
+  background-color: #e6f4ff !important;
+  color: #1677ff !important;
+}
+
+.intl-tel-wrapper .iti__country .iti__flag {
+  order: 1 !important;
+  margin-right: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.intl-tel-wrapper .iti__country .iti__country-name {
+  order: 2 !important;
+  flex: 1 1 auto !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #1e293b !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin-left: 0 !important;
+}
+
+.intl-tel-wrapper .iti__country .iti__dial-code {
+  order: 3 !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   font-size: 12px !important;
-  margin-left: auto !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  text-align: right !important;
+}
+
+.intl-tel-wrapper .iti__country[aria-selected="true"] .iti__dial-code {
+  color: #1677ff !important;
 }
 
 /* 右侧独立号码输入方框 (标准 32px 高度，重置 iti 原生左侧 padding) */

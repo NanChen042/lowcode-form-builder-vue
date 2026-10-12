@@ -29,18 +29,8 @@ export const defaultCountryOptions: FormElementOption[] = fullCountryOptions;
 export const defaultNationalityOptions: FormElementOption[] = fullNationalityOptions;
 
 import {
-  allCountryPhoneRules,
-  getCountryPhoneRule,
-  validatePhoneNumber as validatePhoneNumberRule,
-  type CountryPhoneRule
+  validatePhoneNumber as validatePhoneNumberRule
 } from './phoneRules';
-
-export type DialCodeOption = CountryPhoneRule;
-export const defaultDialCodeOptions = allCountryPhoneRules;
-
-export function getDialCodeOption(codeOrDialCode?: string): CountryPhoneRule {
-  return getCountryPhoneRule(codeOrDialCode);
-}
 
 export function validatePhoneNumber(
   dialCode: string,

@@ -18,10 +18,13 @@ export interface IntlTelInputInstance {
 export interface IntlTelInputOptions {
   initialCountry?: string;
   preferredCountries?: string[];
+  countryOrder?: string[];
   onlyCountries?: string[];
   autoPlaceholder?: 'aggressive' | 'polite' | 'off';
   separateDialCode?: boolean;
   validationNumberType?: string;
+  nationalMode?: boolean;
+  autoInsertDialCode?: boolean;
   countrySearch?: boolean;
   i18n?: Record<string, string>;
 }

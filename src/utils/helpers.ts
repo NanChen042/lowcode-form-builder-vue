@@ -24,6 +24,8 @@ const COMPONENT_HEIGHT_MAP: Record<string, number> = {
   date: 88,
   country: 88,
   nationality: 88,
+  phone: 88,
+  email: 88,
   textarea: 124,
   radio: 108,
   checkbox: 108,

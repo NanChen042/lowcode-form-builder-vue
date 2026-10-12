@@ -14,7 +14,7 @@
             field="option"
             :option-index="idx"
             custom-class="option-text signature-declaration-text text-[13px] text-slate-700 leading-5 flex-1"
-            @update:model-value="(val) => handleOptionUpdate(opt, val)"
+            @update:model-value="(val) => setOptionLabel(opt, val)"
           />
         </div>
       </div>
@@ -28,7 +28,7 @@
           :element-id="element.id"
           field="placeholder"
           custom-class="signature-pad-text text-xs text-slate-600 font-medium"
-          @update:model-value="handlePlaceholderUpdate"
+          @update:model-value="(val) => setFieldText(element, 'placeholder', val)"
         />
       </div>
 
@@ -52,30 +52,12 @@
 </template>
 
 <script setup lang="ts">
-import type { FormElement, FormElementOption } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
-import { t, getFieldText, getOptionLabel } from '@/core/i18n';
+import type { FormElement } from '@/types/schema';
+import { store } from '@/core/store';
+import { t, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 import { Eraser, PenLine } from '@lucide/vue';
 
-const props = defineProps<{ element: FormElement }>();
-
-function handlePlaceholderUpdate(val: string) {
-  if (store.currentLocale === 'en') {
-    props.element.placeholder_en = val;
-  } else {
-    props.element.placeholder = val;
-  }
-  markDirty();
-}
-
-function handleOptionUpdate(opt: FormElementOption, val: string) {
-  if (store.currentLocale === 'en') {
-    opt.label_en = val;
-  } else {
-    opt.label = val;
-  }
-  markDirty();
-}
+defineProps<{ element: FormElement }>();
 </script>

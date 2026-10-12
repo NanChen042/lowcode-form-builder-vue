@@ -127,6 +127,39 @@ body {
     background-color: #ffffff !important;
 }
 
+/* 对齐 algo 规范的表单控件错误高亮态 (精准作用于控件自身，柔和微红边框与微光晕) */
+.arco-input-wrapper.arco-input-error,
+.arco-textarea-wrapper.arco-textarea-error,
+.arco-select-view.arco-select-view-error,
+.arco-picker.arco-picker-error,
+.intl-tel-wrapper.has-error input.iti__tel-input {
+    border-color: #f87171 !important;
+    background-color: rgba(254, 242, 242, 0.45) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) !important;
+}
+
+.arco-input-wrapper.arco-input-error:hover,
+.arco-textarea-wrapper.arco-textarea-error:hover,
+.arco-select-view.arco-select-view-error:hover,
+.arco-picker.arco-picker-error:hover,
+.intl-tel-wrapper.has-error input.iti__tel-input:hover {
+    border-color: #ef4444 !important;
+}
+
+.arco-input-wrapper.arco-input-error.arco-input-focus,
+.arco-input-wrapper.arco-input-error:focus-within,
+.arco-textarea-wrapper.arco-textarea-error.arco-textarea-focus,
+.arco-textarea-wrapper.arco-textarea-error:focus-within,
+.arco-select-view.arco-select-view-error.arco-select-view-focus,
+.arco-select-view.arco-select-view-error:focus-within,
+.arco-picker.arco-picker-error.arco-picker-focused,
+.arco-picker.arco-picker-error:focus-within,
+.intl-tel-wrapper.has-error input.iti__tel-input:focus {
+    border-color: #ef4444 !important;
+    background-color: rgba(254, 242, 242, 0.55) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+}
+
 /* 统一输入框与下拉框内部文字与占位符均为 13px 细腻排版 */
 .arco-input,
 .arco-textarea,
@@ -182,14 +215,39 @@ body {
     height: auto !important;
 }
 
-/* 统一侧边栏与属性面板输入框高度与标签字体大小规范 (32px 紧凑专业高度，12px 标签字体) */
-#prop-editor .arco-input-wrapper,
+/* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (32px 紧凑专业高度，12px 标签字体) */
+#prop-editor .arco-input-wrapper:not(.sub-input-mini),
 #prop-editor .arco-picker,
 #page-prop-editor .arco-input-wrapper,
 .sidebar-search-box {
     height: 32px !important;
     min-height: 32px !important;
     font-size: 13px !important;
+}
+
+/* 二级展开校验提示输入框专属规范 (mini: 24px 高度，11px 精致文字与占位符) */
+#prop-editor .sub-input-mini.arco-input-wrapper,
+#prop-editor .sub-input-mini .arco-input-wrapper,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) {
+    height: 24px !important;
+    min-height: 24px !important;
+    font-size: 11px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    border-radius: 4px !important;
+}
+
+#prop-editor .sub-input-mini input,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input {
+    font-size: 11px !important;
+    height: 22px !important;
+    line-height: 22px !important;
+}
+
+#prop-editor .sub-input-mini input::placeholder,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input::placeholder {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
 }
 
 #prop-editor .arco-select-view {
@@ -1230,14 +1288,13 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 .arco-modal-footer {
-    padding: 10px 16px !important;
-    border-top: 1px solid #f1f5f9 !important;
-    background-color: #fafafa !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    flex-direction: row-reverse !important;
-    gap: 8px !important;
-    align-items: center !important;
+    padding: 10px 16px;
+    border-top: 1px solid #f1f5f9;
+
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 8px;
+    align-items: center;
 }
 
 .arco-modal-footer .arco-btn {
@@ -1283,6 +1340,18 @@ body.is-dragging-component .canvas-element .field-help {
     gap: 8px !important;
     align-items: center !important;
 }
+
+/* 选项配置拖拽排序行外边框与焦点抑制 */
+.option-row,
+.option-row:focus,
+.option-row:focus-visible,
+.option-row:active,
+.option-sortable-drag,
+.option-sortable-chosen,
+.option-sortable-fallback {
+    outline: none !important;
+}
+
 
 
 

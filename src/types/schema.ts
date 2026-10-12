@@ -50,6 +50,11 @@ export interface FormElement {
   maxSelections?: number | null;
   layout?: 'inline' | 'stack';
   declarationRequired?: boolean;
+  // 自定义校验错误提示 (中英双语)
+  customErrorMessage?: string;
+  customErrorMessage_en?: string;
+  declarationErrorMessage?: string;
+  declarationErrorMessage_en?: string;
 }
 
 export interface FormPage {

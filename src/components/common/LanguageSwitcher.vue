@@ -60,11 +60,9 @@ import { IconLanguage, IconDown, IconCheck } from '@arco-design/web-vue/es/icon'
 
 withDefaults(
   defineProps<{
-    size?: 'small' | 'medium';
     customClass?: string;
   }>(),
   {
-    size: 'small',
     customClass: ''
   }
 );

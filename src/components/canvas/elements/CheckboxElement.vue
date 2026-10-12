@@ -17,7 +17,7 @@
           field="option"
           :option-index="idx"
           custom-class="option-text text-sm text-slate-700"
-          @update:model-value="(val) => handleOptionUpdate(opt, val)"
+          @update:model-value="(val) => setOptionLabel(opt, val)"
         />
       </div>
     </div>
@@ -25,10 +25,10 @@
 </template>
 
 <script setup lang="ts">
-import type { FormElement, FormElementOption } from '@/types/schema';
+import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { store, markDirty } from '@/core/store';
-import { getOptionLabel } from '@/core/i18n';
+import { getOptionLabel, setOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
@@ -51,15 +51,6 @@ function toggleDefaultCheckbox(optValue: string) {
     }
   }
   props.element.defaultValue = stringifyMultiValue(current);
-  markDirty();
-}
-
-function handleOptionUpdate(opt: FormElementOption, val: string) {
-  if (store.currentLocale === 'en') {
-    opt.label_en = val;
-  } else {
-    opt.label = val;
-  }
   markDirty();
 }
 </script>

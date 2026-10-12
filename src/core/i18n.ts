@@ -1,15 +1,10 @@
 import { computed } from 'vue';
-import { store } from './store';
+import { store, markDirty } from './store';
 import type { FormElement, FormElementOption } from '@/types/schema';
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
 
 export type Locale = 'zh' | 'en';
-
-export const arcoLocales = {
-  zh: zhCN,
-  en: enUS
-};
 
 /**
  * Arco 官方组件库全局当前语言包（响应式联动）
@@ -86,6 +81,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.signatureRequiredTip': '开启后，用户必须在手写感应板中签名。',
     'prop.declarationRequired': '声明条款必填',
     'prop.declarationRequiredTip': '开启后，用户必须勾选同意所有声明复选条款才能提交表单。',
+    'prop.customErrorMsg': '未填校验提示',
+    'prop.customErrorMsgTip': '当用户未填写该必填项时展示的错误提示文字。留空则自动使用智能默认文案。',
+    'prop.signatureErrorMsg': '未签名提示',
+    'prop.signatureErrorMsgTip': '当用户未在签名板完成手写签名时的提示文字。留空则自动使用智能默认文案。',
+    'prop.declarationErrorMsg': '未同意声明提示',
+    'prop.declarationErrorMsgTip': '当用户未勾选同意声明时的提示文字。留空则自动使用智能默认文案“请先同意声明”。',
     'prop.placeholder': '占位提示',
     'prop.placeholderPrefixEn': '',
     'prop.placeholderSuffixEn': '',
@@ -251,6 +252,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.signatureRequiredTip': 'When enabled, user must sign in the signature pad.',
     'prop.declarationRequired': 'Declarations Required',
     'prop.declarationRequiredTip': 'When enabled, user must agree to all declarations.',
+    'prop.customErrorMsg': 'Validation Message',
+    'prop.customErrorMsgTip': 'Error prompt displayed when this required field is empty. Leave blank to use smart default message.',
+    'prop.signatureErrorMsg': 'Missing Signature Message',
+    'prop.signatureErrorMsgTip': 'Error prompt displayed when signature is missing. Leave blank to use smart default message.',
+    'prop.declarationErrorMsg': 'Declaration Error Message',
+    'prop.declarationErrorMsgTip': 'Error prompt displayed when declarations are not agreed. Leave blank to use smart default "Please agree to the declarations first".',
     'prop.placeholder': 'Placeholder',
     'prop.placeholderPrefixEn': '',
     'prop.placeholderSuffixEn': '',
@@ -401,35 +408,125 @@ export function getPageText(
   const current = locale || store.currentLocale || 'zh';
   if (current === 'en') {
     const enVal = (page as any)[`${field}_en`];
-    return enVal !== undefined && enVal !== '' ? enVal : ((page as any)[field] || '');
+    if (enVal !== undefined && typeof enVal === 'string' && enVal.trim() !== '') {
+      return enVal;
+    }
+    const zhVal = (page as any)[field] || '';
+    if (field === 'title' && zhVal) {
+      // 智能识别匹配中文默认标题格式（如 "第 2 页"、"第2页"、"第 10 页" 等）并自动转换为 "Page N"
+      const matchNum = zhVal.match(/^第\s*(\d+)\s*页$/);
+      if (matchNum) {
+        return `Page ${matchNum[1]}`;
+      }
+      const zhNumMap: Record<string, number> = {
+        '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+        '六': 6, '七': 7, '八': 8, '九': 9, '十': 10
+      };
+      const matchCn = zhVal.match(/^第\s*([一二三四五六七八九十]+)\s*页$/);
+      if (matchCn && zhNumMap[matchCn[1]]) {
+        return `Page ${zhNumMap[matchCn[1]]}`;
+      }
+    }
+    return zhVal;
   }
   return (page as any)[field] || '';
 }
 
 /**
- * 一键复制组件中文配置到英文字段
+ * 统一设置组件多语言文本并标记变更
  */
-export function copyChineseToEnglish(element: FormElement) {
-  element.label_en = element.label || '';
-  if (element.placeholder !== undefined) {
-    element.placeholder_en = element.placeholder;
+export function setFieldText(
+  element: FormElement,
+  field: 'label' | 'placeholder' | 'help',
+  val: string
+) {
+  if (store.currentLocale === 'en') {
+    (element as any)[`${field}_en`] = val;
+  } else {
+    element[field] = val;
   }
-  if (element.help !== undefined) {
-    element.help_en = element.help;
+  markDirty();
+}
+
+/**
+ * 统一设置选项多语言文本并标记变更
+ */
+export function setOptionLabel(
+  option: FormElementOption,
+  val: string
+) {
+  if (store.currentLocale === 'en') {
+    option.label_en = val;
+  } else {
+    option.label = val;
   }
-  if (element.options) {
-    element.options.forEach(opt => {
-      opt.label_en = opt.label;
-    });
+  markDirty();
+}
+
+/**
+ * 获取字段在当前语言下的智能默认/兜底错误提示文字
+ */
+export function getFieldDefaultErrorMessage(
+  element: FormElement,
+  subType?: 'declaration' | 'signature',
+  locale?: Locale
+): string {
+  const current = locale || store.currentLocale || 'zh';
+  const isEn = current === 'en';
+
+  if (subType === 'declaration') {
+    return isEn ? 'Please agree to the declarations first' : '请先同意声明';
+  }
+
+  const label = isEn
+    ? (element.label_en || element.label || 'this field')
+    : (element.label || '此项');
+
+  switch (element.type) {
+    case 'input':
+    case 'textarea':
+      return isEn ? `Please enter ${label}` : `请输入${label}`;
+    case 'select':
+    case 'country':
+    case 'nationality':
+    case 'date':
+      return isEn ? `Please select ${label}` : `请选择${label}`;
+    case 'radio':
+      return isEn ? `Please select an option for ${label}` : `请选择一项${label}`;
+    case 'checkbox':
+      return isEn ? `Please select at least one option for ${label}` : `请至少选择一项${label}`;
+    case 'signature':
+      return isEn ? 'Please sign in the designated area' : '请在指定区域完成手写签名';
+    case 'phone':
+      return isEn ? 'Please enter phone number' : '请输入手机号码';
+    case 'email':
+      return isEn ? 'Please enter email' : '请输入邮箱地址';
+    default:
+      return isEn ? 'This field is required' : '此项为必填项';
   }
 }
 
 /**
- * 一键复制页面中文配置到英文字段
+ * 解析字段的有效校验错误提示（三级降级：用户自定义 > 智能语义兜底 > 系统通用兜底）
  */
-export function copyPageChineseToEnglish(page: { title: string; title_en?: string; description?: string; description_en?: string }) {
-  page.title_en = page.title || '';
-  if (page.description !== undefined) {
-    page.description_en = page.description;
+export function getFieldValidationMessage(
+  element: FormElement,
+  subType?: 'declaration' | 'signature',
+  locale?: Locale
+): string {
+  const current = locale || store.currentLocale || 'zh';
+  const isEn = current === 'en';
+
+  if (subType === 'declaration') {
+    if (isEn && element.declarationErrorMessage_en) return element.declarationErrorMessage_en;
+    if (!isEn && element.declarationErrorMessage) return element.declarationErrorMessage;
+    return getFieldDefaultErrorMessage(element, 'declaration', current);
   }
+
+  // 第一优先级：用户配置的自定义提示
+  if (isEn && element.customErrorMessage_en) return element.customErrorMessage_en;
+  if (!isEn && element.customErrorMessage) return element.customErrorMessage;
+
+  // 第二优先级：组件语义化智能兜底
+  return getFieldDefaultErrorMessage(element, subType, current);
 }

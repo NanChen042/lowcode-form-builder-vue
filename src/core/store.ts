@@ -69,14 +69,9 @@ export const store = reactive({
   rightSidebarVisible: true,
   leftSidebarWidth: 300,
   rightSidebarWidth: 300,
-  isLeftSidebarHovered: false,
-  isRightSidebarHovered: false,
 
   // 国际化语言环境
-  currentLocale: 'zh' as 'zh' | 'en',
-
-  // 测量占位高度
-  dragPlaceholderHeight: null as number | null
+  currentLocale: 'zh' as 'zh' | 'en'
 });
 
 // 计算属性：当前选中的元素或画板页面
@@ -166,37 +161,18 @@ export function createElement(type: ComponentType): FormElement {
   const id = `cmp_${getUniqueId()}`;
   const defaultData = meta ? meta.defaultData() : {};
 
-  const el: FormElement = {
+  return {
     id,
     type,
-    label: defaultData.label || '未命名字段',
-    label_en: defaultData.label_en || '',
     key: makeFieldKey(type, id),
-    required: defaultData.required !== undefined ? defaultData.required : true,
-    showLabel: defaultData.showLabel !== false,
-    placeholder: defaultData.placeholder,
-    placeholder_en: defaultData.placeholder_en || '',
-    help: defaultData.help,
-    help_en: defaultData.help_en || '',
-    helpPosition: defaultData.helpPosition || 'right',
-    defaultValue: defaultData.defaultValue,
-    inputType: defaultData.inputType,
-    dialCode: defaultData.dialCode,
-    countryCode: defaultData.countryCode,
-    strictPhoneValidation: defaultData.strictPhoneValidation,
-    options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined,
-    multiple: defaultData.multiple,
-    dateType: defaultData.dateType,
-    dateMode: defaultData.dateMode,
-    enableLongTerm: defaultData.enableLongTerm,
-    defaultLongTerm: defaultData.defaultLongTerm,
-    endValue: defaultData.endValue,
-    maxSelections: defaultData.maxSelections,
-    layout: defaultData.layout,
-    declarationRequired: defaultData.declarationRequired
+    label: '未命名字段',
+    label_en: '',
+    required: true,
+    showLabel: true,
+    helpPosition: 'right',
+    ...defaultData,
+    options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
   };
-
-  return el;
 }
 
 export function addElement(type: ComponentType, targetPageId?: string) {
@@ -249,8 +225,7 @@ export function duplicateElement(elementId: string) {
     const res = findElementParentAndIndex(page.fields, elementId);
     if (res) {
       const original = res.parentArray[res.index];
-      const cloneStr = JSON.stringify(original);
-      const cloneObj: FormElement = JSON.parse(cloneStr);
+      const cloneObj: FormElement = structuredClone(original);
 
       const newId = `cmp_${getUniqueId()}`;
       cloneObj.id = newId;
@@ -298,10 +273,13 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
     }
   }
 
+  const pageNumber = store.pages.length + 1;
   const newPage: FormPage = {
     id: newId,
-    title: `第 ${store.pages.length + 1} 页`,
+    title: `第 ${pageNumber} 页`,
+    title_en: `Page ${pageNumber}`,
     description: '',
+    description_en: '',
     fields: [],
     x,
     y
@@ -327,14 +305,17 @@ export function deletePage(pageId: string) {
   const idx = store.pages.findIndex(p => p.id === pageId);
   if (idx === -1) return;
 
+  // 第一页不允许删除（保护第一页为默认通用画布）
+  if (idx === 0) return;
+
   if (store.selectedId === pageId) {
     clearSelection();
   }
 
   store.pages.splice(idx, 1);
 
-  // 重新排列后续画板
-  for (let i = 1; i < store.pages.length; i++) {
+  // 重新排列被删除画板之后的后续画板
+  for (let i = idx; i < store.pages.length; i++) {
     store.pages[i].x = store.pages[i - 1].x + PAGE_WIDTH + PAGE_GAP;
   }
 
@@ -499,18 +480,17 @@ export function loadSchema(schema: FormSchema) {
     store.pages = schema.pages.map((p, idx) => ({
       id: p.id || `page_${Date.now()}_${idx}`,
       title: p.title || `第 ${idx + 1} 页`,
-      title_en: p.title_en || '',
+      title_en: p.title_en || (p.title ? (p.title.match(/^第\s*(\d+)\s*页$/) ? `Page ${p.title.match(/^第\s*(\d+)\s*页$/)![1]}` : `Page ${idx + 1}`) : `Page ${idx + 1}`),
       description: p.description || '',
       description_en: p.description_en || '',
       fields: (p.fields || []).map(f => {
         const meta = componentRegistry[f.type];
         const defaultData = meta ? meta.defaultData() : {};
-        const parsed = JSON.parse(JSON.stringify(f));
         return {
           ...defaultData,
-          ...parsed,
-          options: parsed.options && parsed.options.length
-            ? parsed.options
+          ...f,
+          options: f.options && f.options.length
+            ? f.options
             : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined)
         };
       }),

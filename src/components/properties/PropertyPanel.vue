@@ -8,8 +8,6 @@
     :style="{
       width: store.rightSidebarVisible ? `${store.rightSidebarWidth}px` : '0px'
     }"
-    @mouseenter="store.isRightSidebarHovered = true"
-    @mouseleave="store.isRightSidebarHovered = false"
   >
     <!-- 左侧可拖拽拉伸边框把手 (Min: 260px, Max: 520px, Default: 300px) -->
     <div
@@ -141,7 +139,12 @@
           </template>
 
           <div class="pt-3 border-t border-slate-100">
-            <a-popconfirm :content="store.currentLocale === 'en' ? 'Are you sure you want to delete this canvas page? This cannot be undone.' : '确定要删除当前画布页面吗？此操作不可撤销。'" type="warning" @ok="handleDeletePage">
+            <a-popconfirm
+              v-if="!isFirstPage"
+              :content="store.currentLocale === 'en' ? 'Are you sure you want to delete this canvas page? This cannot be undone.' : '确定要删除当前画布页面吗？此操作不可撤销。'"
+              type="warning"
+              @ok="handleDeletePage"
+            >
               <a-button status="danger" long size="small">
                 <template #icon>
                   <Trash2 class="h-3.5 w-3.5" />
@@ -149,6 +152,14 @@
                 {{ t('prop.deletePage') }}
               </a-button>
             </a-popconfirm>
+            <a-tooltip v-else :content="store.currentLocale === 'en' ? 'The first page cannot be deleted' : '第一页为默认通用画布，不可删除'" position="top">
+              <a-button disabled long size="small">
+                <template #icon>
+                  <Trash2 class="h-3.5 w-3.5" />
+                </template>
+                {{ t('prop.deletePage') }}
+              </a-button>
+            </a-tooltip>
           </div>
         </a-form>
       </div>
@@ -352,6 +363,51 @@
               <a-switch v-model="isElementRequired" size="small" />
             </div>
 
+            <!-- 必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格) -->
+            <transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <div
+                v-if="selectedElement.type !== 'alert' && isElementRequired"
+                class="ml-2 pl-3 my-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5">
+                    <MessageSquare class="w-3.5 h-3.5 text-slate-400 group-hover:text-[#1677ff] transition-colors shrink-0" />
+                    <span class="text-[11px] font-medium text-slate-600">
+                      {{ selectedElement.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg') }}
+                    </span>
+                  </div>
+                  <a-tooltip :content="selectedElement.type === 'signature' ? t('prop.signatureErrorMsgTip') : t('prop.customErrorMsgTip')" position="top">
+                    <HelpCircle class="h-3 w-3 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+                <a-input
+                  v-if="store.currentLocale === 'en'"
+                  v-model="selectedElement.customErrorMessage_en"
+                  size="mini"
+                  allow-clear
+                  class="sub-input-mini"
+                  :placeholder="customErrorPlaceholderEn"
+                  @input="markDirty"
+                />
+                <a-input
+                  v-else
+                  v-model="selectedElement.customErrorMessage"
+                  size="mini"
+                  allow-clear
+                  class="sub-input-mini"
+                  :placeholder="customErrorPlaceholderZh"
+                  @input="markDirty"
+                />
+              </div>
+            </transition>
+
             <div v-if="selectedElement.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
                 <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
@@ -361,6 +417,51 @@
               </div>
               <a-switch v-model="isDeclarationRequired" size="small" />
             </div>
+
+            <!-- 签名组件声明必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格) -->
+            <transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-1"
+            >
+              <div
+                v-if="selectedElement.type === 'signature' && isDeclarationRequired"
+                class="ml-2 pl-3 my-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5">
+                    <MessageSquare class="w-3.5 h-3.5 text-slate-400 group-hover:text-[#1677ff] transition-colors shrink-0" />
+                    <span class="text-[11px] font-medium text-slate-600">
+                      {{ t('prop.declarationErrorMsg') }}
+                    </span>
+                  </div>
+                  <a-tooltip :content="t('prop.declarationErrorMsgTip')" position="top">
+                    <HelpCircle class="h-3 w-3 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+                <a-input
+                  v-if="store.currentLocale === 'en'"
+                  v-model="selectedElement.declarationErrorMessage_en"
+                  size="mini"
+                  allow-clear
+                  class="sub-input-mini"
+                  :placeholder="declarationErrorPlaceholderEn"
+                  @input="markDirty"
+                />
+                <a-input
+                  v-else
+                  v-model="selectedElement.declarationErrorMessage"
+                  size="mini"
+                  allow-clear
+                  class="sub-input-mini"
+                  :placeholder="declarationErrorPlaceholderZh"
+                  @input="markDirty"
+                />
+              </div>
+            </transition>
 
             <div v-if="['select', 'country', 'nationality'].includes(selectedElement.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
@@ -389,7 +490,6 @@
                 :max="20"
                 size="small"
                 style="width: 100px"
-                @change="onMaxSelectionsChange"
               />
             </div>
 
@@ -469,12 +569,14 @@
                   :value="item.iso2"
                   :label="`${item.code} ${store.currentLocale === 'en' ? item.name : item.zh}`"
                 >
-                  <div class="flex items-center gap-2.5 w-full text-xs font-sans pr-5">
-                    <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
-                    <span class="font-mono font-medium text-slate-800 w-12 shrink-0">{{ item.code }}</span>
-                    <span class="text-slate-700 font-sans text-xs whitespace-nowrap">
-                      {{ store.currentLocale === 'en' ? item.name : item.zh }}
-                    </span>
+                  <div class="flex items-center justify-between w-full text-xs font-sans py-0.5">
+                    <div class="flex items-center gap-2 min-w-0 flex-1 mr-2.5">
+                      <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
+                      <span class="text-slate-800 font-sans text-xs truncate">
+                        {{ store.currentLocale === 'en' ? item.name : item.zh }}
+                      </span>
+                    </div>
+                    <span class="font-mono font-medium text-slate-400 shrink-0 text-right">{{ item.code }}</span>
                   </div>
                 </a-option>
               </a-select>
@@ -673,7 +775,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import {
   store,
   selectedElement,
@@ -683,9 +785,10 @@ import {
   duplicateElement,
   deleteElement
 } from '@/core/store';
-import { t } from '@/core/i18n';
+import { t, getFieldDefaultErrorMessage } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
-import { countryPhoneRules } from '@/registry/phoneRules';
+import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
+import { useSidebarResize } from '@/utils/useSidebarResize';
 import OptionsEditor from './OptionsEditor.vue';
 import CountryDirectoryModal from './CountryDirectoryModal.vue';
 import {
@@ -696,7 +799,8 @@ import {
   Globe,
   PanelRight,
   CornerDownRight,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from '@lucide/vue';
 
 // 全球国家/国籍/区号统一预设清单弹窗状态
@@ -706,26 +810,27 @@ function openCountryListModal() {
   isCountryListModalVisible.value = true;
 }
 
+const isFirstPage = computed(() => {
+  if (!selectedPage.value) return false;
+  return store.pages.findIndex((p) => p.id === selectedPage.value!.id) === 0;
+});
+
 const selectedCountryIso = computed(() => {
   if (!selectedElement.value) return 'sg';
   if (selectedElement.value.countryCode) return selectedElement.value.countryCode.toLowerCase();
   if (selectedElement.value.dialCode) {
-    const rule = countryPhoneRules.find((r) => r.code === selectedElement.value?.dialCode);
-    if (rule) return rule.iso2;
+    return getCountryPhoneRule(selectedElement.value.dialCode).iso2;
   }
   return 'sg';
 });
 
 function getCountryCodeByIso(iso?: string): string {
-  if (!iso) return '+65';
-  const rule = countryPhoneRules.find((r) => r.iso2.toLowerCase() === String(iso).toLowerCase());
-  return rule ? rule.code : '+65';
+  return getCountryPhoneRule(iso).code;
 }
 
 function getCountryNameByIso(iso?: string): string {
   if (!iso) return store.currentLocale === 'en' ? 'Singapore' : '新加坡';
-  const rule = countryPhoneRules.find((r) => r.iso2.toLowerCase() === String(iso).toLowerCase());
-  if (!rule) return '';
+  const rule = getCountryPhoneRule(iso);
   return store.currentLocale === 'en' ? rule.name : rule.zh;
 }
 
@@ -734,45 +839,22 @@ function onCountryIsoChange(iso: any) {
     markDirty();
     return;
   }
-  const isoStr = String(iso).toLowerCase();
-  const rule = countryPhoneRules.find((r) => r.iso2.toLowerCase() === isoStr);
-  if (rule) {
-    selectedElement.value.countryCode = rule.iso2;
-    selectedElement.value.dialCode = rule.code;
-  } else {
-    selectedElement.value.countryCode = isoStr;
-  }
+  const rule = getCountryPhoneRule(String(iso));
+  selectedElement.value.countryCode = rule.iso2;
+  selectedElement.value.dialCode = rule.code;
   markDirty();
 }
 
 // 侧边栏拖拽拉伸
-const isResizing = ref(false);
-
-function startResize(e: MouseEvent) {
-  isResizing.value = true;
-  const startX = e.clientX;
-  const startWidth = store.rightSidebarWidth;
-
-  const onMouseMove = (moveEvent: MouseEvent) => {
-    // 拖向左侧增加宽度，拖向右侧减小宽度
-    const deltaX = moveEvent.clientX - startX;
-    const newWidth = Math.max(260, Math.min(520, startWidth - deltaX));
-    store.rightSidebarWidth = Math.round(newWidth);
-  };
-
-  const onMouseUp = () => {
-    isResizing.value = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-
-  document.body.style.cursor = 'col-resize';
-  document.body.style.userSelect = 'none';
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
-}
+const { isResizing, startResize } = useSidebarResize({
+  getWidth: () => store.rightSidebarWidth,
+  setWidth: (newWidth) => {
+    store.rightSidebarWidth = newWidth;
+  },
+  min: 260,
+  max: 520,
+  direction: 'left'
+});
 
 const headerBadgeText = computed(() => {
   if (store.selectedType === 'page') return store.selectedId || t('prop.page');
@@ -844,6 +926,26 @@ const isDeclarationRequired = computed({
   }
 });
 
+const customErrorPlaceholderZh = computed(() => {
+  if (!selectedElement.value) return '';
+  return `默认：${getFieldDefaultErrorMessage(selectedElement.value, undefined, 'zh')}`;
+});
+
+const customErrorPlaceholderEn = computed(() => {
+  if (!selectedElement.value) return '';
+  return `Default: ${getFieldDefaultErrorMessage(selectedElement.value, undefined, 'en')}`;
+});
+
+const declarationErrorPlaceholderZh = computed(() => {
+  if (!selectedElement.value) return '';
+  return `默认：${getFieldDefaultErrorMessage(selectedElement.value, 'declaration', 'zh')}`;
+});
+
+const declarationErrorPlaceholderEn = computed(() => {
+  if (!selectedElement.value) return '';
+  return `Default: ${getFieldDefaultErrorMessage(selectedElement.value, 'declaration', 'en')}`;
+});
+
 const isSelectMultiple = computed({
   get() {
     return Boolean(selectedElement.value?.multiple);
@@ -870,21 +972,6 @@ const isStrictPhoneValidation = computed({
     }
   }
 });
-
-watch(
-  () => selectedElement.value,
-  (el) => {
-    if (el && el.type === 'phone') {
-      if (!el.dialCode) {
-        el.dialCode = '+65';
-      }
-      if (!el.countryCode) {
-        el.countryCode = 'sg';
-      }
-    }
-  },
-  { immediate: true }
-);
 
 const hasPlaceholder = computed(() => {
   if (!selectedElement.value) return false;
@@ -950,13 +1037,6 @@ const currentMaxSelections = computed<number>({
   }
 });
 
-function onMaxSelectionsChange(val: number | undefined) {
-  if (selectedElement.value && val !== undefined) {
-    selectedElement.value.maxSelections = val;
-    markDirty();
-  }
-}
-
 function isFieldFocused(field: 'label' | 'placeholder' | 'help' | 'default') {
   if (!store.focusedTarget || !selectedElement.value) return false;
   return (
@@ -1015,26 +1095,23 @@ function handleDeletePage() {
   width: 100% !important;
 }
 
-/* 默认国际区号下拉悬浮层宽度跟随选项内容自适应延伸，彻底杜绝内容挤压与截断 */
+/* 默认国际区号下拉悬浮层规范：国旗与国家名称紧凑在左，区号右对齐 */
 :global(.dial-code-dropdown-popup) {
-  min-width: 280px !important;
-  width: max-content !important;
-  max-width: min(520px, 92vw) !important;
+  min-width: 250px !important;
+  max-width: min(420px, 92vw) !important;
 }
 
 :global(.dial-code-dropdown-popup .arco-select-dropdown) {
-  min-width: 100% !important;
-  width: max-content !important;
-  max-width: 100% !important;
+  width: 100% !important;
 }
 
 :global(.dial-code-dropdown-popup .arco-select-option),
 :global(.dial-code-dropdown-popup .arco-select-option:hover),
 :global(.dial-code-dropdown-popup .arco-select-option.arco-select-option-active),
 :global(.dial-code-dropdown-popup .arco-select-option.arco-select-option-selected) {
-  width: auto !important;
-  min-width: 100% !important;
+  width: 100% !important;
   font-weight: 400 !important;
+  padding: 0 12px !important;
 }
 
 :global(.dial-code-dropdown-popup .arco-select-option *) {
@@ -1046,10 +1123,9 @@ function handleDeletePage() {
 }
 
 :global(.dial-code-dropdown-popup .arco-select-option-content) {
-  width: max-content !important;
-  max-width: none !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-  text-overflow: clip !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  align-items: center !important;
 }
 </style>

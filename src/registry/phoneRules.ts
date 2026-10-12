@@ -1722,7 +1722,17 @@ export const allCountryPhoneRules: CountryPhoneRule[] = [
   }
 ];
 
+/**
+ * 全球国家电话规则库：严格按国家英文名称 A-Z 字母顺序排列 (共 244 个国家/地区)
+ */
 export const countryPhoneRules: CountryPhoneRule[] = allCountryPhoneRules;
+
+/**
+ * 获取给 intl-tel-input 使用的完整国家顺序数组 (严格按 A-Z 字母顺序，与属性面板完全一致)
+ */
+export function getCountryPhoneOrder(): string[] {
+  return allCountryPhoneRules.map((c) => c.iso2);
+}
 
 /**
  * 快速匹配指定国家电话规则 (优先 ISO2 二字码，其次完整区号 +86，纯数字区号 86)
@@ -1747,24 +1757,33 @@ export function getCountryPhoneRule(codeOrDialOrIso?: string): CountryPhoneRule 
 }
 
 /**
- * 获取官方标准手机号码占位示例 (直接调用 Google libphonenumber 规则库动态获取)
+ * 获取官方标准手机号码占位示例 (直接调用 Google libphonenumber 规则库动态获取，与 intlTelInput 分离区号模式一致)
  */
 export function getCountryExampleNumber(codeOrDialOrIso?: string): string {
   const rule = getCountryPhoneRule(codeOrDialOrIso);
   if (typeof window !== 'undefined' && window.intlTelInput?.utils?.getExampleNumber) {
     try {
-      const eg = window.intlTelInput.utils.getExampleNumber(rule.iso2.toLowerCase(), true, 1);
+      // 在分离区号模式下，获取国际号码去掉+区号后的纯号码格式 (如台湾标准显示 912 345 678，新加坡 8123 4567)
+      const egIntl = window.intlTelInput.utils.getExampleNumber(rule.iso2.toLowerCase(), false, 1);
+      if (egIntl) {
+        const cleanCode = rule.code;
+        if (egIntl.startsWith(cleanCode)) {
+          return egIntl.slice(cleanCode.length).trim();
+        }
+      }
+      const eg = window.intlTelInput.utils.getExampleNumber(rule.iso2.toLowerCase(), false, 1);
       if (eg) return eg;
     } catch {}
   }
   if (rule.iso2 === 'cn') return '131 2345 6789';
   if (rule.iso2 === 'sg') return '8123 4567';
+  if (rule.iso2 === 'tw') return '912 345 678';
   if (rule.iso2 === 'us') return '(201) 555-0123';
   return '8123 4567';
 }
 
 /**
- * 校验手机号合法性 (严格国际规则 / 宽松规则，直接调用 Google 官方 libphonenumber 规则库)
+ * 校验手机号合法性 (严格与 algo 系统的 PhoneInput.getValidatedPhoneNumber 保持一致)
  */
 export function validatePhoneNumber(
   dialCodeOrIso: string,
@@ -1787,31 +1806,51 @@ export function validatePhoneNumber(
   // 直接调用 Google 官方 libphonenumber 国际规则库校验
   if (typeof window !== 'undefined' && window.intlTelInput?.utils?.isValidNumber) {
     try {
-      const fullNumber = `${rule.code}${digits}`;
+      // 容错处理：若带有本地前导0 (如台湾 0912...)，尝试去除前导0后校验国际格式
+      const cleanDigits = rule.iso2 === 'tw' && digits.startsWith('0') ? digits.slice(1) : digits;
+      const fullNumber = `${rule.code}${cleanDigits}`;
       const valid =
         window.intlTelInput.utils.isValidNumber(fullNumber, rule.iso2.toLowerCase()) ||
         window.intlTelInput.utils.isValidNumber(digits, rule.iso2.toLowerCase());
       if (valid) {
         return { valid: true, message: '', message_en: '' };
       }
-      const exampleNum = getCountryExampleNumber(rule.iso2);
       return {
         valid: false,
-        message: `请输入有效的${rule.zh}手机号码（示例：${exampleNum}）`,
-        message_en: `Please enter a valid ${rule.name} phone number (e.g. ${exampleNum})`
+        message: '请输入有效的手机号码',
+        message_en: 'Please enter a valid phone number'
       };
     } catch {}
   }
 
   // 基础兜底长度验证 (6-15位国际E.164范围)
   if (digits.length < 6 || digits.length > 15) {
-    const exampleNum = getCountryExampleNumber(rule.iso2);
     return {
       valid: false,
-      message: `请输入有效的${rule.zh}手机号码（示例：${exampleNum}）`,
-      message_en: `Please enter a valid ${rule.name} phone number (e.g. ${exampleNum})`
+      message: '请输入有效的手机号码',
+      message_en: 'Please enter a valid phone number'
     };
   }
 
   return { valid: true, message: '', message_en: '' };
+}
+
+/**
+ * 获取 intl-tel-input v25 原生支持的多语言国家名称与搜索占位符映射
+ */
+export function getCountryI18nMap(locale: 'zh' | 'en'): Record<string, string> {
+  if (locale === 'en') {
+    return {
+      searchPlaceholder: 'Search country or code...'
+    };
+  }
+  const map: Record<string, string> = {
+    searchPlaceholder: '搜索国家或区号...'
+  };
+  for (const rule of allCountryPhoneRules) {
+    if (rule.iso2 && rule.zh) {
+      map[rule.iso2] = rule.zh;
+    }
+  }
+  return map;
 }

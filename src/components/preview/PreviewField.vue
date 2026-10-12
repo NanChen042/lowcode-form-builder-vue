@@ -1,5 +1,10 @@
 <template>
-  <div class="preview-field w-full mb-4.5" :data-type="field.type">
+  <div
+    class="preview-field w-full mb-4.5"
+    :data-type="field.type"
+    :data-error="Boolean(error)"
+    :class="{ 'has-error': Boolean(error) }"
+  >
     <!-- 提示区块 (仅展示无校验) -->
     <template v-if="field.type === 'alert'">
       <div
@@ -75,8 +80,9 @@
         v-else-if="field.type === 'phone'"
         v-model="formData[field.key]"
         v-model:dial-code="phoneDialCode"
-        :country-code="field.countryCode"
-        :custom-placeholder="phonePlaceholder"
+        v-model:country-code="phoneCountryCode"
+        :custom-placeholder="localizedPlaceholder"
+        :custom-error-message="localizedCustomErrorMessage"
         :required="isFieldRequired"
         :strict="field.strictPhoneValidation !== false"
         :error="Boolean(error)"
@@ -201,49 +207,62 @@
         </a-option>
       </a-select>
 
-      <!-- 单选框组 -->
+      <!-- 单选框组 (天然统一排版，与画布一致，杜绝 Arco 内部样式冲突与调换顺序间距塌陷) -->
       <div
         v-else-if="field.type === 'radio'"
-        class="w-full rounded-md transition-all"
-        :class="{ 'p-1.5 border border-red-300 bg-red-50/20': Boolean(error) }"
+        class="w-full py-0.5"
       >
-        <a-radio-group
-          v-model="formData[field.key]"
-          :direction="field.layout === 'stack' ? 'vertical' : 'horizontal'"
-          class="!flex flex-wrap gap-2.5 py-1"
-          @change="handleFieldInput"
+        <div
+          class="choice-group flex flex-wrap"
+          :class="field.layout === 'stack' ? 'flex-col gap-2.5' : 'flex-row gap-x-5 gap-y-2.5'"
         >
-          <a-radio
+          <label
             v-for="(opt, idx) in field.options"
-            :key="idx"
-            :value="opt.value"
+            :key="opt.value || idx"
+            class="inline-flex items-center gap-2 cursor-pointer select-none text-[13px] text-slate-800 group"
+            @click="formData[field.key] = opt.value; handleFieldInput();"
           >
-            {{ getOptionLabel(opt) }}
-          </a-radio>
-        </a-radio-group>
+            <span
+              class="flex items-center justify-center w-4 h-4 rounded-full border transition-all shrink-0"
+              :class="formData[field.key] === opt.value
+                ? 'border-[#1677ff] bg-[#1677ff]'
+                : (error ? 'border-red-400 bg-white group-hover:border-red-500' : 'border-slate-300 bg-white group-hover:border-blue-400')"
+            >
+              <span v-if="formData[field.key] === opt.value" class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            </span>
+            <span>{{ getOptionLabel(opt) }}</span>
+          </label>
+        </div>
       </div>
 
-      <!-- 多选框组 -->
+      <!-- 多选框组 (天然统一排版，与画布一致) -->
       <div
         v-else-if="field.type === 'checkbox'"
-        class="w-full rounded-md transition-all"
-        :class="{ 'p-1.5 border border-red-300 bg-red-50/20': Boolean(error) }"
+        class="w-full py-0.5"
       >
-        <a-checkbox-group
-          v-model="selectedCheckboxTags"
-          :max="field.maxSelections || undefined"
-          :direction="field.layout === 'stack' ? 'vertical' : 'horizontal'"
-          class="!flex flex-wrap gap-2.5 py-1"
-          @change="handleFieldInput"
+        <div
+          class="choice-group flex flex-wrap"
+          :class="field.layout === 'stack' ? 'flex-col gap-2.5' : 'flex-row gap-x-5 gap-y-2.5'"
         >
-          <a-checkbox
+          <label
             v-for="(opt, idx) in field.options"
-            :key="idx"
-            :value="opt.value"
+            :key="opt.value || idx"
+            class="inline-flex items-center gap-2 cursor-pointer select-none text-[13px] text-slate-800 group"
+            @click="toggleCheckbox(opt.value)"
           >
-            {{ getOptionLabel(opt) }}
-          </a-checkbox>
-        </a-checkbox-group>
+            <span
+              class="flex items-center justify-center w-4 h-4 rounded border transition-all shrink-0"
+              :class="selectedTags.includes(opt.value)
+                ? 'border-[#1677ff] bg-[#1677ff] text-white'
+                : (error ? 'border-red-400 bg-white group-hover:border-red-500' : 'border-slate-300 bg-white group-hover:border-blue-400')"
+            >
+              <svg v-if="selectedTags.includes(opt.value)" class="w-2.5 h-2.5 text-white stroke-[2.5]" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>{{ getOptionLabel(opt) }}</span>
+          </label>
+        </div>
       </div>
 
       <!-- 日期选择 -->
@@ -285,27 +304,60 @@
         </div>
       </div>
 
-      <!-- 电子签名 -->
+      <!-- 电子签名 (拼多选声明事项 + 手写签名板，各自下方独立展示校验错误) -->
       <div
         v-else-if="field.type === 'signature'"
-        class="w-full bg-white rounded-lg transition-all"
-        :class="{ 'p-2 border border-red-300 bg-red-50/20': Boolean(error) }"
+        class="w-full bg-white rounded-lg"
       >
         <!-- 声明事项复选 -->
-        <div v-if="field.options && field.options.length" class="space-y-2 mb-3">
+        <div v-if="field.options && field.options.length" class="mb-3">
           <div
-            v-for="(opt, idx) in field.options"
-            :key="idx"
-            class="flex items-start gap-2.5 text-sm text-slate-700"
+            class="space-y-2 rounded-lg transition-all"
+            :class="{ 'p-2 bg-red-50/40 border border-red-300 ring-1 ring-red-300/50': Boolean(declarationError) }"
           >
-            <a-checkbox
-              v-model="declarationChecks[idx]"
-              class="!mt-0.5 flex-shrink-0"
-              @change="onDeclarationChange"
+            <label
+              v-for="(opt, idx) in field.options"
+              :key="opt.value || idx"
+              class="flex items-start gap-2.5 text-sm text-slate-700 cursor-pointer select-none group"
+              @click.prevent="declarationChecks[idx] = !declarationChecks[idx]; onDeclarationChange();"
             >
-              <span class="text-[13px] leading-5 text-slate-700">{{ getOptionLabel(opt) }}</span>
-            </a-checkbox>
+              <span
+                class="mt-0.5 flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-all"
+                :class="declarationChecks[idx]
+                  ? 'border-[#1677ff] bg-[#1677ff] text-white shadow-xs'
+                  : (declarationError ? 'border-red-400 bg-white ring-2 ring-red-100' : 'border-slate-300 bg-white group-hover:border-blue-400')"
+              >
+                <svg v-if="declarationChecks[idx]" class="w-2.5 h-2.5 text-white stroke-[2.5]" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                  <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="flex-1 text-[13px] leading-5 text-slate-700 break-words whitespace-normal font-normal">
+                {{ getOptionLabel(opt) }}
+              </span>
+            </label>
           </div>
+
+          <!-- 声明事项独立校验错误提示 (直接显示在多选条款下方) -->
+          <transition
+            enter-active-class="transition-all duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-100 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
+          >
+            <div
+              v-if="declarationError"
+              class="mt-1.5 pl-0.5 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
+            >
+              <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ declarationError }}</span>
+            </div>
+          </transition>
         </div>
 
         <!-- 签名画板提示 -->
@@ -317,7 +369,11 @@
         <!-- 模拟签名绘制区 -->
         <div
           class="relative h-24 w-full rounded-lg border border-dashed flex items-center justify-center text-xs select-none cursor-pointer transition-all"
-          :class="formData[field.key] ? 'border-emerald-400 bg-emerald-50/40 text-emerald-700 font-serif' : 'border-slate-300 bg-slate-50/80 text-slate-400 hover:border-blue-400'"
+          :class="formData[field.key]
+            ? 'border-emerald-400 bg-emerald-50/40 text-emerald-700 font-serif'
+            : (signatureError
+              ? '!border-red-400 !bg-red-50/45 !shadow-[0_0_0_2px_rgba(239,68,68,0.18)] text-red-500'
+              : 'border-slate-300 bg-slate-50/80 text-slate-400 hover:border-blue-400')"
           @click="toggleSignature"
         >
           <template v-if="formData[field.key]">
@@ -338,9 +394,31 @@
             </span>
           </template>
         </div>
+
+        <!-- 手写签名板独立校验错误提示 (直接显示在签名画板下方) -->
+        <transition
+          enter-active-class="transition-all duration-150 ease-out"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-100 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
+        >
+          <div
+            v-if="signatureError"
+            class="mt-1.5 pl-0.5 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
+          >
+            <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>{{ signatureError }}</span>
+          </div>
+        </transition>
       </div>
 
-      <!-- 统一字段校验错误提示 (除已内嵌提示的 phone 以外) -->
+      <!-- 统一字段校验错误提示 (除已就近展示的 phone 和 signature 以外) -->
       <transition
         enter-active-class="transition-all duration-150 ease-out"
         enter-from-class="opacity-0 -translate-y-1"
@@ -350,7 +428,7 @@
         leave-to-class="opacity-0 -translate-y-1"
       >
         <div
-          v-if="error && field.type !== 'phone'"
+          v-if="error && field.type !== 'phone' && field.type !== 'signature'"
           class="mt-1 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
         >
           <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -373,12 +451,12 @@ import { getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
-import { getCountryExampleNumber } from '@/registry/phoneRules';
 
 const props = defineProps<{
   field: FormElement;
   formData: Record<string, any>;
   error?: string;
+  errors?: Record<string, string>;
 }>();
 
 const emit = defineEmits<{
@@ -389,20 +467,72 @@ function handleFieldInput() {
   emit('clear-error', props.field.key);
 }
 
-// 电话组件交互：优先从 formData 读取已保存区号，默认严格采用新加坡区号 '+65'
-const phoneDialCode = ref(props.formData[`${props.field.key}_areacode`] || props.field.dialCode || '+65');
+const declarationError = computed(() => {
+  if (props.field.type !== 'signature') return '';
+  return props.errors?.[`${props.field.key}_declaration`] || (
+    (props.error && props.field.declarationRequired && !props.formData[`${props.field.key}_declared`])
+      ? props.error
+      : ''
+  );
+});
 
-const phonePlaceholder = computed(() => {
-  if (props.field.type !== 'phone') return '';
-  return getCountryExampleNumber(props.field.countryCode || phoneDialCode.value || props.field.dialCode || '+65');
+const signatureError = computed(() => {
+  if (props.field.type !== 'signature') return '';
+  return props.errors?.[`${props.field.key}_signature`] || (
+    (props.error && props.field.required && !props.formData[props.field.key])
+      ? props.error
+      : ''
+  );
+});
+
+const localizedCustomErrorMessage = computed(() => {
+  if (store.currentLocale === 'en') {
+    return props.field.customErrorMessage_en || props.field.customErrorMessage || '';
+  }
+  return props.field.customErrorMessage || '';
+});
+
+function toggleCheckbox(val: string) {
+  const current = [...selectedTags.value];
+  const idx = current.indexOf(val);
+  if (idx > -1) {
+    current.splice(idx, 1);
+  } else {
+    if (props.field.maxSelections && current.length >= props.field.maxSelections) {
+      return;
+    }
+    current.push(val);
+  }
+  selectedTags.value = current;
+  handleFieldInput();
+}
+
+// 电话组件交互：双向绑定 formData，保持区号与国家代码响应式同步
+const phoneDialCode = computed({
+  get() {
+    return props.formData[`${props.field.key}_areacode`] || props.field.dialCode || '+65';
+  },
+  set(val: string) {
+    props.formData[`${props.field.key}_areacode`] = val;
+  }
+});
+
+const phoneCountryCode = computed({
+  get() {
+    return props.formData[`${props.field.key}_countryCode`] || props.field.countryCode || 'sg';
+  },
+  set(val: string) {
+    props.formData[`${props.field.key}_countryCode`] = val;
+  }
 });
 
 function handlePhoneChange(data: any) {
   if (data.areacode) {
-    phoneDialCode.value = `+${data.areacode}`;
+    props.formData[`${props.field.key}_areacode`] = `+${data.areacode}`;
   }
-  props.formData[`${props.field.key}_areacode`] = data.areacode ? `+${data.areacode}` : phoneDialCode.value;
-  props.formData[`${props.field.key}_countryCode`] = data.countryCode || '';
+  if (data.countryCode) {
+    props.formData[`${props.field.key}_countryCode`] = data.countryCode;
+  }
   props.formData[`${props.field.key}_full`] = data.fullNumber;
   props.formData[`${props.field.key}_valid`] = data.valid;
   props.formData[`${props.field.key}_msg`] = data.message;
@@ -441,19 +571,30 @@ function onDeclarationChange() {
   props.formData[`${props.field.key}_checks`] = { ...declarationChecks };
   const allChecked = (props.field.options || []).every((_, idx) => Boolean(declarationChecks[idx]));
   props.formData[`${props.field.key}_declared`] = allChecked;
-  emit('clear-error', props.field.key);
+  if (allChecked) {
+    if (props.errors) {
+      delete props.errors[`${props.field.key}_declaration`];
+    }
+    if (!signatureError.value) {
+      emit('clear-error', props.field.key);
+    }
+  }
 }
 
 function toggleSignature() {
   if (!props.formData[props.field.key]) {
     props.formData[props.field.key] = 'data:image/svg+xml;signed';
   }
-  emit('clear-error', props.field.key);
+  if (props.errors) {
+    delete props.errors[`${props.field.key}_signature`];
+  }
+  if (!declarationError.value) {
+    emit('clear-error', props.field.key);
+  }
 }
 
 function clearSignature() {
   props.formData[props.field.key] = '';
-  emit('clear-error', props.field.key);
 }
 
 const localizedLabel = computed(() => getFieldText(props.field, 'label'));
@@ -468,16 +609,6 @@ const isFieldRequired = computed(() => {
 });
 
 const selectedTags = computed<string[]>({
-  get() {
-    return parseMultiValue(props.formData[props.field.key]);
-  },
-  set(val) {
-    props.formData[props.field.key] = stringifyMultiValue(val);
-    emit('clear-error', props.field.key);
-  }
-});
-
-const selectedCheckboxTags = computed<string[]>({
   get() {
     return parseMultiValue(props.formData[props.field.key]);
   },

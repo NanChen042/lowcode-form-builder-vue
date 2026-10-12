@@ -285,6 +285,22 @@
                 {{ store.currentLocale === 'en' ? 'Click Text' : '单击文字' }}
               </kbd>
             </div>
+            <div class="flex items-center justify-between text-[13px]">
+              <span class="text-slate-700 font-medium">
+                {{ store.currentLocale === 'en' ? 'Duplicate Element' : '复制选中组件' }}
+              </span>
+              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
+                {{ isMac ? '⌘ D' : 'Ctrl + D' }}
+              </kbd>
+            </div>
+            <div class="flex items-center justify-between text-[13px]">
+              <span class="text-slate-700 font-medium">
+                {{ store.currentLocale === 'en' ? 'Delete Element' : '删除选中组件' }}
+              </span>
+              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
+                Delete
+              </kbd>
+            </div>
           </div>
         </div>
       </div>
@@ -312,7 +328,9 @@ import {
   addPage,
   clearSelection,
   selectElement,
-  selectPage
+  selectPage,
+  duplicateElement,
+  deleteElement
 } from '@/core/store';
 import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
@@ -650,6 +668,20 @@ function handleKeyDown(e: KeyboardEvent) {
   else if (e.shiftKey && (e.key === '2' || e.code === 'Digit2') && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
     handleZoomAction('selection');
+  }
+  // 6. Duplicate Element: Ctrl/Cmd + D
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+    if (store.selectedType === 'element' && store.selectedId) {
+      e.preventDefault();
+      duplicateElement(store.selectedId);
+    }
+  }
+  // 7. Delete Element: Delete / Backspace
+  else if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (store.selectedType === 'element' && store.selectedId) {
+      e.preventDefault();
+      deleteElement(store.selectedId);
+    }
   }
 }
 

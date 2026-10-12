@@ -1,18 +1,27 @@
 <template>
-  <a-modal :visible="visible" :footer="false" :header="false" :closable="false" :width="'min(95vw, 1400px)'" modal-class="preview-arco-modal" :modal-style="{
-    height: '92vh',
-    maxHeight: '92vh',
-    padding: 0,
-    borderRadius: '16px',
-    overflow: 'hidden'
-  }" :body-style="{
+  <a-modal
+    :visible="visible"
+    fullscreen
+    :footer="false"
+    :header="false"
+    :closable="false"
+    modal-class="preview-arco-modal"
+    :modal-style="{
+      padding: 0,
+      overflow: 'hidden'
+    }"
+    :body-style="{
       padding: 0,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
-    }" unmount-on-close :mask-closable="true" @cancel="handleClose">
-    <div class="flex h-full w-full flex-col overflow-hidden bg-white rounded-2xl">
+    }"
+    unmount-on-close
+    :mask-closable="true"
+    @cancel="handleClose"
+  >
+    <div class="flex h-full w-full flex-col overflow-hidden bg-white">
       <!-- 头部 -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
         <div>
@@ -65,24 +74,74 @@
             </div>
           </div>
 
-          <!-- 仿真 iPhone 手机机模 -->
-          <div class="relative flex h-[812px] max-h-full w-[375px] shrink-0 flex-col rounded-[48px] bg-gradient-to-br from-[#ffffff] via-[#f4f4f5] to-[#d4d4d8] p-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_24px_48px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(0,0,0,0.15)] transition-all duration-300">
-            <!-- 黑色边框 -->
-            <div class="relative flex flex-1 flex-col overflow-hidden rounded-[45px] bg-[#0a0a0a] p-[6px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]">
-              <!-- 白色主屏显示 -->
-              <div class="relative flex flex-1 flex-col overflow-hidden rounded-[39px] bg-white ring-1 ring-black/5">
-                <!-- 黑色刘海 -->
-                <div class="absolute left-1/2 top-0 z-30 h-[26px] w-[140px] -translate-x-1/2 rounded-b-[20px] bg-[#0a0a0a] shadow-[inset_0_-1px_2px_rgba(255,255,255,0.08)]"></div>
+          <!-- 仿真 Apple iPhone 17 Pro Max 手机机模 (对齐 Cult UI 设计规范) -->
+          <div class="relative flex h-[820px] max-h-full w-[385px] shrink-0 flex-col select-none transition-all duration-300">
+            <!-- 机身左侧实体按键 (Action 动作键 + 音量加 + 音量减) -->
+            <div class="pointer-events-none absolute -left-[3.5px] top-[115px] z-10 w-[3.5px] h-[26px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
+            <div class="pointer-events-none absolute -left-[3.5px] top-[158px] z-10 w-[3.5px] h-[52px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
+            <div class="pointer-events-none absolute -left-[3.5px] top-[224px] z-10 w-[3.5px] h-[52px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
 
-                <!-- 顶部状态栏 -->
-                <div class="flex h-12 shrink-0 items-center justify-between px-6 text-[13px] font-semibold text-black z-20">
-                  <span>{{ currentTime }}</span>
-                  <div class="flex items-center gap-1.5">
-                    <BarChart2 class="h-3.5 w-3.5" />
-                    <Wifi class="h-3.5 w-3.5" />
-                    <BatteryFull class="h-4 w-4" />
+            <!-- 机身右侧实体按键 (侧边电源/唤醒键) -->
+            <div class="pointer-events-none absolute -right-[3.5px] top-[172px] z-10 w-[3.5px] h-[78px] rounded-r-[2px] bg-[#2a2a2e] shadow-[inset_-1px_0_1px_rgba(255,255,255,0.25)]"></div>
+
+            <!-- 钛金属外壳主框 (Deep Graphite / Titanium Finish) -->
+            <div class="relative flex flex-1 flex-col rounded-[55px] bg-[#18181b] p-[9px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.12),inset_0_0_2px_1px_rgba(255,255,255,0.2)] ring-1 ring-black/80">
+              <!-- 顶部微缝隐藏式听筒 -->
+              <div class="pointer-events-none absolute top-[3.5px] left-1/2 -translate-x-1/2 z-40 w-12 h-[3px] rounded-full bg-[#141416] shadow-[inset_0_1px_1px_rgba(0,0,0,0.9)]"></div>
+
+              <!-- 屏幕外侧极窄等宽黑边 (Uniform Bezel) -->
+              <div class="relative flex flex-1 flex-col overflow-hidden rounded-[47px] bg-black p-[2px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+                <!-- 纯白主屏显示区域 -->
+                <div class="relative flex flex-1 flex-col overflow-hidden rounded-[45px] bg-white">
+                  <!-- iPhone 灵动岛 Dynamic Island (带精致超感前置镜头光学质感) -->
+                  <div class="pointer-events-none absolute left-1/2 top-[11px] z-30 flex h-[32px] w-[118px] -translate-x-1/2 items-center justify-end pr-2.5 rounded-full bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] transition-all">
+                    <!-- 超感光前置镜头结构 (对齐真实 iPhone 灵动岛镜头物理质感) -->
+                    <div class="relative flex h-[12px] w-[12px] items-center justify-center rounded-full bg-[#0a0d16] ring-1 ring-[#1e2538] shadow-[inset_0_1px_2px_rgba(0,0,0,0.9)]">
+                      <!-- 镜头光学镀膜圆环与深蓝高光弧面 -->
+                      <div class="h-[6.5px] w-[6.5px] rounded-full bg-[radial-gradient(circle_at_35%_35%,#26385d_0%,#111a2f_50%,#040711_100%)] shadow-[inset_0_0_1px_rgba(255,255,255,0.4)]"></div>
+                      <!-- 极细镜头聚焦点反射 -->
+                      <div class="absolute top-[2.5px] left-[2.5px] h-[1.5px] w-[1.5px] rounded-full bg-white/50"></div>
+                    </div>
                   </div>
-                </div>
+
+                  <!-- 顶部状态栏 (严格遵循 Apple iOS 官方设计规范与居中对齐) -->
+                  <div class="flex h-[52px] shrink-0 items-center justify-between px-8 text-black z-20 select-none">
+                    <!-- iOS 状态栏时间 -->
+                    <span class="font-semibold text-[14.5px] tracking-tight leading-none" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;">{{ currentTime }}</span>
+                    
+                    <!-- iOS 状态栏图标组合 (信号 + Wi-Fi + 电池) -->
+                    <div class="flex items-center gap-[7px]">
+                      <!-- 蜂窝网络信号 (Apple 4阶实体圆角信号柱) -->
+                      <svg class="w-[17px] h-[11px] text-black shrink-0" viewBox="0 0 18 12" fill="currentColor">
+                        <rect x="0.5" y="8" width="3" height="4" rx="1" />
+                        <rect x="5.1" y="5.3" width="3" height="6.7" rx="1" />
+                        <rect x="9.7" y="2.6" width="3" height="9.4" rx="1" />
+                        <rect x="14.3" y="0" width="3" height="12" rx="1" />
+                      </svg>
+
+                      <!-- Wi-Fi (Apple 经典同心弧波辐射结构) -->
+                      <svg class="w-[16px] h-[11.5px] text-black shrink-0" viewBox="0 0 16 12" fill="none">
+                        <!-- 最外层弧波 -->
+                        <path d="M 1.2 4.2 A 9.8 9.8 0 0 1 14.8 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        <!-- 中间层弧波 -->
+                        <path d="M 3.8 6.9 A 6.2 6.2 0 0 1 12.2 6.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        <!-- 内层弧波 -->
+                        <path d="M 6.4 9.5 A 2.8 2.8 0 0 1 9.6 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        <!-- 底部中心基准点 -->
+                        <circle cx="8" cy="11.4" r="0.75" fill="currentColor" />
+                      </svg>
+
+                      <!-- 电池 (Apple 经典横向电池胶囊 + 实体满电内芯 + 正极凸起) -->
+                      <svg class="w-[25px] h-[12px] text-black shrink-0" viewBox="0 0 25 12" fill="none">
+                        <!-- 电池外框圆角胶囊 -->
+                        <rect x="0.6" y="0.6" width="20.8" height="10.8" rx="3.5" stroke="currentColor" stroke-width="1.2" />
+                        <!-- 电池右侧正极接头触点 (微圆角凸起) -->
+                        <path d="M 22.8 4.3 C 23.5 4.3 23.8 4.7 23.8 5.3 V 6.7 C 23.8 7.3 23.5 7.7 22.8 7.7" fill="currentColor" />
+                        <!-- 内部 100% 满电实心填充条 (带完美等距内边距与圆角) -->
+                        <rect x="2.4" y="2.4" width="17.2" height="7.2" rx="2" fill="currentColor" />
+                      </svg>
+                    </div>
+                  </div>
 
                 <!-- 提交成功状态卡片展示 -->
                 <div v-if="isSubmitted" class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
@@ -116,9 +175,9 @@
                 </div>
 
                 <!-- 手机主视图表单内容 -->
-                <div v-else ref="phoneContentRef" class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar">
-                  <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (对齐 AlgoCandy 规范) -->
-                  <div class="flex items-center justify-between pb-3 mb-2.5 border-b border-slate-100">
+                <div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (对齐 AlgoCandy 规范，固定不随滚动条滚动) -->
+                  <div class="shrink-0 px-5 pt-1 pb-2.5 border-b border-slate-100 bg-white z-20 flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0 pr-2">
                       <img :src="logoUrl" alt="AlgoCandy" class="w-6 h-auto shrink-0 object-contain" />
                       <span class="text-xs font-semibold text-slate-800 truncate leading-snug">
@@ -137,66 +196,70 @@
                     </div>
                   </div>
 
-                  <!-- 步骤与进度条 (对齐 AlgoCandy 样式) -->
-                  <div class="flex items-center justify-between mt-2 mb-3">
-                    <h3 class="m-0 text-base font-bold text-slate-900 tracking-tight">
-                      {{ currentLocalizedTitle }}
-                    </h3>
-                    <div v-if="pages.length > 1" class="flex items-center gap-2">
-                      <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300" :style="{ width: `${((currentStep + 1) / pages.length) * 100}%` }"></div>
+                  <!-- 手机主视图可滚动内容 -->
+                  <div ref="phoneContentRef" class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar">
+                    <!-- 步骤与进度条 (对齐 AlgoCandy 样式) -->
+                    <div class="flex items-center justify-between mt-2 mb-3">
+                      <h3 class="m-0 text-base font-bold text-slate-900 tracking-tight">
+                        {{ currentLocalizedTitle }}
+                      </h3>
+                      <div v-if="pages.length > 1" class="flex items-center gap-2">
+                        <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                          <div class="h-full bg-blue-600 rounded-full transition-all duration-300" :style="{ width: `${((currentStep + 1) / pages.length) * 100}%` }"></div>
+                        </div>
+                        <span class="text-xs font-medium text-slate-400 font-mono">
+                          {{ currentStep + 1 }} / {{ pages.length }}
+                        </span>
                       </div>
-                      <span class="text-xs font-medium text-slate-400 font-mono">
-                        {{ currentStep + 1 }} / {{ pages.length }}
-                      </span>
                     </div>
-                  </div>
 
-                  <p v-if="currentLocalizedDesc" class="mb-4 text-xs text-slate-500 leading-relaxed">
-                    {{ currentLocalizedDesc }}
-                  </p>
+                    <p v-if="currentLocalizedDesc" class="mb-4 text-xs text-slate-500 leading-relaxed">
+                      {{ currentLocalizedDesc }}
+                    </p>
 
-                  <!-- 空页面 -->
-                  <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                    {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
-                  </div>
+                    <!-- 空页面 -->
+                    <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
+                      {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                    </div>
 
-                  <!-- 真实 Arco Design 表单结构 -->
-                  <form class="w-full flex flex-col" @submit.prevent>
-                    <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
-                    <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep" class="w-full flex flex-col">
-                      <!-- 空页面 -->
-                      <div v-if="!page.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                        {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                    <!-- 真实 Arco Design 表单结构 (禁用浏览器原生冒泡提示，采用统一美观校验反馈) -->
+                    <form class="w-full flex flex-col" novalidate @submit.prevent>
+                      <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
+                      <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep" class="w-full flex flex-col">
+                        <!-- 空页面 -->
+                        <div v-if="!page.fields?.length" class="py-12 text-center text-slate-400 text-sm">
+                          {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                        </div>
+
+                        <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
                       </div>
 
-                      <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :form-data="formData" :error="errors[field.key]" @clear-error="clearFieldError" />
-                    </div>
+                      <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
+                      <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
+                        <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
+                          {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
+                        </a-button>
+                        <div v-else class="flex-1"></div>
 
-                    <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
-                    <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
-                      <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
-                        {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
-                      </a-button>
-                      <div v-else class="flex-1"></div>
+                        <a-button v-if="hasNext" type="primary" class="h-9 px-5 rounded-lg text-xs font-medium" @click="handleNextStep">
+                          {{ store.currentLocale === 'en' ? 'Next Step' : '下一步' }}
+                        </a-button>
 
-                      <a-button v-if="hasNext" type="primary" class="h-9 px-5 rounded-lg text-xs font-medium" @click="handleNextStep">
-                        {{ store.currentLocale === 'en' ? 'Next Step' : '下一步' }}
-                      </a-button>
-
-                      <a-button v-else type="primary" class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleFormSubmit">
-                        {{ store.currentLocale === 'en' ? 'Validate Form' : '表单验证' }}
-                      </a-button>
-                    </div>
-                  </form>
+                        <a-button v-else type="primary" class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleFormSubmit">
+                          {{ store.currentLocale === 'en' ? 'Validate Form' : '表单验证' }}
+                        </a-button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
 
-                <!-- 底部 Home Indicator 横条 -->
-                <div class="pointer-events-none absolute bottom-2 left-1/2 h-[4px] w-[120px] -translate-x-1/2 rounded-full bg-slate-300"></div>
+                <!-- 底部 Home Indicator 触控横条 (对齐 Apple 官方与 Cult UI 规范) -->
+                <div class="pointer-events-none absolute bottom-[7px] left-1/2 -translate-x-1/2 h-[4.5px] w-[134px] rounded-full bg-black/85 z-30"></div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         <!-- 右侧 JSON 侧边栏抽屉 -->
         <SchemaSidebar :visible="schemaSidebarVisible" :schema="schema" @close="schemaSidebarVisible = false" />
@@ -227,7 +290,7 @@
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
 import type { FormSchema, FormElement } from '@/types/schema';
 import { store } from '@/core/store';
-import { getPageText, getFieldText } from '@/core/i18n';
+import { getPageText, getFieldValidationMessage } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -237,9 +300,6 @@ import SchemaSidebar from './SchemaSidebar.vue';
 import {
   Code,
   X,
-  BarChart2,
-  Wifi,
-  BatteryFull,
   CheckCircle
 } from '@lucide/vue';
 
@@ -267,6 +327,8 @@ const phoneContentRef = ref<HTMLElement | null>(null);
 
 function clearFieldError(key: string) {
   delete errors[key];
+  delete errors[`${key}_declaration`];
+  delete errors[`${key}_signature`];
 }
 
 function initFormData() {
@@ -287,6 +349,7 @@ function initFormData() {
       // 电话组件默认严格使用新加坡区号 '+65'，手机号码本身保持为空无默认值
       if (field.type === 'phone') {
         formData[`${field.key}_areacode`] = field.dialCode || '+65';
+        formData[`${field.key}_countryCode`] = field.countryCode || 'sg';
         formData[field.key] = '';
       }
     }
@@ -317,8 +380,7 @@ function validateField(field: FormElement): string | null {
   // 1. 单行文本
   if (field.type === 'input') {
     if (isRequired && !strVal) {
-      const name = getFieldText(field, 'label') || (store.currentLocale === 'en' ? 'This field' : '此项');
-      return store.currentLocale === 'en' ? `Please enter ${name}` : `请输入${name}`;
+      return getFieldValidationMessage(field);
     }
     if (strVal && field.inputType === 'number' && isNaN(Number(strVal))) {
       return store.currentLocale === 'en' ? 'Please enter a valid number' : '请输入有效数字';
@@ -329,8 +391,7 @@ function validateField(field: FormElement): string | null {
   // 2. 多行文本
   if (field.type === 'textarea') {
     if (isRequired && !strVal) {
-      const name = getFieldText(field, 'label') || (store.currentLocale === 'en' ? 'This field' : '此项');
-      return store.currentLocale === 'en' ? `Please enter ${name}` : `请输入${name}`;
+      return getFieldValidationMessage(field);
     }
     return null;
   }
@@ -338,7 +399,7 @@ function validateField(field: FormElement): string | null {
   // 3. 电子邮箱
   if (field.type === 'email') {
     if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please enter email' : '请输入邮箱';
+      return getFieldValidationMessage(field);
     }
     if (strVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(strVal)) {
       return store.currentLocale === 'en' ? 'Please enter a valid email' : '请输入有效的邮箱地址';
@@ -349,7 +410,7 @@ function validateField(field: FormElement): string | null {
   // 4. 手机号码 (带区号，严格按照全量 244 国电信规则校验)
   if (field.type === 'phone') {
     if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please enter phone number' : '请输入手机号码';
+      return getFieldValidationMessage(field);
     }
     if (strVal) {
       // 优先采用 intlTelInput 内置 Google libphonenumber 的实时校验结论
@@ -375,14 +436,14 @@ function validateField(field: FormElement): string | null {
     if (field.multiple) {
       const arr = parseMultiValue(rawVal);
       if (isRequired && arr.length === 0) {
-        return store.currentLocale === 'en' ? 'Please select an option' : '请选择选项';
+        return getFieldValidationMessage(field);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
         return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
       }
     } else {
       if (isRequired && !strVal) {
-        return store.currentLocale === 'en' ? 'Please select an option' : '请选择选项';
+        return getFieldValidationMessage(field);
       }
     }
     return null;
@@ -393,14 +454,14 @@ function validateField(field: FormElement): string | null {
     if (field.multiple) {
       const arr = parseMultiValue(rawVal);
       if (isRequired && arr.length === 0) {
-        return store.currentLocale === 'en' ? 'Please select at least one item' : '请至少选择一项';
+        return getFieldValidationMessage(field);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
         return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} items allowed` : `最多只能选择 ${field.maxSelections} 项`;
       }
     } else {
       if (isRequired && !strVal) {
-        return store.currentLocale === 'en' ? 'Please select' : '请选择';
+        return getFieldValidationMessage(field);
       }
     }
     return null;
@@ -409,7 +470,7 @@ function validateField(field: FormElement): string | null {
   // 7. 单选框
   if (field.type === 'radio') {
     if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please select an option' : '请选择一项';
+      return getFieldValidationMessage(field);
     }
     return null;
   }
@@ -418,7 +479,7 @@ function validateField(field: FormElement): string | null {
   if (field.type === 'checkbox') {
     const arr = parseMultiValue(rawVal);
     if (isRequired && arr.length === 0) {
-      return store.currentLocale === 'en' ? 'Please select at least one option' : '请至少选择一项';
+      return getFieldValidationMessage(field);
     }
     if (field.maxSelections && arr.length > field.maxSelections) {
       return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
@@ -429,18 +490,30 @@ function validateField(field: FormElement): string | null {
   // 9. 日期
   if (field.type === 'date') {
     if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please select date' : '请选择日期';
+      return getFieldValidationMessage(field);
     }
     return null;
   }
 
   // 10. 签名
   if (field.type === 'signature') {
+    let hasSigErr = false;
     if (field.declarationRequired && !formData[`${field.key}_declared`]) {
-      return store.currentLocale === 'en' ? 'Please confirm declarations' : '请勾选确认声明事项';
+      const decMsg = getFieldValidationMessage(field, 'declaration', store.currentLocale);
+      errors[`${field.key}_declaration`] = decMsg;
+      hasSigErr = true;
+    } else {
+      delete errors[`${field.key}_declaration`];
     }
-    if (isRequired && !strVal) {
-      return store.currentLocale === 'en' ? 'Please sign in the designated area' : '请在指定区域完成手写签名';
+    if (field.required && !strVal) {
+      const sigMsg = getFieldValidationMessage(field, 'signature', store.currentLocale);
+      errors[`${field.key}_signature`] = sigMsg;
+      hasSigErr = true;
+    } else {
+      delete errors[`${field.key}_signature`];
+    }
+    if (hasSigErr) {
+      return errors[`${field.key}_declaration`] || errors[`${field.key}_signature`];
     }
     return null;
   }
@@ -453,14 +526,12 @@ function validateCurrentPage(): boolean {
   if (!currentPage.value) return true;
 
   let hasError = false;
-  let firstErrorKey = '';
 
   for (const field of currentPage.value.fields || []) {
     const errMsg = validateField(field);
     if (errMsg) {
       errors[field.key] = errMsg;
       hasError = true;
-      if (!firstErrorKey) firstErrorKey = field.key;
     } else {
       delete errors[field.key];
     }
@@ -470,7 +541,7 @@ function validateCurrentPage(): boolean {
     Message.error(store.currentLocale === 'en' ? 'Please fill in all required fields' : '请填写所有必填项并修正错误');
     nextTick(() => {
       if (phoneContentRef.value) {
-        const errEl = phoneContentRef.value.querySelector('.preview-field-error, .has-error, [data-error="true"]');
+        const errEl = phoneContentRef.value.querySelector('.has-error, [data-error="true"], .arco-input-error, .arco-textarea-error, .arco-select-view-error, .arco-picker-error');
         if (errEl) {
           errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -489,6 +560,9 @@ function handleNextStep() {
 
 function handleStepClick(stepIdx: number) {
   // 预览模式：左侧大纲支持自由快速切换，方便表单设计者随时免填必填项预览任意页面排版与多语言
+  for (const key of Object.keys(errors)) {
+    delete errors[key];
+  }
   currentStep.value = stepIdx;
 }
 

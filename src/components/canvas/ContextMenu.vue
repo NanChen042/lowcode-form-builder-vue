@@ -69,9 +69,13 @@
 
         <a-divider style="margin: 4px 0" />
 
-        <a-doption class="!text-red-500 hover:!bg-red-50" @click="handleDeletePage">
+        <a-doption
+          :disabled="isTargetFirstPage"
+          :class="isTargetFirstPage ? '!text-slate-300 !cursor-not-allowed' : '!text-red-500 hover:!bg-red-50'"
+          @click="handleDeletePage"
+        >
           <template #icon>
-            <Trash2 class="h-4 w-4 text-red-500" />
+            <Trash2 class="h-4 w-4" :class="isTargetFirstPage ? 'text-slate-300' : 'text-red-500'" />
           </template>
           <span>{{ store.currentLocale === 'en' ? 'Delete Current Canvas' : '删除当前画布' }}</span>
         </a-doption>
@@ -100,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ComponentType } from '@/types/schema';
 import {
   addPage,
@@ -134,6 +139,10 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
+
+const isTargetFirstPage = computed(() => {
+  return props.targetPageId ? store.pages[0]?.id === props.targetPageId : false;
+});
 
 function handleVisibleChange(val: boolean) {
   if (!val) {
@@ -179,6 +188,7 @@ function handleResetView() {
 }
 
 function handleDeletePage() {
+  if (isTargetFirstPage.value) return;
   if (props.targetPageId) {
     const pageId = props.targetPageId;
     Modal.confirm({

@@ -10,7 +10,7 @@
           :element-id="element.id"
           field="label"
           custom-class="label-text text-[14px] font-bold text-slate-800 m-0 leading-5"
-          @update:model-value="handleLabelUpdate"
+          @update:model-value="(val) => setFieldText(element, 'label', val)"
         />
       </div>
 
@@ -25,7 +25,7 @@
             field="option"
             :option-index="idx"
             custom-class="option-text flex-1"
-            @update:model-value="(val) => handleOptionUpdate(opt, val)"
+            @update:model-value="(val) => setOptionLabel(opt, val)"
           />
         </p>
       </div>
@@ -34,29 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import type { FormElement, FormElementOption } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
-import { getFieldText, getOptionLabel } from '@/core/i18n';
+import type { FormElement } from '@/types/schema';
+import { store } from '@/core/store';
+import { getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 import { Info } from '@lucide/vue';
 
-const props = defineProps<{ element: FormElement }>();
-
-function handleLabelUpdate(val: string) {
-  if (store.currentLocale === 'en') {
-    props.element.label_en = val;
-  } else {
-    props.element.label = val;
-  }
-  markDirty();
-}
-
-function handleOptionUpdate(opt: FormElementOption, val: string) {
-  if (store.currentLocale === 'en') {
-    opt.label_en = val;
-  } else {
-    opt.label = val;
-  }
-  markDirty();
-}
+defineProps<{ element: FormElement }>();
 </script>

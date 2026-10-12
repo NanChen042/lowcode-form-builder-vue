@@ -44,14 +44,14 @@
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store } from '@/core/store';
-import { t, getFieldText } from '@/core/i18n';
+import { t, getFieldText, setFieldText } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 
 const props = defineProps<{ element: FormElement }>();
 
 const isRequired = computed(() => {
   if (props.element.type === 'signature') {
-    return Boolean(props.element.declarationRequired);
+    return Boolean(props.element.declarationRequired || props.element.required);
   }
   return Boolean(props.element.required);
 });
@@ -61,11 +61,7 @@ const currentLabel = computed({
     return getFieldText(props.element, 'label');
   },
   set(val: string) {
-    if (store.currentLocale === 'en') {
-      props.element.label_en = val;
-    } else {
-      props.element.label = val;
-    }
+    setFieldText(props.element, 'label', val);
   }
 });
 
@@ -74,11 +70,7 @@ const currentHelp = computed({
     return getFieldText(props.element, 'help');
   },
   set(val: string) {
-    if (store.currentLocale === 'en') {
-      props.element.help_en = val;
-    } else {
-      props.element.help = val;
-    }
+    setFieldText(props.element, 'help', val);
   }
 });
 </script>

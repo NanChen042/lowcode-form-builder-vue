@@ -8,8 +8,6 @@
     :style="{
       width: store.leftSidebarVisible ? `${store.leftSidebarWidth}px` : '0px'
     }"
-    @mouseenter="store.isLeftSidebarHovered = true"
-    @mouseleave="store.isLeftSidebarHovered = false"
   >
     <!-- 内部固定宽度抽屉容器：保证折叠/展开动画过程中文字与组件不挤压重排 -->
     <div
@@ -195,7 +193,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { store, addElement, loadSchema, createElement } from '@/core/store';
+import { store, addElement, loadSchema } from '@/core/store';
 import { t } from '@/core/i18n';
 import { componentRegistry, getComponentIcon, type ComponentMeta } from '@/registry/components';
 import { blankTemplate } from '@/templates/recommend';
@@ -222,36 +220,20 @@ import {
   PanelLeft
 } from '@lucide/vue';
 
+import { useSidebarResize } from '@/utils/useSidebarResize';
+
 defineEmits(['open-template-gallery']);
 
 // 侧边栏拖拽拉伸
-const isResizing = ref(false);
-
-function startResize(e: MouseEvent) {
-  isResizing.value = true;
-  const startX = e.clientX;
-  const startWidth = store.leftSidebarWidth;
-
-  const onMouseMove = (moveEvent: MouseEvent) => {
-    // 拖向右侧增加宽度，拖向左侧减小宽度
-    const deltaX = moveEvent.clientX - startX;
-    const newWidth = Math.max(240, Math.min(480, startWidth + deltaX));
-    store.leftSidebarWidth = Math.round(newWidth);
-  };
-
-  const onMouseUp = () => {
-    isResizing.value = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-
-  document.body.style.cursor = 'col-resize';
-  document.body.style.userSelect = 'none';
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
-}
+const { isResizing, startResize } = useSidebarResize({
+  getWidth: () => store.leftSidebarWidth,
+  setWidth: (newWidth) => {
+    store.leftSidebarWidth = newWidth;
+  },
+  min: 240,
+  max: 480,
+  direction: 'right'
+});
 
 const searchOpen = ref(false);
 const searchQuery = ref('');
@@ -340,16 +322,33 @@ function getGhostComponent(type: ComponentType) {
   return ghostComponentMap[type] || InputElement;
 }
 
+function createGhostElement(type: ComponentType): FormElement {
+  const meta = componentRegistry[type];
+  const defaultData = meta ? meta.defaultData() : {};
+  return {
+    id: `ghost_${type}`,
+    type,
+    key: `ghost_${type}`,
+    label: defaultData.label || '未命名字段',
+    label_en: defaultData.label_en || '',
+    required: defaultData.required !== undefined ? defaultData.required : true,
+    showLabel: defaultData.showLabel !== false,
+    helpPosition: 'right',
+    ...defaultData,
+    options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
+  };
+}
+
 const ghostElements = computed<Record<ComponentType, FormElement>>(() => {
   const map: Partial<Record<ComponentType, FormElement>> = {};
   for (const type of Object.keys(componentRegistry) as ComponentType[]) {
-    map[type] = createElement(type);
+    map[type] = createGhostElement(type);
   }
   return map as Record<ComponentType, FormElement>;
 });
 
 function getGhostElement(type: ComponentType) {
-  return ghostElements.value[type] || createElement(type);
+  return ghostElements.value[type] || createGhostElement(type);
 }
 
 const allComponents = computed<ComponentMeta[]>(() => Object.values(componentRegistry));

@@ -43,8 +43,7 @@ import { ref, onMounted, watch } from 'vue';
 import {
   store,
   buildSchema,
-  loadSchema,
-  resetCanvasView
+  loadSchema
 } from '@/core/store';
 import { currentArcoLocale } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
@@ -90,35 +89,29 @@ onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const tplParam = urlParams.get('tpl');
 
+  let targetTemplate: FormSchema = blankTemplate;
+  let targetTemplateKey = 'blank';
+
   try {
     if (tplParam === 'kyc-individual') {
-      loadSchema(kycIndividualTemplate);
-      store.activeTemplateKey = 'kyc-individual';
+      targetTemplate = kycIndividualTemplate;
+      targetTemplateKey = 'kyc-individual';
     } else if (tplParam === 'kyc-entity') {
-      loadSchema(kycEntityTemplate);
-      store.activeTemplateKey = 'kyc-entity';
+      targetTemplate = kycEntityTemplate;
+      targetTemplateKey = 'kyc-entity';
     } else {
       const res = await FormAPI.getTemplate('default');
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
-        loadSchema(res.data.schema);
-        store.activeTemplateKey = 'saved';
-      } else {
-        loadSchema(blankTemplate);
-        store.activeTemplateKey = 'blank';
+        targetTemplate = res.data.schema;
+        targetTemplateKey = 'saved';
       }
     }
   } catch {
-    loadSchema(blankTemplate);
-    store.activeTemplateKey = 'blank';
+    // 降级使用空白模板
   } finally {
-    if (store.pages.length === 0) {
-      loadSchema(blankTemplate);
-      store.activeTemplateKey = 'blank';
-    }
+    loadSchema(targetTemplate);
+    store.activeTemplateKey = targetTemplateKey;
     store.isCanvasLoading = false;
-    setTimeout(() => {
-      resetCanvasView();
-    }, 60);
   }
 
   // 离开页面时未保存拦截
