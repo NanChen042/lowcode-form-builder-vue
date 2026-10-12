@@ -68,7 +68,7 @@
       >
         <button
           type="button"
-          class="absolute left-3.5 top-3.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
+          class="absolute left-3.5 top-[70px] z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
           @click="store.leftSidebarVisible = true"
         >
           <PanelLeft class="h-4 w-4 transition-transform duration-200 group-hover:scale-105" />
@@ -85,7 +85,7 @@
       >
         <button
           type="button"
-          class="absolute right-3.5 top-3.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
+          class="absolute right-3.5 top-[70px] z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
           @click="store.rightSidebarVisible = true"
         >
           <PanelRight class="h-4 w-4 transition-transform duration-200 group-hover:scale-105" />
@@ -435,12 +435,7 @@ function zoomToSelection() {
     }
 
     // 2. 检查选中的是否为画板内表单组件
-    const parentPage = store.pages.find(p => {
-      const hasEl = (fields: any[]): boolean => {
-        return fields.some(f => f.id === store.selectedId || (f.children && hasEl(f.children)));
-      };
-      return hasEl(p.fields);
-    });
+    const parentPage = store.pages.find(p => p.fields.some(f => f.id === store.selectedId));
     if (parentPage) {
       focusOnPage(parentPage.id);
       return;

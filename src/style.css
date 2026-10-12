@@ -217,6 +217,7 @@ body {
     min-height: 34px !important;
     line-height: 34px !important;
     font-size: 13px !important;
+    font-weight: 400 !important;
     border-radius: 6px !important;
     margin: 2px 0 !important;
     padding: 0 10px !important;
@@ -225,38 +226,23 @@ body {
 }
 
 .arco-select-dropdown .arco-select-option:hover,
-.arco-select-dropdown .arco-select-option.arco-select-option-hover {
+.arco-select-dropdown .arco-select-option.arco-select-option-hover,
+.arco-select-dropdown .arco-select-option.arco-select-option-active:not(.arco-select-option-selected) {
     background-color: #f1f5f9 !important;
     color: #0f172a !important;
+    font-weight: 400 !important;
 }
 
-.arco-select-dropdown .arco-select-option.arco-select-option-active {
+.arco-select-dropdown .arco-select-option.arco-select-option-selected {
     background-color: #e6f4ff !important;
     color: #1677ff !important;
-    font-weight: 500 !important;
+    font-weight: 400 !important;
 }
 
 .arco-select-dropdown .arco-select-option .arco-checkbox {
     margin-right: 8px !important;
 }
 
-/* 属性面板问号悬浮提示 (Tooltip) 仿原版精致暗色气泡 */
-.arco-tooltip-content {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    line-height: 1.6 !important;
-    padding: 8px 12px !important;
-    max-width: 220px !important;
-    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3) !important;
-    border: none !important;
-}
-
-.arco-tooltip-popup-arrow {
-    background-color: #1e293b !important;
-    border: none !important;
-}
 
 #prop-editor .arco-form-item-label,
 #page-prop-editor .arco-form-item-label {
@@ -881,6 +867,7 @@ body.is-dragging-component .canvas-element .field-help {
     box-shadow: none !important;
     cursor: grabbing !important;
     position: relative !important;
+    transition: none !important;
 }
 
 .canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"] {
@@ -966,7 +953,6 @@ body.is-dragging-component .canvas-element .field-help {
 /* 左侧物料栏内部拖拽时的占位效果（恢复紧凑高度与虚线框） */
 #components-basic .sortable-ghost,
 #components-business .sortable-ghost,
-#components-layout .sortable-ghost,
 .sidebar-drag-group .sortable-ghost {
     min-height: 0 !important;
     height: 36px !important;
@@ -979,7 +965,6 @@ body.is-dragging-component .canvas-element .field-help {
 
 #components-basic .sortable-ghost > *,
 #components-business .sortable-ghost > *,
-#components-layout .sortable-ghost > *,
 .sidebar-drag-group .sortable-ghost > * {
     display: none !important;
 }
@@ -988,8 +973,6 @@ body.is-dragging-component .canvas-element .field-help {
 #components-basic .sortable-ghost::after,
 #components-business .sortable-ghost::before,
 #components-business .sortable-ghost::after,
-#components-layout .sortable-ghost::before,
-#components-layout .sortable-ghost::after,
 .sidebar-drag-group .sortable-ghost::before,
 .sidebar-drag-group .sortable-ghost::after {
     display: none !important;

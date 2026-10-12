@@ -75,6 +75,7 @@
         v-else-if="field.type === 'phone'"
         v-model="formData[field.key]"
         v-model:dial-code="phoneDialCode"
+        :country-code="field.countryCode"
         :custom-placeholder="phonePlaceholder"
         :required="isFieldRequired"
         :strict="field.strictPhoneValidation !== false"
@@ -163,12 +164,9 @@
           :value="opt.value"
           :label="getOptionLabel(opt)"
         >
-          <div class="flex items-center justify-between w-full text-xs font-sans">
-            <span class="flex items-center gap-2">
-              <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
-              <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
-            </span>
-            <span class="text-[11px] text-slate-400 font-mono uppercase">{{ opt.value }}</span>
+          <div class="flex items-center gap-2 w-full text-xs font-sans">
+            <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
+            <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
           </div>
         </a-option>
       </a-select>
@@ -196,12 +194,9 @@
           :value="opt.value"
           :label="getOptionLabel(opt)"
         >
-          <div class="flex items-center justify-between w-full text-xs font-sans">
-            <span class="flex items-center gap-2">
-              <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
-              <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
-            </span>
-            <span class="text-[11px] text-slate-400 font-mono uppercase">{{ opt.value }}</span>
+          <div class="flex items-center gap-2 w-full text-xs font-sans">
+            <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
+            <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
           </div>
         </a-option>
       </a-select>
@@ -378,7 +373,7 @@ import { getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
-import { getCountryPhoneRule } from '@/registry/phoneRules';
+import { getCountryExampleNumber } from '@/registry/phoneRules';
 
 const props = defineProps<{
   field: FormElement;
@@ -399,11 +394,13 @@ const phoneDialCode = ref(props.formData[`${props.field.key}_areacode`] || props
 
 const phonePlaceholder = computed(() => {
   if (props.field.type !== 'phone') return '';
-  const rule = getCountryPhoneRule(phoneDialCode.value || props.field.dialCode || '+65');
-  return rule?.placeholder || '8123 4567';
+  return getCountryExampleNumber(props.field.countryCode || phoneDialCode.value || props.field.dialCode || '+65');
 });
 
 function handlePhoneChange(data: any) {
+  if (data.areacode) {
+    phoneDialCode.value = `+${data.areacode}`;
+  }
   props.formData[`${props.field.key}_areacode`] = data.areacode ? `+${data.areacode}` : phoneDialCode.value;
   props.formData[`${props.field.key}_countryCode`] = data.countryCode || '';
   props.formData[`${props.field.key}_full`] = data.fullNumber;

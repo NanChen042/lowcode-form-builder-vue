@@ -7,9 +7,8 @@
   >
     <button
       type="button"
-      class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[13px] font-normal text-slate-700 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all hover:border-slate-300 hover:bg-slate-50 focus:outline-none cursor-pointer"
+      class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300/50 bg-white/65 hover:bg-white/95 px-2.5 text-[13px] font-medium text-slate-700 select-none shadow-xs backdrop-blur-md transition-all cursor-pointer h-9"
       :class="[
-        size === 'small' ? 'h-7.5' : 'h-8',
         isDropdownOpen ? 'border-[#1677ff] text-[#1677ff] ring-2 ring-blue-500/10' : '',
         customClass
       ]"

@@ -42,12 +42,13 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { store } from '@/core/store';
 import type { IntlTelInputInstance, IntlTelInputOptions } from '@/types/intlTelInput';
-import { getCountryPhoneRule } from '@/registry/phoneRules';
+import { getCountryPhoneRule, getCountryExampleNumber } from '@/registry/phoneRules';
 
 const props = withDefaults(
   defineProps<{
     modelValue?: string;
     dialCode?: string;
+    countryCode?: string;
     customPlaceholder?: string;
     disabled?: boolean;
     readonly?: boolean;
@@ -59,6 +60,7 @@ const props = withDefaults(
   {
     modelValue: '',
     dialCode: '+65',
+    countryCode: '',
     customPlaceholder: '',
     disabled: false,
     readonly: false,
@@ -124,8 +126,8 @@ function initIntlTel() {
     return;
   }
 
-  // 默认国家二字码 (默认新加坡 'sg')
-  const defaultIso = parseIsoFromDialCode(props.dialCode) || 'sg';
+  // 默认国家二字码 (优先使用指定的国家 ISO2，否则根据区号反查，默认 'sg')
+  const defaultIso = props.countryCode?.toLowerCase() || parseIsoFromDialCode(props.dialCode) || 'sg';
 
   const options: IntlTelInputOptions = {
     initialCountry: defaultIso,
@@ -164,11 +166,11 @@ function parseIsoFromDialCode(code?: string): string {
 function updateInputPlaceholder() {
   if (!inputRef.value) return;
   const current = iti ? iti.getSelectedCountryData() : null;
-  const rule = current?.iso2 ? getCountryPhoneRule(current.iso2) : getCountryPhoneRule(props.dialCode || '+65');
+  const targetIso = current?.iso2 || props.countryCode || parseIsoFromDialCode(props.dialCode) || 'sg';
   if (props.customPlaceholder && !/[a-zA-Z]/.test(props.customPlaceholder)) {
     inputRef.value.placeholder = props.customPlaceholder;
   } else {
-    inputRef.value.placeholder = rule?.placeholder || '8123 4567';
+    inputRef.value.placeholder = getCountryExampleNumber(targetIso);
   }
 }
 
@@ -238,17 +240,19 @@ function validateAndEmit() {
   });
 }
 
-// 监听外部区号变化
+// 监听外部区号或国家变化
 watch(
-  () => props.dialCode,
-  newCode => {
-    if (iti && newCode) {
-      const current = iti.getSelectedCountryData();
-      if ('+' + current.dialCode !== newCode) {
-        const iso = parseIsoFromDialCode(newCode);
-        iti.setCountry(iso);
-        updateInputPlaceholder();
-      }
+  () => [props.countryCode, props.dialCode],
+  ([newIso, newCode]) => {
+    if (!iti) return;
+    const current = iti.getSelectedCountryData();
+    if (newIso && newIso.toLowerCase() !== current.iso2?.toLowerCase()) {
+      iti.setCountry(newIso.toLowerCase());
+      updateInputPlaceholder();
+    } else if (newCode && '+' + current.dialCode !== newCode) {
+      const iso = parseIsoFromDialCode(newCode);
+      iti.setCountry(iso);
+      updateInputPlaceholder();
     }
   }
 );

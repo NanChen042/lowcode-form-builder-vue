@@ -71,7 +71,7 @@
     <main class="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-2">
       <!-- 创建方式 -->
       <div v-if="!searchQuery" class="mb-6 px-1 mt-4">
-        <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500 uppercase">
+        <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500">
           {{ t('sidebar.createMethod') }}
         </h3>
         <div class="flex flex-col gap-1.5">
@@ -98,7 +98,7 @@
       <div class="space-y-8 px-1">
         <!-- 基础输入 -->
         <section v-if="filteredBasicComponents.length > 0">
-          <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500 uppercase">
+          <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500">
             {{ t('sidebar.catBasic') }}
           </h3>
           <div id="components-basic" ref="basicGroupRef" class="sidebar-drag-group grid grid-cols-2 gap-2.5">
@@ -127,7 +127,7 @@
 
         <!-- 业务组件 -->
         <section v-if="filteredBusinessComponents.length > 0">
-          <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500 uppercase">
+          <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500">
             {{ t('sidebar.catBusiness') }}
           </h3>
           <div id="components-business" ref="businessGroupRef" class="sidebar-drag-group grid grid-cols-2 gap-2.5">
@@ -154,34 +154,6 @@
           </div>
         </section>
 
-        <!-- 高级布局 -->
-        <section v-if="filteredLayoutComponents.length > 0">
-          <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500 uppercase">
-            {{ t('sidebar.catLayout') }}
-          </h3>
-          <div id="components-layout" ref="layoutGroupRef" class="sidebar-drag-group grid grid-cols-2 gap-2.5">
-            <div
-              v-for="item in filteredLayoutComponents"
-              :key="item.type + '_' + store.currentLocale"
-              class="component-item select-none group flex cursor-pointer items-center rounded-md border border-slate-200 shadow-sm bg-white px-3 py-2 h-[36px] transition-all hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-md active:bg-blue-50/60 active:border-blue-500"
-              :data-type="item.type"
-              @click="handleComponentClick(item.type)"
-            >
-              <!-- 侧边栏常态按钮形态 -->
-              <div class="sidebar-btn-view flex w-full items-center gap-2.5 overflow-hidden">
-                <component :is="getIcon(item.icon)" class="h-4 w-4 text-slate-400 transition-colors group-hover:text-blue-500 shrink-0" />
-                <span class="truncate text-[12px] font-medium text-slate-600 transition-colors group-hover:text-blue-700">
-                  {{ store.currentLocale === 'en' ? (item.label_en || item.label) : item.label }}
-                </span>
-              </div>
-
-              <!-- 画布拖拽占位骨架形态（与画布内真实组件 100% 结构对齐，含红色必填星号与标准 32px 高度） -->
-              <div class="canvas-ghost-skeleton pointer-events-none hidden w-full select-none text-left">
-                <component :is="getGhostComponent(item.type)" :element="getGhostElement(item.type)" />
-              </div>
-            </div>
-          </div>
-        </section>
 
         <!-- 无搜索结果 -->
         <div v-if="noSearchResult" class="rounded-md border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-[12px] leading-5 text-slate-400">
@@ -287,7 +259,6 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 
 const basicGroupRef = ref<HTMLElement | null>(null);
 const businessGroupRef = ref<HTMLElement | null>(null);
-const layoutGroupRef = ref<HTMLElement | null>(null);
 
 const isMac = ref(false);
 onMounted(() => {
@@ -346,7 +317,6 @@ function initDragSources() {
 
   if (basicGroupRef.value) new Sortable(basicGroupRef.value, dragOptions);
   if (businessGroupRef.value) new Sortable(businessGroupRef.value, dragOptions);
-  if (layoutGroupRef.value) new Sortable(layoutGroupRef.value, dragOptions);
 }
 
 const getIcon = getComponentIcon;
@@ -398,19 +368,11 @@ const filteredBusinessComponents = computed(() => {
     .filter(c => !q || c.label.toLowerCase().includes(q) || c.label_en?.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
 });
 
-const filteredLayoutComponents = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase();
-  return allComponents.value
-    .filter(c => c.category === 'layout')
-    .filter(c => !q || c.label.toLowerCase().includes(q) || c.label_en?.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
-});
-
 const noSearchResult = computed(() => {
   return (
     searchQuery.value.trim().length > 0 &&
     filteredBasicComponents.value.length === 0 &&
-    filteredBusinessComponents.value.length === 0 &&
-    filteredLayoutComponents.value.length === 0
+    filteredBusinessComponents.value.length === 0
   );
 });
 

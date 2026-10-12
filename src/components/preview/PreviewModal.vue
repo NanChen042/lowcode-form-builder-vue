@@ -1,32 +1,18 @@
 <template>
-  <a-modal
-    :visible="visible"
-    :footer="false"
-    :header="false"
-    :closable="false"
-    :width="'min(95vw, 1400px)'"
-    modal-class="preview-arco-modal"
-    :modal-style="{
-      height: '92vh',
-      maxHeight: '92vh',
-      padding: 0,
-      borderRadius: '16px',
-      overflow: 'hidden'
-    }"
-    :body-style="{
+  <a-modal :visible="visible" :footer="false" :header="false" :closable="false" :width="'min(95vw, 1400px)'" modal-class="preview-arco-modal" :modal-style="{
+    height: '92vh',
+    maxHeight: '92vh',
+    padding: 0,
+    borderRadius: '16px',
+    overflow: 'hidden'
+  }" :body-style="{
       padding: 0,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
-    }"
-    unmount-on-close
-    :mask-closable="true"
-    @cancel="handleClose"
-  >
-    <div
-      class="flex h-full w-full flex-col overflow-hidden bg-white rounded-2xl"
-    >
+    }" unmount-on-close :mask-closable="true" @cancel="handleClose">
+    <div class="flex h-full w-full flex-col overflow-hidden bg-white rounded-2xl">
       <!-- 头部 -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
         <div>
@@ -39,53 +25,31 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-          <a-button
-            type="secondary"
-            size="small"
-            @click="schemaSidebarVisible = !schemaSidebarVisible"
-          >
+          <a-button type="secondary" size="small" @click="schemaSidebarVisible = !schemaSidebarVisible">
             <template #icon><Code class="h-3.5 w-3.5" /></template>
             {{ store.currentLocale === 'en' ? 'Schema JSON' : '结构 JSON' }}
           </a-button>
 
-          <a-button
-            type="secondary"
-            size="small"
-            shape="circle"
-            aria-label="关闭"
-            @click="handleClose"
-          >
-            <template #icon><X class="h-4 w-4" /></template>
+          <a-button type="secondary" size="small" shape="circle" aria-label="关闭" @click="handleClose">
+            <template #icon>
+              <X class="h-4 w-4" />
+            </template>
           </a-button>
         </div>
       </header>
 
       <!-- 中间主视图 -->
       <div class="relative min-h-0 flex-1 flex overflow-hidden">
-        <section
-          class="flex-1 flex items-center justify-center gap-12 overflow-auto bg-[#f8fafc] py-8 transition-all duration-300 relative"
-        >
+        <section class="flex-1 flex items-center justify-center gap-12 overflow-auto bg-[#f8fafc] py-8 transition-all duration-300 relative">
           <!-- 左侧大纲进度条（多页时展示） -->
-          <div
-            v-if="pages.length > 1 && !isSubmitted"
-            class="w-[240px] shrink-0 flex flex-col gap-1"
-          >
+          <div v-if="pages.length > 1 && !isSubmitted" class="w-[240px] shrink-0 flex flex-col gap-1">
             <div class="mb-2 pb-2 border-b border-slate-200/80 text-xs text-slate-500 font-medium">
               <span>{{ store.currentLocale === 'en' ? 'Form Steps' : '表单步骤列表' }}</span>
             </div>
 
-            <div
-              v-for="(p, i) in pages"
-              :key="p.id"
-              class="preview-step-item cursor-pointer flex items-start gap-3 transition group py-1.5 select-none"
-              :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-600 hover:text-blue-600'"
-              @click="handleStepClick(i)"
-            >
+            <div v-for="(p, i) in pages" :key="p.id" class="preview-step-item cursor-pointer flex items-start gap-3 transition group py-1.5 select-none" :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-600 hover:text-blue-600'" @click="handleStepClick(i)">
               <div class="flex flex-col items-center">
-                <span
-                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs transition-all"
-                  :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff] shadow-xs' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:bg-blue-50/40'"
-                >
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs transition-all" :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff] shadow-xs' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:bg-blue-50/40'">
                   {{ i + 1 }}
                 </span>
                 <div v-if="i < pages.length - 1" class="w-px h-8 bg-slate-200 my-1"></div>
@@ -102,26 +66,16 @@
           </div>
 
           <!-- 仿真 iPhone 手机机模 -->
-          <div
-            class="relative flex h-[812px] max-h-full w-[375px] shrink-0 flex-col rounded-[48px] bg-gradient-to-br from-[#ffffff] via-[#f4f4f5] to-[#d4d4d8] p-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_24px_48px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(0,0,0,0.15)] transition-all duration-300"
-          >
+          <div class="relative flex h-[812px] max-h-full w-[375px] shrink-0 flex-col rounded-[48px] bg-gradient-to-br from-[#ffffff] via-[#f4f4f5] to-[#d4d4d8] p-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_24px_48px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(0,0,0,0.15)] transition-all duration-300">
             <!-- 黑色边框 -->
-            <div
-              class="relative flex flex-1 flex-col overflow-hidden rounded-[45px] bg-[#0a0a0a] p-[6px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]"
-            >
+            <div class="relative flex flex-1 flex-col overflow-hidden rounded-[45px] bg-[#0a0a0a] p-[6px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]">
               <!-- 白色主屏显示 -->
-              <div
-                class="relative flex flex-1 flex-col overflow-hidden rounded-[39px] bg-white ring-1 ring-black/5"
-              >
+              <div class="relative flex flex-1 flex-col overflow-hidden rounded-[39px] bg-white ring-1 ring-black/5">
                 <!-- 黑色刘海 -->
-                <div
-                  class="absolute left-1/2 top-0 z-30 h-[26px] w-[140px] -translate-x-1/2 rounded-b-[20px] bg-[#0a0a0a] shadow-[inset_0_-1px_2px_rgba(255,255,255,0.08)]"
-                ></div>
+                <div class="absolute left-1/2 top-0 z-30 h-[26px] w-[140px] -translate-x-1/2 rounded-b-[20px] bg-[#0a0a0a] shadow-[inset_0_-1px_2px_rgba(255,255,255,0.08)]"></div>
 
                 <!-- 顶部状态栏 -->
-                <div
-                  class="flex h-12 shrink-0 items-center justify-between px-6 text-[13px] font-semibold text-black z-20"
-                >
+                <div class="flex h-12 shrink-0 items-center justify-between px-6 text-[13px] font-semibold text-black z-20">
                   <span>{{ currentTime }}</span>
                   <div class="flex items-center gap-1.5">
                     <BarChart2 class="h-3.5 w-3.5" />
@@ -131,10 +85,7 @@
                 </div>
 
                 <!-- 提交成功状态卡片展示 -->
-                <div
-                  v-if="isSubmitted"
-                  class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in"
-                >
+                <div v-if="isSubmitted" class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
                   <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4 shadow-sm">
                     <CheckCircle class="w-10 h-10" />
                   </div>
@@ -159,25 +110,17 @@
                     </div>
                   </div>
 
-                  <a-button
-                    type="primary"
-                    class="w-full h-9 rounded-lg"
-                    @click="resetForm"
-                  >
+                  <a-button type="primary" class="w-full h-9 rounded-lg" @click="resetForm">
                     {{ store.currentLocale === 'en' ? 'Refill Form' : '重新填写表单' }}
                   </a-button>
                 </div>
 
                 <!-- 手机主视图表单内容 -->
-                <div
-                  v-else
-                  ref="phoneContentRef"
-                  class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar"
-                >
+                <div v-else ref="phoneContentRef" class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar">
                   <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (对齐 AlgoCandy 规范) -->
                   <div class="flex items-center justify-between pb-3 mb-2.5 border-b border-slate-100">
                     <div class="flex items-center gap-2 min-w-0 pr-2">
-                      <img src="/img/algocandy-logo.png" alt="AlgoCandy" class="w-6 h-auto shrink-0 object-contain" />
+                      <img :src="logoUrl" alt="AlgoCandy" class="w-6 h-auto shrink-0 object-contain" />
                       <span class="text-xs font-semibold text-slate-800 truncate leading-snug">
                         {{ formBrandTitle }}
                       </span>
@@ -185,20 +128,10 @@
 
                     <!-- 嵌入手机内的双语切换胶囊 -->
                     <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shrink-0 select-none">
-                      <button
-                        type="button"
-                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer"
-                        :class="store.currentLocale === 'zh' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-                        @click="store.currentLocale = 'zh'"
-                      >
+                      <button type="button" class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer" :class="store.currentLocale === 'zh' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" @click="store.currentLocale = 'zh'">
                         中
                       </button>
-                      <button
-                        type="button"
-                        class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer"
-                        :class="store.currentLocale === 'en' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-                        @click="store.currentLocale = 'en'"
-                      >
+                      <button type="button" class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer" :class="store.currentLocale === 'en' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" @click="store.currentLocale = 'en'">
                         EN
                       </button>
                     </div>
@@ -211,10 +144,7 @@
                     </h3>
                     <div v-if="pages.length > 1" class="flex items-center gap-2">
                       <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                          class="h-full bg-blue-600 rounded-full transition-all duration-300"
-                          :style="{ width: `${((currentStep + 1) / pages.length) * 100}%` }"
-                        ></div>
+                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300" :style="{ width: `${((currentStep + 1) / pages.length) * 100}%` }"></div>
                       </div>
                       <span class="text-xs font-medium text-slate-400 font-mono">
                         {{ currentStep + 1 }} / {{ pages.length }}
@@ -227,70 +157,34 @@
                   </p>
 
                   <!-- 空页面 -->
-                  <div
-                    v-if="!currentPage?.fields?.length"
-                    class="py-12 text-center text-slate-400 text-sm"
-                  >
+                  <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
                     {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
                   </div>
 
                   <!-- 真实 Arco Design 表单结构 -->
-                  <form
-                    class="w-full flex flex-col"
-                    @submit.prevent
-                  >
+                  <form class="w-full flex flex-col" @submit.prevent>
                     <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
-                    <div
-                      v-for="(page, stepIdx) in pages"
-                      :key="page.id"
-                      v-show="stepIdx === currentStep"
-                      class="w-full flex flex-col"
-                    >
+                    <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep" class="w-full flex flex-col">
                       <!-- 空页面 -->
-                      <div
-                        v-if="!page.fields?.length"
-                        class="py-12 text-center text-slate-400 text-sm"
-                      >
+                      <div v-if="!page.fields?.length" class="py-12 text-center text-slate-400 text-sm">
                         {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
                       </div>
 
-                      <PreviewField
-                        v-for="field in page.fields"
-                        :key="field.id"
-                        :field="field"
-                        :form-data="formData"
-                        :error="errors[field.key]"
-                        @clear-error="clearFieldError"
-                      />
+                      <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :form-data="formData" :error="errors[field.key]" @clear-error="clearFieldError" />
                     </div>
 
                     <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
                     <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
-                      <a-button
-                        v-if="hasPrev"
-                        type="secondary"
-                        class="h-9 px-4 rounded-lg text-xs"
-                        @click="currentStep--"
-                      >
+                      <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
                         {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
                       </a-button>
                       <div v-else class="flex-1"></div>
 
-                      <a-button
-                        v-if="hasNext"
-                        type="primary"
-                        class="h-9 px-5 rounded-lg text-xs font-medium"
-                        @click="handleNextStep"
-                      >
+                      <a-button v-if="hasNext" type="primary" class="h-9 px-5 rounded-lg text-xs font-medium" @click="handleNextStep">
                         {{ store.currentLocale === 'en' ? 'Next Step' : '下一步' }}
                       </a-button>
 
-                      <a-button
-                        v-else
-                        type="primary"
-                        class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]"
-                        @click="handleFormSubmit"
-                      >
+                      <a-button v-else type="primary" class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleFormSubmit">
                         {{ store.currentLocale === 'en' ? 'Validate Form' : '表单验证' }}
                       </a-button>
                     </div>
@@ -298,46 +192,29 @@
                 </div>
 
                 <!-- 底部 Home Indicator 横条 -->
-                <div
-                  class="pointer-events-none absolute bottom-2 left-1/2 h-[4px] w-[120px] -translate-x-1/2 rounded-full bg-slate-300"
-                ></div>
+                <div class="pointer-events-none absolute bottom-2 left-1/2 h-[4px] w-[120px] -translate-x-1/2 rounded-full bg-slate-300"></div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- 右侧 JSON 侧边栏抽屉 -->
-        <SchemaSidebar
-          :visible="schemaSidebarVisible"
-          :schema="schema"
-          @close="schemaSidebarVisible = false"
-        />
+        <SchemaSidebar :visible="schemaSidebarVisible" :schema="schema" @close="schemaSidebarVisible = false" />
       </div>
 
       <!-- 底部全局操作栏 -->
-      <footer
-        class="flex h-14 shrink-0 items-center justify-between border-t border-[#f0f0f0] bg-[#fafafa] px-6 z-10"
-      >
+      <footer class="flex h-14 shrink-0 items-center justify-between border-t border-[#f0f0f0] bg-[#fafafa] px-6 z-10">
         <div class="flex items-center gap-2 text-xs text-slate-500">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
           <span>{{ store.currentLocale === 'en' ? 'Live Validator: Active (Singapore +65 default)' : '实时校验引擎已就绪（国际区号默认 +65 新加坡）' }}</span>
         </div>
 
         <div class="flex items-center gap-3">
-          <a-button
-            type="primary"
-            size="small"
-            :loading="isPublishing"
-            @click="handlePublish"
-          >
+          <a-button type="primary" size="small" :loading="isPublishing" @click="handlePublish">
             {{ isPublishing ? (store.currentLocale === 'en' ? 'Publishing...' : '发布中...') : (store.currentLocale === 'en' ? 'Publish Form' : '发布表单') }}
           </a-button>
 
-          <a-button
-            type="secondary"
-            size="small"
-            @click="handleClose"
-          >
+          <a-button type="secondary" size="small" @click="handleClose">
             {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
           </a-button>
         </div>
@@ -371,6 +248,8 @@ const props = defineProps<{
   schema: FormSchema;
   mode?: 'preview' | 'deploy';
 }>();
+
+const logoUrl = `${import.meta.env.BASE_URL}img/algocandy-logo.png`;
 
 const emit = defineEmits(['close']);
 
@@ -702,6 +581,7 @@ async function handlePublish() {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

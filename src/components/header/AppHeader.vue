@@ -1,5 +1,8 @@
 <template>
-  <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/50 bg-white/75 backdrop-blur-md px-6 relative z-40 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+  <header
+    class="w-full flex h-14 shrink-0 items-center justify-between px-6 relative z-40 transition-all select-none pointer-events-auto"
+    style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.35) 55%, rgba(255, 255, 255, 0) 100%);"
+  >
     <!-- 左侧标题与标识 -->
     <div class="flex min-w-0 items-center gap-2.5">
       <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#1677ff] shrink-0 shadow-2xs border border-blue-100/60">
@@ -37,23 +40,36 @@
         {{ t('app.saving') }}
       </a-tag>
 
-      <!-- 主要操作按钮 -->
+      <!-- 主要操作按钮 (对齐 Stitch 胶囊毛玻璃按钮风格) -->
       <a-space size="small">
-        <a-button type="secondary" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs backdrop-blur-xs" :loading="isSaving" @click="handleSave">
+        <a-button
+          type="secondary"
+          class="!h-9 !px-3.5 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md !text-slate-700 !font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+          :loading="isSaving"
+          @click="handleSave"
+        >
           <template #icon>
-            <Save class="h-4 w-4" />
+            <Save class="h-4 w-4 text-slate-600" />
           </template>
           {{ t('app.save') }}
         </a-button>
 
-        <a-button type="secondary" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs backdrop-blur-xs" @click="$emit('open-preview')">
+        <a-button
+          type="secondary"
+          class="!h-9 !px-3.5 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md !text-slate-700 !font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+          @click="$emit('open-preview')"
+        >
           <template #icon>
-            <Eye class="h-4 w-4" />
+            <Eye class="h-4 w-4 text-slate-600" />
           </template>
           {{ t('app.preview') }}
         </a-button>
 
-        <a-button type="primary" class="!shadow-xs" @click="$emit('open-deploy')">
+        <a-button
+          type="primary"
+          class="!h-9 !px-4 !rounded-xl !bg-[#1677ff] hover:!bg-[#4096ff] !text-white !font-medium !shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+          @click="$emit('open-deploy')"
+        >
           <template #icon>
             <CloudUpload class="h-4 w-4" />
           </template>
@@ -61,14 +77,20 @@
         </a-button>
       </a-space>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-200" />
+      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-300/40" />
 
       <!-- 语言切换组件 -->
       <LanguageSwitcher />
 
       <!-- 布局折叠快捷菜单 -->
       <a-dropdown trigger="click" position="br">
-        <a-button type="secondary" shape="circle" size="medium" class="!bg-white/85 hover:!bg-white !border-slate-200/80 !shadow-2xs" :title="t('app.settings')">
+        <a-button
+          type="secondary"
+          shape="circle"
+          size="medium"
+          class="!h-9 !w-9 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md"
+          :title="t('app.settings')"
+        >
           <template #icon>
             <Settings class="h-4 w-4 text-slate-500" />
           </template>
@@ -88,19 +110,18 @@
         </template>
       </a-dropdown>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-200" />
+      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-300/40" />
 
-      <!-- 最右侧：纯头像徽章 (参考 Stitch 设计，无多余名字与箭头) -->
+      <!-- 最右侧：纯圆形头像徽章 (对标 Stitch 截图，悬浮微光独立头像) -->
       <a-dropdown trigger="click" position="br" v-model:popup-visible="isUserDropdownOpen">
         <div
           class="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-blue-400/50 cursor-pointer transition-all select-none"
           :class="{ 'ring-2 ring-[#1677ff]': isUserDropdownOpen }"
           title="ceshi"
         >
-          <!-- 纯圆形头像 -->
           <a-avatar
-            :size="30"
-            class="!bg-gradient-to-tr !from-[#1677ff] !to-[#69b1ff] !text-white !font-semibold text-xs shadow-xs shrink-0 flex items-center justify-center transition-transform hover:scale-105"
+            :size="32"
+            class="!bg-gradient-to-tr !from-[#1677ff] !to-[#69b1ff] !text-white !font-semibold text-xs shadow-xs shrink-0 flex items-center justify-center transition-transform hover:scale-105 border border-white/80"
           >
             <IconUser class="text-white text-[15px]" />
           </a-avatar>

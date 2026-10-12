@@ -1,6 +1,6 @@
 <template>
   <a-config-provider :locale="currentArcoLocale">
-    <div class="relative flex h-full w-full overflow-hidden">
+    <div class="relative flex h-full w-full flex-col overflow-hidden">
       <!-- 顶部导航栏 (Stitch 通栏流光毛玻璃) -->
       <AppHeader
         @open-preview="openPreview('preview')"
@@ -10,17 +10,15 @@
       <!-- 主工作区：左侧组件库 + 中间无限画布 + 右侧属性面板 -->
       <div class="app-main relative flex min-h-0 flex-1 overflow-hidden">
         <MaterialSidebar
-          class="pt-14"
           @open-template-gallery="templateModalVisible = true"
         />
 
         <InfiniteCanvas
+          class="-mt-14"
           @open-template-gallery="templateModalVisible = true"
         />
 
-        <PropertyPanel
-          class="pt-14"
-        />
+        <PropertyPanel />
       </div>
 
       <!-- 场景模板库弹窗 -->

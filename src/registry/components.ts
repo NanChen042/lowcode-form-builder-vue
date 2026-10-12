@@ -285,8 +285,8 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     defaultData: () => ({
       label: '手机号码',
       label_en: 'Phone Number',
-      placeholder: '8123 4567',
-      placeholder_en: '8123 4567',
+      placeholder: '',
+      placeholder_en: '',
       help: '',
       help_en: '',
       dialCode: '+65',

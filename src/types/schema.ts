@@ -38,6 +38,7 @@ export interface FormElement {
   inputType?: 'text' | 'number';
   // 电话特有属性
   dialCode?: string;
+  countryCode?: string;
   strictPhoneValidation?: boolean;
   // 日期特有属性
   dateType?: 'date' | 'datetime-local' | 'month' | 'time';

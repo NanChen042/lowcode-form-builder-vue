@@ -23,12 +23,9 @@
         :value="opt.value"
         :label="getOptionLabel(opt)"
       >
-        <div class="flex items-center justify-between w-full text-xs font-sans">
-          <span class="flex items-center gap-2">
-            <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
-            <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
-          </span>
-          <span class="text-[11px] text-slate-400 font-mono uppercase">{{ opt.value }}</span>
+        <div class="flex items-center gap-2 w-full text-xs font-sans">
+          <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
+          <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
         </div>
       </a-option>
     </a-select>
@@ -53,12 +50,9 @@
         :value="opt.value"
         :label="getOptionLabel(opt)"
       >
-        <div class="flex items-center justify-between w-full text-xs font-sans">
-          <span class="flex items-center gap-2">
-            <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
-            <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
-          </span>
-          <span class="text-[11px] text-slate-400 font-mono uppercase">{{ opt.value }}</span>
+        <div class="flex items-center gap-2 w-full text-xs font-sans">
+          <span class="iti__flag shrink-0" :class="'iti__' + (opt.value ? String(opt.value).toLowerCase() : 'sg')"></span>
+          <span class="font-medium text-slate-800">{{ getOptionLabel(opt) }}</span>
         </div>
       </a-option>
     </a-select>

@@ -1,5 +1,5 @@
 <template>
-  <div :id="'frame_' + page.id" class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col transition-all cursor-default" :class="[
+  <div :id="'frame_' + page.id" class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col cursor-default" :class="[
     isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
     isFrameElevated ? '!z-20 is-active-frame' : 'z-10'
   ]" :style="{
@@ -188,6 +188,7 @@ onMounted(() => {
       filter: 'input, textarea, select, button, [contenteditable], .action-btn',
       preventOnFilter: false,
       onStart(evt) {
+        store.isDraggingComponent = true;
         document.body.classList.add('is-dragging-component');
         const frame = evt.from?.closest('.mobile-frame') as HTMLElement;
         if (frame) {
@@ -205,36 +206,37 @@ onMounted(() => {
           }
         }
 
-        setTimeout(() => {
-          const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
-          if (fallback && evt.item) {
-            const rect = evt.item.getBoundingClientRect();
-            const scale = store.canvasState.scale || 1;
-            const visual = evt.item.cloneNode(true) as HTMLElement;
-            visual.classList.remove('sortable-ghost', 'drag-chosen');
-            visual.classList.add('drag-fallback', 'sortable-drag', 'drag-fallback-visual');
-            visual.style.position = 'relative';
-            visual.style.left = '0';
-            visual.style.top = '0';
-            visual.style.width = `${evt.item.offsetWidth}px`;
-            visual.style.height = `${evt.item.offsetHeight}px`;
-            visual.style.transform = `scale(${scale})`;
-            visual.style.transformOrigin = '0 0';
-            visual.style.boxSizing = 'border-box';
+        // 同步配置拖拽镜像，修复 Sortable 在缩放画布下的坐标除以 scale 偏移 bug，并杜绝异步 setTimeout 导致的闪烁与抽搐
+        const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
+        if (fallback && evt.item) {
+          const rect = evt.item.getBoundingClientRect();
+          const scale = store.canvasState.scale || 1;
+          const visual = evt.item.cloneNode(true) as HTMLElement;
+          visual.classList.remove('sortable-ghost', 'drag-chosen');
+          visual.classList.add('drag-fallback-visual');
+          visual.style.position = 'relative';
+          visual.style.left = '0';
+          visual.style.top = '0';
+          visual.style.width = `${evt.item.offsetWidth}px`;
+          visual.style.height = `${evt.item.offsetHeight}px`;
+          visual.style.transform = `scale(${scale})`;
+          visual.style.transformOrigin = '0 0';
+          visual.style.boxSizing = 'border-box';
+          visual.style.pointerEvents = 'none';
 
-            fallback.style.left = `${rect.left}px`;
-            fallback.style.top = `${rect.top}px`;
-            fallback.style.width = `${rect.width}px`;
-            fallback.style.height = `${rect.height}px`;
-            fallback.style.scale = '';
-            fallback.style.transformOrigin = '';
-            fallback.classList.add('drag-fallback-shell');
-            fallback.innerHTML = '';
-            fallback.appendChild(visual);
-          }
-        }, 0);
+          // 核心修复：Sortable.js 内部会将 fixed top/left 除以 scale，导致缩放下拖起瞬间大幅向下向右掉落错位；
+          // 同步校准 fallback 的初始坐标与宽高，与当前组件屏幕位置精确对齐
+          fallback.style.left = `${rect.left}px`;
+          fallback.style.top = `${rect.top}px`;
+          fallback.style.width = `${rect.width}px`;
+          fallback.style.height = `${rect.height}px`;
+          fallback.classList.add('drag-fallback-shell');
+          fallback.innerHTML = '';
+          fallback.appendChild(visual);
+        }
       },
       onEnd(evt) {
+        store.isDraggingComponent = false;
         document.body.classList.remove('is-dragging-component');
         document.body.style.removeProperty('--drag-placeholder-height');
         const frame = evt.from?.closest('.mobile-frame') as HTMLElement;
