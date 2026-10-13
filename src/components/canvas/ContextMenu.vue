@@ -33,7 +33,7 @@
 
         <a-divider style="margin: 4px 0" />
 
-        <a-doption class="!text-red-500 hover:!bg-red-50" @click="handleDeleteElement">
+        <a-doption class="context-danger-option" @click="handleDeleteElement">
           <template #icon>
             <Trash2 class="h-4 w-4 text-red-500" />
           </template>
@@ -43,15 +43,26 @@
 
       <!-- 场景 2：在画板页面内右键（targetType === 'page' && targetPageId） -->
       <template v-else-if="targetType === 'page' && targetPageId">
-        <!-- 快捷多级子菜单：添加表单组件 -->
-        <ComponentCascadeMenu
-          :title="store.currentLocale === 'en' ? 'Add Component' : '添加表单组件'"
-          value-prefix="page-insert"
-          title-class="font-medium text-slate-800"
-          @select="handleQuickAddComponent"
-        />
+        <!-- 系统预设画板标识（只读锁定，不可添加组件或删除） -->
+        <div
+          v-if="isTargetSystemProfilePage"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-slate-500 border-b border-slate-100 select-none"
+        >
+          <Lock class="h-3 w-3 text-blue-500" />
+          <span>{{ store.currentLocale === 'en' ? 'System Preset (Read-only)' : '系统预设资料（只读锁定）' }}</span>
+        </div>
 
-        <a-divider style="margin: 4px 0" />
+        <!-- 快捷多级子菜单：添加表单组件 (系统基础资料画板不允许添加表单组件) -->
+        <template v-if="!isTargetSystemProfilePage">
+          <ComponentCascadeMenu
+            :title="store.currentLocale === 'en' ? 'Add Component' : '添加表单组件'"
+            value-prefix="page-insert"
+            title-class="font-medium text-slate-800"
+            @select="handleQuickAddComponent"
+          />
+
+          <a-divider style="margin: 4px 0" />
+        </template>
 
         <a-doption @click="handleAddPage">
           <template #icon>
@@ -67,18 +78,17 @@
           <span>{{ store.currentLocale === 'en' ? 'Reset View' : '重置画布视角' }}</span>
         </a-doption>
 
-        <a-divider style="margin: 4px 0" />
+        <!-- 删除当前画布 (系统预设画板不可删除，彻底隐藏) -->
+        <template v-if="!isTargetSystemProfilePage">
+          <a-divider style="margin: 4px 0" />
 
-        <a-doption
-          :disabled="isTargetFirstPage"
-          :class="isTargetFirstPage ? '!text-slate-300 !cursor-not-allowed' : '!text-red-500 hover:!bg-red-50'"
-          @click="handleDeletePage"
-        >
-          <template #icon>
-            <Trash2 class="h-4 w-4" :class="isTargetFirstPage ? 'text-slate-300' : 'text-red-500'" />
-          </template>
-          <span>{{ store.currentLocale === 'en' ? 'Delete Current Canvas' : '删除当前画布' }}</span>
-        </a-doption>
+          <a-doption class="context-danger-option" @click="handleDeletePage">
+            <template #icon>
+              <Trash2 class="h-4 w-4 text-red-500" />
+            </template>
+            <span>{{ store.currentLocale === 'en' ? 'Delete Current Canvas' : '删除当前画布' }}</span>
+          </a-doption>
+        </template>
       </template>
 
       <!-- 场景 3：在空白画布背景上右键（不在任何画板中，不显示“添加表单组件”） -->
@@ -117,7 +127,7 @@ import {
   store
 } from '@/core/store';
 import { Modal } from '@arco-design/web-vue';
-import { FilePlus, Expand, Trash2, Copy } from '@lucide/vue';
+import { FilePlus, Expand, Trash2, Copy, Lock } from '@lucide/vue';
 import ComponentCascadeMenu from './ComponentCascadeMenu.vue';
 
 const props = withDefaults(
@@ -140,9 +150,16 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const isTargetFirstPage = computed(() => {
-  return props.targetPageId ? store.pages[0]?.id === props.targetPageId : false;
+const targetPage = computed(() => {
+  return props.targetPageId ? store.pages.find(p => p.id === props.targetPageId) : null;
 });
+
+const isTargetSystemProfilePage = computed(() => {
+  if (!props.targetPageId) return false;
+  return targetPage.value?.pageType === 'system_profile' || store.pages[0]?.id === props.targetPageId;
+});
+
+const isTargetFirstPage = isTargetSystemProfilePage;
 
 function handleVisibleChange(val: boolean) {
   if (!val) {
@@ -210,3 +227,16 @@ function handleDeletePage() {
   emit('close');
 }
 </script>
+
+<style scoped>
+:deep(.context-danger-option) {
+  color: #ef4444;
+}
+:deep(.context-danger-option:hover) {
+  background-color: #fef2f2;
+}
+:deep(.context-disabled-option) {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+</style>

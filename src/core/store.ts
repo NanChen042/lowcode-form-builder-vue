@@ -4,12 +4,15 @@ import type {
   FormPage,
   FormElement,
   ComponentType,
-  CanvasState
+  CanvasState,
+  ProfileType
 } from '../types/schema';
 import { componentRegistry } from '../registry/components';
+import { createBlankTemplate } from '../templates/recommend';
 
-const PAGE_WIDTH = 390;
-const PAGE_GAP = 160;
+export const PAGE_WIDTH = 390;
+export const PAGE_HEIGHT = 720;
+export const PAGE_GAP = 160;
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 1.6;
 
@@ -29,7 +32,13 @@ export const store = reactive({
     title: '未命名表单',
     title_en: '',
     description: '',
-    description_en: ''
+    description_en: '',
+    profileType: 'customer' as ProfileType,
+    source: 'diy' as 'template' | 'diy',
+    templateKey: '' as string,
+    formId: '' as string,
+    serialNo: '' as string,
+    createdAt: 0 as number
   },
 
   // 页面列表
@@ -71,7 +80,10 @@ export const store = reactive({
   rightSidebarWidth: 300,
 
   // 国际化语言环境
-  currentLocale: 'zh' as 'zh' | 'en'
+  currentLocale: 'zh' as 'zh' | 'en',
+
+  // 外部 URL 锁定的业务主体类型 (若有则锁定不能切换，若无则为 null 允许自由选择)
+  lockedProfileType: null as ProfileType | null
 });
 
 // 计算属性：当前选中的元素或画板页面
@@ -183,7 +195,6 @@ export function addElement(type: ComponentType, targetPageId?: string) {
   // 1. 优先使用显式指定的 targetPageId
   // 2. 否则如果当前选中了画板（selectedType === 'page'），使用选中的画板 ID
   // 3. 否则如果当前有激活画板（activePageId），使用激活画板
-  // 4. 兜底才使用最后一个画板
   let resolvedPageId = targetPageId;
   if (!resolvedPageId) {
     if (store.selectedType === 'page' && store.selectedId) {
@@ -193,15 +204,30 @@ export function addElement(type: ComponentType, targetPageId?: string) {
     }
   }
 
-  const page = (resolvedPageId ? store.pages.find(p => p.id === resolvedPageId) : null)
-    || store.pages[store.pages.length - 1];
+  let page = resolvedPageId ? store.pages.find(p => p.id === resolvedPageId) : null;
+
+  // 核心约束：第 1 个画布（基础资料核验页，pageType === 'system_profile'）不允许添加任何表单组件
+  if (!page || page.pageType === 'system_profile' || store.pages[0]?.id === page.id) {
+    // 自动定向到首个可用的常规表单页
+    let formPage = store.pages.find(p => p.pageType !== 'system_profile' && p.id !== store.pages[0]?.id);
+    if (!formPage) {
+      // 若当前只有第 1 页系统资料页，自动创建第 2 页常规表单页
+      addPage(undefined, { focus: false });
+      formPage = store.pages.find(p => p.pageType !== 'system_profile' && p.id !== store.pages[0]?.id)
+        || store.pages[store.pages.length - 1];
+    }
+    page = formPage;
+  }
+
+  if (!page) return;
 
   const newEl = createElement(type);
 
   // 如果当前在目标页面内已选中了某个元素，直接在其正下方插入
-  if (selectedElement.value) {
+  if (selectedElement.value && store.selectedType === 'element') {
     for (const p of store.pages) {
-      if (resolvedPageId && p.id !== resolvedPageId) continue;
+      if (p.pageType === 'system_profile') continue;
+      if (page && p.id !== page.id) continue;
 
       const searchRes = findElementParentAndIndex(p.fields, selectedElement.value.id);
       if (searchRes) {
@@ -253,6 +279,22 @@ export function deleteElement(elementId: string) {
   }
 }
 
+// 中文数字转换函数（1 -> '一', 2 -> '二', 10 -> '十', 12 -> '十二'）
+export function toChineseNum(num: number): string {
+  const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  if (num <= 10) return cnNums[num] || String(num);
+  if (num < 20) {
+    const unit = num % 10;
+    return `十${unit > 0 ? cnNums[unit] : ''}`;
+  }
+  if (num < 100) {
+    const tens = Math.floor(num / 10);
+    const rem = num % 10;
+    return `${cnNums[tens]}十${rem > 0 ? cnNums[rem] : ''}`;
+  }
+  return String(num);
+}
+
 // 页面操作方法
 export function addPage(afterPageId?: string | null, options: { focus?: boolean } = {}) {
   const isFirst = store.pages.length === 0;
@@ -273,10 +315,11 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
     }
   }
 
-  const pageNumber = store.pages.length + 1;
+  const pageNumber = insertIndex + 1;
   const newPage: FormPage = {
     id: newId,
-    title: `第 ${pageNumber} 页`,
+    pageType: 'form',
+    title: `第${toChineseNum(pageNumber)}页`,
     title_en: `Page ${pageNumber}`,
     description: '',
     description_en: '',
@@ -372,26 +415,102 @@ export function animateCanvasTransition(duration = 420) {
   }, duration);
 }
 
-export function focusOnPage(pageId: string) {
+export interface FocusOnPageOptions {
+  forTour?: boolean;
+  popoverWidth?: number;
+  duration?: number;
+}
+
+export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
   const page = store.pages.find(p => p.id === pageId);
   if (!page) return;
 
-  animateCanvasTransition(420);
+  const duration = options?.duration ?? 420;
+  if (duration > 0) {
+    animateCanvasTransition(duration);
+  } else {
+    store.isCanvasAnimating = false;
+  }
 
-  const viewportWidth = window.innerWidth - 300 - 280; // 大致除去左右侧边栏
-  const viewportHeight = window.innerHeight - 64; // 除去顶部高度
-  const frameHeight = 720;
+  // 纯 JavaScript 高性能几何计算，零 DOM 查询，杜绝强制同步重排 (Reflow)
+  const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+  const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+  const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
+  const viewportHeight = Math.max(320, window.innerHeight - 56);
+  const headerHeight = 56; // AppHeader 占位高度（InfiniteCanvas 采用了 -mt-14）
 
-  const targetScale = clampScale(Math.min((viewportWidth - 120) / PAGE_WIDTH, (viewportHeight - 120) / frameHeight));
-  const finalScale = Math.abs(targetScale - 1) < 0.05 ? 1 : Math.min(1, targetScale);
+  // 获取画板真实物理高度：普通画板基准 720px；系统预设基础资料页随卡片自然展开，动态获取实际或预设展开高度
+  let realHeight = PAGE_HEIGHT;
+  if (typeof document !== 'undefined') {
+    const frameEl = document.getElementById(page.id === store.pages[0]?.id ? 'tour-first-page-frame' : `frame_${page.id}`);
+    if (frameEl && frameEl.offsetHeight > 0) {
+      realHeight = frameEl.offsetHeight;
+    } else if (page.pageType === 'system_profile') {
+      realHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+    }
+  } else if (page.pageType === 'system_profile') {
+    realHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+  }
+  const realWidth = PAGE_WIDTH;
 
-  store.canvasState.scale = finalScale;
-  store.canvasState.x = viewportWidth / 2 - (page.x + PAGE_WIDTH / 2) * finalScale;
-  store.canvasState.y = viewportHeight / 2 - (page.y + frameHeight / 2) * finalScale;
+  // 上方序号标签占用 28px 高度，预留 32px
+  const badgeOffset = 32;
+  const totalContentHeight = realHeight + badgeOffset;
+
+  // 垂直方向：保证完整画板卡片（包括顶部标签和底部卡片）在视口内具备舒适的呼吸留白
+  const paddingY = options?.forTour ? 100 : 80;
+  const safeHeight = Math.max(240, viewportHeight - paddingY);
+  const targetScaleY = safeHeight / totalContentHeight;
+
+  if (options?.forTour) {
+    // 漫游引导模式：为右侧解说气泡预留独立展示空间（气泡宽约 360px，间距 24px）
+    const popoverWidth = options.popoverWidth || 360;
+    const gap = 24;
+    const paddingX = 70;
+    const safeWidth = Math.max(300, viewportWidth - popoverWidth - gap - paddingX);
+    const targetScaleX = safeWidth / realWidth;
+
+    // 漫游缩放取合适比例：长画板自适应缩放（~0.55），常规画板（~0.82），完整展示全貌绝不切边
+    const finalScale = clampScale(Math.min(targetScaleX, targetScaleY, 0.85));
+    store.canvasState.scale = finalScale;
+
+    // 水平方向：将 [画板 + 气泡] 复合取景整体居中在视口内
+    const cardRenderedWidth = realWidth * finalScale;
+    const totalGroupWidth = cardRenderedWidth + gap + popoverWidth;
+    const leftMargin = Math.max(28, (viewportWidth - totalGroupWidth) / 2);
+
+    store.canvasState.x = leftMargin - page.x * finalScale;
+
+    // 垂直方向：将画板内容垂直居中在可视视口中，上下均保留充足呼吸留白
+    const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
+    const viewportCenterY = headerHeight + viewportHeight / 2;
+    store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
+  } else {
+    // 常规聚焦模式（如新建/删除画板、聚焦到选中）：将画板居中
+    const paddingX = 80;
+    const safeWidth = Math.max(200, viewportWidth - paddingX);
+    const targetScaleX = safeWidth / realWidth;
+
+    const targetScale = Math.min(targetScaleX, targetScaleY);
+    const finalScale = clampScale(Math.abs(targetScale - 1) < 0.05 ? 1 : Math.min(0.9, targetScale));
+    store.canvasState.scale = finalScale;
+
+    store.canvasState.x = viewportWidth / 2 - (page.x + realWidth / 2) * finalScale;
+
+    const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
+    const viewportCenterY = headerHeight + viewportHeight / 2;
+    store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
+  }
 }
 
-export function resetCanvasView(viewportWidth = window.innerWidth - 580, viewportHeight = window.innerHeight - 64) {
-  animateCanvasTransition(420);
+export function resetCanvasView(options?: { duration?: number }) {
+  const duration = options?.duration ?? 420;
+  if (duration > 0) {
+    animateCanvasTransition(duration);
+  } else {
+    store.isCanvasAnimating = false;
+  }
+
   if (store.pages.length === 0) {
     store.canvasState.x = 0;
     store.canvasState.y = 0;
@@ -399,21 +518,40 @@ export function resetCanvasView(viewportWidth = window.innerWidth - 580, viewpor
     return;
   }
 
+  const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+  const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+  const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
+  const viewportHeight = Math.max(320, window.innerHeight - 56);
+  const headerHeight = 56;
+
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
 
   store.pages.forEach(p => {
+    let pHeight = PAGE_HEIGHT;
+    if (typeof document !== 'undefined') {
+      const frameEl = document.getElementById(p.id === store.pages[0]?.id ? 'tour-first-page-frame' : `frame_${p.id}`);
+      if (frameEl && frameEl.offsetHeight > 0) {
+        pHeight = frameEl.offsetHeight;
+      } else if (p.pageType === 'system_profile') {
+        pHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+      }
+    } else if (p.pageType === 'system_profile') {
+      pHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+    }
+    const pWidth = PAGE_WIDTH;
+
     if (p.x < minX) minX = p.x;
-    if (p.y < minY) minY = p.y;
-    if (p.x + PAGE_WIDTH > maxX) maxX = p.x + PAGE_WIDTH;
-    if (p.y + 720 > maxY) maxY = p.y + 720;
+    if (p.y - 28 < minY) minY = p.y - 28;
+    if (p.x + pWidth > maxX) maxX = p.x + pWidth;
+    if (p.y + pHeight > maxY) maxY = p.y + pHeight;
   });
 
   const totalWidth = maxX - minX;
   const totalHeight = maxY - minY;
-  const padding = 160;
+  const padding = 120;
 
   const safeWidth = Math.max(10, viewportWidth - padding);
   const safeHeight = Math.max(10, viewportHeight - padding);
@@ -426,10 +564,31 @@ export function resetCanvasView(viewportWidth = window.innerWidth - 580, viewpor
   const contentCenterY = minY + totalHeight / 2;
 
   store.canvasState.x = viewportWidth / 2 - contentCenterX * targetScale;
-  store.canvasState.y = viewportHeight / 2 - contentCenterY * targetScale;
+  store.canvasState.y = (headerHeight + viewportHeight / 2) - contentCenterY * targetScale;
 }
 
-// Schema 转换与加载
+// 统一生成纯小写规范表单业务 ID (例如: cli_diy_20261012_7x8k / ind_diy_... / ent_tpl_...)
+// 结构: [cli客户/ind个人/ent机构]_[diy自建/tpl模板]_[日期]_[纯小写防重随机码]
+export function generateFormId(
+  profileType: ProfileType = 'customer',
+  source: 'diy' | 'template' = 'diy'
+): string {
+  const isCus = profileType === 'customer' || profileType === 'client';
+  const typeCode = isCus ? 'cus' : (profileType === 'entity' ? 'ent' : 'ind');
+  const srcCode = source === 'template' ? 'tpl' : 'diy';
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const rand = Math.random().toString(36).substring(2, 6).toLowerCase();
+  return `${typeCode}_${srcCode}_${dateStr}_${rand}`;
+}
+
+export function generateSerialNo(
+  profileType: ProfileType = 'customer',
+  source: 'diy' | 'template' = 'diy'
+): string {
+  return generateFormId(profileType, source);
+}
+
+// Schema 转换与导出
 export function buildSchema(): FormSchema {
   return {
     schemaVersion: '1.0.0',
@@ -437,18 +596,87 @@ export function buildSchema(): FormSchema {
       title: store.meta.title || store.pages[0]?.title || '未命名表单',
       title_en: store.meta.title_en || store.pages[0]?.title_en || '',
       description: store.meta.description || store.pages[0]?.description || '',
-      description_en: store.meta.description_en || store.pages[0]?.description_en || ''
+      description_en: store.meta.description_en || store.pages[0]?.description_en || '',
+      profileType: store.meta.profileType || 'individual',
+      source: store.meta.source || 'diy',
+      templateKey: store.meta.templateKey,
+      formId: store.meta.formId,
+      serialNo: store.meta.serialNo,
+      createdAt: store.meta.createdAt
     },
     pages: store.pages.map(p => ({
       id: p.id,
+      pageType: p.pageType || 'form',
+      profileType: p.pageType === 'system_profile' ? (store.meta.profileType || p.profileType || 'individual') : p.profileType,
+      showSkeleton: p.showSkeleton,
       title: p.title,
       title_en: p.title_en,
       description: p.description,
       description_en: p.description_en,
-      fields: JSON.parse(JSON.stringify(p.fields))
+      fields: p.fields.map(f => {
+        const fieldCopy = JSON.parse(JSON.stringify(f));
+        // 国家和国籍组件是系统内建预设字典，无需在 Schema JSON 中冗余序列化全部244个国家选项
+        if (['country', 'nationality'].includes(fieldCopy.type)) {
+          if (!fieldCopy.options || fieldCopy.options.length === 0 || fieldCopy.options.length >= 200) {
+            delete fieldCopy.options;
+          }
+        }
+        return fieldCopy;
+      })
     })),
     pageConnections: []
   };
+}
+
+// URL 同步：仅使用纯小写 ID，不泄露多余长参数
+export function syncUrlParams(id?: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('type');
+    url.searchParams.delete('profileType');
+    url.searchParams.delete('mode');
+    url.searchParams.delete('source');
+    url.searchParams.delete('tpl');
+
+    const formId = (id || store.meta.formId || store.meta.serialNo || '').toLowerCase();
+    if (formId) {
+      url.searchParams.set('id', formId);
+    } else {
+      url.searchParams.delete('id');
+    }
+    window.history.replaceState({}, '', url.toString());
+  } catch (e) {
+    console.error('Failed to sync URL params', e);
+  }
+}
+
+export function createNewCanvas(options: {
+  title: string;
+  description?: string;
+  profileType?: ProfileType;
+}) {
+  const profileType = options.profileType || store.lockedProfileType || 'customer';
+  const schema = createBlankTemplate(profileType, options.title, '', options.description || '');
+  const formId = generateFormId(profileType, 'diy');
+  const now = Date.now();
+
+  schema.meta.source = 'diy';
+  schema.meta.serialNo = formId;
+  schema.meta.formId = formId;
+  schema.meta.createdAt = now;
+
+  loadSchema(schema);
+  store.meta.title = options.title || schema.meta.title;
+  store.meta.description = options.description !== undefined ? options.description : schema.meta.description;
+  store.meta.profileType = profileType;
+  store.meta.source = 'diy';
+  store.meta.serialNo = formId;
+  store.meta.formId = formId;
+  store.meta.createdAt = now;
+  store.activeTemplateKey = 'blank';
+  establishBaseline();
+  syncUrlParams(formId);
 }
 
 export function loadSchema(schema: FormSchema) {
@@ -457,6 +685,21 @@ export function loadSchema(schema: FormSchema) {
   store.meta.title_en = schema.meta?.title_en || '';
   store.meta.description = schema.meta?.description || '';
   store.meta.description_en = schema.meta?.description_en || '';
+  const rawProfileType = schema.meta?.profileType
+    || (schema.pages?.[0]?.profileType)
+    || 'customer';
+  const profileType: ProfileType = rawProfileType === 'client' ? 'customer' : rawProfileType;
+  store.meta.profileType = profileType;
+  store.meta.source = schema.meta?.source || 'diy';
+  store.meta.templateKey = schema.meta?.templateKey || '';
+
+  const incomingId = (schema.meta?.formId || schema.meta?.serialNo || '').toLowerCase();
+  const formId = incomingId || generateFormId(store.meta.profileType, store.meta.source);
+  store.meta.formId = formId;
+  store.meta.serialNo = formId;
+  store.meta.createdAt = schema.meta?.createdAt || Date.now();
+
+  syncUrlParams(formId);
 
   // 重新计算并扫描最大组件 ID，防止编号冲突
   let maxId = 0;
@@ -477,26 +720,57 @@ export function loadSchema(schema: FormSchema) {
 
   // 构建页面
   if (schema.pages && schema.pages.length > 0) {
-    store.pages = schema.pages.map((p, idx) => ({
-      id: p.id || `page_${Date.now()}_${idx}`,
-      title: p.title || `第 ${idx + 1} 页`,
-      title_en: p.title_en || (p.title ? (p.title.match(/^第\s*(\d+)\s*页$/) ? `Page ${p.title.match(/^第\s*(\d+)\s*页$/)![1]}` : `Page ${idx + 1}`) : `Page ${idx + 1}`),
-      description: p.description || '',
-      description_en: p.description_en || '',
-      fields: (p.fields || []).map(f => {
-        const meta = componentRegistry[f.type];
-        const defaultData = meta ? meta.defaultData() : {};
-        return {
-          ...defaultData,
-          ...f,
-          options: f.options && f.options.length
+    store.pages = schema.pages.map((p, idx) => {
+      const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (p.title === '基本资料' || p.title_en === 'Basic Information'));
+      const pageNumber = idx + 1;
+      const defaultZhTitle = `第${toChineseNum(pageNumber)}页`;
+      const defaultEnTitle = `Page ${pageNumber}`;
+      const numStr = String(pageNumber).padStart(2, '0');
+
+      let pageTitle = p.title || '';
+      let pageTitleEn = p.title_en || '';
+      if (!isSystemProfile) {
+        // 如果标题为空、或为历史纯数字序号残留（如 '02' / '2'），兜底恢复为中文语义标题（如 '第二页'）
+        if (!pageTitle || pageTitle === numStr || /^0\d+$/.test(pageTitle.trim())) {
+          pageTitle = defaultZhTitle;
+        } else if (/^第\s*\d+\s*页$/.test(pageTitle.trim())) {
+          const m = pageTitle.trim().match(/^第\s*(\d+)\s*页$/);
+          if (m) {
+            pageTitle = `第${toChineseNum(parseInt(m[1], 10))}页`;
+          }
+        }
+
+        if (!pageTitleEn || pageTitleEn === numStr || /^0\d+$/.test(pageTitleEn.trim())) {
+          pageTitleEn = defaultEnTitle;
+        }
+      }
+      return {
+        id: p.id || `page_${Date.now()}_${idx}`,
+        pageType: (isSystemProfile ? 'system_profile' : 'form') as 'form' | 'system_profile',
+        profileType: isSystemProfile ? (store.meta.profileType || p.profileType || 'entity') : p.profileType,
+        showSkeleton: p.showSkeleton !== false,
+        title: isSystemProfile ? (p.title || '基本资料') : pageTitle,
+        title_en: isSystemProfile ? (p.title_en || 'Basic Information') : pageTitleEn,
+        description: p.description || '',
+        description_en: p.description_en || '',
+        fields: isSystemProfile ? [] : (p.fields || []).map(f => {
+          const meta = componentRegistry[f.type];
+          const defaultData = meta ? meta.defaultData() : {};
+          const fieldOptions = f.options && f.options.length
             ? f.options
-            : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined)
-        };
-      }),
-      x: idx * (PAGE_WIDTH + PAGE_GAP),
-      y: 0
-    }));
+            : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined);
+          return {
+            ...defaultData,
+            ...f,
+            options: (['country', 'nationality'].includes(f.type) && fieldOptions && fieldOptions.length >= 200)
+              ? []
+              : fieldOptions
+          };
+        }),
+        x: idx * (PAGE_WIDTH + PAGE_GAP),
+        y: 0
+      };
+    });
     store.activePageId = store.pages.length > 0 ? store.pages[0].id : null;
     setTimeout(() => {
       resetCanvasView();

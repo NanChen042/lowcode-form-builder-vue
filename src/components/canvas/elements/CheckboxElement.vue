@@ -1,14 +1,14 @@
 <template>
   <div class="w-full">
     <ElementLabel :element="element" />
-    <div class="choice-group flex flex-wrap gap-3" :class="{ '!flex-col !gap-2': element.layout === 'stack' }">
+    <div class="choice-group" :class="{ 'choice-stack': element.layout === 'stack' }">
       <div v-for="(opt, idx) in element.options" :key="idx" class="inline-flex items-center gap-1.5 select-none">
         <span
           class="inline-flex items-center cursor-pointer p-0.5 rounded hover:bg-blue-50/70 transition-colors"
           :title="store.currentLocale === 'en' ? 'Click to toggle default check' : '点击切换默认勾选'"
           @click.stop="toggleDefaultCheckbox(opt.value)"
         >
-          <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none!" />
+          <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none" />
         </span>
         <EditableText
           :model-value="getOptionLabel(opt)"

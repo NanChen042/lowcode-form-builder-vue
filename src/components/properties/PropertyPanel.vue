@@ -1,5 +1,6 @@
 <template>
   <aside
+    id="tour-property-panel"
     class="relative min-h-0 flex flex-col border-l border-[#f0f0f0] bg-white overflow-hidden shrink-0 z-30"
     :class="{
       'transition-all duration-300 ease-in-out': !isResizing,
@@ -90,16 +91,70 @@
 
       <!-- 画布页面属性配置 -->
       <div v-else-if="store.selectedType === 'page' && selectedPage" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4">
-        <a-form id="page-prop-editor" :model="selectedPage" layout="vertical" size="small">
+        <!-- 场景 A：系统前置基础资料页（只读预设节点，禁止修改任何属性） -->
+        <template v-if="selectedPage.pageType === 'system_profile'">
+          <div class="mb-4 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">{{ t('prop.canvasSettings') }}</span>
+            <a-tag color="arcoblue" size="small">
+              {{ store.currentLocale === 'en' ? 'System Preset' : '系统预设' }}
+            </a-tag>
+          </div>
+
+          <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-3.5">
+            <div>
+              <span class="text-[11px] font-medium text-slate-400 block mb-1">
+                {{ store.currentLocale === 'en' ? 'Node Type' : '节点类型' }}
+              </span>
+              <div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-800">
+                <span>{{ store.currentLocale === 'en' ? 'System Baseline · Basic Info' : '系统前置 · 基础资料' }}</span>
+                <span class="text-[11px] font-mono font-semibold text-[#1677ff] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">01</span>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-[11px] font-medium text-slate-400 block mb-1">
+                {{ store.currentLocale === 'en' ? 'Business Type' : '业务类型' }}
+              </span>
+              <div class="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-200">
+                <div class="flex items-center gap-2">
+                  <Users v-if="currentProfileType === 'client'" class="h-4 w-4 text-blue-600" />
+                  <Building2 v-else-if="currentProfileType === 'entity'" class="h-4 w-4 text-[#1677ff]" />
+                  <User v-else class="h-4 w-4 text-emerald-600" />
+                  <span class="text-[13px] font-semibold text-slate-800">
+                    {{ getProfileTypeName(currentProfileType) }}
+                  </span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                  <Lock class="h-3 w-3" />
+                  {{ store.currentLocale === 'en' ? 'Locked' : '已锁定' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="rounded-lg bg-blue-50/80 border border-blue-200/60 p-3 text-[12px] leading-relaxed text-blue-700 flex items-start gap-2">
+              <Lock class="h-4 w-4 text-[#1677ff] shrink-0 mt-0.5" />
+              <span>
+                {{ store.currentLocale === 'en'
+                  ? 'This node is a system-level pre-check step with fixed logic. Property modification is not supported.'
+                  : '该节点为系统预置前置核验步骤，内容与逻辑由系统固化，不支持修改属性配置。' }}
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <!-- 场景 B：普通业务表单画布页面配置 -->
+        <a-form v-else id="page-prop-editor" :model="selectedPage" layout="vertical" size="small">
           <div class="mb-3 flex items-center justify-between">
             <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">{{ t('prop.canvasSettings') }}</span>
-            <a-tag color="blue" size="small">{{ t('prop.page') }}</a-tag>
+            <a-tag color="blue" size="small">
+              {{ t('prop.page') }}
+            </a-tag>
           </div>
 
           <!-- 英文模式页面配置 -->
           <template v-if="store.currentLocale === 'en'">
             <!-- 英文页面标题 -->
-            <a-form-item :label="t('prop.pageTitleEn')" class="!mb-3">
+            <a-form-item :label="t('prop.pageTitleEn')">
               <a-input
                 id="page-prop-title-input"
                 v-model="selectedPage.title_en"
@@ -113,7 +168,7 @@
             </a-form-item>
 
             <!-- 英文页面描述 -->
-            <a-form-item :label="t('prop.pageDescEn')" class="!mb-4">
+            <a-form-item :label="t('prop.pageDescEn')" class="mb-4">
               <a-textarea
                 id="page-prop-desc-input"
                 v-model="selectedPage.description_en"
@@ -129,18 +184,17 @@
 
           <!-- 中文模式页面配置 -->
           <template v-else>
-            <a-form-item :label="t('prop.pageTitle')" class="!mb-3">
+            <a-form-item :label="t('prop.pageTitle')">
               <a-input id="page-prop-title-input" v-model="selectedPage.title" allow-clear :placeholder="t('prop.pageTitlePlaceholder')" @focus="setPageFocus('title')" @blur="clearFocus" @input="markDirty" />
             </a-form-item>
 
-            <a-form-item :label="t('prop.pageDesc')" class="!mb-4">
+            <a-form-item :label="t('prop.pageDesc')" class="mb-4">
               <a-textarea id="page-prop-desc-input" v-model="selectedPage.description" :auto-size="{ minRows: 3, maxRows: 6 }" :placeholder="t('prop.pageDescPlaceholder')" @focus="setPageFocus('desc')" @blur="clearFocus" @input="markDirty" />
             </a-form-item>
           </template>
 
           <div class="pt-3 border-t border-slate-100">
             <a-popconfirm
-              v-if="!isFirstPage"
               :content="store.currentLocale === 'en' ? 'Are you sure you want to delete this canvas page? This cannot be undone.' : '确定要删除当前画布页面吗？此操作不可撤销。'"
               type="warning"
               @ok="handleDeletePage"
@@ -152,14 +206,6 @@
                 {{ t('prop.deletePage') }}
               </a-button>
             </a-popconfirm>
-            <a-tooltip v-else :content="store.currentLocale === 'en' ? 'The first page cannot be deleted' : '第一页为默认通用画布，不可删除'" position="top">
-              <a-button disabled long size="small">
-                <template #icon>
-                  <Trash2 class="h-3.5 w-3.5" />
-                </template>
-                {{ t('prop.deletePage') }}
-              </a-button>
-            </a-tooltip>
           </div>
         </a-form>
       </div>
@@ -180,7 +226,7 @@
             <!-- 英文模式下的字段配置 -->
             <template v-if="store.currentLocale === 'en'">
               <!-- 英文字段标题 -->
-              <a-form-item :label="t('prop.fieldLabelEn')" class="!mb-3">
+              <a-form-item :label="t('prop.fieldLabelEn')">
                 <a-input
                   id="prop-label-input"
                   v-model="selectedElement.label_en"
@@ -195,8 +241,8 @@
               </a-form-item>
 
               <!-- 英文副标题 -->
-              <div v-if="selectedElement.type !== 'alert'" class="!mb-3">
-                <a-form-item :label="t('prop.fieldHelpEn')" class="!mb-1">
+              <div v-if="selectedElement.type !== 'alert'" class="mb-3">
+                <a-form-item :label="t('prop.fieldHelpEn')" class="mb-1">
                   <a-input
                     id="prop-help-input"
                     v-model="selectedElement.help_en"
@@ -211,16 +257,8 @@
                 </a-form-item>
 
                 <!-- 方案 A：二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
-                <transition
-                  enter-active-class="transition-all duration-200 ease-out"
-                  enter-from-class="opacity-0 -translate-y-1"
-                  enter-to-class="opacity-100 translate-y-0"
-                  leave-active-class="transition-all duration-150 ease-in"
-                  leave-from-class="opacity-100 translate-y-0"
-                  leave-to-class="opacity-0 -translate-y-1"
-                >
+                <CollapseTransition :show="hasHelpContent">
                   <div
-                    v-if="hasHelpContent"
                     class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   >
                     <div class="flex items-center gap-1.5">
@@ -259,13 +297,13 @@
                       </div>
                     </div>
                   </div>
-                </transition>
+                </CollapseTransition>
               </div>
             </template>
 
             <!-- 中文模式下的字段配置 -->
             <template v-else>
-              <a-form-item :label="t('prop.fieldLabel')" class="!mb-3">
+              <a-form-item :label="t('prop.fieldLabel')">
                 <a-input
                   id="prop-label-input"
                   v-model="selectedElement.label"
@@ -279,8 +317,8 @@
               </a-form-item>
 
               <!-- 中文副标题 -->
-              <div v-if="selectedElement.type !== 'alert'" class="!mb-3">
-                <a-form-item :label="t('prop.fieldHelp')" class="!mb-1">
+              <div v-if="selectedElement.type !== 'alert'" class="mb-3">
+                <a-form-item :label="t('prop.fieldHelp')" class="mb-1">
                   <a-input
                     id="prop-help-input"
                     v-model="selectedElement.help"
@@ -294,16 +332,8 @@
                 </a-form-item>
 
                 <!-- 方案 A：二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
-                <transition
-                  enter-active-class="transition-all duration-200 ease-out"
-                  enter-from-class="opacity-0 -translate-y-1"
-                  enter-to-class="opacity-100 translate-y-0"
-                  leave-active-class="transition-all duration-150 ease-in"
-                  leave-from-class="opacity-100 translate-y-0"
-                  leave-to-class="opacity-0 -translate-y-1"
-                >
+                <CollapseTransition :show="hasHelpContent">
                   <div
-                    v-if="hasHelpContent"
                     class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   >
                     <div class="flex items-center gap-1.5">
@@ -342,7 +372,7 @@
                       </div>
                     </div>
                   </div>
-                </transition>
+                </CollapseTransition>
               </div>
             </template>
 
@@ -363,17 +393,9 @@
               <a-switch v-model="isElementRequired" size="small" />
             </div>
 
-            <!-- 必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格) -->
-            <transition
-              enter-active-class="transition-all duration-200 ease-out"
-              enter-from-class="opacity-0 -translate-y-1"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-150 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-1"
-            >
+            <!-- 必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格，丝滑展开折叠过渡) -->
+            <CollapseTransition :show="Boolean(selectedElement.type !== 'alert' && isElementRequired)">
               <div
-                v-if="selectedElement.type !== 'alert' && isElementRequired"
                 class="ml-2 pl-3 my-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
               >
                 <div class="flex items-center justify-between">
@@ -406,7 +428,7 @@
                   @input="markDirty"
                 />
               </div>
-            </transition>
+            </CollapseTransition>
 
             <div v-if="selectedElement.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
@@ -418,17 +440,9 @@
               <a-switch v-model="isDeclarationRequired" size="small" />
             </div>
 
-            <!-- 签名组件声明必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格) -->
-            <transition
-              enter-active-class="transition-all duration-200 ease-out"
-              enter-from-class="opacity-0 -translate-y-1"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-150 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-1"
-            >
+            <!-- 签名组件声明必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格，丝滑展开折叠过渡) -->
+            <CollapseTransition :show="Boolean(selectedElement.type === 'signature' && isDeclarationRequired)">
               <div
-                v-if="selectedElement.type === 'signature' && isDeclarationRequired"
                 class="ml-2 pl-3 my-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
               >
                 <div class="flex items-center justify-between">
@@ -461,7 +475,7 @@
                   @input="markDirty"
                 />
               </div>
-            </transition>
+            </CollapseTransition>
 
             <div v-if="['select', 'country', 'nationality'].includes(selectedElement.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
@@ -473,25 +487,26 @@
               <a-switch v-model="isSelectMultiple" size="small" />
             </div>
 
-            <!-- 点击开启多选时，最大允许选择数紧跟在开启多选正下方 (或多选框组 checkbox 自带多选) -->
-            <div
-              v-if="canHaveMaxSelections"
-              class="flex items-center justify-between py-1.5 border-t border-slate-50"
-            >
-              <div class="flex items-center gap-1.5">
-                <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
-                <a-tooltip :content="t('prop.maxSelectionsTip')" position="top">
-                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-                </a-tooltip>
+            <!-- 点击开启多选时，最大允许选择数紧跟在开启多选正下方 (或多选框组 checkbox 自带多选，丝滑展开折叠过渡) -->
+            <CollapseTransition :show="Boolean(canHaveMaxSelections)">
+              <div
+                class="flex items-center justify-between py-1.5 border-t border-slate-50"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
+                  <a-tooltip :content="t('prop.maxSelectionsTip')" position="top">
+                    <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+                <a-input-number
+                  v-model="currentMaxSelections"
+                  :min="1"
+                  :max="20"
+                  size="small"
+                  style="width: 100px"
+                />
               </div>
-              <a-input-number
-                v-model="currentMaxSelections"
-                :min="1"
-                :max="20"
-                size="small"
-                style="width: 100px"
-              />
-            </div>
+            </CollapseTransition>
 
             <!-- 单行文本格式类型 (文本 / 数字) -->
             <div v-if="selectedElement.type === 'input'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
@@ -539,7 +554,7 @@
 
           <!-- 电话组件专属：默认国际区号设置 (默认新加坡 +65，选中后展示国家国旗图标) -->
           <div v-if="selectedElement.type === 'phone'" class="space-y-2.5 pt-3.5 border-t border-slate-100">
-            <a-form-item :label="t('prop.defaultDialCode')" class="!mb-0">
+            <a-form-item :label="t('prop.defaultDialCode')" class="mb-0">
               <a-select
                 :model-value="selectedCountryIso"
                 class="w-full"
@@ -588,7 +603,7 @@
           <div v-if="hasPlaceholder" class="space-y-3 pt-3.5 border-t border-slate-100">
             <!-- 英文占位符配置 -->
             <template v-if="store.currentLocale === 'en'">
-              <a-form-item :label="englishPlaceholderFieldLabel" class="!mb-0">
+              <a-form-item :label="englishPlaceholderFieldLabel" class="mb-0">
                 <a-input
                   id="prop-placeholder-input"
                   v-model="selectedElement.placeholder_en"
@@ -604,7 +619,7 @@
             </template>
             <!-- 中文占位符配置 -->
             <template v-else>
-              <a-form-item :label="placeholderFieldLabel" class="!mb-0">
+              <a-form-item :label="placeholderFieldLabel" class="mb-0">
                 <a-input
                   id="prop-placeholder-input"
                   v-model="selectedElement.placeholder"
@@ -706,16 +721,16 @@
           <!-- 日期选择器专属配置 (现代化 Arco 原生组件) -->
           <div v-if="selectedElement.type === 'date'" class="space-y-3 pt-3.5 border-t border-slate-100">
             <!-- 日期模式 (单日期 / 起止日期) -->
-            <a-form-item :label="t('prop.dateMode')" class="!mb-0">
+            <a-form-item :label="t('prop.dateMode')" class="mb-0">
               <a-radio-group
                 v-model="selectedElement.dateMode"
                 type="button"
                 size="small"
-                class="w-full !flex"
+                class="w-full flex"
                 @change="markDirty"
               >
-                <a-radio value="single" class="!flex-1 !text-center">{{ t('prop.dateModeSingle') }}</a-radio>
-                <a-radio value="range" class="!flex-1 !text-center">{{ t('prop.dateModeRange') }}</a-radio>
+                <a-radio value="single" class="flex-1 text-center">{{ t('prop.dateModeSingle') }}</a-radio>
+                <a-radio value="range" class="flex-1 text-center">{{ t('prop.dateModeRange') }}</a-radio>
               </a-radio-group>
             </a-form-item>
 
@@ -734,18 +749,19 @@
               />
             </div>
 
-            <!-- 默认勾选长期 -->
-            <div
-              v-if="selectedElement.enableLongTerm"
-              class="flex items-center justify-between py-1.5 px-3 rounded-lg bg-blue-50/60 border border-blue-100 transition-all"
-            >
-              <span class="text-[12px] font-medium text-blue-900">{{ t('prop.defaultLongTerm') }}</span>
-              <a-switch
-                v-model="selectedElement.defaultLongTerm"
-                size="small"
-                @change="markDirty"
-              />
-            </div>
+            <!-- 默认勾选长期 (丝滑展开折叠过渡) -->
+            <CollapseTransition :show="Boolean(selectedElement.enableLongTerm)">
+              <div
+                class="flex items-center justify-between py-1.5 px-3 rounded-lg bg-blue-50/60 border border-blue-100 transition-all"
+              >
+                <span class="text-[12px] font-medium text-blue-900">{{ t('prop.defaultLongTerm') }}</span>
+                <a-switch
+                  v-model="selectedElement.defaultLongTerm"
+                  size="small"
+                  @change="markDirty"
+                />
+              </div>
+            </CollapseTransition>
           </div>
 
           <!-- 底部操作按钮 -->
@@ -791,6 +807,7 @@ import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
 import { useSidebarResize } from '@/utils/useSidebarResize';
 import OptionsEditor from './OptionsEditor.vue';
 import CountryDirectoryModal from './CountryDirectoryModal.vue';
+import CollapseTransition from '@/components/common/CollapseTransition.vue';
 import {
   SlidersHorizontal,
   Copy,
@@ -800,8 +817,24 @@ import {
   PanelRight,
   CornerDownRight,
   ChevronRight,
-  MessageSquare
+  MessageSquare,
+  Building2,
+  User,
+  Users,
+  Lock
 } from '@lucide/vue';
+import type { ProfileType } from '@/types/schema';
+
+function getProfileTypeName(type?: ProfileType) {
+  if (type === 'client') return store.currentLocale === 'en' ? 'Client Case' : '客户案例';
+  if (type === 'entity') return store.currentLocale === 'en' ? 'Entity Case' : '实体案例';
+  return store.currentLocale === 'en' ? 'Individual Case' : '个人案例';
+}
+
+// 当前基础资料业务类型
+const currentProfileType = computed(() => {
+  return selectedPage.value?.profileType || store.meta.profileType || 'client';
+});
 
 // 全球国家/国籍/区号统一预设清单弹窗状态
 const isCountryListModalVisible = ref(false);
@@ -809,11 +842,6 @@ const isCountryListModalVisible = ref(false);
 function openCountryListModal() {
   isCountryListModalVisible.value = true;
 }
-
-const isFirstPage = computed(() => {
-  if (!selectedPage.value) return false;
-  return store.pages.findIndex((p) => p.id === selectedPage.value!.id) === 0;
-});
 
 const selectedCountryIso = computed(() => {
   if (!selectedElement.value) return 'sg';
@@ -1089,10 +1117,10 @@ function handleDeletePage() {
   margin-bottom: 12px;
 }
 :deep(.arco-form-item-content-flex) {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  width: 100% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
 /* 默认国际区号下拉悬浮层规范：国旗与国家名称紧凑在左，区号右对齐 */

@@ -1,33 +1,48 @@
 <template>
   <a-modal
     :visible="visible"
-    fullscreen
+    :width="'min(1060px, 94vw)'"
+    :align-center="true"
     :footer="false"
     :header="false"
     :closable="false"
     modal-class="preview-arco-modal"
     :modal-style="{
       padding: 0,
-      overflow: 'hidden'
+      height: 'min(890px, 92vh)',
+      maxHeight: '92vh',
+      borderRadius: '20px',
+      overflow: 'hidden',
+      boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08)'
+    }"
+    :mask-style="{
+      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(15, 23, 42, 0.5)'
     }"
     :body-style="{
       padding: 0,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      borderRadius: '20px'
     }"
     unmount-on-close
     :mask-closable="true"
     @cancel="handleClose"
   >
-    <div class="flex h-full w-full flex-col overflow-hidden bg-white">
+    <div class="flex h-full w-full flex-col overflow-hidden bg-white rounded-[20px]">
       <!-- 头部 -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
         <div>
-          <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
-            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Deploy Schema' : '发布结构') : (store.currentLocale === 'en' ? 'Preview' : '预览') }}
-          </h2>
+          <div class="flex items-center gap-2">
+            <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
+              {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Deploy Schema' : '发布结构') : (store.currentLocale === 'en' ? 'Preview' : '预览') }}
+            </h2>
+            <a-tag v-if="schema?.meta?.title || store.meta.title" color="arcoblue" size="small">
+              {{ schema?.meta?.title || store.meta.title }}
+            </a-tag>
+          </div>
           <p class="m-0 text-xs leading-5 text-slate-400">
             {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Form schema is ready for deployment' : '当前表单已生成可保存的结构数据') : (store.currentLocale === 'en' ? 'Experience responsive mobile form interactions and validations' : '在手机设备模拟器中体验表单交互与验证') }}
           </p>
@@ -49,33 +64,33 @@
 
       <!-- 中间主视图 -->
       <div class="relative min-h-0 flex-1 flex overflow-hidden">
-        <section class="flex-1 flex items-center justify-center gap-12 overflow-auto bg-[#f8fafc] py-8 transition-all duration-300 relative">
+        <section class="flex-1 flex items-center justify-center gap-12 overflow-hidden bg-[#f8fafc] py-6 transition-all duration-300 relative">
           <!-- 左侧大纲进度条（多页时展示） -->
-          <div v-if="pages.length > 1 && !isSubmitted" class="w-[240px] shrink-0 flex flex-col gap-1">
+          <div v-if="pages.length > 1 && !isSubmitted" class="w-[240px] shrink-0 flex flex-col gap-1 max-h-full overflow-y-auto custom-scrollbar">
             <div class="mb-2 pb-2 border-b border-slate-200/80 text-xs text-slate-500 font-medium">
               <span>{{ store.currentLocale === 'en' ? 'Form Steps' : '表单步骤列表' }}</span>
             </div>
 
             <div v-for="(p, i) in pages" :key="p.id" class="preview-step-item cursor-pointer flex items-start gap-3 transition group py-1.5 select-none" :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-600 hover:text-blue-600'" @click="handleStepClick(i)">
               <div class="flex flex-col items-center">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs transition-all" :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff] shadow-xs' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:bg-blue-50/40'">
-                  {{ i + 1 }}
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-mono transition-all" :class="i === currentStep ? 'border-[#1677ff] font-semibold bg-blue-50 text-[#1677ff] shadow-xs' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:bg-blue-50/40'">
+                  {{ getStepNumber(i) }}
                 </span>
                 <div v-if="i < pages.length - 1" class="w-px h-8 bg-slate-200 my-1"></div>
               </div>
               <div class="pt-0.5 flex flex-col min-w-0">
                 <span class="text-sm font-medium leading-5 truncate" :class="{ 'font-semibold': i === currentStep }">
-                  {{ getPageText(p, 'title') || (store.currentLocale === 'en' ? `Page ${i + 1}` : `第 ${i + 1} 页`) }}
+                  {{ p.pageType === 'system_profile' ? (store.currentLocale === 'en' ? '01 · Basic Information [Preset]' : '01 · 基础资料 [系统预设]') : getPageTitleDisplay(p, i) }}
                 </span>
                 <span class="text-[11px] text-slate-400">
-                  {{ store.currentLocale === 'en' ? `${p.fields?.length || 0} fields` : `${p.fields?.length || 0} 个字段` }}
+                  {{ p.pageType === 'system_profile' ? (store.currentLocale === 'en' ? 'Pre-filled Baseline' : '预置核验节点') : (store.currentLocale === 'en' ? `${p.fields?.length || 0} fields` : `${p.fields?.length || 0} 个字段`) }}
                 </span>
               </div>
             </div>
           </div>
 
-          <!-- 仿真 Apple iPhone 17 Pro Max 手机机模 (对齐 Cult UI 设计规范) -->
-          <div class="relative flex h-[820px] max-h-full w-[385px] shrink-0 flex-col select-none transition-all duration-300">
+          <!-- 仿真 Apple iPhone 17 Pro Max 手机机模 (高度自适应屏幕视口并严格在机身内滚动) -->
+          <div class="relative flex h-full max-h-[812px] w-[385px] shrink-0 flex-col select-none transition-all duration-300 min-h-0">
             <!-- 机身左侧实体按键 (Action 动作键 + 音量加 + 音量减) -->
             <div class="pointer-events-none absolute -left-[3.5px] top-[115px] z-10 w-[3.5px] h-[26px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
             <div class="pointer-events-none absolute -left-[3.5px] top-[158px] z-10 w-[3.5px] h-[52px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
@@ -85,14 +100,14 @@
             <div class="pointer-events-none absolute -right-[3.5px] top-[172px] z-10 w-[3.5px] h-[78px] rounded-r-[2px] bg-[#2a2a2e] shadow-[inset_-1px_0_1px_rgba(255,255,255,0.25)]"></div>
 
             <!-- 钛金属外壳主框 (Deep Graphite / Titanium Finish) -->
-            <div class="relative flex flex-1 flex-col rounded-[55px] bg-[#18181b] p-[9px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.12),inset_0_0_2px_1px_rgba(255,255,255,0.2)] ring-1 ring-black/80">
+            <div class="relative flex flex-1 flex-col min-h-0 rounded-[55px] bg-[#18181b] p-[9px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.12),inset_0_0_2px_1px_rgba(255,255,255,0.2)] ring-1 ring-black/80">
               <!-- 顶部微缝隐藏式听筒 -->
               <div class="pointer-events-none absolute top-[3.5px] left-1/2 -translate-x-1/2 z-40 w-12 h-[3px] rounded-full bg-[#141416] shadow-[inset_0_1px_1px_rgba(0,0,0,0.9)]"></div>
 
               <!-- 屏幕外侧极窄等宽黑边 (Uniform Bezel) -->
-              <div class="relative flex flex-1 flex-col overflow-hidden rounded-[47px] bg-black p-[2px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+              <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[47px] bg-black p-[2px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
                 <!-- 纯白主屏显示区域 -->
-                <div class="relative flex flex-1 flex-col overflow-hidden rounded-[45px] bg-white">
+                <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[45px] bg-white">
                   <!-- iPhone 灵动岛 Dynamic Island (带精致超感前置镜头光学质感) -->
                   <div class="pointer-events-none absolute left-1/2 top-[11px] z-30 flex h-[32px] w-[118px] -translate-x-1/2 items-center justify-end pr-2.5 rounded-full bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] transition-all">
                     <!-- 超感光前置镜头结构 (对齐真实 iPhone 灵动岛镜头物理质感) -->
@@ -144,7 +159,7 @@
                   </div>
 
                 <!-- 提交成功状态卡片展示 -->
-                <div v-if="isSubmitted" class="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div v-if="isSubmitted" class="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center p-6 text-center animate-fade-in custom-scrollbar">
                   <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4 shadow-sm">
                     <CheckCircle class="w-10 h-10" />
                   </div>
@@ -197,7 +212,7 @@
                   </div>
 
                   <!-- 手机主视图可滚动内容 -->
-                  <div ref="phoneContentRef" class="flex-1 overflow-auto px-5 pb-12 pt-2 custom-scrollbar">
+                  <div ref="phoneContentRef" class="flex-1 min-h-0 overflow-y-auto px-5 pb-14 pt-2 custom-scrollbar">
                     <!-- 步骤与进度条 (对齐 AlgoCandy 样式) -->
                     <div class="flex items-center justify-between mt-2 mb-3">
                       <h3 class="m-0 text-base font-bold text-slate-900 tracking-tight">
@@ -217,20 +232,36 @@
                       {{ currentLocalizedDesc }}
                     </p>
 
-                    <!-- 空页面 -->
-                    <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                      {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                    <!-- 系统预设基础资料页 (无表单验证，直接渲染结构化卡片与骨架屏) -->
+                    <div v-if="currentPage?.pageType === 'system_profile'" class="w-full flex flex-col">
+                      <SystemProfileView
+                        :profile-type="currentPage.profileType || schema?.meta?.profileType || 'client'"
+                        :show-skeleton="currentPage.showSkeleton !== false"
+                        :is-canvas="false"
+                      />
+
+                      <!-- 底部操作按钮：确认 & 下一步 (无任何验证阻断，直接进入下一步！) -->
+                      <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
+                        <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
+                          {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
+                        </a-button>
+                        <div v-else class="flex-1"></div>
+
+                        <a-button type="primary" class="h-9 px-6 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleProfileNext">
+                          {{ store.currentLocale === 'en' ? 'Confirm & Next' : '确认 & 下一步' }}
+                        </a-button>
+                      </div>
                     </div>
 
                     <!-- 真实 Arco Design 表单结构 (禁用浏览器原生冒泡提示，采用统一美观校验反馈) -->
-                    <form class="w-full flex flex-col" novalidate @submit.prevent>
-                      <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
-                      <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep" class="w-full flex flex-col">
-                        <!-- 空页面 -->
-                        <div v-if="!page.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                          {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
-                        </div>
+                    <form v-else class="w-full flex flex-col" novalidate @submit.prevent>
+                      <!-- 空页面 -->
+                      <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
+                        {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                      </div>
 
+                      <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
+                      <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep && page.pageType !== 'system_profile'" class="w-full flex flex-col">
                         <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
                       </div>
 
@@ -297,6 +328,7 @@ import { parseMultiValue } from '@/utils/helpers';
 import { validatePhoneNumber } from '@/registry/components';
 import PreviewField from './PreviewField.vue';
 import SchemaSidebar from './SchemaSidebar.vue';
+import SystemProfileView from '@/components/common/SystemProfileView.vue';
 import {
   Code,
   X,
@@ -524,6 +556,8 @@ function validateField(field: FormElement): string | null {
 // 校验整页
 function validateCurrentPage(): boolean {
   if (!currentPage.value) return true;
+  // 系统预设基础资料页：不做任何表单验证，直接放行
+  if (currentPage.value.pageType === 'system_profile') return true;
 
   let hasError = false;
 
@@ -551,6 +585,16 @@ function validateCurrentPage(): boolean {
   }
 
   return true;
+}
+
+function handleProfileNext() {
+  // 第一页基础资料页：完全不做表单验证，直接流转至下一页
+  currentStep.value++;
+  nextTick(() => {
+    if (phoneContentRef.value) {
+      phoneContentRef.value.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 }
 
 function handleNextStep() {
@@ -597,6 +641,19 @@ onUnmounted(() => {
 const pages = computed(() => props.schema.pages || []);
 const currentPage = computed(() => pages.value[currentStep.value] || null);
 
+function getStepNumber(idx: number): string {
+  return String(idx + 1).padStart(2, '0');
+}
+
+function getPageTitleDisplay(p: any, idx: number): string {
+  const stepNo = getStepNumber(idx);
+  const rawTitle = getPageText(p, 'title') || (store.currentLocale === 'en' ? `Page ${idx + 1}` : `第 ${idx + 1} 页`);
+  if (rawTitle.startsWith(stepNo) || /^\d{2}\s*·/.test(rawTitle)) {
+    return rawTitle;
+  }
+  return `${stepNo} · ${rawTitle}`;
+}
+
 const totalFieldsCount = computed(() => {
   let count = 0;
   for (const p of pages.value) {
@@ -623,9 +680,11 @@ const formBrandTitle = computed(() => {
 
 const currentLocalizedDesc = computed(() => {
   if (currentPage.value) {
-    return getPageText(currentPage.value, 'description') || currentPage.value.description || (store.currentLocale === 'en' ? 'No description available' : '暂无描述信息');
+    const desc = getPageText(currentPage.value, 'description') || currentPage.value.description;
+    return desc && desc.trim() ? desc.trim() : '';
   }
-  return props.schema.meta?.description || (store.currentLocale === 'en' ? 'No description available' : '暂无描述信息');
+  const metaDesc = props.schema.meta?.description;
+  return metaDesc && metaDesc.trim() ? metaDesc.trim() : '';
 });
 
 const hasPrev = computed(() => currentStep.value > 0);
@@ -667,14 +726,18 @@ async function handlePublish() {
 }
 
 :deep(.preview-arco-modal .arco-modal) {
-  padding: 0 !important;
+  padding: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 :deep(.preview-arco-modal .arco-modal-body) {
-  padding: 0 !important;
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <section
+    id="tour-canvas-area"
     ref="canvasContainerRef"
     class="canvas-grid relative min-h-0 flex-1 overflow-hidden"
     :class="{ 'space-panning-ready': store.isSpacePressed }"
@@ -14,6 +15,8 @@
     @mouseleave="onCanvasMouseLeave"
     @contextmenu.prevent="onContextMenu"
   >
+    <!-- 专属新手引导视口目标（严格对齐顶栏 56px 下方，杜绝负外边距穿透顶栏） -->
+    <div id="tour-canvas-viewport" style="position: absolute; top: 56px; left: 0; right: 0; bottom: 0; pointer-events: none;" />
 
     <!-- 画布世界 -->
     <div class="canvas-world" :class="{ 'is-animating': store.isCanvasAnimating }" :style="{
@@ -23,7 +26,12 @@
       <CanvasConnections />
 
       <!-- 多画板页面列表 -->
-      <PageFrame v-for="(page, idx) in store.pages" :key="page.id" :page="page" :page-index="idx" />
+      <PageFrame
+        v-for="(page, idx) in store.pages"
+        :key="page.id"
+        :page="page"
+        :page-index="idx"
+      />
     </div>
 
     <!-- 全局画布初始化加载状态 -->
@@ -43,7 +51,7 @@
         </p>
 
         <div class="flex flex-col gap-3 w-full max-w-[200px]">
-          <a-button type="primary" size="large" long @click="addPage()">
+          <a-button type="primary" size="large" long @click="$emit('open-create-canvas')">
             <template #icon>
               <Plus class="h-4 w-4" />
             </template>
@@ -237,9 +245,9 @@
                 {{ store.currentLocale === 'en' ? 'Pan Canvas' : '自由平移画布' }}
               </span>
               <span class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ store.currentLocale === 'en' ? 'Space' : '空格' }}</kbd>
+                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
                 <span>+</span>
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ store.currentLocale === 'en' ? 'Drag' : '拖拽' }}</kbd>
+                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ store.currentLocale === 'en' ? 'Left Drag' : '左键拖拽' }}</kbd>
               </span>
             </div>
             <div class="flex items-center justify-between text-[13px]">
@@ -305,7 +313,11 @@
         </div>
       </div>
 
-      <div class="mt-5 flex justify-end">
+      <div class="mt-5 flex items-center justify-between">
+        <a-button type="outline" class="rounded-lg" @click="handleRestartTour">
+          <template #icon><Sparkles class="h-4 w-4 text-[#1677ff]" /></template>
+          {{ store.currentLocale === 'en' ? 'Product Tour' : '开启新手漫游引导' }}
+        </a-button>
         <a-button type="primary" class="rounded-lg px-5" @click="helpModalVisible = false">
           {{ store.currentLocale === 'en' ? 'Got it' : '我知道了' }}
         </a-button>
@@ -325,7 +337,6 @@ import {
   resetCanvasView,
   focusOnPage,
   animateCanvasTransition,
-  addPage,
   clearSelection,
   selectElement,
   selectPage,
@@ -339,10 +350,12 @@ import {
   Plus,
   LayoutTemplate,
   PanelLeft,
-  PanelRight
+  PanelRight,
+  Sparkles
 } from '@lucide/vue';
+import { startAppTour } from '@/utils/useAppTour';
 
-defineEmits(['open-template-gallery']);
+defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
 
@@ -351,12 +364,13 @@ const currentGridSize = computed(() => {
   return Math.max(9, Math.min(22, Math.round(14 * store.canvasState.scale)));
 });
 
-// 谷歌 Bento 风格微点阵光斑追踪与静止自动隐藏
-const mouseX = ref(window.innerWidth / 2);
-const mouseY = ref(window.innerHeight / 2);
-const targetX = ref(window.innerWidth / 2);
-const targetY = ref(window.innerHeight / 2);
-const isMouseInside = ref(false);
+
+// 谷歌 Bento / Stitch 风格微点阵光斑追踪与静止自动隐藏 (纯原生变量，0 Vue 响应式追踪开销)
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let targetX = window.innerWidth / 2;
+let targetY = window.innerHeight / 2;
+let isMouseInside = false;
 let spotlightOpacity = 0;
 let rafId: number | null = null;
 let lastMoveTime = 0;
@@ -365,49 +379,69 @@ const IDLE_TIMEOUT_MS = 1200; // 鼠标超过 1.2 秒未移动自动平滑淡出
 function onCanvasMouseMove(e: MouseEvent) {
   if (!canvasContainerRef.value) return;
   const rect = canvasContainerRef.value.getBoundingClientRect();
-  targetX.value = e.clientX - rect.left;
-  targetY.value = e.clientY - rect.top;
-  isMouseInside.value = true;
+  const currentX = e.clientX - rect.left;
+  const currentY = e.clientY - rect.top;
+
+  // 若处于静止淡出态或刚移入，瞬间对齐当前鼠标位置，确保绝对居中发散
+  if (spotlightOpacity <= 0.01) {
+    mouseX = currentX;
+    mouseY = currentY;
+  }
+  targetX = currentX;
+  targetY = currentY;
+  isMouseInside = true;
   lastMoveTime = performance.now();
+
+  // 按需唤醒：仅在动画未激活时启动 rAF 渲染，静止淡出后完全休眠，0% 空闲 CPU 开销
+  if (!rafId) {
+    rafId = requestAnimationFrame(updateSpotlight);
+  }
 }
 
 function onCanvasMouseLeave() {
-  isMouseInside.value = false;
+  isMouseInside = false;
+  // 鼠标移出画布后，若动画已暂停则唤醒执行平滑淡出
+  if (!rafId && spotlightOpacity > 0.005) {
+    rafId = requestAnimationFrame(updateSpotlight);
+  }
 }
 
 function updateSpotlight() {
   const now = performance.now();
   const timeSinceMove = now - lastMoveTime;
-  const isMoving = isMouseInside.value && (timeSinceMove < IDLE_TIMEOUT_MS);
+  const isMoving = isMouseInside && (timeSinceMove < IDLE_TIMEOUT_MS);
   const targetOpacity = isMoving ? 1 : 0;
 
   // 顺滑淡入与消退插值（移动时 0.15 渐入，静止超时 0.05 优雅慢消退）
   spotlightOpacity += (targetOpacity - spotlightOpacity) * (targetOpacity > spotlightOpacity ? 0.15 : 0.05);
 
   if (spotlightOpacity > 0.005) {
-    // 鼠标坐标平滑阻尼插值
-    const dx = targetX.value - mouseX.value;
-    const dy = targetY.value - mouseY.value;
-    mouseX.value += dx * 0.14;
-    mouseY.value += dy * 0.14;
+    // 鼠标坐标阻尼插值：响应敏捷，紧跟光标居中发散
+    const dx = targetX - mouseX;
+    const dy = targetY - mouseY;
+    mouseX += dx * 0.25;
+    mouseY += dy * 0.25;
 
     // 谷歌 Stitch 原版聚光灯扩散控制（精确对照采样）：紧凑半径 65px，移动活跃时微舒展至 75px
     const moveFactor = Math.max(0, 1 - timeSinceMove / 400);
     const radius = 65 + moveFactor * 10;
 
     if (canvasContainerRef.value) {
-      canvasContainerRef.value.style.setProperty('--mouse-x', `${mouseX.value.toFixed(1)}px`);
-      canvasContainerRef.value.style.setProperty('--mouse-y', `${mouseY.value.toFixed(1)}px`);
+      canvasContainerRef.value.style.setProperty('--mouse-x', `${mouseX.toFixed(1)}px`);
+      canvasContainerRef.value.style.setProperty('--mouse-y', `${mouseY.toFixed(1)}px`);
       canvasContainerRef.value.style.setProperty('--spotlight-radius', `${radius.toFixed(1)}px`);
       canvasContainerRef.value.style.setProperty('--spotlight-opacity', `${spotlightOpacity.toFixed(3)}`);
     }
+
+    rafId = requestAnimationFrame(updateSpotlight);
   } else {
+    // 完全静止且淡出完成：设为 0 并彻底休眠 rAF 循环，释放 CPU / GPU
+    spotlightOpacity = 0;
     if (canvasContainerRef.value) {
       canvasContainerRef.value.style.setProperty('--spotlight-opacity', '0');
     }
+    rafId = null;
   }
-
-  rafId = requestAnimationFrame(updateSpotlight);
 }
 
 // 右键菜单状态
@@ -485,6 +519,13 @@ function showHelpAlert() {
   helpModalVisible.value = true;
 }
 
+function handleRestartTour() {
+  helpModalVisible.value = false;
+  setTimeout(() => {
+    startAppTour();
+  }, 250);
+}
+
 function onMouseDown(e: MouseEvent) {
   if (isZoomMenuOpen.value) {
     isZoomMenuOpen.value = false;
@@ -496,6 +537,7 @@ function onMouseDown(e: MouseEvent) {
   if ((e.target as HTMLElement).closest('.ruler')) return;
 
   const isSpaceDrag = store.isSpacePressed;
+  const isCtrlDrag = e.button === 0 && (e.ctrlKey || e.metaKey);
   const isMiddleDrag = e.button === 1;
   const isBackgroundDrag =
     e.button === 0 &&
@@ -503,7 +545,7 @@ function onMouseDown(e: MouseEvent) {
       (e.target as HTMLElement).classList.contains('canvas-world') ||
       (e.target as HTMLElement).id === 'canvas-connections');
 
-  if (isSpaceDrag || isMiddleDrag || isBackgroundDrag) {
+  if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag) {
     e.preventDefault();
     store.isPanning = true;
     panStartX = e.clientX;
@@ -512,7 +554,7 @@ function onMouseDown(e: MouseEvent) {
     panStartCanvasY = store.canvasState.y;
     document.body.classList.add('is-panning');
 
-    if (e.button === 0 && !isSpaceDrag && !isMiddleDrag) {
+    if (e.button === 0 && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
       clearSelection();
     }
   } else if (store.isDraggingFrame && store.draggedFrameId) {
@@ -569,8 +611,8 @@ function onWheel(e: WheelEvent) {
   if (e.ctrlKey || e.metaKey) {
     const oldScale = store.canvasState.scale;
     const nextScale = oldScale * Math.exp(-e.deltaY * 0.0016);
-    const rect = canvasContainerRef.value?.getBoundingClientRect();
-    adjustZoom(nextScale - oldScale, e.clientX, e.clientY, rect);
+    const left = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+    adjustZoom(nextScale - oldScale, e.clientX, e.clientY, { left, top: 0 } as DOMRect);
   } else {
     let dy = e.deltaY;
     let dx = e.deltaX;
@@ -595,16 +637,32 @@ function onContextMenu(e: MouseEvent) {
   const elementEl = target.closest('.canvas-element') as HTMLElement | null;
   const frameEl = target.closest('.mobile-frame') as HTMLElement | null;
 
+  // 辅助解析所属画板 ID（优先从 data-page-id 取真实 ID，次之兼容 id 解析与第一页回退）
+  const getFramePageId = (el: HTMLElement | null): string | null => {
+    if (!el) return null;
+    return (
+      el.getAttribute('data-page-id') ||
+      (el.id?.startsWith('frame_') ? el.id.replace('frame_', '') : null) ||
+      (el.id === 'tour-first-page-frame' ? store.pages[0]?.id : null)
+    );
+  };
+
+  const resolvedPageId = getFramePageId(frameEl);
+
   if (elementEl && elementEl.id) {
     selectElement(elementEl.id);
     contextMenuTargetType.value = 'element';
     contextMenuTargetElementId.value = elementEl.id;
-    contextMenuTargetPageId.value = frameEl?.id ? frameEl.id.replace('frame_', '') : null;
-  } else if (frameEl && frameEl.id) {
-    selectPage(frameEl.id.replace('frame_', ''));
+    contextMenuTargetPageId.value = resolvedPageId;
+    if (resolvedPageId) {
+      store.activePageId = resolvedPageId;
+    }
+  } else if (frameEl && resolvedPageId) {
+    // 默认高亮选中当前画板，并展开属性面板
+    selectPage(resolvedPageId);
     contextMenuTargetType.value = 'page';
     contextMenuTargetElementId.value = null;
-    contextMenuTargetPageId.value = frameEl.id.replace('frame_', '');
+    contextMenuTargetPageId.value = resolvedPageId;
   } else {
     contextMenuTargetType.value = 'canvas';
     contextMenuTargetElementId.value = null;
@@ -696,7 +754,6 @@ onMounted(() => {
   window.addEventListener('mouseup', onMouseUp);
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
-  rafId = requestAnimationFrame(updateSpotlight);
 });
 
 onUnmounted(() => {
@@ -706,6 +763,7 @@ onUnmounted(() => {
   window.removeEventListener('keyup', handleKeyUp);
   if (rafId) {
     cancelAnimationFrame(rafId);
+    rafId = null;
   }
 });
 </script>

@@ -186,7 +186,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       showLabel: true,
       multiple: false,
       maxSelections: 3,
-      options: [...defaultCountryOptions]
+      options: []
     })
   },
   nationality: {
@@ -207,7 +207,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       showLabel: true,
       multiple: false,
       maxSelections: 3,
-      options: [...defaultNationalityOptions]
+      options: []
     })
   },
   signature: {

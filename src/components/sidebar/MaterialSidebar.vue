@@ -1,5 +1,6 @@
 <template>
   <aside
+    id="tour-material-sidebar"
     class="relative flex h-full shrink-0 flex-col border-r border-slate-200 bg-[#FAFAFA] font-sans text-slate-900 overflow-hidden"
     :class="{
       'transition-all duration-300 ease-in-out': !isResizing,
@@ -52,7 +53,7 @@
       <!-- 可折叠搜索框 -->
       <div class="transition-all duration-300 overflow-hidden" :class="searchOpen ? 'max-h-16 opacity-100 mt-3' : 'max-h-0 opacity-0'">
         <div class="relative">
-          <a-input ref="searchInputRef" v-model="searchQuery" class="sidebar-search-box !h-[32px]" :placeholder="t('sidebar.searchPlaceholder')" allow-clear @keydown.esc="handleSearchEsc">
+          <a-input ref="searchInputRef" v-model="searchQuery" class="sidebar-search-box" :placeholder="t('sidebar.searchPlaceholder')" allow-clear @keydown.esc="handleSearchEsc">
             <template #prefix>
               <Search class="h-4 w-4 text-slate-400" />
             </template>
@@ -67,29 +68,25 @@
     </header>
 
     <main class="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-2">
-      <!-- 创建方式 -->
-      <div v-if="!searchQuery" class="mb-6 px-1 mt-4">
-        <h3 class="mb-3 pl-1 text-[12px] font-semibold tracking-wider text-slate-500">
-          {{ t('sidebar.createMethod') }}
-        </h3>
-        <div class="flex flex-col gap-1.5">
-          <button type="button" class="group flex w-full items-center justify-between rounded-lg bg-[#1677ff] px-3.5 py-2.5 text-left shadow-sm transition-colors hover:bg-[#4096ff]" @click="$emit('open-template-gallery')">
-            <div class="flex items-center gap-2">
-              <LayoutTemplate class="h-4 w-4 text-white" />
-              <span class="text-[12px] font-semibold text-white tracking-wide">{{ t('sidebar.createFromTemplate') }}</span>
+      <!-- 新建表单主入口 (合并空白自建与模板创建为统一弹窗) -->
+      <div v-if="!searchQuery" class="mb-5 px-1 mt-3">
+        <button
+          type="button"
+          class="group flex w-full items-center justify-between rounded-xl bg-[#1677ff] px-3.5 py-2.5 text-left shadow-sm transition-all duration-200 hover:bg-[#4096ff] hover:shadow-md cursor-pointer"
+          @click="$emit('open-create-form')"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-white/20 text-white">
+              <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
             </div>
-            <span class="rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-white backdrop-blur-sm">
-              {{ templateBadge }}
+            <span class="text-[13px] font-bold text-white tracking-wide">
+              {{ store.currentLocale === 'en' ? 'New Form Canvas' : '新建表单画布' }}
             </span>
-          </button>
-
-          <button type="button" class="group flex w-full items-center justify-center gap-1.5 rounded-lg border border-transparent bg-transparent py-1.5 transition-colors hover:bg-slate-100" @click="handleNewBlank">
-            <span class="text-[11px] font-medium text-slate-500 transition-colors group-hover:text-slate-700">
-              {{ t('sidebar.newBlankCanvas') }}
-            </span>
-            <ArrowRight class="h-3 w-3 text-slate-400 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100 group-hover:text-slate-600" />
-          </button>
-        </div>
+          </div>
+          <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xs">
+            {{ currentProfileBadge }}
+          </span>
+        </button>
       </div>
 
       <!-- 物料组件分类列表 -->
@@ -171,32 +168,14 @@
   >
     <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
   </div>
-
-  <!-- 确认新建空白画布弹窗 (标准普通简洁样式) -->
-  <a-modal
-    v-model:visible="isBlankConfirmVisible"
-    :title="t('sidebar.newBlankConfirmTitle')"
-    :title-align="'start'"
-    :width="420"
-    :ok-text="t('sidebar.confirmOk')"
-    :cancel-text="t('sidebar.cancel')"
-    :ok-button-props="{ status: 'warning' }"
-    unmount-on-close
-    @ok="executeNewBlank"
-  >
-    <div class="text-[13px] text-slate-600 leading-relaxed py-1">
-      {{ t('sidebar.newBlankConfirmContent') }}
-    </div>
-  </a-modal>
 </aside>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { store, addElement, loadSchema } from '@/core/store';
+import { store, addElement } from '@/core/store';
 import { t } from '@/core/i18n';
 import { componentRegistry, getComponentIcon, type ComponentMeta } from '@/registry/components';
-import { blankTemplate } from '@/templates/recommend';
 import { syncDragPlaceholderHeight } from '@/utils/helpers';
 import type { ComponentType, FormElement } from '@/types/schema';
 import Sortable from 'sortablejs';
@@ -215,14 +194,20 @@ import EmailElement from '@/components/canvas/elements/EmailElement.vue';
 import {
   Search,
   ChevronUp,
-  LayoutTemplate,
-  ArrowRight,
-  PanelLeft
+  PanelLeft,
+  Plus
 } from '@lucide/vue';
 
 import { useSidebarResize } from '@/utils/useSidebarResize';
 
-defineEmits(['open-template-gallery']);
+const emit = defineEmits(['open-template-gallery', 'open-create-canvas', 'open-create-form']);
+
+const currentProfileBadge = computed(() => {
+  const p = store.meta.profileType;
+  if (p === 'individual') return store.currentLocale === 'en' ? 'Individual' : '个人案例';
+  if (p === 'entity') return store.currentLocale === 'en' ? 'Entity' : '机构案例';
+  return store.currentLocale === 'en' ? 'Customer' : '母案例';
+});
 
 // 侧边栏拖拽拉伸
 const { isResizing, startResize } = useSidebarResize({
@@ -400,17 +385,6 @@ const templateDotClass = computed(() => {
   }
 });
 
-const templateBadge = computed(() => {
-  switch (store.activeTemplateKey) {
-    case 'kyc-individual':
-      return t('sidebar.badgePersonal');
-    case 'kyc-entity':
-      return t('sidebar.badgeEntity');
-    default:
-      return t('sidebar.badgeRecommend');
-  }
-});
-
 function toggleSearch() {
   searchOpen.value = !searchOpen.value;
   if (searchOpen.value) {
@@ -434,17 +408,5 @@ function handleComponentClick(type: ComponentType) {
     || store.activePageId
     || undefined;
   addElement(type, targetPageId);
-}
-
-const isBlankConfirmVisible = ref(false);
-
-function handleNewBlank() {
-  isBlankConfirmVisible.value = true;
-}
-
-function executeNewBlank() {
-  loadSchema(blankTemplate);
-  store.activeTemplateKey = 'blank';
-  isBlankConfirmVisible.value = false;
 }
 </script>

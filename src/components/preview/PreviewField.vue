@@ -165,7 +165,7 @@
           </span>
         </template>
         <a-option
-          v-for="(opt, idx) in field.options"
+          v-for="(opt, idx) in resolvedCountryOptions"
           :key="idx"
           :value="opt.value"
           :label="getOptionLabel(opt)"
@@ -195,7 +195,7 @@
           </span>
         </template>
         <a-option
-          v-for="(opt, idx) in field.options"
+          v-for="(opt, idx) in resolvedCountryOptions"
           :key="idx"
           :value="opt.value"
           :label="getOptionLabel(opt)"
@@ -372,7 +372,7 @@
           :class="formData[field.key]
             ? 'border-emerald-400 bg-emerald-50/40 text-emerald-700 font-serif'
             : (signatureError
-              ? '!border-red-400 !bg-red-50/45 !shadow-[0_0_0_2px_rgba(239,68,68,0.18)] text-red-500'
+              ? 'border-red-400 bg-red-50/45 shadow-[0_0_0_2px_rgba(239,68,68,0.18)] text-red-500'
               : 'border-slate-300 bg-slate-50/80 text-slate-400 hover:border-blue-400')"
           @click="toggleSignature"
         >
@@ -451,6 +451,7 @@ import { getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
+import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
 
 const props = defineProps<{
   field: FormElement;
@@ -458,6 +459,13 @@ const props = defineProps<{
   error?: string;
   errors?: Record<string, string>;
 }>();
+
+const resolvedCountryOptions = computed(() => {
+  if (props.field.options && props.field.options.length > 0) {
+    return props.field.options;
+  }
+  return props.field.type === 'nationality' ? defaultNationalityOptions : defaultCountryOptions;
+});
 
 const emit = defineEmits<{
   (e: 'clear-error', key: string): void;

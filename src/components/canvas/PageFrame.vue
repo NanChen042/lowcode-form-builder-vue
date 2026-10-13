@@ -1,26 +1,97 @@
 <template>
-  <div :id="'frame_' + page.id" class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col cursor-default" :class="[
-    isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
-    isFrameElevated ? '!z-20 is-active-frame' : 'z-10'
-  ]" :style="{
+  <div
+    :id="pageIndex === 0 ? 'tour-first-page-frame' : ('frame_' + page.id)"
+    :data-page-id="page.id"
+    :data-page-index="pageIndex"
+    :data-page-type="page.pageType"
+    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col cursor-default transition-all duration-200"
+    :class="[
+      isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
+      isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
+      store.isDraggingComponent && !isSystemProfile ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
+      store.isDraggingComponent && isSystemProfile ? 'opacity-85' : ''
+    ]"
+    :style="{
       transform: `translate(${page.x}px, ${page.y}px)`
-    }" @mousedown="handleFrameMouseDown" @click.stop="selectPage(page.id)">
+    }"
+    @mousedown="handleFrameMouseDown"
+    @click.stop="selectPage(page.id)"
+  >
     <!-- 左上角序号角标 -->
     <div class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
       <Smartphone class="h-3.5 w-3.5" />
-      <span class="font-mono">{{ store.currentLocale === 'en' ? `Page ${pageIndex + 1}` : `第${pageIndex + 1}页` }}</span>
+      <template v-if="isSystemProfile">
+        <span class="font-mono font-medium text-slate-700">01 · {{ store.currentLocale === 'en' ? 'Basic Info' : '基础资料' }}</span>
+        <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200/60 ml-0.5">
+          <Lock class="h-2.5 w-2.5" />
+          {{ store.currentLocale === 'en' ? 'System Preset' : '系统预设' }}
+        </span>
+        <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
+          {{ store.currentLocale === 'en' ? 'Cannot Drop' : '不可放置' }}
+        </span>
+      </template>
+      <template v-else>
+        <span class="font-mono font-bold text-slate-600 text-[13px] tracking-normal">{{ pageIndexString }}</span>
+      </template>
+    </div>
+
+    <!-- 拖拽组件时：右上角动态标识“可放置画布”状态 -->
+    <div
+      v-if="store.isDraggingComponent && !isSystemProfile"
+      class="absolute -top-7 right-0 flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs select-none pointer-events-none animate-pulse"
+    >
+      <ArrowDownToLine class="h-3 w-3 text-blue-500" />
+      <span>{{ store.currentLocale === 'en' ? 'Droppable Canvas' : '可放置画布' }}</span>
     </div>
 
     <!-- 页面主容器 -->
-    <div class="flex-1 overflow-hidden flex flex-col w-full h-full rounded-2xl">
-      <!-- 页面头部 -->
-      <div class="page-header-area px-5 pt-6 pb-4 shrink-0 bg-white rounded-t-2xl" @click.stop="selectPage(page.id)">
-        <input v-model="displayPageTitle" class="page-title-input text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full bg-transparent outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageTitle }" :placeholder="store.currentLocale === 'en' ? 'Page Title' : '页面标题'" @focus="onPageTitleFocus" @blur="onPageTitleBlur" @click.stop="onPageTitleFocus" @input="markDirty" />
-        <textarea v-model="displayPageDesc" class="page-desc-input mt-1.5 w-full overflow-hidden resize-none bg-transparent text-[15px] leading-6 text-slate-500 outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageDesc }" rows="1" :placeholder="store.currentLocale === 'en' ? 'Enter page description here...' : '在此输入页面的描述信息...'" @focus="onPageDescFocus" @blur="onPageDescBlur" @click.stop="onPageDescFocus" @input="markDirty"></textarea>
+    <div class="flex-1 overflow-hidden flex flex-col w-full h-full rounded-2xl relative">
+      <!-- 拖拽组件时：系统前置页只读锁定遮罩向导（防止用户误解） -->
+      <div
+        v-if="store.isDraggingComponent && isSystemProfile"
+        class="absolute inset-0 z-30 rounded-2xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
+      >
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-md mb-2.5 text-slate-500">
+          <Lock class="h-5 w-5 text-slate-400" />
+        </div>
+        <span class="text-[13px] font-bold text-slate-700 bg-white/95 px-3 py-1 rounded-full shadow-2xs border border-slate-200">
+          {{ store.currentLocale === 'en' ? 'System Preset · Cannot Drop' : '系统预设步骤 · 不可添加组件' }}
+        </span>
+        <p class="mt-2 text-[11px] text-slate-500 max-w-[220px] leading-relaxed m-0">
+          {{ store.currentLocale === 'en' ? 'Please drag components to subsequent form canvases' : '请将组件拖拽至右侧常规表单画布中' }}
+        </p>
       </div>
 
-      <!-- 画布组件容器与拖拽接收区 -->
-      <div class="canvas-pages-container relative flex-1 bg-white flex flex-col">
+      <!-- 页面头部 -->
+      <div class="page-header-area px-5 pt-6 pb-4 shrink-0 bg-white rounded-t-2xl" @click.stop="selectPage(page.id)">
+        <template v-if="isSystemProfile">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
+              {{ store.currentLocale === 'en' ? (page.title_en || 'Basic Information') : (page.title || '基本资料') }}
+            </h2>
+            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+              <Lock class="h-3 w-3" />
+              {{ store.currentLocale === 'en' ? 'Read-only' : '只读核验' }}
+            </span>
+          </div>
+        </template>
+        <template v-else>
+          <input v-model="displayPageTitle" class="page-title-input text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full bg-transparent outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageTitle }" :placeholder="store.currentLocale === 'en' ? 'Page Title' : '页面标题'" @focus="onPageTitleFocus" @blur="onPageTitleBlur" @click.stop="onPageTitleFocus" @input="markDirty" />
+          <textarea v-model="displayPageDesc" class="page-desc-input mt-1.5 w-full overflow-hidden resize-none bg-transparent text-[15px] leading-6 text-slate-500 outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageDesc }" rows="1" :placeholder="store.currentLocale === 'en' ? 'Enter page description here...' : '在此输入页面的描述信息...'" @focus="onPageDescFocus" @blur="onPageDescBlur" @click.stop="onPageDescFocus" @input="markDirty"></textarea>
+        </template>
+      </div>
+
+      <!-- 系统预设基础资料页：直接自然平铺展开高保真业务资料卡片 -->
+      <div v-if="isSystemProfile" class="flex-1 bg-white p-3" @click="selectPage(page.id)">
+        <SystemProfileView
+          :profile-type="page.profileType || store.meta.profileType || 'client'"
+          :show-skeleton="page.showSkeleton !== false"
+          :is-canvas="true"
+        />
+      </div>
+
+      <!-- 常规画布组件容器与拖拽接收区 -->
+      <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col">
         <!-- 空状态提示：绝对定位浮层，不占据 Sortable DOM 节点流，拖拽组件时透明隐藏 -->
         <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
           <div class="relative mb-6 grid h-20 w-24 grid-cols-2 gap-2">
@@ -38,7 +109,16 @@
         </div>
 
         <!-- 真实组件列表与拖拽投放区：空状态时内部无任何子节点，新拖入组件必然成为第 1 个子元素 -->
-        <div ref="dropzoneRef" class="canvas-dropzone relative z-10 flex-1 min-h-[520px] p-3 transition" :class="{ 'has-elements': page.fields.length > 0 }" :data-page-id="page.id" @click.self="selectPage(page.id)">
+        <div
+          ref="dropzoneRef"
+          class="canvas-dropzone relative z-10 flex-1 min-h-[520px] p-3 transition-colors duration-200"
+          :class="{
+            'has-elements': page.fields.length > 0,
+            'bg-blue-50/15': store.isDraggingComponent
+          }"
+          :data-page-id="page.id"
+          @click.self="selectPage(page.id)"
+        >
           <CanvasElement v-for="element in page.fields" :key="element.id" :element="element" />
         </div>
       </div>
@@ -60,12 +140,19 @@ import { store, selectPage, addPage, createElement, selectElement, markDirty, tr
 import { getPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
-import { Smartphone, ArrowDownToLine, Plus } from '@lucide/vue';
+import SystemProfileView from '@/components/common/SystemProfileView.vue';
+import { Smartphone, ArrowDownToLine, Plus, Lock } from '@lucide/vue';
 
 const props = defineProps<{
   page: FormPage;
   pageIndex: number;
 }>();
+
+const isSystemProfile = computed(() => props.page.pageType === 'system_profile');
+
+const pageIndexString = computed(() => {
+  return String(props.pageIndex + 1).padStart(2, '0');
+});
 
 const dropzoneRef = ref<HTMLElement | null>(null);
 
@@ -170,7 +257,7 @@ let globalDraggingItem: {
 } | null = null;
 
 onMounted(() => {
-  if (dropzoneRef.value) {
+  if (dropzoneRef.value && !isSystemProfile.value) {
     new Sortable(dropzoneRef.value, {
       group: 'shared',
       animation: 200,

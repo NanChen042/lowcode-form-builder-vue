@@ -23,7 +23,7 @@
       <div v-if="element.enableLongTerm" class="flex-shrink-0 flex items-center">
         <a-checkbox
           :model-value="Boolean(element.defaultLongTerm)"
-          class="!m-0 select-none"
+          class="m-0 select-none"
           @change="onToggleLongTerm"
         >
           <span class="text-[13px] font-medium text-slate-700">

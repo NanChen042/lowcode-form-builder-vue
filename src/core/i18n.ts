@@ -419,12 +419,25 @@ export function getPageText(
         return `Page ${matchNum[1]}`;
       }
       const zhNumMap: Record<string, number> = {
-        '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+        '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
         '六': 6, '七': 7, '八': 8, '九': 9, '十': 10
       };
-      const matchCn = zhVal.match(/^第\s*([一二三四五六七八九十]+)\s*页$/);
-      if (matchCn && zhNumMap[matchCn[1]]) {
-        return `Page ${zhNumMap[matchCn[1]]}`;
+      const matchCn = zhVal.match(/^第\s*([零一二三四五六七八九十]+)\s*页$/);
+      if (matchCn) {
+        const cn = matchCn[1];
+        if (zhNumMap[cn] !== undefined) {
+          return `Page ${zhNumMap[cn]}`;
+        }
+        if (cn.startsWith('十')) {
+          const unit = zhNumMap[cn.slice(1)] || 0;
+          return `Page ${10 + unit}`;
+        }
+        const parts = cn.split('十');
+        if (parts.length === 2) {
+          const tens = zhNumMap[parts[0]] || 1;
+          const unit = parts[1] ? (zhNumMap[parts[1]] || 0) : 0;
+          return `Page ${tens * 10 + unit}`;
+        }
       }
     }
     return zhVal;

@@ -3,37 +3,55 @@
     class="w-full flex h-14 shrink-0 items-center justify-between px-6 relative z-40 transition-all select-none pointer-events-auto"
     style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.35) 55%, rgba(255, 255, 255, 0) 100%);"
   >
-    <!-- 左侧标题与标识 -->
+    <!-- 左侧返回按钮、品牌 Logo 与标题 -->
     <div class="flex min-w-0 items-center gap-2.5">
-      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-[#1677ff] shrink-0 shadow-2xs border border-blue-100/60">
-        <Layers class="h-4 w-4" />
-      </div>
-      <div>
-        <div class="m-0 text-[14px] font-semibold leading-5 text-slate-800 tracking-tight">
-          {{ t('app.title') }}
-        </div>
-        <p class="m-0 text-[11px] leading-4 text-slate-400">
-          {{ t('app.subtitle') }}
-        </p>
+      <!-- 回退按钮 -->
+      <a-tooltip :content="store.currentLocale === 'en' ? 'Back' : '返回上一页'" position="bottom">
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/90 bg-white/85 text-slate-600 shadow-2xs backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-xs active:scale-95 shrink-0 cursor-pointer"
+          @click="handleGoBack"
+        >
+          <ArrowLeft class="h-4 w-4" />
+        </button>
+      </a-tooltip>
+
+      <div class="h-4 w-px bg-slate-200/90 shrink-0" />
+
+      <!-- Logo 图片 (本地优先，杜绝混合内容与外链离线失效) -->
+      <img
+        :src="logoUrl"
+        alt="AlgoCandy"
+        class="h-[30px] w-auto max-w-[160px] object-contain shrink-0 select-none"
+      />
+
+      <!-- 分隔线 -->
+      <div class="h-4 w-px bg-slate-200/90 shrink-0" />
+
+      <!-- DIY Form Builder 标题 -->
+      <div class="flex items-center min-w-0">
+        <span class="text-[14px] font-semibold text-slate-800 tracking-tight whitespace-nowrap">
+          DIY Form Builder
+        </span>
       </div>
     </div>
 
     <!-- 右侧操作与状态组 -->
     <div class="flex items-center gap-2.5">
       <!-- 保存状态标签 -->
-      <a-tag v-if="store.isDirty" color="orangered" size="small" class="!flex items-center gap-1.5">
+      <a-tag v-if="store.isDirty" color="orangered" size="small" class="flex items-center gap-1.5">
         <template #icon>
           <CircleAlert class="h-3 w-3" />
         </template>
         {{ t('app.dirty') }}
       </a-tag>
-      <a-tag v-else-if="saveSuccess" color="green" size="small" class="!flex items-center gap-1.5">
+      <a-tag v-else-if="saveSuccess" color="green" size="small" class="flex items-center gap-1.5">
         <template #icon>
           <Check class="h-3 w-3" />
         </template>
         {{ t('app.saved') }}
       </a-tag>
-      <a-tag v-else-if="isSaving" color="arcoblue" size="small" class="!flex items-center gap-1.5">
+      <a-tag v-else-if="isSaving" color="arcoblue" size="small" class="flex items-center gap-1.5">
         <template #icon>
           <Loader2 class="h-3 w-3 animate-spin" />
         </template>
@@ -42,9 +60,10 @@
 
       <!-- 主要操作按钮 (对齐 Stitch 胶囊毛玻璃按钮风格) -->
       <a-space size="small">
+
         <a-button
           type="secondary"
-          class="!h-9 !px-3.5 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md !text-slate-700 !font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+          class="header-glass-btn"
           :loading="isSaving"
           @click="handleSave"
         >
@@ -55,8 +74,9 @@
         </a-button>
 
         <a-button
+          id="tour-preview-btn"
           type="secondary"
-          class="!h-9 !px-3.5 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md !text-slate-700 !font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+          class="header-glass-btn"
           @click="$emit('open-preview')"
         >
           <template #icon>
@@ -66,8 +86,9 @@
         </a-button>
 
         <a-button
+          id="tour-deploy-btn"
           type="primary"
-          class="!h-9 !px-4 !rounded-xl !bg-[#1677ff] hover:!bg-[#4096ff] !text-white !font-medium !shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+          class="header-primary-btn"
           @click="$emit('open-deploy')"
         >
           <template #icon>
@@ -77,18 +98,17 @@
         </a-button>
       </a-space>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-300/40" />
+      <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
       <!-- 语言切换组件 -->
       <LanguageSwitcher />
 
-      <!-- 布局折叠快捷菜单 -->
+      <!-- 布局折叠与新手引导快捷菜单 -->
       <a-dropdown trigger="click" position="br">
         <a-button
           type="secondary"
-          shape="circle"
           size="medium"
-          class="!h-9 !w-9 !rounded-xl !bg-white/65 hover:!bg-white/95 !border-slate-300/50 !shadow-xs backdrop-blur-md"
+          class="header-icon-btn"
           :title="t('app.settings')"
         >
           <template #icon>
@@ -96,7 +116,7 @@
           </template>
         </a-button>
         <template #content>
-          <div class="p-2 space-y-2 min-w-[160px]">
+          <div class="p-2 space-y-2 min-w-[170px]">
             <div class="text-[12px] font-medium text-slate-400 px-1">{{ t('app.settings') }}</div>
             <div class="flex items-center justify-between px-1 py-1 hover:bg-slate-50 rounded">
               <span class="text-[13px] text-slate-700">{{ t('app.leftSidebar') }}</span>
@@ -106,11 +126,20 @@
               <span class="text-[13px] text-slate-700">{{ t('app.rightSidebar') }}</span>
               <a-switch v-model="store.rightSidebarVisible" size="small" />
             </div>
+            <a-divider style="margin: 4px 0" />
+            <button
+              type="button"
+              class="w-full flex items-center justify-between px-1.5 py-1 text-left hover:bg-blue-50 text-[#1677ff] rounded transition-colors text-[13px] font-medium cursor-pointer"
+              @click="handleTriggerTour"
+            >
+              <span>{{ store.currentLocale === 'en' ? 'Product Tour' : '新手漫游引导' }}</span>
+              <Sparkles class="h-3.5 w-3.5" />
+            </button>
           </div>
         </template>
       </a-dropdown>
 
-      <a-divider direction="vertical" class="!mx-0.5 !h-5 !border-slate-300/40" />
+      <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
       <!-- 最右侧：纯圆形头像徽章 (对标 Stitch 截图，悬浮微光独立头像) -->
       <a-dropdown trigger="click" position="br" v-model:popup-visible="isUserDropdownOpen">
@@ -121,7 +150,7 @@
         >
           <a-avatar
             :size="32"
-            class="!bg-gradient-to-tr !from-[#1677ff] !to-[#69b1ff] !text-white !font-semibold text-xs shadow-xs shrink-0 flex items-center justify-center transition-transform hover:scale-105 border border-white/80"
+            class="header-user-avatar"
           >
             <IconUser class="text-white text-[15px]" />
           </a-avatar>
@@ -145,9 +174,9 @@
               <template #icon><IconSettings class="text-[14px]" /></template>
               {{ t('user.settings') }}
             </a-doption>
-            <a-divider class="!my-1" />
-            <a-doption class="!text-red-500 hover:!bg-red-50" @click="handleUserAction('logout')">
-              <template #icon><IconExport class="!text-red-500 text-[14px]" /></template>
+            <a-divider class="my-1" />
+            <a-doption class="logout-option" @click="handleUserAction('logout')">
+              <template #icon><IconExport class="text-[14px]" /></template>
               {{ t('user.logout') }}
             </a-doption>
           </div>
@@ -171,21 +200,36 @@ import {
   IconExport
 } from '@arco-design/web-vue/es/icon';
 import {
-  Layers,
+  ArrowLeft,
   Settings,
   Save,
   Eye,
   CloudUpload,
   Check,
   CircleAlert,
-  Loader2
+  Loader2,
+  Sparkles
 } from '@lucide/vue';
+import { startAppTour } from '@/utils/useAppTour';
 
 defineEmits(['open-preview', 'open-deploy']);
 
+const logoUrl = `${import.meta.env.BASE_URL}img/algocandy-logo.png`;
 const isSaving = ref(false);
 const saveSuccess = ref(false);
 const isUserDropdownOpen = ref(false);
+
+function handleTriggerTour() {
+  startAppTour();
+}
+
+function handleGoBack() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = '/';
+  }
+}
 
 function handleUserAction(action: string) {
   isUserDropdownOpen.value = false;
@@ -226,3 +270,28 @@ async function handleSave() {
   }
 }
 </script>
+
+<style scoped>
+.header-user-avatar {
+  background: linear-gradient(to top right, #1677ff, #69b1ff);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.header-user-avatar:hover {
+  transform: scale(1.05);
+}
+:deep(.logout-option) {
+  color: #ef4444;
+}
+:deep(.logout-option:hover) {
+  background-color: #fef2f2;
+}
+</style>

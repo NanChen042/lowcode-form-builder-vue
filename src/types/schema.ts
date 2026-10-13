@@ -57,6 +57,8 @@ export interface FormElement {
   declarationErrorMessage_en?: string;
 }
 
+export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
+
 export interface FormPage {
   id: string;
   title: string;
@@ -66,6 +68,9 @@ export interface FormPage {
   fields: FormElement[];
   x: number;
   y: number;
+  pageType?: 'form' | 'system_profile';
+  profileType?: ProfileType;
+  showSkeleton?: boolean;
 }
 
 export interface PageConnection {
@@ -78,6 +83,14 @@ export interface FormMeta {
   title_en?: string;
   description: string;
   description_en?: string;
+  profileType?: ProfileType;
+  // 内部创建模式：仅内部业务与后端识别，不在 URL 暴露明文
+  source?: 'template' | 'diy';
+  templateKey?: string;
+  // 安全随机业务序列号与系统唯一 ID
+  formId?: string;
+  serialNo?: string;
+  createdAt?: number;
 }
 
 export interface FormSchema {
@@ -90,6 +103,9 @@ export interface FormSchema {
     description: string;
     description_en?: string;
     fields: FormElement[];
+    pageType?: 'form' | 'system_profile';
+    profileType?: ProfileType;
+    showSkeleton?: boolean;
   }[];
   pageConnections?: PageConnection[];
 }

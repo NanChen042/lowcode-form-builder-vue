@@ -5,14 +5,14 @@ body {
     padding: 0;
     width: 100vw;
     height: 100vh;
-    overflow: hidden !important;
+    overflow: hidden;
 }
 
 .app-main {
-    display: flex !important;
-    flex: 1 1 0% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
+    display: flex;
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
 }
 
 body {
@@ -51,40 +51,40 @@ body {
 
 /* 开关 Switch 明确蓝底与纯白滑块 */
 .arco-switch {
-    background-color: #cbd5e1 !important;
-    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background-color: #cbd5e1;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .arco-switch-checked {
-    background-color: #1677ff !important;
+    background-color: #1677ff;
 }
 
 .arco-switch .arco-switch-dot {
-    background-color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* 复选框 Checkbox 明确未选与选中状态 */
 .arco-checkbox .arco-checkbox-icon {
-    border: 1px solid #d9d9d9 !important;
-    border-radius: 4px !important;
-    background-color: #ffffff !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background-color: #ffffff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .arco-checkbox:hover .arco-checkbox-icon {
-    border-color: #4096ff !important;
+    border-color: #4096ff;
 }
 
 .arco-checkbox-checked .arco-checkbox-icon {
-    border-color: #1677ff !important;
-    background-color: #1677ff !important;
+    border-color: #1677ff;
+    background-color: #1677ff;
 }
 
 .arco-checkbox-checked .arco-checkbox-icon svg {
-    color: #ffffff !important;
-    fill: currentColor !important;
-    stroke: none !important;
+    color: #ffffff;
+    fill: currentColor;
+    stroke: none;
 }
 
 /* 现代精致输入控件系统 (统一浅灰边框、优雅圆角、柔蓝聚焦光晕，统一精美 13px 字体规范) */
@@ -94,21 +94,24 @@ body {
 .arco-picker,
 .component-placeholder,
 .preview-input {
-    border-radius: 6px !important;
-    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
     background-color: #ffffff !important;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
-    font-size: 13px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+    font-size: 13px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.arco-input-wrapper .arco-input.arco-input-size-small{
+    font-size: 13px;
+}
 .arco-input-wrapper:hover,
 .arco-select-view:hover,
 .arco-textarea-wrapper:hover,
 .arco-picker:hover,
 .component-placeholder:hover,
 .preview-input:hover {
-    border-color: #4096ff !important;
+    border-color: #4096ff;
 }
 
 .arco-input-wrapper.arco-input-focus,
@@ -121,10 +124,10 @@ body {
 .arco-picker:focus-within,
 .component-placeholder:focus,
 .preview-input:focus {
-    border-color: #1677ff !important;
-    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16) !important;
-    outline: none !important;
-    background-color: #ffffff !important;
+    border-color: #1677ff;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16);
+    outline: none;
+    background-color: #ffffff;
 }
 
 /* 对齐 algo 规范的表单控件错误高亮态 (精准作用于控件自身，柔和微红边框与微光晕) */
@@ -133,9 +136,9 @@ body {
 .arco-select-view.arco-select-view-error,
 .arco-picker.arco-picker-error,
 .intl-tel-wrapper.has-error input.iti__tel-input {
-    border-color: #f87171 !important;
-    background-color: rgba(254, 242, 242, 0.45) !important;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) !important;
+    border-color: #f87171;
+    background-color: rgba(254, 242, 242, 0.45);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18);
 }
 
 .arco-input-wrapper.arco-input-error:hover,
@@ -143,7 +146,7 @@ body {
 .arco-select-view.arco-select-view-error:hover,
 .arco-picker.arco-picker-error:hover,
 .intl-tel-wrapper.has-error input.iti__tel-input:hover {
-    border-color: #ef4444 !important;
+    border-color: #ef4444;
 }
 
 .arco-input-wrapper.arco-input-error.arco-input-focus,
@@ -155,9 +158,9 @@ body {
 .arco-picker.arco-picker-error.arco-picker-focused,
 .arco-picker.arco-picker-error:focus-within,
 .intl-tel-wrapper.has-error input.iti__tel-input:focus {
-    border-color: #ef4444 !important;
-    background-color: rgba(254, 242, 242, 0.55) !important;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+    border-color: #ef4444;
+    background-color: rgba(254, 242, 242, 0.55);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
 }
 
 /* 统一输入框与下拉框内部文字与占位符均为 13px 细腻排版 */
@@ -168,9 +171,9 @@ body {
 .arco-picker-input input,
 .component-placeholder,
 .preview-input {
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-    color: #1e293b !important;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #1e293b;
 }
 
 .arco-input::placeholder,
@@ -179,8 +182,8 @@ body {
 .arco-picker-input input::placeholder,
 .component-placeholder::placeholder,
 .preview-input::placeholder {
-    font-size: 13px !important;
-    color: #94a3b8 !important;
+    font-size: 13px;
+    color: #94a3b8;
 }
 
 /* 画布内的输入框高度规范 (统一遵循 Arco Design 官方标准 medium: 32px) */
@@ -194,8 +197,8 @@ body {
 .preview-card .arco-picker,
 .preview-field .arco-input-wrapper,
 .preview-field .arco-picker {
-    height: 32px !important;
-    min-height: 32px !important;
+    height: 32px;
+    min-height: 32px;
 }
 
 /* 多选下拉框支持标签自适应高度，避免标签重叠或被截断 */
@@ -203,16 +206,16 @@ body {
 .canvas-ghost-skeleton .arco-select-view,
 .preview-card .arco-select-view,
 .preview-field .arco-select-view {
-    min-height: 32px !important;
-    height: auto !important;
+    min-height: 32px;
+    height: auto;
 }
 
 .canvas-element .arco-textarea-wrapper,
 .canvas-ghost-skeleton .arco-textarea-wrapper,
 .preview-card .arco-textarea-wrapper,
 .preview-field .arco-textarea-wrapper {
-    min-height: 72px !important;
-    height: auto !important;
+    min-height: 72px;
+    height: auto;
 }
 
 /* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (32px 紧凑专业高度，12px 标签字体) */
@@ -220,100 +223,99 @@ body {
 #prop-editor .arco-picker,
 #page-prop-editor .arco-input-wrapper,
 .sidebar-search-box {
-    height: 32px !important;
-    min-height: 32px !important;
-    font-size: 13px !important;
+    height: 32px;
+    min-height: 32px;
+    font-size: 13px;
 }
 
 /* 二级展开校验提示输入框专属规范 (mini: 24px 高度，11px 精致文字与占位符) */
 #prop-editor .sub-input-mini.arco-input-wrapper,
 #prop-editor .sub-input-mini .arco-input-wrapper,
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini) {
-    height: 24px !important;
-    min-height: 24px !important;
-    font-size: 11px !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-    border-radius: 4px !important;
+    height: 24px;
+    min-height: 24px;
+    font-size: 11px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 4px;
 }
 
 #prop-editor .sub-input-mini input,
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input {
-    font-size: 11px !important;
-    height: 22px !important;
-    line-height: 22px !important;
+    font-size: 11px;
+    height: 22px;
+    line-height: 22px;
 }
 
 #prop-editor .sub-input-mini input::placeholder,
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input::placeholder {
-    font-size: 11px !important;
-    color: #94a3b8 !important;
+    font-size: 11px;
+    color: #94a3b8;
 }
 
 #prop-editor .arco-select-view {
-    min-height: 32px !important;
-    height: auto !important;
-    font-size: 13px !important;
+    min-height: 32px;
+    height: auto;
+    font-size: 13px;
 }
 
 /* 下拉菜单弹出层 (优化整体留白、圆角柔和阴影，防止顶部/底部项被截断) */
 .arco-select-dropdown {
-    padding: 6px 0 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.08) !important;
-    border: 1px solid #e2e8f0 !important;
-    background-color: #ffffff !important;
-    box-sizing: border-box !important;
+    padding: 6px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    box-sizing: border-box;
 }
 
 .arco-select-dropdown .arco-select-dropdown-list {
-    padding: 2px 4px !important;
-    max-height: 240px !important;
+    padding: 2px 4px;
+    max-height: 240px;
 }
 
 .arco-select-dropdown .arco-select-option {
-    min-height: 34px !important;
-    line-height: 34px !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    border-radius: 6px !important;
-    margin: 2px 0 !important;
-    padding: 0 10px !important;
-    color: #334155 !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
+    min-height: 34px;
+    line-height: 34px;
+    font-size: 13px;
+    font-weight: 400;
+    border-radius: 6px;
+    margin: 2px 0;
+    padding: 0 10px;
+    color: #334155;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .arco-select-dropdown .arco-select-option:hover,
 .arco-select-dropdown .arco-select-option.arco-select-option-hover,
 .arco-select-dropdown .arco-select-option.arco-select-option-active:not(.arco-select-option-selected) {
-    background-color: #f1f5f9 !important;
-    color: #0f172a !important;
-    font-weight: 400 !important;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 400;
 }
 
 .arco-select-dropdown .arco-select-option.arco-select-option-selected {
-    background-color: #e6f4ff !important;
-    color: #1677ff !important;
-    font-weight: 400 !important;
+    background-color: #e6f4ff;
+    color: #1677ff;
+    font-weight: 400;
 }
 
 .arco-select-dropdown .arco-select-option .arco-checkbox {
-    margin-right: 8px !important;
+    margin-right: 8px;
 }
-
 
 #prop-editor .arco-form-item-label,
 #page-prop-editor .arco-form-item-label {
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    color: #475569 !important;
-    margin-bottom: 4px !important;
-    line-height: 1.4 !important;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 4px;
+    line-height: 1.4;
 }
 
 #prop-editor .arco-form-item,
 #page-prop-editor .arco-form-item {
-    margin-bottom: 12px !important;
+    margin-bottom: 12px;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -346,17 +348,17 @@ body.is-panning * {
 
 /* 现代化通用按钮系统 (统一精致现代设计风格) */
 .arco-btn {
-    gap: 0 !important;
+    gap: 0;
 }
 
 .arco-btn .arco-btn-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    margin-right: 6px !important;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
 }
 
 .arco-btn-only-icon .arco-btn-icon {
-    margin-right: 0 !important;
+    margin-right: 0;
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger),
@@ -364,53 +366,53 @@ body.is-panning * {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0 !important;
-    border-radius: 6px !important;
-    border: 1px solid #d9d9d9 !important;
-    background: #ffffff !important;
-    color: rgba(0, 0, 0, 0.85) !important;
-    font-weight: 500 !important;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    gap: 0;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+    background: #ffffff;
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 .arco-btn-size-mini.arco-btn-secondary,
 .arco-btn-size-mini.arco-btn-outline {
-    height: 24px !important;
-    padding: 0 8px !important;
-    font-size: 12px !important;
-    border-radius: 4px !important;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 4px;
 }
 
 .arco-btn-size-small.arco-btn-secondary,
 .arco-btn-size-small.arco-btn-outline {
-    height: 28px !important;
-    padding: 0 12px !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 6px;
 }
 
 .arco-btn-size-medium.arco-btn-secondary:not(.arco-btn-status-danger),
 .arco-btn-size-medium.arco-btn-outline {
     height: 32px;
-    padding: 4px 14px !important;
-    font-size: 13px !important;
+    padding: 4px 14px;
+    font-size: 13px;
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger):hover,
 .arco-btn-outline:hover {
-    border-color: #4096ff !important;
-    color: #1677ff !important;
-    background: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.12) !important;
+    border-color: #4096ff;
+    color: #1677ff;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.12);
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger):active,
 .arco-btn-outline:active {
-    border-color: #0958d9 !important;
-    color: #0958d9 !important;
-    background: #fbfbfb !important;
+    border-color: #0958d9;
+    color: #0958d9;
+    background: #fbfbfb;
 }
 
 .arco-btn-primary:not(.arco-btn-status-danger) {
@@ -418,74 +420,144 @@ body.is-panning * {
     height: 32px;
     align-items: center;
     justify-content: center;
-    gap: 0 !important;
-    border-radius: 8px !important;
-    border: 1px solid #1677ff !important;
-    background: #1677ff !important;
-    color: #ffffff !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    padding: 4px 16px !important;
-    box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2), 0 1px 2px rgba(22, 119, 255, 0.12) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    gap: 0;
+    border-radius: 8px;
+    border: 1px solid #1677ff;
+    background: #1677ff;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 16px;
+    box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2), 0 1px 2px rgba(22, 119, 255, 0.12);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 .arco-btn-primary:not(.arco-btn-status-danger):hover {
-    border-color: #4096ff !important;
-    background: #4096ff !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 10px rgba(22, 119, 255, 0.28) !important;
+    border-color: #4096ff;
+    background: #4096ff;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(22, 119, 255, 0.28);
 }
 
 .arco-btn-primary:not(.arco-btn-status-danger):active {
-    border-color: #0958d9 !important;
-    background: #0958d9 !important;
+    border-color: #0958d9;
+    background: #0958d9;
 }
 
 .arco-btn-status-danger {
-    border-radius: 8px !important;
-    border: 1px solid #ffa39e !important;
-    background: #fff1f0 !important;
-    color: #f5222d !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 8px;
+    border: 1px solid #ffa39e;
+    background: #fff1f0;
+    color: #f5222d;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .arco-btn-status-danger:hover {
-    border-color: #f5222d !important;
-    background: #ff4d4f !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(245, 34, 45, 0.2) !important;
+    border-color: #f5222d;
+    background: #ff4d4f;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(245, 34, 45, 0.2);
 }
 
 .arco-btn-size-small {
-    height: 28px !important;
-    padding: 2px 10px !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
+    height: 28px;
+    padding: 2px 10px;
+    font-size: 12px;
+    border-radius: 6px;
 }
 
 .icon-btn,
 .arco-btn-shape-circle {
     display: inline-flex;
-    height: 32px !important;
-    width: 32px !important;
+    height: 32px;
+    width: 32px;
     align-items: center;
     justify-content: center;
-    border-radius: 8px !important;
-    border: 1px solid #d9d9d9 !important;
-    background: #fff !important;
-    color: rgba(0, 0, 0, 0.65) !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    cursor: pointer !important;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.65);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .icon-btn:hover,
 .arco-btn-shape-circle:hover {
-    border-color: #4096ff !important;
-    color: #1677ff !important;
-    background: #fff !important;
+    border-color: #4096ff;
+    color: #1677ff;
+    background: #fff;
+}
+
+/* 顶部导航栏专属高质感毛玻璃胶囊按钮规范 (保留现代轻巧动效与微阴影) */
+.header-glass-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    color: #334155;
+    font-weight: 500;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-glass-btn:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(203, 213, 225, 0.8);
+    transform: scale(1.02);
+}
+
+.header-glass-btn:active {
+    transform: scale(0.98);
+}
+
+.header-primary-btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background-color: #1677ff;
+    border: 1px solid #1677ff;
+    color: #ffffff;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.25);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-primary-btn:hover {
+    background-color: #4096ff;
+    border-color: #4096ff;
+    transform: scale(1.02);
+}
+
+.header-primary-btn:active {
+    transform: scale(0.98);
+}
+
+.header-icon-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(203, 213, 225, 0.8);
+    color: #1e293b;
 }
 
 .icon-btn.danger {
@@ -519,9 +591,19 @@ body.is-panning * {
 .canvas-grid {
     background-color: #f1f3f4;
     position: relative;
-    cursor: grab;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%23000000' fill-opacity='0.28' transform='translate(1, 1)'/><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%231677ff' stroke='%23ffffff' stroke-width='1.8' stroke-linejoin='round' stroke-linecap='round'/></svg>") 1 1,
+    -webkit-image-set(
+        url('./assets/canvas-cursor.png') 1x,
+        url('./assets/canvas-cursor@2x.png') 2x
+    ) 1 1,
+    image-set(
+        url('./assets/canvas-cursor.png') 1x,
+        url('./assets/canvas-cursor@2x.png') 2x
+    ) 1 1,
+    url('./assets/canvas-cursor.png') 1 1,
+    default;
     touch-action: none;
-    overflow: hidden !important;
+    overflow: hidden;
 }
 
 /* 全画幅基础浅灰微点阵 (Ambient Micro-dots: 14px 黄金微点阵间距，精准对齐 Google Stitch 测定值) */
@@ -572,9 +654,10 @@ body.is-panning * {
         transparent 100%
     );
     opacity: var(--spotlight-opacity, 0);
-    transition: opacity 0.25s ease-out;
     z-index: 0;
+    contain: strict;
 }
+
 
 .canvas-grid:active {
     cursor: grabbing;
@@ -597,7 +680,7 @@ body.space-panning-ready * {
 
 .canvas-world.is-animating,
 .canvas-world.is-zooming {
-    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mobile-frame {
@@ -649,9 +732,19 @@ body.space-panning-ready * {
     marker-end: url(#arrowhead);
 }
 
+.connection-path.is-system-flow {
+    stroke: #3b82f6 !important;
+    stroke-dasharray: 6 4 !important;
+    marker-end: url(#arrowhead-blue) !important;
+}
+
 .connection-path:hover {
     stroke: #94a3b8;
     stroke-width: 3;
+}
+
+.connection-path.is-system-flow:hover {
+    stroke: #1677ff !important;
 }
 
 
@@ -847,6 +940,10 @@ body.is-dragging-component .canvas-element .field-help {
     outline: none;
 }
 
+.field-help-bottom {
+    margin-left: 0;
+}
+
 .element-actions {
     position: absolute;
     top: 10px;
@@ -928,10 +1025,21 @@ body.is-dragging-component .canvas-element .field-help {
     transition: none !important;
 }
 
-.canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"] {
-    padding: 0 !important;
+/* 提示区块（Alert）拖拽占位：外层容器零边距，虚线框贴合 Alert 卡片自身边缘，消除多余内边距与双重边框 */
+.canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"],
+.canvas-dropzone .component-item.sortable-ghost[data-type="alert"] {
     background: transparent !important;
     border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"] .rounded-xl,
+.canvas-dropzone .component-item.sortable-ghost[data-type="alert"] .rounded-xl {
+    border: 1.5px dashed #60a5fa !important;
+    border-top: 3.5px solid #1677ff !important;
+    background: #eff6ff !important;
+    box-shadow: none !important;
 }
 
 .canvas-dropzone .canvas-element.sortable-ghost::before,
@@ -967,11 +1075,6 @@ body.is-dragging-component .canvas-element .field-help {
     position: relative !important;
 }
 
-.canvas-dropzone .component-item.sortable-ghost[data-type="alert"] {
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-}
 
 .canvas-dropzone .component-item.sortable-ghost::before,
 .canvas-dropzone .component-item.sortable-ghost::after {
@@ -1117,8 +1220,8 @@ body.is-dragging-component .canvas-element .field-help {
 /* 画布页面标题规范：默认 text-xl (20px / 28px) 字体排版 */
 .page-title-input,
 .page-title-input.text-xl {
-    font-size: 1.25rem !important; /* 20px */
-    line-height: 1.75rem !important; /* 28px */
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem; /* 28px */
 }
 
 .canvas-element[data-type="alert"] {
@@ -1171,126 +1274,125 @@ body.is-dragging-component .canvas-element .field-help {
 
 /* 对标 Google Stitch 原生设计的高质感深黑气泡提示 Tooltip */
 .arco-tooltip-content {
-    background-color: #111827 !important;
-    color: #ffffff !important;
-    border-radius: 8px !important;
-    padding: 5px 9px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22) !important;
-    line-height: 1.4 !important;
-    letter-spacing: 0.01em !important;
+    background-color: #111827;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
 }
 
 .arco-tooltip-arrow,
 .arco-tooltip-popup-arrow {
-    background-color: #111827 !important;
+    background-color: #111827;
 }
 
 /* 级联多级子菜单无缝贴合（彻底消除 4px 物理空隙，并杜绝产生任何横向滚动条） */
 .arco-dropdown,
 .arco-dropdown-submenu,
 .arco-dropdown-list-wrapper {
-    overflow-x: hidden !important;
+    overflow-x: hidden;
 }
 
 /* 当子菜单在右侧弹出 (rt) 时，向左微调 5px，完全抵消 Arco 默认的 4px 偏移，使两级菜单无缝贴合 */
 .arco-trigger-popup.arco-trigger-position-rt .arco-dropdown-submenu {
-    margin-left: -5px !important;
+    margin-left: -5px;
 }
 
 /* 当子菜单贴近屏幕右边缘向左翻转 (lt) 时，向右微调 5px，无缝贴合 */
 .arco-trigger-popup.arco-trigger-position-lt .arco-dropdown-submenu {
-    margin-right: -5px !important;
+    margin-right: -5px;
 }
 
 /* 下拉菜单项统一样式：图标与文本紧凑左对齐，后缀（快捷键/箭头）靠右对齐，消除英文下不规则空隙 */
 .arco-dropdown-option {
-    display: flex !important;
-    align-items: center !important;
-    padding: 0 10px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
-    font-size: 13px !important;
-    box-sizing: border-box !important;
-    min-width: 156px !important;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    min-height: 32px;
+    line-height: 32px;
+    font-size: 13px;
+    box-sizing: border-box;
+    min-width: 156px;
 }
 
 .arco-dropdown-option-has-suffix {
-    justify-content: flex-start !important;
+    justify-content: flex-start;
 }
 
 .arco-dropdown-option-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-right: 8px !important;
-    flex-shrink: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .arco-dropdown-option-content {
-    flex: 0 1 auto !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    white-space: nowrap !important;
+    flex: 0 1 auto;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .arco-dropdown-option-suffix {
-    margin-left: auto !important;
-    padding-left: 14px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    flex-shrink: 0 !important;
+    margin-left: auto;
+    padding-left: 14px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 /* ========================================================
    Arco Modal 经典标准对话框视觉规范 (普通标准圆角与克制排版)
    ======================================================== */
 .arco-modal {
-    border-radius: 6px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    overflow: hidden !important;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 }
 
 .arco-modal-header {
-    height: auto !important;
-    min-height: 44px !important;
-    padding: 14px 16px 12px 16px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    background-color: #ffffff !important;
+    height: auto;
+    min-height: 44px;
+    padding: 14px 16px 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #ffffff;
 }
 
 .arco-modal-title {
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    color: #0f172a !important;
-    line-height: 1.4 !important;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
 }
 
 .arco-modal-close-btn {
-    top: 12px !important;
-    right: 14px !important;
-    color: #94a3b8 !important;
-    border-radius: 4px !important;
-    transition: all 0.15s ease !important;
+    top: 12px;
+    right: 14px;
+    color: #94a3b8;
+    border-radius: 4px;
+    transition: all 0.15s ease;
 }
 
 .arco-modal-close-btn:hover {
-    color: #1e293b !important;
-    background-color: #f1f5f9 !important;
+    color: #1e293b;
+    background-color: #f1f5f9;
 }
 
 .arco-modal-body {
-    padding: 16px !important;
-    font-size: 13px !important;
-    color: #475569 !important;
-    line-height: 1.6 !important;
+    padding: 16px;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
 }
 
 .arco-modal-footer {
     padding: 10px 16px;
     border-top: 1px solid #f1f5f9;
-
     display: flex;
     flex-direction: row-reverse;
     gap: 8px;
@@ -1298,47 +1400,47 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 .arco-modal-footer .arco-btn {
-    border-radius: 4px !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    height: 32px !important;
-    padding: 0 16px !important;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    height: 32px;
+    padding: 0 16px;
 }
 
 /* 兼容处理 simple 模式弹窗，确认按钮在取消左边 */
 .arco-modal-simple {
-    padding: 20px !important;
-    text-align: left !important;
+    padding: 20px;
+    text-align: left;
 }
 
 .arco-modal-simple .arco-modal-title {
-    text-align: left !important;
-    justify-content: flex-start !important;
+    text-align: left;
+    justify-content: flex-start;
 }
 
 .arco-modal-simple .arco-modal-body {
-    text-align: left !important;
-    padding: 0 0 16px 0 !important;
+    text-align: left;
+    padding: 0 0 16px 0;
 }
 
 .arco-modal-simple .arco-modal-footer {
-    display: flex !important;
-    justify-content: flex-end !important;
-    flex-direction: row-reverse !important;
-    gap: 8px !important;
-    align-items: center !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border-top: none !important;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+    gap: 8px;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    border-top: none;
 }
 
 /* 气泡确认框：确认按钮在取消左边 */
 .arco-popconfirm-footer {
-    display: flex !important;
-    justify-content: flex-end !important;
-    flex-direction: row-reverse !important;
-    gap: 8px !important;
-    align-items: center !important;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+    gap: 8px;
+    align-items: center;
 }
 
 /* 选项配置拖拽排序行外边框与焦点抑制 */
@@ -1351,6 +1453,182 @@ body.is-dragging-component .canvas-element .field-help {
 .option-sortable-fallback {
     outline: none !important;
 }
+
+/* ==========================================================================
+   Driver.js 新手漫游引导 - Arco Design 极简科技蓝主题定制
+   ========================================================================== */
+/* 引导进行期间全局锁定背景交互，防止用户误触或污染表单 */
+body.tour-active .app-main,
+body.tour-active header {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+body.tour-active .driver-popover,
+body.tour-active .driver-overlay {
+    pointer-events: auto !important;
+}
+
+
+.driver-popover {
+    background-color: #ffffff !important;
+    color: #1d2129 !important;
+    border-radius: 4px !important;
+    padding: 16px 18px 16px 18px !important;
+    min-width: 320px !important;
+    max-width: 390px !important;
+    border: 1px solid #e5e6eb !important;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08), 0 2px 4px 0 rgba(0, 0, 0, 0.04) !important;
+    font-family: inherit !important;
+    z-index: 10000000 !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
+}
+
+.driver-popover-title {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #1d2129 !important;
+    line-height: 22px !important;
+    margin-bottom: 6px !important;
+    padding-right: 26px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.driver-popover-description {
+    font-size: 13px !important;
+    line-height: 20px !important;
+    color: #4e5969 !important;
+    margin-bottom: 12px !important;
+}
+
+.driver-popover-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #f2f3f5 !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+}
+
+.driver-never-show-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #86909c !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
+    transition: color 0.15s ease !important;
+    margin-right: auto !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.driver-never-show-btn:hover {
+    color: #1677ff !important;
+}
+
+.driver-popover-progress-text {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #86909c !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    white-space: nowrap !important;
+}
+
+.driver-popover-navigation-btns {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.driver-popover-prev-btn {
+    background-color: #f2f3f5 !important;
+    color: #4e5969 !important;
+    border: 1px solid transparent !important;
+    border-radius: 4px !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    text-shadow: none !important;
+}
+
+.driver-popover-prev-btn:hover {
+    background-color: #e5e6eb !important;
+    color: #1d2129 !important;
+}
+
+.driver-popover-next-btn {
+    background-color: #1677ff !important;
+    color: #ffffff !important;
+    border: 1px solid #1677ff !important;
+    border-radius: 4px !important;
+    padding: 4px 12px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(22, 119, 255, 0.2) !important;
+    transition: all 0.15s ease !important;
+    text-shadow: none !important;
+}
+
+.driver-popover-next-btn:hover {
+    background-color: #4096ff !important;
+    border-color: #4096ff !important;
+    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.3) !important;
+}
+
+.driver-popover-close-btn {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 22px !important;
+    height: 22px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    color: #86909c !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    border-radius: 3px !important;
+    padding: 0 !important;
+    transition: all 0.15s ease !important;
+}
+
+.driver-popover-close-btn:hover {
+    color: #1d2129 !important;
+    background-color: #f2f3f5 !important;
+}
+
+.driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: #ffffff !important;
+}
+
 
 
 

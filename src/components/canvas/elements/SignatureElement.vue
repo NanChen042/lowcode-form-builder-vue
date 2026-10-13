@@ -6,7 +6,7 @@
       <!-- 声明列表 -->
       <div class="signature-options-container mb-4 flex flex-col gap-2.5">
         <div v-for="(opt, idx) in element.options" :key="idx" class="flex items-start gap-2.5">
-          <a-checkbox disabled class="!mt-0.5 flex-shrink-0" />
+          <a-checkbox disabled class="mt-0.5 flex-shrink-0" />
           <EditableText
             :model-value="getOptionLabel(opt)"
             :placeholder="store.currentLocale === 'en' ? `Declaration item ${idx + 1}` : `声明事项${idx + 1}`"
@@ -40,7 +40,7 @@
         </span>
         <button
           type="button"
-          class="!absolute !right-2 !bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-colors cursor-pointer shadow-xs"
+          class="absolute right-2 bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-colors cursor-pointer shadow-xs"
           title="Clear"
           @click.stop
         >

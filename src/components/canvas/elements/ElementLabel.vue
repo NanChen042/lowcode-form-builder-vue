@@ -33,7 +33,7 @@
         :placeholder="store.currentLocale === 'en' ? 'Description' : '补充说明'"
         :element-id="element.id"
         field="help"
-        custom-class="field-help text-[11px] text-slate-400 font-normal leading-4 !ml-0"
+        custom-class="field-help field-help-bottom text-[11px] text-slate-400 font-normal leading-4"
         :allow-empty="true"
       />
     </div>

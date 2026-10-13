@@ -19,7 +19,7 @@
         </span>
       </template>
       <a-option
-        v-for="(opt, idx) in element.options"
+        v-for="(opt, idx) in resolvedOptions"
         :key="idx"
         :value="opt.value"
         :label="getOptionLabel(opt)"
@@ -46,7 +46,7 @@
         </span>
       </template>
       <a-option
-        v-for="(opt, idx) in element.options"
+        v-for="(opt, idx) in resolvedOptions"
         :key="idx"
         :value="opt.value"
         :label="getOptionLabel(opt)"
@@ -66,6 +66,7 @@ import type { FormElement } from '@/types/schema';
 import { parseMultiValue } from '@/utils/helpers';
 import { store } from '@/core/store';
 import { getFieldText, getOptionLabel } from '@/core/i18n';
+import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
 import ElementLabel from './ElementLabel.vue';
 
 const props = defineProps<{
@@ -73,6 +74,13 @@ const props = defineProps<{
   fallbackPlaceholderZh: string;
   fallbackPlaceholderEn: string;
 }>();
+
+const resolvedOptions = computed(() => {
+  if (props.element.options && props.element.options.length > 0) {
+    return props.element.options;
+  }
+  return props.element.type === 'nationality' ? defaultNationalityOptions : defaultCountryOptions;
+});
 
 const placeholderText = computed(() => {
   return (

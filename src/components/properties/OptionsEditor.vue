@@ -297,8 +297,8 @@ function removeOption(idx: number) {
   box-shadow: none !important;
 }
 .option-del-btn {
-  border: none !important;
-  outline: none !important;
+  border: none;
+  outline: none;
   background: transparent;
   cursor: pointer;
 }
