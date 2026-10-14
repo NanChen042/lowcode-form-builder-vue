@@ -21,12 +21,7 @@ import ElementLabel from './ElementLabel.vue';
 const props = defineProps<{ element: FormElement }>();
 
 const displayPlaceholder = computed(() => {
-  const custom = getFieldText(props.element, 'placeholder');
-  if (custom) return custom;
-  if (props.element.inputType === 'number') {
-    return store.currentLocale === 'en' ? 'Please enter number' : '请输入数字';
-  }
-  return store.currentLocale === 'en' ? 'Please enter' : '请输入内容';
+  return getFieldText(props.element, 'placeholder');
 });
 
 const isFocusedPlaceholder = computed(() => {

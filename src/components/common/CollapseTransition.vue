@@ -1,25 +1,21 @@
 <template>
-  <transition
-    name="smooth-collapse"
-    @before-enter="onBeforeEnter"
-    @enter="onEnter"
-    @after-enter="onAfterEnter"
-    @before-leave="onBeforeLeave"
-    @leave="onLeave"
-    @after-leave="onAfterLeave"
+  <div
+    v-show="isVisible"
+    ref="wrapperRef"
+    :hidden="!isVisible"
+    class="collapse-transition-wrapper"
+    :class="{ 'is-expanded': isExpanded }"
+    :style="{ '--collapse-duration': `${duration}ms` }"
+    @transitionend="handleTransitionEnd"
   >
-    <div
-      v-if="isExpanded"
-      class="smooth-collapse-outer"
-      style="overflow: hidden; will-change: height, opacity;"
-    >
+    <div class="collapse-transition-content">
       <slot />
     </div>
-  </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -28,100 +24,97 @@ const props = withDefaults(
   }>(),
   {
     show: true,
-    duration: 280
+    duration: 220
   }
 );
 
-const isExpanded = computed(() => props.show);
+const isVisible = ref(Boolean(props.show));
+const isExpanded = ref(Boolean(props.show));
+const wrapperRef = ref<HTMLElement | null>(null);
 
-function onBeforeEnter(el: Element) {
-  const htmlEl = el as HTMLElement;
-  htmlEl.style.height = '0px';
-  htmlEl.style.opacity = '0';
-  htmlEl.style.overflow = 'hidden';
+let closeTimer: ReturnType<typeof setTimeout> | null = null;
+let openRaf1: number | null = null;
+let openRaf2: number | null = null;
+
+function clearTimers() {
+  if (closeTimer) {
+    clearTimeout(closeTimer);
+    closeTimer = null;
+  }
+  if (openRaf1 !== null) {
+    cancelAnimationFrame(openRaf1);
+    openRaf1 = null;
+  }
+  if (openRaf2 !== null) {
+    cancelAnimationFrame(openRaf2);
+    openRaf2 = null;
+  }
 }
 
-function onEnter(el: Element, done: () => void) {
-  const htmlEl = el as HTMLElement;
-  const targetHeight = htmlEl.scrollHeight;
-  const duration = props.duration;
-
-  // 苹果与 Radix UI 黄金减速弹簧曲线 (自然、柔顺、绝不机械僵硬)
-  htmlEl.style.transition = `height ${duration}ms cubic-bezier(0.16, 1, 0.3, 1), opacity ${Math.round(duration * 0.85)}ms cubic-bezier(0.16, 1, 0.3, 1)`;
-
-  // 触发重排
-  void htmlEl.offsetHeight;
-
-  htmlEl.style.height = `${targetHeight}px`;
-  htmlEl.style.opacity = '1';
-
-  let finished = false;
-  const finish = () => {
-    if (finished) return;
-    finished = true;
-    htmlEl.removeEventListener('transitionend', onEnd);
-    done();
-  };
-
-  const onEnd = (e: TransitionEvent) => {
-    if (e.target === htmlEl && e.propertyName === 'height') {
-      finish();
+watch(
+  () => props.show,
+  (newVal) => {
+    clearTimers();
+    if (newVal) {
+      isVisible.value = true;
+      // Use double rAF to guarantee the browser flushes the initial 0fr grid state before animating to 1fr
+      openRaf1 = requestAnimationFrame(() => {
+        openRaf2 = requestAnimationFrame(() => {
+          isExpanded.value = true;
+          openRaf1 = null;
+          openRaf2 = null;
+        });
+      });
+    } else {
+      isExpanded.value = false;
+      // Fallback timer in case transitionend does not fire
+      closeTimer = setTimeout(() => {
+        if (!props.show) {
+          isVisible.value = false;
+        }
+        closeTimer = null;
+      }, (props.duration || 220) + 60);
     }
-  };
+  }
+);
 
-  htmlEl.addEventListener('transitionend', onEnd);
-  setTimeout(finish, duration + 60);
+function handleTransitionEnd(event: TransitionEvent) {
+  if (event.target !== wrapperRef.value || event.propertyName !== 'grid-template-rows') {
+    return;
+  }
+  if (!props.show) {
+    clearTimers();
+    isVisible.value = false;
+  }
 }
 
-function onAfterEnter(el: Element) {
-  const htmlEl = el as HTMLElement;
-  htmlEl.style.height = '';
-  htmlEl.style.opacity = '';
-  htmlEl.style.overflow = '';
-  htmlEl.style.transition = '';
-}
-
-function onBeforeLeave(el: Element) {
-  const htmlEl = el as HTMLElement;
-  htmlEl.style.height = `${htmlEl.offsetHeight}px`;
-  htmlEl.style.overflow = 'hidden';
-}
-
-function onLeave(el: Element, done: () => void) {
-  const htmlEl = el as HTMLElement;
-  const duration = Math.max(180, Math.round(props.duration * 0.8));
-
-  htmlEl.style.transition = `height ${duration}ms cubic-bezier(0.16, 1, 0.3, 1), opacity ${Math.round(duration * 0.75)}ms ease-in`;
-
-  // 触发重排
-  void htmlEl.offsetHeight;
-
-  htmlEl.style.height = '0px';
-  htmlEl.style.opacity = '0';
-
-  let finished = false;
-  const finish = () => {
-    if (finished) return;
-    finished = true;
-    htmlEl.removeEventListener('transitionend', onEnd);
-    done();
-  };
-
-  const onEnd = (e: TransitionEvent) => {
-    if (e.target === htmlEl && e.propertyName === 'height') {
-      finish();
-    }
-  };
-
-  htmlEl.addEventListener('transitionend', onEnd);
-  setTimeout(finish, duration + 60);
-}
-
-function onAfterLeave(el: Element) {
-  const htmlEl = el as HTMLElement;
-  htmlEl.style.height = '';
-  htmlEl.style.opacity = '';
-  htmlEl.style.overflow = '';
-  htmlEl.style.transition = '';
-}
+onBeforeUnmount(() => {
+  clearTimers();
+});
 </script>
+
+<style scoped>
+.collapse-transition-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--collapse-duration, 220ms) cubic-bezier(0.16, 1, 0.3, 1),
+    opacity calc(var(--collapse-duration, 220ms) * 0.8) cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: grid-template-rows, opacity;
+}
+
+.collapse-transition-wrapper.is-expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.collapse-transition-wrapper:not(.is-expanded) {
+  pointer-events: none;
+}
+
+.collapse-transition-content {
+  min-height: 0;
+  overflow: hidden;
+}
+</style>

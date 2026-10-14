@@ -21,17 +21,24 @@
     <div class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
       <Smartphone class="h-3.5 w-3.5" />
       <template v-if="isSystemProfile">
-        <span class="font-mono font-medium text-slate-700">01 · {{ store.currentLocale === 'en' ? 'Basic Info' : '基础资料' }}</span>
+        <span class="font-mono font-medium text-slate-700">01 · {{ t('common.basicInfo') }}</span>
         <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200/60 ml-0.5">
           <Lock class="h-2.5 w-2.5" />
-          {{ store.currentLocale === 'en' ? 'System Preset' : '系统预设' }}
+          {{ t('common.systemPreset') }}
         </span>
         <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
-          {{ store.currentLocale === 'en' ? 'Cannot Drop' : '不可放置' }}
+          {{ t('common.cannotDrop') }}
         </span>
       </template>
       <template v-else>
-        <span class="font-mono font-bold text-slate-600 text-[13px] tracking-normal">{{ pageIndexString }}</span>
+        <span class="font-mono font-bold text-slate-700 text-[13px] tracking-normal">{{ pageIndexString }}</span>
+        <span class="text-slate-400 font-normal">·</span>
+        <span
+          class="font-medium max-w-[200px] truncate"
+          :class="displayPageTitle ? 'text-slate-700' : 'text-slate-400 font-normal'"
+        >
+          {{ displayPageTitle || t('common.untitledPage') }}
+        </span>
       </template>
     </div>
 
@@ -41,7 +48,7 @@
       class="absolute -top-7 right-0 flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs select-none pointer-events-none animate-pulse"
     >
       <ArrowDownToLine class="h-3 w-3 text-blue-500" />
-      <span>{{ store.currentLocale === 'en' ? 'Droppable Canvas' : '可放置画布' }}</span>
+      <span>{{ t('canvas.droppable') }}</span>
     </div>
 
     <!-- 页面主容器 -->
@@ -55,10 +62,10 @@
           <Lock class="h-5 w-5 text-slate-400" />
         </div>
         <span class="text-[13px] font-bold text-slate-700 bg-white/95 px-3 py-1 rounded-full shadow-2xs border border-slate-200">
-          {{ store.currentLocale === 'en' ? 'System Preset · Cannot Drop' : '系统预设步骤 · 不可添加组件' }}
+          {{ t('canvas.presetCannotDrop') }}
         </span>
         <p class="mt-2 text-[11px] text-slate-500 max-w-[220px] leading-relaxed m-0">
-          {{ store.currentLocale === 'en' ? 'Please drag components to subsequent form canvases' : '请将组件拖拽至右侧常规表单画布中' }}
+          {{ t('canvas.dragToFormCanvas') }}
         </p>
       </div>
 
@@ -67,17 +74,17 @@
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
-              {{ store.currentLocale === 'en' ? (page.title_en || 'Basic Information') : (page.title || '基本资料') }}
+              {{ getPageText(page, 'title') || t('common.basicInfo') }}
             </h2>
             <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
               <Lock class="h-3 w-3" />
-              {{ store.currentLocale === 'en' ? 'Read-only' : '只读核验' }}
+              {{ t('common.readOnly') }}
             </span>
           </div>
         </template>
         <template v-else>
-          <input v-model="displayPageTitle" class="page-title-input text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full bg-transparent outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageTitle }" :placeholder="store.currentLocale === 'en' ? 'Page Title' : '页面标题'" @focus="onPageTitleFocus" @blur="onPageTitleBlur" @click.stop="onPageTitleFocus" @input="markDirty" />
-          <textarea v-model="displayPageDesc" class="page-desc-input mt-1.5 w-full overflow-hidden resize-none bg-transparent text-[15px] leading-6 text-slate-500 outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageDesc }" rows="1" :placeholder="store.currentLocale === 'en' ? 'Enter page description here...' : '在此输入页面的描述信息...'" @focus="onPageDescFocus" @blur="onPageDescBlur" @click.stop="onPageDescFocus" @input="markDirty"></textarea>
+          <input v-model="displayPageTitle" class="page-title-input text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full bg-transparent outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageTitle }" :placeholder="t('prop.pageTitle')" @focus="onPageTitleFocus" @blur="onPageTitleBlur" @click.stop="onPageTitleFocus" @input="markDirty" />
+          <textarea v-model="displayPageDesc" class="page-desc-input mt-1.5 w-full overflow-hidden resize-none bg-transparent text-[15px] leading-6 text-slate-500 outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageDesc }" rows="1" :placeholder="t('prop.pageDescPlaceholder')" @focus="onPageDescFocus" @blur="onPageDescBlur" @click.stop="onPageDescFocus" @input="markDirty"></textarea>
         </template>
       </div>
 
@@ -102,9 +109,9 @@
             </div>
           </div>
 
-          <h3 class="text-[14px] font-semibold tracking-tight text-slate-800">{{ store.currentLocale === 'en' ? 'Canvas is currently empty' : '画布当前为空' }}</h3>
+          <h3 class="text-[14px] font-semibold tracking-tight text-slate-800">{{ t('canvas.emptyTitle') }}</h3>
           <p class="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-slate-500">
-            {{ store.currentLocale === 'en' ? 'Drag and drop components from the left sidebar to start building' : '拖拽左侧基础输入或业务组件即可在这里生成并预览表单' }}
+            {{ t('canvas.emptyDesc') }}
           </p>
         </div>
 
@@ -125,7 +132,7 @@
     </div>
 
     <!-- 右侧中间添加新页面按钮 -->
-    <a-tooltip content="在右侧添加新页面" position="top">
+    <a-tooltip :content="t('canvas.addPageRight')" position="top">
       <div class="add-next-page-btn absolute -right-5 top-[340px] flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md transition hover:scale-110" @click.stop="addPage(page.id)">
         <Plus class="h-4 w-4" />
       </div>
@@ -134,10 +141,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import type { FormPage, FormElement, ComponentType } from '@/types/schema';
 import { store, selectPage, addPage, createElement, selectElement, markDirty, triggerHighlight } from '@/core/store';
-import { getPageText } from '@/core/i18n';
+import { t, getPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
 import SystemProfileView from '@/components/common/SystemProfileView.vue';
@@ -158,7 +165,10 @@ const dropzoneRef = ref<HTMLElement | null>(null);
 
 const displayPageTitle = computed({
   get() {
-    return getPageText(props.page, 'title');
+    if (store.currentLocale === 'en') {
+      return props.page.title_en || '';
+    }
+    return props.page.title || '';
   },
   set(val: string) {
     if (store.currentLocale === 'en') {
@@ -166,12 +176,16 @@ const displayPageTitle = computed({
     } else {
       props.page.title = val;
     }
+    markDirty();
   }
 });
 
 const displayPageDesc = computed({
   get() {
-    return getPageText(props.page, 'description');
+    if (store.currentLocale === 'en') {
+      return props.page.description_en || '';
+    }
+    return props.page.description || '';
   },
   set(val: string) {
     if (store.currentLocale === 'en') {
@@ -179,6 +193,7 @@ const displayPageDesc = computed({
     } else {
       props.page.description = val;
     }
+    markDirty();
   }
 });
 
@@ -250,15 +265,16 @@ function onPageDescBlur() {
   }
 }
 
-// 记录全局当前被拖拽的已存在组件信息（支持跨画板迁移）
 let globalDraggingItem: {
   sourcePageId: string;
   element: FormElement;
 } | null = null;
 
+let sortableInstance: Sortable | null = null;
+
 onMounted(() => {
   if (dropzoneRef.value && !isSystemProfile.value) {
-    new Sortable(dropzoneRef.value, {
+    sortableInstance = new Sortable(dropzoneRef.value, {
       group: 'shared',
       animation: 200,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
@@ -392,6 +408,13 @@ onMounted(() => {
         globalDraggingItem = null;
       }
     });
+  }
+});
+
+onBeforeUnmount(() => {
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
   }
 });
 

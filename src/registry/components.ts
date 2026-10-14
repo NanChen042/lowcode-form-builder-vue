@@ -2,16 +2,21 @@ import type { ComponentType, FormElement, FormElementOption } from '@/types/sche
 import {
   Type,
   AlignLeft,
-  ListCollapse,
-  CheckCircle,
+  SquareChevronDown,
+  CircleDot,
   CheckSquare,
   Calendar,
   Globe,
   Flag,
-  PenTool,
+  Signature,
   Info,
-  Phone,
-  Mail
+  Smartphone,
+  Mail,
+  // 保持兼容旧名称
+  ListCollapse,
+  CheckCircle,
+  PenTool,
+  Phone
 } from '@lucide/vue';
 
 export interface ComponentMeta {
@@ -83,7 +88,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     label: '下拉选择',
     label_en: 'Dropdown',
     category: 'basic',
-    icon: 'ListCollapse',
+    icon: 'SquareChevronDown',
     defaultData: () => ({
       label: '下拉选择',
       label_en: 'Dropdown Select',
@@ -105,9 +110,9 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   radio: {
     type: 'radio',
     label: '单选框组',
-    label_en: 'Radio Group',
+    label_en: 'Radio',
     category: 'basic',
-    icon: 'CheckCircle',
+    icon: 'CircleDot',
     defaultData: () => ({
       label: '单选框组',
       label_en: 'Radio Group',
@@ -215,7 +220,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     label: '电子签名',
     label_en: 'E-Signature',
     category: 'business',
-    icon: 'PenTool',
+    icon: 'Signature',
     defaultData: () => ({
       label: '电子签名',
       label_en: 'E-Signature',
@@ -234,7 +239,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   alert: {
     type: 'alert',
     label: '提示区块',
-    label_en: 'Notice Block',
+    label_en: 'Notice',
     category: 'business',
     icon: 'Info',
     defaultData: () => ({
@@ -251,7 +256,7 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   email: {
     type: 'email',
     label: '电子邮箱',
-    label_en: 'Email Address',
+    label_en: 'Email',
     category: 'basic',
     icon: 'Mail',
     defaultData: () => ({
@@ -269,9 +274,9 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   phone: {
     type: 'phone',
     label: '手机号码',
-    label_en: 'Phone Number',
+    label_en: 'Phone',
     category: 'business',
-    icon: 'Phone',
+    icon: 'Smartphone',
     defaultData: () => ({
       label: '手机号码',
       label_en: 'Phone Number',
@@ -292,16 +297,21 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
 export const componentIconMap: Record<string, any> = {
   Type,
   AlignLeft,
-  ListCollapse,
-  CheckCircle,
+  SquareChevronDown,
+  CircleDot,
   CheckSquare,
   Calendar,
   Globe,
   Flag,
-  PenTool,
+  Signature,
   Info,
-  Phone,
-  Mail
+  Smartphone,
+  Mail,
+  // 兼容旧名称
+  ListCollapse,
+  CheckCircle,
+  PenTool,
+  Phone
 };
 
 export function getComponentIcon(iconName: string) {

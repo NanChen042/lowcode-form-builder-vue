@@ -8,7 +8,12 @@ import type {
   ProfileType
 } from '../types/schema';
 import { componentRegistry } from '../registry/components';
-import { createBlankTemplate } from '../templates/recommend';
+import {
+  createBlankTemplate,
+  kycCustomerTemplate,
+  kycIndividualTemplate,
+  kycEntityTemplate
+} from '../templates/recommend';
 
 export const PAGE_WIDTH = 390;
 export const PAGE_HEIGHT = 720;
@@ -76,11 +81,27 @@ export const store = reactive({
   // 侧边栏布局展示与尺寸拉伸
   leftSidebarVisible: true,
   rightSidebarVisible: true,
-  leftSidebarWidth: 300,
+  leftSidebarWidth: 320,
   rightSidebarWidth: 300,
+  sidebarTab: 'templates' as 'templates' | 'components' | 'pages',
 
   // 国际化语言环境
   currentLocale: 'zh' as 'zh' | 'en',
+
+  // 母系统 algo 用户登录态与机构信息
+  user: {
+    isLoggedIn: false,
+    token: '',
+    uid: 0,
+    nickname: 'ceshi',
+    avatar: '',
+    email: '',
+    role: ''
+  },
+  org: {
+    orgId: 0,
+    companyName: ''
+  },
 
   // 外部 URL 锁定的业务主体类型 (若有则锁定不能切换，若无则为 null 允许自由选择)
   lockedProfileType: null as ProfileType | null
@@ -315,12 +336,11 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
     }
   }
 
-  const pageNumber = insertIndex + 1;
   const newPage: FormPage = {
     id: newId,
     pageType: 'form',
-    title: `第${toChineseNum(pageNumber)}页`,
-    title_en: `Page ${pageNumber}`,
+    title: '',
+    title_en: '',
     description: '',
     description_en: '',
     fields: [],
@@ -463,14 +483,14 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
   const targetScaleY = safeHeight / totalContentHeight;
 
   if (options?.forTour) {
-    // 漫游引导模式：为右侧解说气泡预留独立展示空间（气泡宽约 360px，间距 24px）
+    // 操作指南高亮模式：为右侧解说气泡预留独立展示空间（气泡宽约 360px，间距 24px）
     const popoverWidth = options.popoverWidth || 360;
     const gap = 24;
     const paddingX = 70;
     const safeWidth = Math.max(300, viewportWidth - popoverWidth - gap - paddingX);
     const targetScaleX = safeWidth / realWidth;
 
-    // 漫游缩放取合适比例：长画板自适应缩放（~0.55），常规画板（~0.82），完整展示全貌绝不切边
+    // 智能自适应缩放：长画板自适应缩放（~0.55），常规画板（~0.82），完整展示全貌绝不切边
     const finalScale = clampScale(Math.min(targetScaleX, targetScaleY, 0.85));
     store.canvasState.scale = finalScale;
 
@@ -679,6 +699,48 @@ export function createNewCanvas(options: {
   syncUrlParams(formId);
 }
 
+export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity', customTitle?: string) {
+  let templateSource: FormSchema = kycCustomerTemplate;
+  let pType: ProfileType = 'customer';
+  let defaultTitle = 'SG_CDD_Customer';
+
+  if (tplKey === 'kyc-individual') {
+    templateSource = kycIndividualTemplate;
+    pType = 'individual';
+    defaultTitle = 'SG_CDD_Individual';
+  } else if (tplKey === 'kyc-entity') {
+    templateSource = kycEntityTemplate;
+    pType = 'entity';
+    defaultTitle = 'SG_CDD_Entity';
+  }
+
+  const clonedSchema: FormSchema = JSON.parse(JSON.stringify(templateSource));
+  const formId = generateFormId(pType, 'template');
+  const now = Date.now();
+  const title = customTitle?.trim() || defaultTitle;
+
+  clonedSchema.meta.title = title;
+  clonedSchema.meta.profileType = pType;
+  clonedSchema.meta.source = 'template';
+  clonedSchema.meta.templateKey = tplKey;
+  clonedSchema.meta.formId = formId;
+  clonedSchema.meta.serialNo = formId;
+  clonedSchema.meta.createdAt = now;
+
+  loadSchema(clonedSchema);
+  store.meta.title = title;
+  store.meta.profileType = pType;
+  store.meta.source = 'template';
+  store.meta.templateKey = tplKey;
+  store.meta.formId = formId;
+  store.meta.serialNo = formId;
+  store.meta.createdAt = now;
+  store.activeTemplateKey = tplKey;
+
+  establishBaseline();
+  syncUrlParams(formId);
+}
+
 export function loadSchema(schema: FormSchema) {
   clearSelection();
   store.meta.title = schema.meta?.title || '未命名表单';
@@ -722,26 +784,15 @@ export function loadSchema(schema: FormSchema) {
   if (schema.pages && schema.pages.length > 0) {
     store.pages = schema.pages.map((p, idx) => {
       const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (p.title === '基本资料' || p.title_en === 'Basic Information'));
-      const pageNumber = idx + 1;
-      const defaultZhTitle = `第${toChineseNum(pageNumber)}页`;
-      const defaultEnTitle = `Page ${pageNumber}`;
-      const numStr = String(pageNumber).padStart(2, '0');
-
       let pageTitle = p.title || '';
       let pageTitleEn = p.title_en || '';
       if (!isSystemProfile) {
-        // 如果标题为空、或为历史纯数字序号残留（如 '02' / '2'），兜底恢复为中文语义标题（如 '第二页'）
-        if (!pageTitle || pageTitle === numStr || /^0\d+$/.test(pageTitle.trim())) {
-          pageTitle = defaultZhTitle;
-        } else if (/^第\s*\d+\s*页$/.test(pageTitle.trim())) {
-          const m = pageTitle.trim().match(/^第\s*(\d+)\s*页$/);
-          if (m) {
-            pageTitle = `第${toChineseNum(parseInt(m[1], 10))}页`;
-          }
+        // 清理历史遗留纯数字序号残余（如 '02' / '2'），保持空状态以展示 placeholder
+        if (/^0\d+$/.test(pageTitle.trim())) {
+          pageTitle = '';
         }
-
-        if (!pageTitleEn || pageTitleEn === numStr || /^0\d+$/.test(pageTitleEn.trim())) {
-          pageTitleEn = defaultEnTitle;
+        if (/^0\d+$/.test(pageTitleEn.trim())) {
+          pageTitleEn = '';
         }
       }
       return {

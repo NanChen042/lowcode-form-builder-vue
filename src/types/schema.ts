@@ -91,6 +91,7 @@ export interface FormMeta {
   formId?: string;
   serialNo?: string;
   createdAt?: number;
+  updatedAt?: string | number;
 }
 
 export interface FormSchema {

@@ -13,31 +13,47 @@
         </div>
 
         <!-- 英文模式 -->
-        <a-textarea
-          v-if="store.currentLocale === 'en'"
-          v-model="option.label_en"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
-          size="small"
-          :placeholder="t('options.noticePlaceholder')"
-          class="flex-1 !rounded-md"
-          :class="{ 'prop-field-focused': isOptionFocused(idx) }"
-          @focus="onFocus(idx)"
-          @blur="onBlur"
-          @input="onInput(idx, $event)"
-        />
+        <div v-if="store.currentLocale === 'en'" class="flex-1 relative">
+          <a-textarea
+            v-model="option.label_en"
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            size="small"
+            :placeholder="t('options.noticePlaceholder')"
+            class="w-full !rounded-md"
+            :class="{ 'prop-field-focused': isOptionFocused(idx) }"
+            @focus="onFocus(idx)"
+            @blur="onBlur"
+            @input="onInput(idx, $event)"
+          />
+          <span
+            v-if="option.label && !option.label_en"
+            class="absolute right-2 bottom-2 text-[10px] text-amber-600 bg-amber-50/90 px-1.5 py-0.5 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+            :title="`中文: ${option.label}`"
+          >
+            {{ t('prop.missingEnTag') }}
+          </span>
+        </div>
         <!-- 中文模式 -->
-        <a-textarea
-          v-else
-          v-model="option.label"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
-          size="small"
-          :placeholder="t('options.noticePlaceholder')"
-          class="flex-1 !rounded-md"
-          :class="{ 'prop-field-focused': isOptionFocused(idx) }"
-          @focus="onFocus(idx)"
-          @blur="onBlur"
-          @input="onInput(idx, $event)"
-        />
+        <div v-else class="flex-1 relative">
+          <a-textarea
+            v-model="option.label"
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            size="small"
+            :placeholder="t('options.noticePlaceholder')"
+            class="w-full !rounded-md"
+            :class="{ 'prop-field-focused': isOptionFocused(idx) }"
+            @focus="onFocus(idx)"
+            @blur="onBlur"
+            @input="onInput(idx, $event)"
+          />
+          <span
+            v-if="option.label_en && !option.label"
+            class="absolute right-2 bottom-2 text-[10px] text-amber-600 bg-amber-50/90 px-1.5 py-0.5 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+            :title="`EN: ${option.label_en}`"
+          >
+            {{ t('prop.missingZhTag') }}
+          </span>
+        </div>
 
         <!-- 删除按钮 -->
         <button
@@ -63,7 +79,7 @@
           <!-- 拖拽/排序手柄图标 -->
           <div
             class="drag-handle flex items-center justify-center w-5 h-7 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
-            :title="store.currentLocale === 'en' ? `Drag to reorder Option ${idx + 1}` : `按住拖拽排序 (选项 ${idx + 1})`"
+            :title="t('options.dragToReorderIndexed', undefined, { index: idx + 1 })"
           >
             <GripVertical class="h-3.5 w-3.5" />
           </div>
@@ -81,7 +97,23 @@
               @blur="onBlur"
               @input="onInput(idx, $event)"
               @keydown.enter.prevent="addOptionAt(idx + 1)"
-            />
+            >
+              <template #suffix>
+                <span
+                  v-if="option.label && !option.label_en"
+                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+                  :title="`中文: ${option.label}`"
+                >
+                  {{ t('prop.missingEnTag') }}
+                </span>
+                <span
+                  v-else-if="option.label_en && !option.label"
+                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+                >
+                  {{ t('prop.missingZhTag') }}
+                </span>
+              </template>
+            </a-input>
           </template>
           <!-- 中文模式输入框 -->
           <template v-else>
@@ -96,7 +128,23 @@
               @blur="onBlur"
               @input="onInput(idx, $event)"
               @keydown.enter.prevent="addOptionAt(idx + 1)"
-            />
+            >
+              <template #suffix>
+                <span
+                  v-if="option.label && !option.label_en"
+                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+                >
+                  {{ t('prop.missingEnTag') }}
+                </span>
+                <span
+                  v-else-if="option.label_en && !option.label"
+                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
+                  :title="`EN: ${option.label_en}`"
+                >
+                  {{ t('prop.missingZhTag') }}
+                </span>
+              </template>
+            </a-input>
           </template>
 
           <!-- 现代精致删除按钮 (不受全局 Arco 样式污染) -->
@@ -238,8 +286,8 @@ function addOption() {
   }
   const nextIdx = props.element.options.length + 1;
   props.element.options.push({
-    label: `选项${nextIdx}`,
-    label_en: `Option ${nextIdx}`,
+    label: store.currentLocale === 'zh' ? `选项${nextIdx}` : '',
+    label_en: store.currentLocale === 'en' ? `Option ${nextIdx}` : '',
     value: `option_${nextIdx}_${Date.now().toString(36)}`
   });
   markDirty();
@@ -254,8 +302,8 @@ function addOptionAt(targetIndex: number) {
   }
   const nextIdx = props.element.options.length + 1;
   const newOpt = {
-    label: `选项${nextIdx}`,
-    label_en: `Option ${nextIdx}`,
+    label: store.currentLocale === 'zh' ? `选项${nextIdx}` : '',
+    label_en: store.currentLocale === 'en' ? `Option ${nextIdx}` : '',
     value: `option_${nextIdx}_${Date.now().toString(36)}`
   };
   props.element.options.splice(targetIndex, 0, newOpt);

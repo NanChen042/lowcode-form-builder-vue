@@ -5,14 +5,14 @@
       <div v-for="(opt, idx) in element.options" :key="idx" class="inline-flex items-center gap-1.5 select-none">
         <span
           class="inline-flex items-center cursor-pointer p-0.5 rounded hover:bg-blue-50/70 transition-colors"
-          :title="store.currentLocale === 'en' ? 'Click to toggle default check' : '点击切换默认勾选'"
+          :title="t('options.toggleDefaultCheckbox')"
           @click.stop="toggleDefaultCheckbox(opt.value)"
         >
           <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none" />
         </span>
         <EditableText
           :model-value="getOptionLabel(opt)"
-          :placeholder="store.currentLocale === 'en' ? `Option ${idx + 1}` : `选项${idx + 1}`"
+          :placeholder="t('options.optionPlaceholder', undefined, { index: idx + 1 })"
           :element-id="element.id"
           field="option"
           :option-index="idx"
@@ -27,8 +27,8 @@
 <script setup lang="ts">
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { store, markDirty } from '@/core/store';
-import { getOptionLabel, setOptionLabel } from '@/core/i18n';
+import { markDirty } from '@/core/store';
+import { t, getOptionLabel, setOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 

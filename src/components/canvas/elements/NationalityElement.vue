@@ -1,9 +1,5 @@
 <template>
-  <CountrySelectBase
-    :element="element"
-    fallback-placeholder-zh="请选择国籍"
-    fallback-placeholder-en="Select Nationality"
-  />
+  <CountrySelectBase :element="element" />
 </template>
 
 <script setup lang="ts">

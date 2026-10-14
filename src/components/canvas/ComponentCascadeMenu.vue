@@ -14,7 +14,7 @@
         </template>
         <template #default>
           <span class="text-[13px] text-slate-700">
-            {{ store.currentLocale === 'en' ? 'Basic Inputs' : '基础输入' }}
+            {{ t('sidebar.catBasic') }}
           </span>
         </template>
         <template #content>
@@ -27,7 +27,7 @@
               <component :is="getComponentIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400" />
             </template>
             <span class="text-[13px] text-slate-700">
-              {{ store.currentLocale === 'en' ? item.label_en : item.label }}
+              {{ getFieldText(item, 'label') }}
             </span>
           </a-doption>
         </template>
@@ -40,7 +40,7 @@
         </template>
         <template #default>
           <span class="text-[13px] text-slate-700">
-            {{ store.currentLocale === 'en' ? 'Business Components' : '业务组件' }}
+            {{ t('sidebar.catBusiness') }}
           </span>
         </template>
         <template #content>
@@ -53,7 +53,7 @@
               <component :is="getComponentIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400" />
             </template>
             <span class="text-[13px] text-slate-700">
-              {{ store.currentLocale === 'en' ? item.label_en : item.label }}
+              {{ getFieldText(item, 'label') }}
             </span>
           </a-doption>
         </template>
@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import type { ComponentType } from '@/types/schema';
-import { store } from '@/core/store';
+import { t, getFieldText } from '@/core/i18n';
 import { basicComponents, businessComponents, getComponentIcon } from '@/registry/components';
 import { PlusCircle, Layers, Briefcase } from '@lucide/vue';
 

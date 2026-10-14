@@ -13,9 +13,9 @@
 
       <!-- 标题右侧说明 (默认排布) -->
       <EditableText
-        v-if="element.helpPosition !== 'bottom' && (element.help || (store.currentLocale === 'en' && element.help_en))"
+        v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
         v-model="currentHelp"
-        :placeholder="store.currentLocale === 'en' ? 'Description' : '补充说明'"
+        :placeholder="t('prop.fieldHelp')"
         :element-id="element.id"
         field="help"
         custom-class="field-help text-[11px] text-slate-400 font-normal leading-4"
@@ -25,12 +25,12 @@
 
     <!-- 标题下方说明 (底部换行排布) -->
     <div
-      v-if="element.helpPosition === 'bottom' && (element.help || (store.currentLocale === 'en' && element.help_en))"
+      v-if="element.helpPosition === 'bottom' && Boolean(getFieldText(element, 'help'))"
       class="mt-0.5 leading-4"
     >
       <EditableText
         v-model="currentHelp"
-        :placeholder="store.currentLocale === 'en' ? 'Description' : '补充说明'"
+        :placeholder="t('prop.fieldHelp')"
         :element-id="element.id"
         field="help"
         custom-class="field-help field-help-bottom text-[11px] text-slate-400 font-normal leading-4"
@@ -43,7 +43,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 

@@ -9,7 +9,7 @@
           <a-checkbox disabled class="mt-0.5 flex-shrink-0" />
           <EditableText
             :model-value="getOptionLabel(opt)"
-            :placeholder="store.currentLocale === 'en' ? `Declaration item ${idx + 1}` : `声明事项${idx + 1}`"
+            :placeholder="t('options.declarationPlaceholder', undefined, { index: idx + 1 })"
             :element-id="element.id"
             field="option"
             :option-index="idx"
@@ -23,8 +23,8 @@
       <div class="signature-pad-label mb-2 flex items-center gap-1">
         <span v-if="element.required" class="signature-pad-required text-red-500 font-bold">*</span>
         <EditableText
-          :model-value="getFieldText(element, 'placeholder') || (store.currentLocale === 'en' ? 'Please sign in the area below:' : '请在下方指定区域签名：')"
-          :placeholder="store.currentLocale === 'en' ? 'Please sign in the area below:' : '请在下方指定区域签名：'"
+          :model-value="getFieldText(element, 'placeholder')"
+          :placeholder="t('common.clickToSign')"
           :element-id="element.id"
           field="placeholder"
           custom-class="signature-pad-text text-xs text-slate-600 font-medium"
@@ -41,7 +41,7 @@
         <button
           type="button"
           class="absolute right-2 bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-colors cursor-pointer shadow-xs"
-          title="Clear"
+          :title="t('common.clearSignature')"
           @click.stop
         >
           <Eraser class="w-3.5 h-3.5" />
@@ -53,7 +53,6 @@
 
 <script setup lang="ts">
 import type { FormElement } from '@/types/schema';
-import { store } from '@/core/store';
 import { t, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';

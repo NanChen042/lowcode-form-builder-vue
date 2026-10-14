@@ -1,8 +1,21 @@
 <template>
-  <component :is="tag" ref="textRef" class="outline-none transition-all duration-200 cursor-text hover:text-[#1677ff]" :class="[
-    customClass,
-    { 'canvas-text-focus': isFocused }
-  ]" contenteditable="plaintext-only" spellcheck="false" style="user-select: text !important; -webkit-user-select: text !important; outline: none !important;" @focus="handleFocus" @blur="handleBlur" @input="handleInput" @keydown.enter.prevent="handleEnter" />
+  <component
+    :is="tag"
+    ref="textRef"
+    class="outline-none transition-all duration-200 cursor-text hover:text-[#1677ff] editable-text-node"
+    :class="[
+      customClass,
+      { 'canvas-text-focus': isFocused }
+    ]"
+    :data-placeholder="placeholder"
+    contenteditable="plaintext-only"
+    spellcheck="false"
+    style="user-select: text !important; -webkit-user-select: text !important; outline: none !important;"
+    @focus="handleFocus"
+    @blur="handleBlur"
+    @input="handleInput"
+    @keydown.enter.prevent="handleEnter"
+  />
 </template>
 
 <script setup lang="ts">
@@ -53,7 +66,7 @@ const isFocused = computed(() => {
 
 function syncTextToDOM(val: string | undefined) {
   if (!textRef.value) return;
-  const targetText = val || props.placeholder || '';
+  const targetText = val !== undefined && val !== null && val !== '' ? val : (!props.allowEmpty ? (props.placeholder || '') : '');
   if (textRef.value.textContent !== targetText) {
     textRef.value.textContent = targetText;
   }
@@ -66,10 +79,11 @@ onMounted(() => {
 watch(
   () => props.modelValue,
   newVal => {
-    // 当自身非活动聚焦元素时，才由外部响应式同步更新，避免破坏正在输入的选区光标
-    if (typeof document !== 'undefined' && document.activeElement !== textRef.value) {
-      syncTextToDOM(newVal);
+    // 当自身正在编辑或为当前活动聚焦元素时，绝对不同步，避免破坏用户正在输入的光标选区
+    if (isEditing.value || (typeof document !== 'undefined' && document.activeElement === textRef.value)) {
+      return;
     }
+    syncTextToDOM(newVal);
   }
 );
 
@@ -139,3 +153,11 @@ function handleEnter() {
   textRef.value?.blur();
 }
 </script>
+
+<style scoped>
+.editable-text-node:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
+}
+</style>

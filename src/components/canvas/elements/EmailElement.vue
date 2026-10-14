@@ -4,7 +4,7 @@
     <a-input
       class="w-full pointer-events-none"
       :class="{ 'canvas-control-focus': isFocusedPlaceholder }"
-      :placeholder="getFieldText(element, 'placeholder') || (store.currentLocale === 'en' ? 'Please enter email' : '请输入邮箱')"
+      :placeholder="getFieldText(element, 'placeholder')"
       :model-value="element.defaultValue || ''"
       readonly
     >

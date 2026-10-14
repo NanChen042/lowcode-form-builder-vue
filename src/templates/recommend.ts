@@ -10,12 +10,12 @@ export function createBlankTemplate(
 ): FormSchema {
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
   const defaultMetaMap: Record<string, { title: string; desc: string }> = {
-    customer: { title: 'SG_CDD_Customer(2026)', desc: '客户母案例专用KYC问卷' },
-    client: { title: 'SG_CDD_Customer(2026)', desc: '客户母案例专用KYC问卷' },
-    individual: { title: 'SG_CDD_Individual(2026)', desc: '个人成员专用KYC问卷' },
-    entity: { title: 'SG_CDD_Entity(2026)', desc: '实体成员专用KYC问卷' }
+    customer: { title: 'SG_CDD_Customer', desc: '客户母案例专用KYC问卷' },
+    client: { title: 'SG_CDD_Customer', desc: '客户母案例专用KYC问卷' },
+    individual: { title: 'SG_CDD_Individual', desc: '个人成员专用KYC问卷' },
+    entity: { title: 'SG_CDD_Entity', desc: '实体成员专用KYC问卷' }
   };
-  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_Customer(2026)';
+  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_Customer';
   const resolvedDesc = description || defaultMetaMap[normType]?.desc || '客户母案例专用KYC问卷';
 
   return {
@@ -43,8 +43,8 @@ export function createBlankTemplate(
       {
         id: 'page_form_1',
         pageType: 'form',
-        title: '第二页',
-        title_en: 'Page 2',
+        title: '',
+        title_en: '',
         description: '',
         description_en: '',
         fields: []
@@ -57,12 +57,12 @@ export function createBlankTemplate(
 // 默认空白画布模板 (自带第 1 页系统基础资料，默认客户母案例)
 export const blankTemplate: FormSchema = createBlankTemplate('customer');
 
-// 1. 客户母案例 - KYC 表单 (SG_CDD_Customer(2026))
+// 1. 客户母案例 - KYC 表单 (SG_CDD_Customer)
 export const kycCustomerTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
-    title: 'SG_CDD_Customer(2026)',
-    title_en: 'SG_CDD_Customer(2026)',
+    title: 'SG_CDD_Customer',
+    title_en: 'SG_CDD_Customer',
     description: '客户母案例专用KYC问卷',
     description_en: 'Dedicated KYC questionnaire for parent customer cases',
     profileType: 'customer',
@@ -138,12 +138,12 @@ export const kycCustomerTemplate: FormSchema = {
 // 向后兼容别名导出
 export const kycClientTemplate: FormSchema = kycCustomerTemplate;
 
-// 2. 个人案例 - KYC 表单 (SG_CDD_Individual(2026))
+// 2. 个人案例 - KYC 表单 (SG_CDD_Individual)
 export const kycIndividualTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
-    title: 'SG_CDD_Individual(2026)',
-    title_en: 'SG_CDD_Individual(2026)',
+    title: 'SG_CDD_Individual',
+    title_en: 'SG_CDD_Individual',
     description: '个人成员专用KYC问卷',
     description_en: 'Dedicated KYC questionnaire for individual members',
     profileType: 'individual',
@@ -246,12 +246,12 @@ export const kycIndividualTemplate: FormSchema = {
   pageConnections: []
 };
 
-// 3. 实体案例 - KYC 表单 (SG_CDD_Entity(2026))
+// 3. 实体案例 - KYC 表单 (SG_CDD_Entity)
 export const kycEntityTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
-    title: 'SG_CDD_Entity(2026)',
-    title_en: 'SG_CDD_Entity(2026)',
+    title: 'SG_CDD_Entity',
+    title_en: 'SG_CDD_Entity',
     description: '实体成员专用KYC问卷',
     description_en: 'Dedicated KYC questionnaire for entity members',
     profileType: 'entity',

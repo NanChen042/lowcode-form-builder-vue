@@ -2,20 +2,20 @@
   <a-drawer
     :visible="visible"
     :width="480"
-    title="表单结构 JSON Schema"
+    :title="t('schema.title')"
     @cancel="$emit('close')"
   >
     <template #extra>
       <a-space size="small">
         <a-tag size="small" color="arcoblue">
-          {{ pageCount }} 页 / {{ fieldCount }} 字段
+          {{ pageCount }} {{ t('common.pagesUnit') }} / {{ fieldCount }} {{ t('common.fieldsUnit') }}
         </a-tag>
         <a-button size="mini" type="secondary" @click="copySchema">
           <template #icon>
             <Check v-if="copied" class="h-3.5 w-3.5 text-green-500" />
             <Copy v-else class="h-3.5 w-3.5" />
           </template>
-          {{ copied ? '已复制' : '复制 JSON' }}
+          {{ copied ? t('schema.copied') : t('schema.copyJson') }}
         </a-button>
       </a-space>
     </template>
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { FormSchema } from '@/types/schema';
+import { t } from '@/core/i18n';
 import { highlightJSON } from '@/utils/helpers';
 import { Message } from '@arco-design/web-vue';
 import { Copy, Check } from '@lucide/vue';
@@ -63,7 +64,7 @@ async function copySchema() {
   try {
     await navigator.clipboard.writeText(jsonString.value);
     copied.value = true;
-    Message.success('已成功复制 Schema JSON 到剪贴板');
+    Message.success(t('schema.copySuccess'));
     setTimeout(() => {
       copied.value = false;
     }, 2000);

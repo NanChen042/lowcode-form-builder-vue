@@ -218,8 +218,8 @@ body {
     height: auto;
 }
 
-/* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (32px 紧凑专业高度，12px 标签字体) */
-#prop-editor .arco-input-wrapper:not(.sub-input-mini),
+/* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (Arco medium 32px 高度，13px 输入文字) */
+#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini),
 #prop-editor .arco-picker,
 #page-prop-editor .arco-input-wrapper,
 .sidebar-search-box {
@@ -228,29 +228,87 @@ body {
     font-size: 13px;
 }
 
-/* 二级展开校验提示输入框专属规范 (mini: 24px 高度，11px 精致文字与占位符) */
+#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) input,
+#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) .arco-input,
+#prop-editor textarea,
+#prop-editor .arco-textarea,
+#prop-editor .arco-textarea-wrapper,
+#page-prop-editor input,
+#page-prop-editor .arco-input,
+#page-prop-editor textarea,
+#page-prop-editor .arco-textarea {
+    font-size: 13px !important;
+    line-height: 1.5;
+}
+
+#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) input::placeholder,
+#prop-editor textarea::placeholder,
+#page-prop-editor input::placeholder,
+#page-prop-editor textarea::placeholder {
+    font-size: 13px !important;
+    color: #94a3b8;
+}
+
+/* 二级展开校验提示输入框专属规范 (遵循 Arco 官方标准四档尺寸之 mini: 24px 高度，12px 紧凑精致文字与占位符) */
+#prop-editor .sub-input-mini,
 #prop-editor .sub-input-mini.arco-input-wrapper,
-#prop-editor .sub-input-mini .arco-input-wrapper,
-#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) {
-    height: 24px;
-    min-height: 24px;
-    font-size: 11px;
-    padding-left: 8px;
-    padding-right: 8px;
-    border-radius: 4px;
+#prop-editor .arco-input-wrapper-size-mini,
+#prop-editor .arco-input-wrapper.arco-input-wrapper-size-mini {
+    height: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    font-size: 12px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    border-radius: 4px !important;
+    line-height: 22px !important;
 }
 
 #prop-editor .sub-input-mini input,
-#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input {
-    font-size: 11px;
-    height: 22px;
-    line-height: 22px;
+#prop-editor .sub-input-mini .arco-input,
+#prop-editor .arco-input-wrapper-size-mini input,
+#prop-editor .arco-input-wrapper-size-mini .arco-input,
+#prop-editor .arco-input-size-mini,
+#prop-editor input.arco-input-size-mini {
+    font-size: 12px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    line-height: 22px !important;
 }
 
 #prop-editor .sub-input-mini input::placeholder,
-#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input::placeholder {
-    font-size: 11px;
+#prop-editor .sub-input-mini .arco-input::placeholder,
+#prop-editor .arco-input-wrapper-size-mini input::placeholder,
+#prop-editor .arco-input-wrapper-size-mini .arco-input::placeholder,
+#prop-editor .arco-input-size-mini::placeholder,
+#prop-editor input.arco-input-size-mini::placeholder {
+    font-size: 12px !important;
+    line-height: 22px !important;
     color: #94a3b8;
+}
+
+#prop-editor .sub-input-mini .arco-input-clear-btn,
+#prop-editor .arco-input-wrapper-size-mini .arco-input-clear-btn {
+    font-size: 12px;
+}
+
+/* 确保属性面板内的操作按钮字号与行高严格生效，不被组件库默认的 button 样式 (font-size: 100%, line-height: 1.15) 干扰 */
+#prop-editor button,
+#page-prop-editor button {
+    font-family: inherit;
+}
+
+#prop-editor button.text-\[11px\],
+#prop-editor button[class*="text-[11px]"] {
+    font-size: 11px !important;
+    line-height: normal;
+}
+
+#prop-editor button.text-\[11\.5px\],
+#prop-editor button[class*="text-[11.5px]"] {
+    font-size: 11.5px !important;
+    line-height: normal;
 }
 
 #prop-editor .arco-select-view {
@@ -346,118 +404,68 @@ body.is-panning * {
     -webkit-user-select: none !important;
 }
 
-/* 现代化通用按钮系统 (统一精致现代设计风格) */
+/* 现代化通用按钮系统 (克制的主题色与标准微圆角，完全复用 Arco 原生尺寸体系) */
 .arco-btn {
-    gap: 0;
+    border-radius: 4px;
+    font-weight: 500;
 }
 
-.arco-btn .arco-btn-icon {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 6px;
+.arco-btn-primary:not(.arco-btn-status-danger) {
+    background-color: #1677ff;
+    border-color: #1677ff;
+    color: #ffffff;
 }
 
-.arco-btn-only-icon .arco-btn-icon {
-    margin-right: 0;
+.arco-btn-primary:not(.arco-btn-status-danger):hover {
+    background-color: #4096ff;
+    border-color: #4096ff;
+}
+
+.arco-btn-primary:not(.arco-btn-status-danger):active {
+    background-color: #0958d9;
+    border-color: #0958d9;
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger),
 .arco-btn-outline {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    border-radius: 6px;
-    border: 1px solid #d9d9d9;
-    background: #ffffff;
-    color: rgba(0, 0, 0, 0.85);
-    font-weight: 500;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-}
-
-.arco-btn-size-mini.arco-btn-secondary,
-.arco-btn-size-mini.arco-btn-outline {
-    height: 24px;
-    padding: 0 8px;
-    font-size: 12px;
-    border-radius: 4px;
-}
-
-.arco-btn-size-small.arco-btn-secondary,
-.arco-btn-size-small.arco-btn-outline {
-    height: 28px;
-    padding: 0 12px;
-    font-size: 12px;
-    border-radius: 6px;
-}
-
-.arco-btn-size-medium.arco-btn-secondary:not(.arco-btn-status-danger),
-.arco-btn-size-medium.arco-btn-outline {
-    height: 32px;
-    padding: 4px 14px;
-    font-size: 13px;
+    border-color: #d9d9d9;
+    background-color: #ffffff;
+    color: #1f2937;
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger):hover,
 .arco-btn-outline:hover {
     border-color: #4096ff;
     color: #1677ff;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.12);
+    background-color: #f8fafc;
 }
 
 .arco-btn-secondary:not(.arco-btn-status-danger):active,
 .arco-btn-outline:active {
     border-color: #0958d9;
     color: #0958d9;
-    background: #fbfbfb;
+    background-color: #eff6ff;
 }
 
-.arco-btn-primary:not(.arco-btn-status-danger) {
-    display: inline-flex;
-    height: 32px;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    border-radius: 8px;
-    border: 1px solid #1677ff;
-    background: #1677ff;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 4px 16px;
-    box-shadow: 0 2px 4px rgba(22, 119, 255, 0.2), 0 1px 2px rgba(22, 119, 255, 0.12);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-}
-
-.arco-btn-primary:not(.arco-btn-status-danger):hover {
-    border-color: #4096ff;
-    background: #4096ff;
-    color: #ffffff;
-    box-shadow: 0 4px 10px rgba(22, 119, 255, 0.28);
-}
-
-.arco-btn-primary:not(.arco-btn-status-danger):active {
-    border-color: #0958d9;
-    background: #0958d9;
+.arco-btn-secondary:not(.arco-btn-status-danger):focus-visible,
+.arco-btn-secondary:not(.arco-btn-status-danger):focus,
+.arco-btn-outline:focus-visible,
+.arco-btn-outline:focus {
+    border-color: #1677ff;
+    color: #1677ff;
+    background-color: #ffffff;
 }
 
 .arco-btn-status-danger {
-    border-radius: 8px;
-    border: 1px solid #ffa39e;
-    background: #fff1f0;
+    border-color: #ffa39e;
+    background-color: #fff1f0;
     color: #f5222d;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .arco-btn-status-danger:hover {
     border-color: #f5222d;
-    background: #ff4d4f;
+    background-color: #ff4d4f;
     color: #ffffff;
-    box-shadow: 0 2px 6px rgba(245, 34, 45, 0.2);
 }
 
 .arco-btn-size-small {
@@ -490,73 +498,32 @@ body.is-panning * {
     background: #fff;
 }
 
-/* 顶部导航栏专属高质感毛玻璃胶囊按钮规范 (保留现代轻巧动效与微阴影) */
+/* 顶部导航栏标准按钮高度与对齐规范 */
 .header-glass-btn {
-    height: 36px;
-    padding: 0 14px;
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(203, 213, 225, 0.5);
+    height: 32px;
+    padding: 0 12px;
     color: #334155;
     font-weight: 500;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-glass-btn:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(203, 213, 225, 0.8);
-    transform: scale(1.02);
-}
-
-.header-glass-btn:active {
-    transform: scale(0.98);
 }
 
 .header-primary-btn {
-    height: 36px;
-    padding: 0 16px;
-    border-radius: 12px;
-    background-color: #1677ff;
-    border: 1px solid #1677ff;
+    height: 32px;
+    padding: 0 14px;
     color: #ffffff;
     font-weight: 500;
-    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.25);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-primary-btn:hover {
-    background-color: #4096ff;
-    border-color: #4096ff;
-    transform: scale(1.02);
-}
-
-.header-primary-btn:active {
-    transform: scale(0.98);
 }
 
 .header-icon-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     padding: 0;
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(203, 213, 225, 0.5);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #64748b;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(203, 213, 225, 0.8);
     color: #1e293b;
 }
 
@@ -1297,6 +1264,19 @@ body.is-dragging-component .canvas-element .field-help {
     overflow-x: hidden;
 }
 
+/* 下拉菜单整体容器：现代圆角、精致微阴影与紧凑内边距 */
+.arco-dropdown {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
+    border: 1px solid #f1f5f9;
+    background-color: #ffffff;
+    padding: 4px;
+}
+
+.arco-dropdown-list {
+    padding: 0;
+}
+
 /* 当子菜单在右侧弹出 (rt) 时，向左微调 5px，完全抵消 Arco 默认的 4px 偏移，使两级菜单无缝贴合 */
 .arco-trigger-popup.arco-trigger-position-rt .arco-dropdown-submenu {
     margin-left: -5px;
@@ -1307,16 +1287,62 @@ body.is-dragging-component .canvas-element .field-help {
     margin-right: -5px;
 }
 
-/* 下拉菜单项统一样式：图标与文本紧凑左对齐，后缀（快捷键/箭头）靠右对齐，消除英文下不规则空隙 */
+/* 下拉菜单项统一样式：精致圆角、过渡自然、有底色、悬停文字变色 */
 .arco-dropdown-option {
     display: flex;
     align-items: center;
     padding: 0 10px;
-    min-height: 32px;
-    line-height: 32px;
+    min-height: 34px;
+    line-height: 34px;
     font-size: 13px;
+    border-radius: 6px;
+    margin: 2px 0;
+    color: #475569;
     box-sizing: border-box;
-    min-width: 156px;
+    min-width: 136px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+}
+
+/* 鼠标悬停态：有浅色底色 + 文字悬停高亮品牌蓝 */
+.arco-dropdown-option:not(.arco-dropdown-option-disabled):hover,
+.arco-dropdown-option:not(.arco-dropdown-option-disabled).arco-dropdown-option-hover {
+    background-color: #f0f7ff !important;
+    color: #1677ff !important;
+}
+
+.arco-dropdown-option:not(.arco-dropdown-option-disabled):hover .arco-dropdown-option-icon,
+.arco-dropdown-option:not(.arco-dropdown-option-disabled):hover .arco-dropdown-option-content,
+.arco-dropdown-option:not(.arco-dropdown-option-disabled).arco-dropdown-option-hover .arco-dropdown-option-icon,
+.arco-dropdown-option:not(.arco-dropdown-option-disabled).arco-dropdown-option-hover .arco-dropdown-option-content {
+    color: #1677ff !important;
+}
+
+/* 菜单项激活/选中态：自带淡蓝底色 + 品牌蓝文字与图标 */
+.arco-dropdown-option.arco-dropdown-option-active,
+.arco-dropdown-option-active {
+    background-color: #eff6ff !important;
+    color: #1677ff !important;
+    font-weight: 500;
+}
+
+.arco-dropdown-option.arco-dropdown-option-active .arco-dropdown-option-icon,
+.arco-dropdown-option.arco-dropdown-option-active .arco-dropdown-option-content,
+.arco-dropdown-option-active .arco-dropdown-option-icon,
+.arco-dropdown-option-active .arco-dropdown-option-content {
+    color: #1677ff !important;
+}
+
+/* 危险操作项（如退出登录）悬停浅红底色与红字 */
+.arco-dropdown-option.text-red-500:hover,
+.arco-dropdown-option.text-red-500.arco-dropdown-option-hover {
+    background-color: #fef2f2 !important;
+    color: #ef4444 !important;
+}
+
+.arco-dropdown-option.text-red-500:hover .arco-dropdown-option-icon,
+.arco-dropdown-option.text-red-500:hover .arco-dropdown-option-content {
+    color: #ef4444 !important;
 }
 
 .arco-dropdown-option-has-suffix {
@@ -1434,7 +1460,7 @@ body.is-dragging-component .canvas-element .field-help {
     border-top: none;
 }
 
-/* 气泡确认框：确认按钮在取消左边 */
+/* 气泡确认框：确定在左，取消在右 */
 .arco-popconfirm-footer {
     display: flex;
     justify-content: flex-end;
@@ -1455,7 +1481,7 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 /* ==========================================================================
-   Driver.js 新手漫游引导 - Arco Design 极简科技蓝主题定制
+   Driver.js 操作指南 - Arco Design 极简科技蓝主题定制
    ========================================================================== */
 /* 引导进行期间全局锁定背景交互，防止用户误触或污染表单 */
 body.tour-active .app-main,
@@ -1473,7 +1499,7 @@ body.tour-active .driver-overlay {
 .driver-popover {
     background-color: #ffffff !important;
     color: #1d2129 !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     padding: 16px 18px 16px 18px !important;
     min-width: 320px !important;
     max-width: 390px !important;

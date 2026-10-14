@@ -6,7 +6,7 @@
         <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
         <EditableText
           :model-value="getFieldText(element, 'label')"
-          :placeholder="store.currentLocale === 'en' ? 'Notice' : '提示'"
+          :placeholder="t('common.notice')"
           :element-id="element.id"
           field="label"
           custom-class="label-text text-[14px] font-bold text-slate-800 m-0 leading-5"
@@ -20,7 +20,7 @@
           <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-[2px] bg-[#1677ff]"></span>
           <EditableText
             :model-value="getOptionLabel(opt)"
-            :placeholder="store.currentLocale === 'en' ? 'Notice item' : '提示说明项'"
+            :placeholder="t('common.noticeItem')"
             :element-id="element.id"
             field="option"
             :option-index="idx"
@@ -35,8 +35,7 @@
 
 <script setup lang="ts">
 import type { FormElement } from '@/types/schema';
-import { store } from '@/core/store';
-import { getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
+import { t, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 import { Info } from '@lucide/vue';
 

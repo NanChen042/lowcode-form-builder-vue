@@ -12,7 +12,7 @@
       >
         <div v-if="field.showLabel !== false" class="flex items-center gap-2 mb-2.5">
           <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
-          <span class="text-[14px] font-bold text-slate-800 leading-5">{{ localizedLabel || (store.currentLocale === 'en' ? 'Notice' : '提示') }}</span>
+          <span class="text-[14px] font-bold text-slate-800 leading-5">{{ localizedLabel || t('common.notice') }}</span>
         </div>
         <div class="space-y-2 text-[13px] leading-5 text-slate-700">
           <p v-for="(opt, idx) in field.options" :key="idx" class="m-0 flex items-start gap-2.5">
@@ -29,7 +29,7 @@
       <div v-if="field.showLabel !== false" class="component-label mb-1.5">
         <div class="flex items-center flex-wrap gap-1">
           <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-0.5">*</span>
-          <span class="label-text text-[13px] font-medium text-slate-800 leading-5">{{ localizedLabel || (store.currentLocale === 'en' ? 'Untitled Field' : '未命名字段') }}</span>
+          <span class="label-text text-[13px] font-medium text-slate-800 leading-5">{{ localizedLabel || t('common.untitledField') }}</span>
           <!-- 标题右侧说明 (默认排布) -->
           <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5">{{ localizedHelp }}</span>
         </div>
@@ -46,7 +46,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please enter number' : '请输入数字')"
+        :placeholder="localizedPlaceholder"
         :hide-button="true"
         @change="handleFieldInput"
       />
@@ -55,7 +55,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please enter' : '请输入内容')"
+        :placeholder="localizedPlaceholder"
         allow-clear
         @input="handleFieldInput"
       />
@@ -66,7 +66,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please enter email' : '请输入邮箱')"
+        :placeholder="localizedPlaceholder"
         allow-clear
         @input="handleFieldInput"
       >
@@ -96,7 +96,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please enter details...' : '请输入详细内容...')"
+        :placeholder="localizedPlaceholder"
         :auto-size="{ minRows: 3, maxRows: 6 }"
         @input="handleFieldInput"
       />
@@ -107,7 +107,7 @@
         v-model="selectedTags"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择选项')"
+        :placeholder="localizedPlaceholder"
         multiple
         :limit="field.maxSelections || undefined"
         :max-tag-count="field.maxSelections || 3"
@@ -130,7 +130,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择选项')"
+        :placeholder="localizedPlaceholder"
         allow-clear
         allow-search
         @change="handleFieldInput"
@@ -150,7 +150,7 @@
         v-model="selectedTags"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择')"
+        :placeholder="localizedPlaceholder"
         multiple
         :limit="field.maxSelections || undefined"
         :max-tag-count="field.maxSelections || 3"
@@ -183,7 +183,7 @@
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
-        :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select' : '请选择')"
+        :placeholder="localizedPlaceholder"
         allow-clear
         allow-search
         @change="handleFieldInput"
@@ -275,7 +275,7 @@
               style="width: 100%"
               :error="Boolean(error)"
               :disabled="isLongTermChecked"
-              :placeholder="store.currentLocale === 'en' ? ['Start Date', 'End Date'] : ['开始日期', '结束日期']"
+              :placeholder="[t('common.startDate'), t('common.endDate')]"
               @change="handleFieldInput"
             />
             <a-date-picker
@@ -284,7 +284,7 @@
               style="width: 100%"
               :error="Boolean(error)"
               :disabled="isLongTermChecked"
-              :placeholder="localizedPlaceholder || (store.currentLocale === 'en' ? 'Please select date' : '请选择日期')"
+              :placeholder="localizedPlaceholder"
               @change="handleFieldInput"
             />
           </div>
@@ -297,7 +297,7 @@
               @change="onLongTermChange"
             >
               <span class="text-[13px] font-medium text-slate-700">
-                {{ store.currentLocale === 'en' ? 'Long-term' : '长期' }}
+                {{ t('common.longTerm') }}
               </span>
             </a-checkbox>
           </div>
@@ -363,7 +363,7 @@
         <!-- 签名画板提示 -->
         <div class="mb-2 text-xs font-medium text-slate-600">
           <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
-          {{ localizedPlaceholder || (store.currentLocale === 'en' ? 'Please sign in the area below:' : '请在下方指定区域签名：') }}
+          {{ localizedPlaceholder }}
         </div>
 
         <!-- 模拟签名绘制区 -->
@@ -377,11 +377,13 @@
           @click="toggleSignature"
         >
           <template v-if="formData[field.key]">
-            <span class="text-base italic font-semibold text-slate-800 tracking-wider">Signed: Verified Representative ✓</span>
+            <span class="text-base italic font-semibold text-slate-800 tracking-wider">
+              {{ t('common.signed') }}
+            </span>
             <button
               type="button"
               class="absolute right-2 bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 border border-slate-200 shadow-xs transition-colors cursor-pointer"
-              title="Clear"
+              :title="t('common.clearSignature')"
               @click.stop="clearSignature"
             >
               <Eraser class="w-3.5 h-3.5" />
@@ -390,7 +392,7 @@
           <template v-else>
             <span class="flex items-center gap-1.5 text-slate-400 text-xs">
               <PenLine class="w-3.5 h-3.5 opacity-60" />
-              <span>{{ store.currentLocale === 'en' ? 'Click to sign' : '点击此处手写签名' }}</span>
+              <span>{{ t('common.clickToSign') }}</span>
             </span>
           </template>
         </div>
@@ -446,8 +448,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store } from '@/core/store';
-import { getFieldText, getOptionLabel } from '@/core/i18n';
+import { t, getFieldText, getOptionLabel } from '@/core/i18n';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
@@ -494,10 +495,7 @@ const signatureError = computed(() => {
 });
 
 const localizedCustomErrorMessage = computed(() => {
-  if (store.currentLocale === 'en') {
-    return props.field.customErrorMessage_en || props.field.customErrorMessage || '';
-  }
-  return props.field.customErrorMessage || '';
+  return getFieldText(props.field, 'customErrorMessage');
 });
 
 function toggleCheckbox(val: string) {
@@ -549,20 +547,23 @@ function handlePhoneChange(data: any) {
 
 // 长期有效选项
 const isLongTermChecked = ref(
-  props.formData[props.field.key] === (store.currentLocale === 'en' ? 'Long-term' : '长期') ||
+  props.formData[props.field.key] === '9999-12-31' ||
+  props.formData[props.field.key] === 'Long-term' ||
+  props.formData[props.field.key] === '长期' ||
   Boolean(props.formData[`${props.field.key}_isLongTerm`]) ||
   Boolean(props.field.defaultLongTerm)
 );
 
 if (props.field.type === 'date' && props.field.enableLongTerm && props.field.defaultLongTerm && !props.formData[props.field.key]) {
-  props.formData[props.field.key] = store.currentLocale === 'en' ? 'Long-term' : '长期';
+  props.formData[props.field.key] = '9999-12-31';
   props.formData[`${props.field.key}_isLongTerm`] = true;
 }
 
 function onLongTermChange(val: boolean | (string | number | boolean)[]) {
-  props.formData[`${props.field.key}_isLongTerm`] = Boolean(val);
-  if (val) {
-    props.formData[props.field.key] = store.currentLocale === 'en' ? 'Long-term' : '长期';
+  const isChecked = Boolean(val);
+  props.formData[`${props.field.key}_isLongTerm`] = isChecked;
+  if (isChecked) {
+    props.formData[props.field.key] = '9999-12-31';
   } else {
     props.formData[props.field.key] = props.field.defaultValue || '';
   }

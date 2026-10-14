@@ -5,6 +5,7 @@
     :title="countryModalTitle"
     width="auto"
     :footer="false"
+    draggable
     unmount-on-close
     @cancel="handleClose"
   >
@@ -14,10 +15,7 @@
         <a-input
           v-model="countrySearchKeyword"
           allow-clear
-          :placeholder="store.currentLocale === 'en'
-            ? 'Search by country, nationality, code or dial code (e.g. Singapore, SG, +65)...'
-            : '搜索国家、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)...'
-          "
+          :placeholder="t('dir.searchPlaceholder')"
           class="flex-1"
         >
           <template #prefix>
@@ -36,16 +34,16 @@
           class="flex items-center px-3.5 py-2 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 tracking-wider select-none"
         >
           <div style="width: 32%;">
-            {{ store.currentLocale === 'en' ? 'Country' : '国家' }}
+            {{ t('dir.country') }}
           </div>
           <div style="width: 30%;">
-            {{ store.currentLocale === 'en' ? 'Nationality' : '国籍' }}
+            {{ t('dir.nationality') }}
           </div>
           <div style="width: 18%;">
-            {{ store.currentLocale === 'en' ? 'Code' : '代码' }}
+            {{ t('dir.code') }}
           </div>
           <div class="text-right" style="width: 20%;">
-            {{ store.currentLocale === 'en' ? 'Dial Code' : '国际区号' }}
+            {{ t('dir.dialCode') }}
           </div>
         </div>
 
@@ -61,18 +59,18 @@
               <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
               <span
                 class="font-medium text-slate-800 truncate"
-                :title="store.currentLocale === 'en' ? item.countryEn : item.countryZh"
+                :title="getCountryName(item)"
               >
-                {{ store.currentLocale === 'en' ? item.countryEn : item.countryZh }}
+                {{ getCountryName(item) }}
               </span>
             </div>
             <!-- 列 2: 国籍 -->
             <div
               class="text-slate-600 truncate min-w-0 pr-2"
               style="width: 30%;"
-              :title="store.currentLocale === 'en' ? item.natEn : item.natZh"
+              :title="getNatName(item)"
             >
-              {{ store.currentLocale === 'en' ? item.natEn : item.natZh }}
+              {{ getNatName(item) }}
             </div>
             <!-- 列 3: 代码 (ISO-2) -->
             <div class="min-w-0" style="width: 18%;">
@@ -90,7 +88,7 @@
 
           <!-- 空态提示 -->
           <div v-if="filteredUnifiedList.length === 0" class="py-12 text-center text-xs text-slate-400">
-            {{ store.currentLocale === 'en' ? 'No matching records found' : '未找到匹配的数据记录' }}
+            {{ t('dir.noMatching') }}
           </div>
         </div>
       </div>
@@ -98,10 +96,7 @@
       <!-- 底部提示 -->
       <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
         <span>
-          {{ store.currentLocale === 'en'
-            ? 'Total 244 countries & regions'
-            : '共 244 个预设国家与地区'
-          }}
+          {{ t('dir.totalCountPrefix') }} 244 {{ t('dir.totalCountSuffix') }}
         </span>
         <span class="font-mono text-slate-400">244 Total</span>
       </div>
@@ -112,6 +107,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { store } from '@/core/store';
+import { t } from '@/core/i18n';
 import { countryPhoneRules } from '@/registry/phoneRules';
 import { fullNationalityOptions } from '@/registry/countryList';
 import { Search } from '@lucide/vue';
@@ -141,6 +137,14 @@ function handleClose() {
   emit('close');
 }
 
+function getCountryName(item: { countryEn: string; countryZh: string }) {
+  return store.currentLocale === 'en' ? item.countryEn : item.countryZh;
+}
+
+function getNatName(item: { natEn: string; natZh: string }) {
+  return store.currentLocale === 'en' ? item.natEn : item.natZh;
+}
+
 const nationalityMap = computed(() => {
   const map: Record<string, { zh: string; en: string }> = {};
   for (const opt of fullNationalityOptions) {
@@ -168,9 +172,7 @@ const unifiedDirectoryList = computed(() => {
 });
 
 const countryModalTitle = computed(() => {
-  return store.currentLocale === 'en'
-    ? 'Preset List (244)'
-    : '预设清单 (244)';
+  return `${t('dir.presetList')} (244)`;
 });
 
 const filteredUnifiedList = computed(() => {

@@ -6,7 +6,7 @@
         <a-range-picker
           v-if="element.dateMode === 'range'"
           style="width: 100%"
-          :placeholder="store.currentLocale === 'en' ? ['Start Date', 'End Date'] : ['开始日期', '结束日期']"
+          :placeholder="[t('common.startDate'), t('common.endDate')]"
           :model-value="element.defaultValue && element.endValue ? [element.defaultValue, element.endValue] : undefined"
           :disabled="Boolean(element.defaultLongTerm)"
         />
@@ -27,7 +27,7 @@
           @change="onToggleLongTerm"
         >
           <span class="text-[13px] font-medium text-slate-700">
-            {{ store.currentLocale === 'en' ? 'Long-term' : '长期' }}
+            {{ t('common.longTerm') }}
           </span>
         </a-checkbox>
       </div>
@@ -38,14 +38,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
-import { getFieldText } from '@/core/i18n';
+import { markDirty } from '@/core/store';
+import { t, getFieldText } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 
 const props = defineProps<{ element: FormElement }>();
 
 const displayPlaceholder = computed(() => {
-  return getFieldText(props.element, 'placeholder') || (store.currentLocale === 'en' ? 'Select Date' : '请选择日期');
+  return getFieldText(props.element, 'placeholder');
 });
 
 function onToggleLongTerm(val: boolean | (string | number | boolean)[]) {

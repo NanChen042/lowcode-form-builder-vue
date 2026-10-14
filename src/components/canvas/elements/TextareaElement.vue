@@ -4,7 +4,7 @@
     <a-textarea
       class="w-full pointer-events-none"
       :class="{ 'canvas-control-focus': isFocusedPlaceholder }"
-      :placeholder="getFieldText(element, 'placeholder') || (store.currentLocale === 'en' ? 'Please enter detailed description...' : '请输入详细描述...')"
+      :placeholder="getFieldText(element, 'placeholder')"
       :model-value="element.defaultValue || ''"
       :auto-size="{ minRows: 3, maxRows: 5 }"
       readonly

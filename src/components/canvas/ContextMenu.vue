@@ -18,7 +18,7 @@
           <template #icon>
             <Copy class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Duplicate' : '复制组件' }}</span>
+          <span>{{ t('context.duplicate') }}</span>
           <template #suffix>
             <span class="text-[10px] text-slate-400 font-mono">Ctrl+D</span>
           </template>
@@ -26,7 +26,7 @@
 
         <!-- 快捷多级子菜单：在下方插入组件（复用级联组件菜单） -->
         <ComponentCascadeMenu
-          :title="store.currentLocale === 'en' ? 'Insert Below' : '在下方插入组件'"
+          :title="t('context.insertBelow')"
           value-prefix="elem-insert"
           @select="handleQuickAddComponent"
         />
@@ -37,7 +37,7 @@
           <template #icon>
             <Trash2 class="h-4 w-4 text-red-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Delete Component' : '删除组件' }}</span>
+          <span>{{ t('context.deleteElement') }}</span>
         </a-doption>
       </template>
 
@@ -49,13 +49,13 @@
           class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-slate-500 border-b border-slate-100 select-none"
         >
           <Lock class="h-3 w-3 text-blue-500" />
-          <span>{{ store.currentLocale === 'en' ? 'System Preset (Read-only)' : '系统预设资料（只读锁定）' }}</span>
+          <span>{{ t('context.presetReadOnly') }}</span>
         </div>
 
         <!-- 快捷多级子菜单：添加表单组件 (系统基础资料画板不允许添加表单组件) -->
         <template v-if="!isTargetSystemProfilePage">
           <ComponentCascadeMenu
-            :title="store.currentLocale === 'en' ? 'Add Component' : '添加表单组件'"
+            :title="t('context.addComponent')"
             value-prefix="page-insert"
             title-class="font-medium text-slate-800"
             @select="handleQuickAddComponent"
@@ -68,14 +68,14 @@
           <template #icon>
             <FilePlus class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Insert Page After' : '在当前画布后方插入' }}</span>
+          <span>{{ t('context.insertPageAfter') }}</span>
         </a-doption>
 
         <a-doption @click="handleResetView">
           <template #icon>
             <Expand class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Reset View' : '重置画布视角' }}</span>
+          <span>{{ t('context.resetView') }}</span>
         </a-doption>
 
         <!-- 删除当前画布 (系统预设画板不可删除，彻底隐藏) -->
@@ -86,7 +86,7 @@
             <template #icon>
               <Trash2 class="h-4 w-4 text-red-500" />
             </template>
-            <span>{{ store.currentLocale === 'en' ? 'Delete Current Canvas' : '删除当前画布' }}</span>
+            <span>{{ t('context.deletePage') }}</span>
           </a-doption>
         </template>
       </template>
@@ -97,7 +97,7 @@
           <template #icon>
             <FilePlus class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'New Blank Page' : '新建画布页面' }}</span>
+          <span>{{ t('context.newPage') }}</span>
         </a-doption>
 
         <a-divider style="margin: 4px 0" />
@@ -106,7 +106,7 @@
           <template #icon>
             <Expand class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Reset View' : '重置画布视角' }}</span>
+          <span>{{ t('context.resetView') }}</span>
         </a-doption>
       </template>
     </template>
@@ -126,6 +126,7 @@ import {
   clearSelection,
   store
 } from '@/core/store';
+import { t } from '@/core/i18n';
 import { Modal } from '@arco-design/web-vue';
 import { FilePlus, Expand, Trash2, Copy, Lock } from '@lucide/vue';
 import ComponentCascadeMenu from './ComponentCascadeMenu.vue';
@@ -209,12 +210,10 @@ function handleDeletePage() {
   if (props.targetPageId) {
     const pageId = props.targetPageId;
     Modal.confirm({
-      title: store.currentLocale === 'en' ? 'Confirm Delete Canvas' : '确认删除画布',
-      content: store.currentLocale === 'en'
-        ? 'Are you sure you want to delete this canvas and all its contents? This action cannot be undone.'
-        : '确定要删除当前画布及其所有内容吗？此操作不可撤销。',
-      okText: store.currentLocale === 'en' ? 'Delete' : '确认删除',
-      cancelText: store.currentLocale === 'en' ? 'Cancel' : '取消',
+      title: t('context.confirmDeleteTitle'),
+      content: t('context.confirmDeleteContent'),
+      okText: t('context.confirmDeleteOk'),
+      cancelText: t('common.cancel'),
       okButtonProps: { status: 'danger' },
       simple: false,
       width: 440,

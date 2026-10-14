@@ -1,6 +1,7 @@
 import { driver, type Driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { store, focusOnPage, resetCanvasView } from '@/core/store';
+import { t } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 
 let driverInstance: Driver | null = null;
@@ -8,12 +9,34 @@ let driverInstance: Driver | null = null;
 export function getTourSteps(isEn: boolean): DriveStep[] {
   return [
     {
-      element: '#tour-material-sidebar',
+      element: '#tour-activity-bar',
       popover: {
-        title: isEn ? '1. Materials & Templates' : '1. 物料库与场景模板',
+        title: isEn ? '1. Sidebar Navigation' : '1. 侧边功能导航',
         description: isEn
-          ? 'Access all form materials here. Click "Create from Template" to load preset KYC questionnaires, or click / drag fields from Basic Inputs and Business Components into your canvas.'
-          : '左侧汇集表单全套构建物料：点击“从场景模板创建”可一键套用预设的 KYC 问卷；在下方“基础输入”与“业务组件”库中，可直接点击或拖拽字段添加到右侧画布中。',
+          ? 'The leftmost activity bar provides three core workspaces: Scenario Templates (preset questionnaires), Field Components (form inputs), and Page Outline (multi-page flow).'
+          : '最左侧为核心功能导航栏，纵向整合三大主功能区：模板库（开箱即用行业问卷）、组件库（表单字段物料）与页面大纲（多画板流程编排）。',
+        side: 'right',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-template-panel',
+      popover: {
+        title: isEn ? '2. Scenario Templates' : '2. 场景模板库',
+        description: isEn
+          ? 'Browse prebuilt compliance KYC templates (Customer, Individual, Entity). Click any template to load its full structure in 1-click, or click "Create Blank Canvas" to build from scratch.'
+          : '汇集标准合规的 KYC 行业模板（母案例、个人案例、机构案例）。点击任意模板卡片即可一键载入完整架构，或点击顶部“新建空白画布”从零自定义搭建。',
+        side: 'right',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-component-panel',
+      popover: {
+        title: isEn ? '3. Field Components' : '3. 字段组件库',
+        description: isEn
+          ? 'Offers basic and business form fields including Text Inputs, ID Selectors, Dates, Addresses, and Signatures. Click any component or drag it directly into a page on the canvas.'
+          : '提供单行输入、数字、证件选择、日期、地址、声明复选及手写签名等多种标准表单物料。支持直接点击字段，或直接拖拽添加至画布对应页面中。',
         side: 'right',
         align: 'start'
       }
@@ -21,10 +44,10 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
     {
       element: '#tour-canvas-viewport',
       popover: {
-        title: isEn ? '2. Infinite Canvas & Navigation' : '2. 无限画布与自由漫游',
+        title: isEn ? '4. Main Design Canvas' : '4. 主设计画布',
         description: isEn
-          ? 'The center is an infinite visual workspace: hold [Ctrl + Left Drag] or hold [Middle Mouse] to pan the canvas; scroll [Mouse Wheel] to zoom smoothly and arrange multi-page form workflows.'
-          : '中间为可视化无限设计画布：按住【Ctrl + 鼠标左键拖拽】或直接按住【鼠标中键】可自由平移画布；滑动【鼠标滚轮】可平滑缩放视图，支持在无限空间中自由编排多画板。',
+          ? 'The central workspace for visual form design: hold [Ctrl + Left Drag] or [Middle Mouse] to pan the canvas; scroll [Mouse Wheel] to zoom smoothly and arrange multi-page flows.'
+          : '中央为可视化自由排版画布：按住【Ctrl + 鼠标左键拖拽】或【鼠标中键】可自由平移画布视口；滑动【鼠标滚轮】可平滑缩放视图，支持直观编排多页面联动。',
         side: 'bottom',
         align: 'center'
       }
@@ -32,10 +55,10 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
     {
       element: '#tour-first-page-frame',
       popover: {
-        title: isEn ? '3. Basic Information (System Preset)' : '3. 基本资料（系统预设只读）',
+        title: isEn ? '5. System Preset Information' : '5. 系统预设信息',
         description: isEn
-          ? 'Page 1 is preset "Basic Information": this section is system-generated and read-only, and cannot be modified. Customers verify it before proceeding to subsequent custom form pages.'
-          : '第 1 个画板为系统预设的“基本资料”：此部分由系统自动录入，属于只读核验信息，不可更改；终端客户在填表时仅供核对确认，后续页面才是真正自定义动态收集的表单内容。',
+          ? 'The first frame displays system preset data: automatically populated by the host system and locked as read-only for verification. Subsequent pages contain your custom fields.'
+          : '首个画板为系统预设核验页：由母系统根据企业或个人档案自动生成并锁定为只读状态，供填表人在填写自定义问卷前核对确认基本信息。后续画板才是真正自定义收集的业务内容。',
         side: 'right',
         align: 'center'
       }
@@ -43,10 +66,10 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
     {
       element: '#tour-property-panel',
       popover: {
-        title: isEn ? '4. Properties & Configuration' : '4. 属性配置与规则设置',
+        title: isEn ? '6. Property Panel' : '6. 属性配置面板',
         description: isEn
-          ? 'Configure form and field settings. When no element is selected, edit form name/description and toggle bilingual mode. Clicking any field in canvas reveals its label, placeholder, validation, and options.'
-          : '右侧为当前选中的配置面板：未选中组件时，可在此修改表单名称/描述，并切换中英文双语模式；当点击画布中的具体字段时，将自动展开标题、必填校验、选项配置及联动规则。',
+          ? 'When no element is selected, edit form title, description, and toggle bilingual mode. Clicking any field in the canvas reveals its label, placeholder, validation, and options.'
+          : '未选中组件时，可在此设置表单全局名称、描述及中英文双语模式；选中画布中具体字段后，将展开该字段的标题、占位提示、必填校验及选项配置。',
         side: 'left',
         align: 'start'
       }
@@ -54,10 +77,10 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
     {
       element: '#tour-preview-btn',
       popover: {
-        title: isEn ? '5. Mobile Simulator Preview' : '5. 手机端真机模拟预览',
+        title: isEn ? '7. Mobile Device Preview' : '7. 移动端真机预览',
         description: isEn
-          ? 'Click "Preview" anytime to test the actual respondent experience in an iPhone mockup, including page transitions, validation errors, and clean JSON Schema.'
-          : '随时点击顶部的“预览”按钮，将在 iPhone 仿真手机壳中模拟终端用户的真实填表体验，实时测试字段必填校验、多页流转逻辑以及底层低代码 Schema。',
+          ? 'Click "Preview" anytime to test the actual respondent experience in an iPhone mockup, including field validations, multi-step navigation, and underlying JSON Schema.'
+          : '随时点击顶部的“预览”按钮，将在 iPhone 仿真模型中模拟终端用户的真实填表流程，实时测试表单必填校验、多页流转以及底层低代码 Schema 数据。',
         side: 'bottom',
         align: 'end'
       }
@@ -65,10 +88,10 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
     {
       element: '#tour-deploy-btn',
       popover: {
-        title: isEn ? '6. Publish & Frontend Deployment' : '6. 发布表单与前台交付',
+        title: isEn ? '8. Form Publishing & Integration' : '8. 表单发布与交付',
         description: isEn
-          ? 'Once form design is ready, click "Publish Form" to generate a standalone form link, QR code, or export low-code Schema. After publishing, you can configure and send the DIY form tasks directly in your frontend portal!'
-          : '表单设计就绪后，点击“发布表单”，即可一键生成对外填表专属链接与二维码，或导出低代码 Schema 数据，快速集成上线。导出发布后就可以在前台配置发送对应的 DIY 表单了！',
+          ? 'Once form design is ready, click "Publish" to generate a standalone form link and QR code, or export the standard low-code Schema for frontend integration.'
+          : '表单设计就绪后，点击“发布表单”，即可一键生成对外填表专属链接与二维码，或导出标准化低代码 Schema 数据，便捷集成至前台业务系统中。',
         side: 'bottom',
         align: 'end'
       }
@@ -76,7 +99,14 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
   ];
 }
 
-export function startAppTour() {
+export function startAppTour(initialIndex = 0) {
+  if (driverInstance) {
+    try {
+      driverInstance.destroy();
+    } catch (_) {}
+    driverInstance = null;
+  }
+
   // If sidebars are hidden, ensure they are visible during tour
   if (!store.leftSidebarVisible) {
     store.leftSidebarVisible = true;
@@ -99,15 +129,20 @@ export function startAppTour() {
     overlayColor: 'rgba(15, 23, 42, 0.65)',
     stageRadius: 8,
     stagePadding: 6,
-    nextBtnText: isEn ? 'Next →' : '下一步 →',
-    prevBtnText: isEn ? '← Back' : '← 上一步',
-    doneBtnText: isEn ? 'Start Now' : '开始使用',
-    progressText: isEn ? 'Step {{current}} of {{total}}' : '第 {{current}} / {{total}} 步',
+    nextBtnText: t('tour.nextBtn'),
+    prevBtnText: t('tour.prevBtn'),
+    doneBtnText: t('tour.doneBtn'),
+    progressText: t('tour.progressText'),
     steps: getTourSteps(isEn),
     onHighlightStarted: (_el, _step, opts) => {
-      if (opts.state.activeIndex === 1) {
+      const idx = opts.state.activeIndex;
+      if (idx === 1) {
+        store.sidebarTab = 'templates';
+      } else if (idx === 2) {
+        store.sidebarTab = 'components';
+      } else if (idx === 3) {
         resetCanvasView({ duration: 0 });
-      } else if (opts.state.activeIndex === 2 && store.pages.length > 0) {
+      } else if (idx === 4 && store.pages.length > 0) {
         focusOnPage(store.pages[0].id, { forTour: true, duration: 0 });
       }
     },
@@ -117,21 +152,17 @@ export function startAppTour() {
         const neverBtn = document.createElement('button');
         neverBtn.className = 'driver-never-show-btn';
         neverBtn.type = 'button';
-        neverBtn.innerText = isEn ? "Don't show again" : '不再提示';
-        neverBtn.title = isEn ? "Never show tour automatically on startup" : '以后进入页面不再自动弹出新手指引';
+        neverBtn.innerText = t('tour.neverShow');
+        neverBtn.title = t('tour.neverShowTitle');
         neverBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           localStorage.setItem('diy_form_tour_never_show', 'true');
-          localStorage.setItem('diy_form_tour_shown', 'true');
+          sessionStorage.setItem('diy_form_tour_shown_session', 'true');
           if (driverInstance) {
             driverInstance.destroy();
             driverInstance = null;
           }
-          Message.info(
-            isEn
-              ? 'Tour closed. You can restart it anytime from the top-right Settings.'
-              : '已关闭新手指引，后续可随时在右上角设置中重新开启'
-          );
+          Message.info(t('tour.closedMsg'));
         });
         footer.insertBefore(neverBtn, footer.firstChild);
       }
@@ -140,7 +171,7 @@ export function startAppTour() {
       if (typeof document !== 'undefined') {
         document.body.classList.remove('tour-active');
       }
-      localStorage.setItem('diy_form_tour_shown', 'true');
+      sessionStorage.setItem('diy_form_tour_shown_session', 'true');
       if (driverInstance) {
         driverInstance.destroy();
         driverInstance = null;
@@ -148,18 +179,28 @@ export function startAppTour() {
     }
   });
 
-  driverInstance.drive();
+  driverInstance.drive(initialIndex);
 }
 
-export function checkAutoStartTour() {
+export function checkAutoStartTour(force = false) {
   if (typeof window === 'undefined') return;
-  const neverShow = localStorage.getItem('diy_form_tour_never_show');
-  if (neverShow === 'true') return;
 
-  const hasShown = localStorage.getItem('diy_form_tour_shown');
-  if (hasShown === 'true') return;
+  const urlParams = new URLSearchParams(window.location.search);
+  const tourParam = urlParams.get('tour');
+  if (tourParam === '1' || tourParam === 'true') {
+    setTimeout(() => {
+      startAppTour();
+    }, 500);
+    return;
+  }
+
+  const neverShow = localStorage.getItem('diy_form_tour_never_show');
+  if (neverShow === 'true' && !force) return;
+
+  const hasShown = sessionStorage.getItem('diy_form_tour_shown_session') || localStorage.getItem('diy_form_tour_shown');
+  if (hasShown === 'true' && !force) return;
 
   setTimeout(() => {
     startAppTour();
-  }, 800);
+  }, 600);
 }

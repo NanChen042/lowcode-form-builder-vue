@@ -6,18 +6,19 @@
     :footer="false"
     :header="false"
     :closable="false"
+    draggable
     modal-class="preview-arco-modal"
     :modal-style="{
       padding: 0,
-      height: 'min(890px, 92vh)',
+      height: 'min(860px, 92vh)',
       maxHeight: '92vh',
-      borderRadius: '20px',
+      borderRadius: '8px',
       overflow: 'hidden',
-      boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08)'
+      boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06)'
     }"
     :mask-style="{
       backdropFilter: 'blur(8px)',
-      backgroundColor: 'rgba(15, 23, 42, 0.5)'
+      backgroundColor: 'rgba(15, 23, 42, 0.45)'
     }"
     :body-style="{
       padding: 0,
@@ -25,40 +26,38 @@
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      borderRadius: '20px'
+      borderRadius: '8px'
     }"
     unmount-on-close
     :mask-closable="true"
     @cancel="handleClose"
   >
-    <div class="flex h-full w-full flex-col overflow-hidden bg-white rounded-[20px]">
+    <div class="flex h-full w-full flex-col overflow-hidden bg-white rounded-[8px]">
       <!-- 头部 -->
-      <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#f0f0f0] px-6">
-        <div>
-          <div class="flex items-center gap-2">
-            <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
-              {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Deploy Schema' : '发布结构') : (store.currentLocale === 'en' ? 'Preview' : '预览') }}
-            </h2>
-            <a-tag v-if="schema?.meta?.title || store.meta.title" color="arcoblue" size="small">
-              {{ schema?.meta?.title || store.meta.title }}
-            </a-tag>
-          </div>
-          <p class="m-0 text-xs leading-5 text-slate-400">
-            {{ mode === 'deploy' ? (store.currentLocale === 'en' ? 'Form schema is ready for deployment' : '当前表单已生成可保存的结构数据') : (store.currentLocale === 'en' ? 'Experience responsive mobile form interactions and validations' : '在手机设备模拟器中体验表单交互与验证') }}
-          </p>
+      <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 px-6">
+        <div class="flex items-center gap-2.5">
+          <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
+            {{ mode === 'deploy' ? t('preview.deploySchema') : t('preview.preview') }}
+          </h2>
+          <a-tag v-if="schema?.meta?.title || store.meta.title" color="arcoblue" size="small">
+            {{ schema?.meta?.title || store.meta.title }}
+          </a-tag>
         </div>
 
         <div class="flex items-center gap-2.5">
           <a-button type="secondary" size="small" @click="schemaSidebarVisible = !schemaSidebarVisible">
             <template #icon><Code class="h-3.5 w-3.5" /></template>
-            {{ store.currentLocale === 'en' ? 'Schema JSON' : '结构 JSON' }}
+            {{ t('preview.schemaJson') }}
           </a-button>
 
-          <a-button type="secondary" size="small" shape="circle" aria-label="关闭" @click="handleClose">
-            <template #icon>
-              <X class="h-4 w-4" />
-            </template>
-          </a-button>
+          <button
+            type="button"
+            class="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            :title="t('common.close') || '关闭'"
+            @click="handleClose"
+          >
+            <X class="h-4 w-4" />
+          </button>
         </div>
       </header>
 
@@ -68,7 +67,7 @@
           <!-- 左侧大纲进度条（多页时展示） -->
           <div v-if="pages.length > 1 && !isSubmitted" class="w-[240px] shrink-0 flex flex-col gap-1 max-h-full overflow-y-auto custom-scrollbar">
             <div class="mb-2 pb-2 border-b border-slate-200/80 text-xs text-slate-500 font-medium">
-              <span>{{ store.currentLocale === 'en' ? 'Form Steps' : '表单步骤列表' }}</span>
+              <span>{{ t('preview.formSteps') }}</span>
             </div>
 
             <div v-for="(p, i) in pages" :key="p.id" class="preview-step-item cursor-pointer flex items-start gap-3 transition group py-1.5 select-none" :class="i === currentStep ? 'text-[#1677ff]' : 'text-slate-600 hover:text-blue-600'" @click="handleStepClick(i)">
@@ -80,83 +79,57 @@
               </div>
               <div class="pt-0.5 flex flex-col min-w-0">
                 <span class="text-sm font-medium leading-5 truncate" :class="{ 'font-semibold': i === currentStep }">
-                  {{ p.pageType === 'system_profile' ? (store.currentLocale === 'en' ? '01 · Basic Information [Preset]' : '01 · 基础资料 [系统预设]') : getPageTitleDisplay(p, i) }}
+                  {{ p.pageType === 'system_profile' ? `01 · ${t('common.basicInfo')} [${t('common.systemPreset')}]` : getPageTitleDisplay(p, i) }}
                 </span>
                 <span class="text-[11px] text-slate-400">
-                  {{ p.pageType === 'system_profile' ? (store.currentLocale === 'en' ? 'Pre-filled Baseline' : '预置核验节点') : (store.currentLocale === 'en' ? `${p.fields?.length || 0} fields` : `${p.fields?.length || 0} 个字段`) }}
+                  {{ p.pageType === 'system_profile' ? t('common.prefilledBaseline') : `${p.fields?.length || 0} ${t('common.fieldsUnit')}` }}
                 </span>
               </div>
             </div>
           </div>
 
-          <!-- 仿真 Apple iPhone 17 Pro Max 手机机模 (高度自适应屏幕视口并严格在机身内滚动) -->
-          <div class="relative flex h-full max-h-[812px] w-[385px] shrink-0 flex-col select-none transition-all duration-300 min-h-0">
-            <!-- 机身左侧实体按键 (Action 动作键 + 音量加 + 音量减) -->
-            <div class="pointer-events-none absolute -left-[3.5px] top-[115px] z-10 w-[3.5px] h-[26px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
-            <div class="pointer-events-none absolute -left-[3.5px] top-[158px] z-10 w-[3.5px] h-[52px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
-            <div class="pointer-events-none absolute -left-[3.5px] top-[224px] z-10 w-[3.5px] h-[52px] rounded-l-[2px] bg-[#2a2a2e] shadow-[inset_1px_0_1px_rgba(255,255,255,0.25)]"></div>
+          <!-- 仿真手机机模 (经典长方形圆角机身，杜绝大圆角椭圆畸变) -->
+          <div class="relative flex h-full max-h-[780px] w-[375px] shrink-0 flex-col select-none transition-all duration-200 min-h-0">
+            <!-- 手机黑色外框 (精致微圆角 32px，超窄边框) -->
+            <div class="relative flex flex-1 flex-col min-h-0 rounded-[32px] bg-slate-900 p-[7px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35),0_0_0_1px_rgba(15,23,42,0.12)] ring-1 ring-black/40">
+              <!-- 纯白主屏显示区域 (内圆角 26px) -->
+              <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[26px] bg-white">
+                <!-- 顶部灵动岛胶囊 (居中简约设计) -->
+                <div class="pointer-events-none absolute left-1/2 top-[8px] z-30 flex h-[22px] w-[90px] -translate-x-1/2 items-center justify-center rounded-full bg-black shadow-xs">
+                  <div class="h-[7px] w-[7px] rounded-full bg-[#1c1c1e] ring-1 ring-[#2c2c2e]"></div>
+                </div>
 
-            <!-- 机身右侧实体按键 (侧边电源/唤醒键) -->
-            <div class="pointer-events-none absolute -right-[3.5px] top-[172px] z-10 w-[3.5px] h-[78px] rounded-r-[2px] bg-[#2a2a2e] shadow-[inset_-1px_0_1px_rgba(255,255,255,0.25)]"></div>
+                <!-- 顶部状态栏 -->
+                <div class="flex h-10 shrink-0 items-center justify-between px-6 text-black z-20 select-none">
+                  <!-- iOS 状态栏时间 -->
+                  <span class="font-semibold text-[13px] tracking-tight leading-none" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;">{{ currentTime }}</span>
+                  
+                  <!-- iOS 状态栏图标组合 (信号 + Wi-Fi + 电池) -->
+                  <div class="flex items-center gap-[6px]">
+                    <!-- 蜂窝网络信号 -->
+                    <svg class="w-[16px] h-[10px] text-black shrink-0" viewBox="0 0 18 12" fill="currentColor">
+                      <rect x="0.5" y="8" width="3" height="4" rx="1" />
+                      <rect x="5.1" y="5.3" width="3" height="6.7" rx="1" />
+                      <rect x="9.7" y="2.6" width="3" height="9.4" rx="1" />
+                      <rect x="14.3" y="0" width="3" height="12" rx="1" />
+                    </svg>
 
-            <!-- 钛金属外壳主框 (Deep Graphite / Titanium Finish) -->
-            <div class="relative flex flex-1 flex-col min-h-0 rounded-[55px] bg-[#18181b] p-[9px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.12),inset_0_0_2px_1px_rgba(255,255,255,0.2)] ring-1 ring-black/80">
-              <!-- 顶部微缝隐藏式听筒 -->
-              <div class="pointer-events-none absolute top-[3.5px] left-1/2 -translate-x-1/2 z-40 w-12 h-[3px] rounded-full bg-[#141416] shadow-[inset_0_1px_1px_rgba(0,0,0,0.9)]"></div>
+                    <!-- Wi-Fi -->
+                    <svg class="w-[15px] h-[10.5px] text-black shrink-0" viewBox="0 0 16 12" fill="none">
+                      <path d="M 1.2 4.2 A 9.8 9.8 0 0 1 14.8 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                      <path d="M 3.8 6.9 A 6.2 6.2 0 0 1 12.2 6.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                      <path d="M 6.4 9.5 A 2.8 2.8 0 0 1 9.6 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                      <circle cx="8" cy="11.4" r="0.75" fill="currentColor" />
+                    </svg>
 
-              <!-- 屏幕外侧极窄等宽黑边 (Uniform Bezel) -->
-              <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[47px] bg-black p-[2px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
-                <!-- 纯白主屏显示区域 -->
-                <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[45px] bg-white">
-                  <!-- iPhone 灵动岛 Dynamic Island (带精致超感前置镜头光学质感) -->
-                  <div class="pointer-events-none absolute left-1/2 top-[11px] z-30 flex h-[32px] w-[118px] -translate-x-1/2 items-center justify-end pr-2.5 rounded-full bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_2px_8px_rgba(0,0,0,0.4)] transition-all">
-                    <!-- 超感光前置镜头结构 (对齐真实 iPhone 灵动岛镜头物理质感) -->
-                    <div class="relative flex h-[12px] w-[12px] items-center justify-center rounded-full bg-[#0a0d16] ring-1 ring-[#1e2538] shadow-[inset_0_1px_2px_rgba(0,0,0,0.9)]">
-                      <!-- 镜头光学镀膜圆环与深蓝高光弧面 -->
-                      <div class="h-[6.5px] w-[6.5px] rounded-full bg-[radial-gradient(circle_at_35%_35%,#26385d_0%,#111a2f_50%,#040711_100%)] shadow-[inset_0_0_1px_rgba(255,255,255,0.4)]"></div>
-                      <!-- 极细镜头聚焦点反射 -->
-                      <div class="absolute top-[2.5px] left-[2.5px] h-[1.5px] w-[1.5px] rounded-full bg-white/50"></div>
-                    </div>
+                    <!-- 电池 -->
+                    <svg class="w-[23px] h-[11px] text-black shrink-0" viewBox="0 0 25 12" fill="none">
+                      <rect x="0.6" y="0.6" width="20.8" height="10.8" rx="3.5" stroke="currentColor" stroke-width="1.2" />
+                      <path d="M 22.8 4.3 C 23.5 4.3 23.8 4.7 23.8 5.3 V 6.7 C 23.8 7.3 23.5 7.7 22.8 7.7" fill="currentColor" />
+                      <rect x="2.4" y="2.4" width="17.2" height="7.2" rx="2" fill="currentColor" />
+                    </svg>
                   </div>
-
-                  <!-- 顶部状态栏 (严格遵循 Apple iOS 官方设计规范与居中对齐) -->
-                  <div class="flex h-[52px] shrink-0 items-center justify-between px-8 text-black z-20 select-none">
-                    <!-- iOS 状态栏时间 -->
-                    <span class="font-semibold text-[14.5px] tracking-tight leading-none" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;">{{ currentTime }}</span>
-                    
-                    <!-- iOS 状态栏图标组合 (信号 + Wi-Fi + 电池) -->
-                    <div class="flex items-center gap-[7px]">
-                      <!-- 蜂窝网络信号 (Apple 4阶实体圆角信号柱) -->
-                      <svg class="w-[17px] h-[11px] text-black shrink-0" viewBox="0 0 18 12" fill="currentColor">
-                        <rect x="0.5" y="8" width="3" height="4" rx="1" />
-                        <rect x="5.1" y="5.3" width="3" height="6.7" rx="1" />
-                        <rect x="9.7" y="2.6" width="3" height="9.4" rx="1" />
-                        <rect x="14.3" y="0" width="3" height="12" rx="1" />
-                      </svg>
-
-                      <!-- Wi-Fi (Apple 经典同心弧波辐射结构) -->
-                      <svg class="w-[16px] h-[11.5px] text-black shrink-0" viewBox="0 0 16 12" fill="none">
-                        <!-- 最外层弧波 -->
-                        <path d="M 1.2 4.2 A 9.8 9.8 0 0 1 14.8 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                        <!-- 中间层弧波 -->
-                        <path d="M 3.8 6.9 A 6.2 6.2 0 0 1 12.2 6.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                        <!-- 内层弧波 -->
-                        <path d="M 6.4 9.5 A 2.8 2.8 0 0 1 9.6 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                        <!-- 底部中心基准点 -->
-                        <circle cx="8" cy="11.4" r="0.75" fill="currentColor" />
-                      </svg>
-
-                      <!-- 电池 (Apple 经典横向电池胶囊 + 实体满电内芯 + 正极凸起) -->
-                      <svg class="w-[25px] h-[12px] text-black shrink-0" viewBox="0 0 25 12" fill="none">
-                        <!-- 电池外框圆角胶囊 -->
-                        <rect x="0.6" y="0.6" width="20.8" height="10.8" rx="3.5" stroke="currentColor" stroke-width="1.2" />
-                        <!-- 电池右侧正极接头触点 (微圆角凸起) -->
-                        <path d="M 22.8 4.3 C 23.5 4.3 23.8 4.7 23.8 5.3 V 6.7 C 23.8 7.3 23.5 7.7 22.8 7.7" fill="currentColor" />
-                        <!-- 内部 100% 满电实心填充条 (带完美等距内边距与圆角) -->
-                        <rect x="2.4" y="2.4" width="17.2" height="7.2" rx="2" fill="currentColor" />
-                      </svg>
-                    </div>
-                  </div>
+                </div>
 
                 <!-- 提交成功状态卡片展示 -->
                 <div v-if="isSubmitted" class="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center p-6 text-center animate-fade-in custom-scrollbar">
@@ -164,28 +137,28 @@
                     <CheckCircle class="w-10 h-10" />
                   </div>
                   <h3 class="text-lg font-bold text-slate-800 m-0 mb-1">
-                    {{ store.currentLocale === 'en' ? 'Submitted Successfully!' : '表单提交成功！' }}
+                    {{ t('preview.submitSuccess') }}
                   </h3>
                   <p class="text-xs text-slate-400 mb-6 leading-relaxed max-w-[240px]">
-                    {{ store.currentLocale === 'en' ? 'All mandatory fields and rules have passed strict validation.' : '所有必填项已严格通过校验，数据格式完全合规。' }}
+                    {{ t('preview.submitSuccessDesc') }}
                   </p>
 
                   <div class="w-full bg-slate-50 rounded-xl p-3 mb-6 text-left border border-slate-100 space-y-1.5 text-xs">
                     <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
-                      {{ store.currentLocale === 'en' ? 'Validation Summary' : '校验结果汇总' }}
+                      {{ t('preview.validationSummary') }}
                     </div>
                     <div class="flex items-center justify-between text-slate-600">
-                      <span>{{ store.currentLocale === 'en' ? 'Total Fields Checked' : '校验字段总数' }}:</span>
+                      <span>{{ t('preview.totalFieldsChecked') }}:</span>
                       <span class="font-mono font-medium text-slate-800">{{ totalFieldsCount }}</span>
                     </div>
                     <div class="flex items-center justify-between text-slate-600">
-                      <span>{{ store.currentLocale === 'en' ? 'Mandatory Fields' : '必填项目' }}:</span>
-                      <span class="font-mono font-medium text-emerald-600">100% 通过</span>
+                      <span>{{ t('preview.mandatoryFields') }}:</span>
+                      <span class="font-mono font-medium text-emerald-600">100% {{ t('common.passed') }}</span>
                     </div>
                   </div>
 
                   <a-button type="primary" class="w-full h-9 rounded-lg" @click="resetForm">
-                    {{ store.currentLocale === 'en' ? 'Refill Form' : '重新填写表单' }}
+                    {{ t('preview.refillForm') }}
                   </a-button>
                 </div>
 
@@ -243,12 +216,12 @@
                       <!-- 底部操作按钮：确认 & 下一步 (无任何验证阻断，直接进入下一步！) -->
                       <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
                         <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
-                          {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
+                          {{ t('common.prev') }}
                         </a-button>
                         <div v-else class="flex-1"></div>
 
                         <a-button type="primary" class="h-9 px-6 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleProfileNext">
-                          {{ store.currentLocale === 'en' ? 'Confirm & Next' : '确认 & 下一步' }}
+                          {{ t('common.confirmNext') }}
                         </a-button>
                       </div>
                     </div>
@@ -257,7 +230,7 @@
                     <form v-else class="w-full flex flex-col" novalidate @submit.prevent>
                       <!-- 空页面 -->
                       <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                        {{ store.currentLocale === 'en' ? 'Current page has no fields' : '当前页面暂无字段' }}
+                        {{ t('preview.noFields') }}
                       </div>
 
                       <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
@@ -268,48 +241,42 @@
                       <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
                       <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
                         <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
-                          {{ store.currentLocale === 'en' ? 'Previous' : '上一步' }}
+                          {{ t('common.prev') }}
                         </a-button>
                         <div v-else class="flex-1"></div>
 
                         <a-button v-if="hasNext" type="primary" class="h-9 px-5 rounded-lg text-xs font-medium" @click="handleNextStep">
-                          {{ store.currentLocale === 'en' ? 'Next Step' : '下一步' }}
+                          {{ t('common.nextStep') }}
                         </a-button>
 
                         <a-button v-else type="primary" class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleFormSubmit">
-                          {{ store.currentLocale === 'en' ? 'Validate Form' : '表单验证' }}
+                          {{ t('preview.validateForm') }}
                         </a-button>
                       </div>
                     </form>
                   </div>
                 </div>
 
-                <!-- 底部 Home Indicator 触控横条 (对齐 Apple 官方与 Cult UI 规范) -->
-                <div class="pointer-events-none absolute bottom-[7px] left-1/2 -translate-x-1/2 h-[4.5px] w-[134px] rounded-full bg-black/85 z-30"></div>
+                <!-- 底部 Home Indicator 触控横条 -->
+                <div class="pointer-events-none absolute bottom-[6px] left-1/2 -translate-x-1/2 h-[4px] w-[110px] rounded-full bg-black/75 z-30"></div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
         <!-- 右侧 JSON 侧边栏抽屉 -->
         <SchemaSidebar :visible="schemaSidebarVisible" :schema="schema" @close="schemaSidebarVisible = false" />
       </div>
 
-      <!-- 底部全局操作栏 -->
-      <footer class="flex h-14 shrink-0 items-center justify-between border-t border-[#f0f0f0] bg-[#fafafa] px-6 z-10">
-        <div class="flex items-center gap-2 text-xs text-slate-500">
-          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>{{ store.currentLocale === 'en' ? 'Live Validator: Active (Singapore +65 default)' : '实时校验引擎已就绪（国际区号默认 +65 新加坡）' }}</span>
-        </div>
-
+      <!-- 底部全局操作栏 (移除多余状态文案) -->
+      <footer class="flex h-14 shrink-0 items-center justify-end border-t border-[#f0f0f0] bg-[#fafafa] px-6 z-10">
         <div class="flex items-center gap-3">
           <a-button type="primary" size="small" :loading="isPublishing" @click="handlePublish">
-            {{ isPublishing ? (store.currentLocale === 'en' ? 'Publishing...' : '发布中...') : (store.currentLocale === 'en' ? 'Publish Form' : '发布表单') }}
+            {{ isPublishing ? t('preview.publishing') : t('preview.publishForm') }}
           </a-button>
 
           <a-button type="secondary" size="small" @click="handleClose">
-            {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
+            {{ t('common.cancel') }}
           </a-button>
         </div>
       </footer>
@@ -321,7 +288,7 @@
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
 import type { FormSchema, FormElement } from '@/types/schema';
 import { store } from '@/core/store';
-import { getPageText, getFieldValidationMessage } from '@/core/i18n';
+import { t, getPageText, getFieldValidationMessage } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -415,7 +382,7 @@ function validateField(field: FormElement): string | null {
       return getFieldValidationMessage(field);
     }
     if (strVal && field.inputType === 'number' && isNaN(Number(strVal))) {
-      return store.currentLocale === 'en' ? 'Please enter a valid number' : '请输入有效数字';
+      return t('val.validNumber');
     }
     return null;
   }
@@ -434,7 +401,7 @@ function validateField(field: FormElement): string | null {
       return getFieldValidationMessage(field);
     }
     if (strVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(strVal)) {
-      return store.currentLocale === 'en' ? 'Please enter a valid email' : '请输入有效的邮箱地址';
+      return t('val.validEmail');
     }
     return null;
   }
@@ -471,7 +438,7 @@ function validateField(field: FormElement): string | null {
         return getFieldValidationMessage(field);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
-        return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
+        return t('val.maxOptions', undefined, { count: field.maxSelections });
       }
     } else {
       if (isRequired && !strVal) {
@@ -489,7 +456,7 @@ function validateField(field: FormElement): string | null {
         return getFieldValidationMessage(field);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
-        return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} items allowed` : `最多只能选择 ${field.maxSelections} 项`;
+        return t('val.maxItems', undefined, { count: field.maxSelections });
       }
     } else {
       if (isRequired && !strVal) {
@@ -514,13 +481,16 @@ function validateField(field: FormElement): string | null {
       return getFieldValidationMessage(field);
     }
     if (field.maxSelections && arr.length > field.maxSelections) {
-      return store.currentLocale === 'en' ? `Maximum ${field.maxSelections} options allowed` : `最多只能选择 ${field.maxSelections} 项`;
+      return t('val.maxOptions', undefined, { count: field.maxSelections });
     }
     return null;
   }
 
   // 9. 日期
   if (field.type === 'date') {
+    if (field.enableLongTerm && formData[`${field.key}_isLongTerm`]) {
+      return null;
+    }
     if (isRequired && !strVal) {
       return getFieldValidationMessage(field);
     }
@@ -572,7 +542,7 @@ function validateCurrentPage(): boolean {
   }
 
   if (hasError) {
-    Message.error(store.currentLocale === 'en' ? 'Please fill in all required fields' : '请填写所有必填项并修正错误');
+    Message.error(t('preview.fillRequiredFields'));
     nextTick(() => {
       if (phoneContentRef.value) {
         const errEl = phoneContentRef.value.querySelector('.has-error, [data-error="true"], .arco-input-error, .arco-textarea-error, .arco-select-view-error, .arco-picker-error');
@@ -613,7 +583,7 @@ function handleStepClick(stepIdx: number) {
 function handleFormSubmit() {
   if (!validateCurrentPage()) return;
   isSubmitted.value = true;
-  Message.success(store.currentLocale === 'en' ? 'Submitted successfully!' : '表单提交成功！');
+  Message.success(t('preview.submitSuccess'));
 }
 
 function resetForm() {
@@ -647,7 +617,7 @@ function getStepNumber(idx: number): string {
 
 function getPageTitleDisplay(p: any, idx: number): string {
   const stepNo = getStepNumber(idx);
-  const rawTitle = getPageText(p, 'title') || (store.currentLocale === 'en' ? `Page ${idx + 1}` : `第 ${idx + 1} 页`);
+  const rawTitle = getPageText(p, 'title') || (p.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
   if (rawTitle.startsWith(stepNo) || /^\d{2}\s*·/.test(rawTitle)) {
     return rawTitle;
   }
@@ -664,18 +634,13 @@ const totalFieldsCount = computed(() => {
 
 const currentLocalizedTitle = computed(() => {
   if (currentPage.value) {
-    return getPageText(currentPage.value, 'title') || currentPage.value.title || (store.currentLocale === 'en' ? 'Untitled Page' : '未命名页面');
+    return getPageText(currentPage.value, 'title') || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
   }
-  return props.schema.meta?.title || (store.currentLocale === 'en' ? 'Untitled Form' : '未命名表单');
+  return props.schema.meta?.title || t('header.untitledForm');
 });
 
 const formBrandTitle = computed(() => {
-  return (
-    props.schema.meta?.title ||
-    (store.currentLocale === 'en'
-      ? 'Beijing Branch of Shanghai Qingmo Information Co., Ltd'
-      : '上海青墨信息技术有限公司北京分公司')
-  );
+  return props.schema.meta?.title || t('preview.defaultCompanyTitle');
 });
 
 const currentLocalizedDesc = computed(() => {
@@ -697,11 +662,11 @@ async function handlePublish() {
   try {
     const res = await FormAPI.publishForm(props.schema);
     if (res.success) {
-      Message.success(`表单发布成功！线上地址: ${res.data.url}`);
+      Message.success(`${t('preview.publishSuccess')} URL: ${res.data.url}`);
       emit('close');
     }
   } catch (e: any) {
-    Message.error(`发布失败: ${e.message}`);
+    Message.error(`${t('preview.publishFailed')}: ${e?.message || t('common.unknownError')}`);
   } finally {
     isPublishing.value = false;
   }
@@ -727,9 +692,9 @@ async function handlePublish() {
 
 :deep(.preview-arco-modal .arco-modal) {
   padding: 0;
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 :deep(.preview-arco-modal .arco-modal-body) {
@@ -738,6 +703,6 @@ async function handlePublish() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 8px;
 }
 </style>

@@ -64,15 +64,12 @@
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue } from '@/utils/helpers';
-import { store } from '@/core/store';
-import { getFieldText, getOptionLabel } from '@/core/i18n';
+import { t, getFieldText, getOptionLabel } from '@/core/i18n';
 import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
 import ElementLabel from './ElementLabel.vue';
 
 const props = defineProps<{
   element: FormElement;
-  fallbackPlaceholderZh: string;
-  fallbackPlaceholderEn: string;
 }>();
 
 const resolvedOptions = computed(() => {
@@ -83,10 +80,12 @@ const resolvedOptions = computed(() => {
 });
 
 const placeholderText = computed(() => {
-  return (
-    getFieldText(props.element, 'placeholder') ||
-    (store.currentLocale === 'en' ? props.fallbackPlaceholderEn : props.fallbackPlaceholderZh)
-  );
+  const custom = getFieldText(props.element, 'placeholder');
+  if (custom) return custom;
+  if (props.element.type === 'nationality') {
+    return t('prop.defaultNatPlaceholder');
+  }
+  return t('prop.defaultCountryPlaceholder');
 });
 
 const parsedDefaultValue = computed(() => {

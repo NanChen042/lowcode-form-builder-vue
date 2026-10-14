@@ -37,58 +37,100 @@
     <!-- 全局画布初始化加载状态 -->
     <div v-if="store.isCanvasLoading" class="absolute inset-0 flex items-center justify-center z-40 bg-slate-50/70 backdrop-blur-sm">
       <div class="flex flex-col items-center justify-center p-8 bg-white/95 rounded-xl shadow-lg border border-slate-200/80">
-        <a-spin :size="32" tip="正在初始化画布..." />
-        <span class="mt-3 text-xs text-slate-400">正在准备表单设计环境</span>
+        <a-spin :size="32" :tip="t('canvas.initializing')" />
+        <span class="mt-3 text-xs text-slate-400">{{ t('canvas.preparingEnv') }}</span>
       </div>
     </div>
 
-    <!-- 全局空状态提示（仅在加载完毕且所有页面被用户主动清空时展示） -->
-    <div v-else-if="store.pages.length === 0" class="absolute inset-0 flex items-center justify-center z-10 bg-slate-50/60 backdrop-blur-sm">
-      <div class="flex flex-col items-center justify-center w-full max-w-[420px] px-12 py-10 bg-white rounded-lg shadow-sm border border-slate-200">
-        <h3 class="mb-2 text-[17px] font-medium text-slate-800">暂无画布页面</h3>
-        <p class="mb-8 text-sm text-slate-500 text-center">
-          你的工作区准备就绪。创建一个画布来配置表单字段与布局。
+    <!-- 全局空状态提示（标准简约实线边框微圆角，与网格点阵自然融合） -->
+    <div
+      v-else-if="store.pages.length === 0"
+      class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none select-none"
+    >
+      <div
+        class="pointer-events-auto flex flex-col items-center justify-center w-full max-w-[400px] mx-4 px-8 py-6 rounded-lg border border-slate-200/90 bg-white/95 shadow-sm transition-all duration-150"
+      >
+        <!-- 顶部轻拟物图标 -->
+        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#1677ff] flex items-center justify-center mb-2.5 border border-blue-100">
+          <FilePlus2 class="w-4.5 h-4.5 stroke-[2]" />
+        </div>
+
+        <h3 class="mb-1 text-sm font-bold text-slate-800 tracking-tight">
+          {{ t('canvas.noPages') }}
+        </h3>
+        <p class="mb-4 text-xs text-slate-500 text-center max-w-[280px] leading-relaxed m-0">
+          {{ t('canvas.noPagesDesc') }}
         </p>
 
-        <div class="flex flex-col gap-3 w-full max-w-[200px]">
-          <a-button type="primary" size="large" long @click="$emit('open-create-canvas')">
+        <!-- 横排并列双按钮 (主按钮在左，次按钮在右，标准微圆角) -->
+        <div class="flex items-center gap-2.5">
+          <a-button
+            type="primary"
+            class="h-8 px-3.5 rounded bg-[#1677ff] text-xs font-medium flex items-center gap-1.5 shadow-2xs hover:bg-blue-600 transition-colors cursor-pointer"
+            @click="$emit('open-create-canvas')"
+          >
             <template #icon>
-              <Plus class="h-4 w-4" />
+              <Plus class="h-3.5 w-3.5" />
             </template>
-            新建画布
+            {{ t('canvas.newCanvas') }}
           </a-button>
-          <a-button type="secondary" size="large" long @click="$emit('open-template-gallery')">
+
+          <a-button
+            class="h-8 px-3.5 rounded border border-slate-200 bg-white text-slate-700 text-xs font-medium flex items-center gap-1.5 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer shadow-2xs"
+            @click="$emit('open-template-gallery')"
+          >
             <template #icon>
-              <LayoutTemplate class="h-4 w-4" />
+              <LayoutTemplate class="h-3.5 w-3.5 text-slate-500" />
             </template>
-            浏览场景模板
+            {{ t('canvas.browseTemplates') }}
           </a-button>
         </div>
       </div>
     </div>
 
-    <!-- 左上角悬浮半透明展开物料栏按钮 (折叠时优雅浮现，毛玻璃极简质感，精准对应红框位置) -->
+    <!-- 左上角 Figma UI3 独立悬浮胶囊小组件 (完全收起时浮现，1:1 还原 Figma 截图) -->
     <transition name="fade">
-      <a-tooltip
+      <div
         v-if="!store.leftSidebarVisible"
-        :content="store.currentLocale === 'en' ? 'Expand Materials' : '展开左侧物料栏'"
-        position="right"
+        class="figma-floating-pill absolute left-4 top-[70px] z-30 flex items-center gap-2.5 px-3 py-1.5 bg-white/95 rounded-xl border border-slate-200/90 shadow-md backdrop-blur-md select-none transition-all duration-200 hover:shadow-lg hover:border-blue-300 cursor-pointer"
+        @click="store.leftSidebarVisible = true"
       >
-        <button
-          type="button"
-          class="absolute left-3.5 top-[70px] z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
-          @click="store.leftSidebarVisible = true"
-        >
-          <PanelLeft class="h-4 w-4 transition-transform duration-200 group-hover:scale-105" />
-        </button>
-      </a-tooltip>
+        <!-- 品牌 / Figma 风格 Logo -->
+        <div class="flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 text-blue-600">
+          <Boxes class="w-3.5 h-3.5 stroke-[2.2]" />
+        </div>
+
+        <!-- 当前表单标题 (如无标题则显示 无标题) -->
+        <span class="text-[13px] font-bold text-slate-800 tracking-tight max-w-[140px] truncate">
+          {{ floatingTitle }}
+        </span>
+
+        <!-- 业务主体类型标签 (对标截图 免费 徽标) -->
+        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/60 leading-none">
+          {{ floatingProfileBadge }}
+        </span>
+
+        <!-- 分隔细线 -->
+        <div class="w-px h-3.5 bg-slate-200" />
+
+        <!-- 侧边栏展开图标按钮 (对标 Figma 截图 ◨ 图标) -->
+        <a-tooltip :content="t('canvas.expandSidebar')" position="bottom">
+          <button
+            type="button"
+            class="flex items-center justify-center w-5 h-5 rounded hover:bg-slate-100 text-slate-500 hover:text-blue-600 cursor-pointer transition-colors"
+            @click.stop="store.leftSidebarVisible = true"
+          >
+            <PanelLeft class="w-4 h-4" />
+          </button>
+        </a-tooltip>
+      </div>
     </transition>
 
     <!-- 右上角悬浮半透明展开属性面板按钮 (折叠时对称优雅浮现) -->
     <transition name="fade">
       <a-tooltip
         v-if="!store.rightSidebarVisible"
-        :content="store.currentLocale === 'en' ? 'Expand Properties' : '展开右侧属性面板'"
+        :content="t('canvas.expandProperties')"
         position="left"
       >
         <button
@@ -100,6 +142,7 @@
         </button>
       </a-tooltip>
     </transition>
+
 
     <!-- 悬浮画布控制与帮助组 (对标 Google Stitch 极简双胶囊/圆形原生设计，彻底移除加减号) -->
     <!-- 悬浮画布控制与帮助组 (现代化高级白色毛玻璃 + Arco 原生组件) -->
@@ -120,7 +163,7 @@
           <a-doption value="in" @click="handleZoomAction('in')">
             <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ store.currentLocale === 'en' ? 'Zoom in' : '放大画布' }}
+                {{ t('canvas.zoomIn') }}
               </span>
               <span class="font-mono text-[11px] text-slate-400 whitespace-nowrap">
                 {{ isMac ? '⌘+' : 'Ctrl+' }}
@@ -130,7 +173,7 @@
           <a-doption value="out" @click="handleZoomAction('out')">
             <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ store.currentLocale === 'en' ? 'Zoom out' : '缩小画布' }}
+                {{ t('canvas.zoomOut') }}
               </span>
               <span class="font-mono text-[11px] text-slate-400 whitespace-nowrap">
                 {{ isMac ? '⌘-' : 'Ctrl-' }}
@@ -140,7 +183,7 @@
           <a-doption value="100" @click="handleZoomAction('100')">
             <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ store.currentLocale === 'en' ? 'Zoom to 100%' : '缩放到 100%' }}
+                {{ t('canvas.zoom100') }}
               </span>
               <span class="font-mono text-[11px] text-slate-400 whitespace-nowrap">
                 {{ isMac ? '⇧0' : 'Shift+0' }}
@@ -150,7 +193,7 @@
           <a-doption value="fit" @click="handleZoomAction('fit')">
             <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ store.currentLocale === 'en' ? 'Zoom to Fit' : '适应画布全貌' }}
+                {{ t('canvas.zoomFit') }}
               </span>
               <span class="font-mono text-[11px] text-slate-400 whitespace-nowrap">
                 {{ isMac ? '⇧1' : 'Shift+1' }}
@@ -160,7 +203,7 @@
           <a-doption value="selection" @click="handleZoomAction('selection')">
             <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ store.currentLocale === 'en' ? 'Zoom to Selection' : '缩放到选中项' }}
+                {{ t('canvas.zoomSelection') }}
               </span>
               <span class="font-mono text-[11px] text-slate-400 whitespace-nowrap">
                 {{ isMac ? '⇧2' : 'Shift+2' }}
@@ -172,7 +215,7 @@
 
       <!-- 帮助与快捷键圆形按钮 (现代化高级白色毛玻璃 + 原生深黑气泡提示) -->
       <a-tooltip
-        :content="store.currentLocale === 'en' ? 'Help & Shortcuts' : '帮助与快捷键指南'"
+        :content="t('canvas.helpTooltip')"
         position="top"
       >
         <button
@@ -188,21 +231,22 @@
     <!-- 平台帮助与快捷键指南弹窗 (现代化分类卡片排版) -->
     <a-modal
       v-model:visible="helpModalVisible"
-      :title="store.currentLocale === 'en' ? 'Platform Help & Shortcuts' : '平台帮助与快捷键指南'"
+      :title="t('canvas.helpModalTitle')"
       :footer="false"
       :width="500"
+      draggable
       unmount-on-close
     >
       <div class="space-y-4 py-1 select-none">
         <!-- 视口与缩放 -->
         <div>
           <div class="text-[12px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            {{ store.currentLocale === 'en' ? 'Canvas & Zoom' : '画布缩放与漫游' }}
+            {{ t('canvas.secCanvasZoom') }}
           </div>
           <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-50/80 p-3 border border-slate-100">
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Zoom In' : '放大画布' }}
+                {{ t('canvas.zoomIn') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⌘ +' : 'Ctrl +' }}
@@ -210,7 +254,7 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Zoom Out' : '缩小画布' }}
+                {{ t('canvas.zoomOut') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⌘ -' : 'Ctrl -' }}
@@ -218,7 +262,7 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Zoom to 100%' : '缩放到 100%' }}
+                {{ t('canvas.zoom100') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⇧ 0' : 'Shift + 0' }}
@@ -226,7 +270,7 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Zoom to Fit' : '适应画布全貌' }}
+                {{ t('canvas.zoomFit') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⇧ 1' : 'Shift + 1' }}
@@ -234,7 +278,7 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Zoom to Selection' : '缩放到选中项' }}
+                {{ t('canvas.zoomSelection') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⇧ 2' : 'Shift + 2' }}
@@ -242,22 +286,22 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Pan Canvas' : '自由平移画布' }}
+                {{ t('canvas.panCanvas') }}
               </span>
               <span class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
                 <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
                 <span>+</span>
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ store.currentLocale === 'en' ? 'Left Drag' : '左键拖拽' }}</kbd>
+                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ t('canvas.leftDrag') }}</kbd>
               </span>
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Smooth Zoom' : '滚轮平滑缩放' }}
+                {{ t('canvas.smoothZoom') }}
               </span>
               <span class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
                 <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
                 <span>+</span>
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ store.currentLocale === 'en' ? 'Wheel' : '滚轮' }}</kbd>
+                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ t('canvas.wheel') }}</kbd>
               </span>
             </div>
           </div>
@@ -266,12 +310,12 @@
         <!-- 常用编辑快捷操作 -->
         <div>
           <div class="text-[12px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            {{ store.currentLocale === 'en' ? 'Form & Editing' : '表单编辑与组件' }}
+            {{ t('canvas.secFormEditing') }}
           </div>
           <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-50/80 p-3 border border-slate-100">
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Search Components' : '搜索物料组件' }}
+                {{ t('canvas.searchComponents') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⌘ K' : 'Ctrl + K' }}
@@ -279,23 +323,23 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Context Menu' : '画布右键快捷菜单' }}
+                {{ t('canvas.contextMenu') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ store.currentLocale === 'en' ? 'Right Click' : '鼠标右键' }}
+                {{ t('canvas.rightClick') }}
               </kbd>
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Inline Text Edit' : '就地直接编辑文字' }}
+                {{ t('canvas.inlineTextEdit') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ store.currentLocale === 'en' ? 'Click Text' : '单击文字' }}
+                {{ t('canvas.clickText') }}
               </kbd>
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Duplicate Element' : '复制选中组件' }}
+                {{ t('canvas.duplicateElement') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 {{ isMac ? '⌘ D' : 'Ctrl + D' }}
@@ -303,7 +347,7 @@
             </div>
             <div class="flex items-center justify-between text-[13px]">
               <span class="text-slate-700 font-medium">
-                {{ store.currentLocale === 'en' ? 'Delete Element' : '删除选中组件' }}
+                {{ t('canvas.deleteElement') }}
               </span>
               <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
                 Delete
@@ -316,10 +360,10 @@
       <div class="mt-5 flex items-center justify-between">
         <a-button type="outline" class="rounded-lg" @click="handleRestartTour">
           <template #icon><Sparkles class="h-4 w-4 text-[#1677ff]" /></template>
-          {{ store.currentLocale === 'en' ? 'Product Tour' : '开启新手漫游引导' }}
+          {{ t('canvas.productTour') }}
         </a-button>
         <a-button type="primary" class="rounded-lg px-5" @click="helpModalVisible = false">
-          {{ store.currentLocale === 'en' ? 'Got it' : '我知道了' }}
+          {{ t('canvas.gotIt') }}
         </a-button>
       </div>
     </a-modal>
@@ -343,21 +387,38 @@ import {
   duplicateElement,
   deleteElement
 } from '@/core/store';
+import { t } from '@/core/i18n';
 import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
 import ContextMenu from './ContextMenu.vue';
 import {
   Plus,
   LayoutTemplate,
+  FilePlus2,
   PanelLeft,
   PanelRight,
-  Sparkles
+  Sparkles,
+  Boxes
 } from '@lucide/vue';
 import { startAppTour } from '@/utils/useAppTour';
 
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
+
+const floatingTitle = computed(() => {
+  if (store.currentLocale === 'en') {
+    return store.meta.title_en?.trim() || store.meta.title?.trim() || t('header.untitledForm');
+  }
+  return store.meta.title?.trim() || t('header.untitledForm');
+});
+
+const floatingProfileBadge = computed(() => {
+  const p = store.meta.profileType;
+  if (p === 'individual') return t('canvas.profileIndividual');
+  if (p === 'entity') return t('canvas.profileEntity');
+  return t('canvas.profileCustomer');
+});
 
 // 谷歌 Stitch 原版 14px 黄金基准间距（缩放比例 0.7~0.8 时渲染为 10.5~11.2px，与 Google Stitch 10.6px 完全一致）
 const currentGridSize = computed(() => {
