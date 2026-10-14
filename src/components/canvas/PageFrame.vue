@@ -4,7 +4,7 @@
     :data-page-id="page.id"
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
-    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col cursor-default transition-all duration-200"
+    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col transition-all duration-200"
     :class="[
       isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
       isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
@@ -126,7 +126,19 @@
           :data-page-id="page.id"
           @click.self="selectPage(page.id)"
         >
-          <CanvasElement v-for="element in page.fields" :key="element.id" :element="element" />
+          <div
+            v-for="group in elementGroups"
+            :key="group.id"
+            :data-group-id="group.id"
+            class="canvas-element-group relative"
+            :class="{ 'is-multi-branch-group': group.elements.length > 1 }"
+          >
+            <CanvasElement
+              v-for="element in group.elements"
+              :key="element.id"
+              :element="element"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -144,7 +156,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import type { FormPage, FormElement, ComponentType } from '@/types/schema';
 import { store, selectPage, addPage, createElement, selectElement, markDirty, triggerHighlight } from '@/core/store';
-import { t, getPageText } from '@/core/i18n';
+import { t, getPageText, setPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
 import SystemProfileView from '@/components/common/SystemProfileView.vue';
@@ -165,35 +177,19 @@ const dropzoneRef = ref<HTMLElement | null>(null);
 
 const displayPageTitle = computed({
   get() {
-    if (store.currentLocale === 'en') {
-      return props.page.title_en || '';
-    }
-    return props.page.title || '';
+    return getPageText(props.page, 'title');
   },
   set(val: string) {
-    if (store.currentLocale === 'en') {
-      props.page.title_en = val;
-    } else {
-      props.page.title = val;
-    }
-    markDirty();
+    setPageText(props.page, 'title', val);
   }
 });
 
 const displayPageDesc = computed({
   get() {
-    if (store.currentLocale === 'en') {
-      return props.page.description_en || '';
-    }
-    return props.page.description || '';
+    return getPageText(props.page, 'description');
   },
   set(val: string) {
-    if (store.currentLocale === 'en') {
-      props.page.description_en = val;
-    } else {
-      props.page.description = val;
-    }
-    markDirty();
+    setPageText(props.page, 'description', val);
   }
 });
 
@@ -265,9 +261,36 @@ function onPageDescBlur() {
   }
 }
 
-let globalDraggingItem: {
+interface ElementGroup {
+  id: string;
+  elements: FormElement[];
+}
+
+const elementGroups = computed<ElementGroup[]>(() => {
+  const result: ElementGroup[] = [];
+  const fields = props.page.fields;
+  let currentGroup: ElementGroup | null = null;
+
+  for (let i = 0; i < fields.length; i++) {
+    const el = fields[i];
+    // 核心从属判定：若当前元素是条件联动从属子项，且依附于当前组的根节点组件，则吸纳到该组中一同拖拽移动
+    if (currentGroup && el.dependsOn && currentGroup.elements[0].key === el.dependsOn.fieldKey) {
+      currentGroup.elements.push(el);
+    } else {
+      currentGroup = {
+        id: el.id,
+        elements: [el]
+      };
+      result.push(currentGroup);
+    }
+  }
+
+  return result;
+});
+
+let globalDraggingGroup: {
   sourcePageId: string;
-  element: FormElement;
+  group: ElementGroup;
 } | null = null;
 
 let sortableInstance: Sortable | null = null;
@@ -287,8 +310,8 @@ onMounted(() => {
       fallbackTolerance: 3,
       swapThreshold: 0.65,
       emptyInsertThreshold: 28,
-      draggable: '.canvas-element, .component-item',
-      filter: 'input, textarea, select, button, [contenteditable], .action-btn',
+      draggable: '.canvas-element-group, .component-item',
+      filter: '.is-branch-child, input, textarea, select, button, [contenteditable], .action-btn',
       preventOnFilter: false,
       onStart(evt) {
         store.isDraggingComponent = true;
@@ -298,13 +321,13 @@ onMounted(() => {
           frame.style.zIndex = '9999';
         }
 
-        const elementId = evt.item.id;
-        if (elementId) {
-          const el = props.page.fields.find(f => f.id === elementId);
-          if (el) {
-            globalDraggingItem = {
+        const groupId = evt.item.getAttribute('data-group-id') || evt.item.id;
+        if (groupId) {
+          const group = elementGroups.value.find(g => g.id === groupId);
+          if (group) {
+            globalDraggingGroup = {
               sourcePageId: props.page.id,
-              element: el
+              group: JSON.parse(JSON.stringify(group))
             };
           }
         }
@@ -327,6 +350,9 @@ onMounted(() => {
           visual.style.boxSizing = 'border-box';
           visual.style.pointerEvents = 'none';
 
+          // 移除拖拽镜像中的操作按钮，保持拖拽预览纯净简洁
+          visual.querySelectorAll('.element-actions').forEach(btn => btn.remove());
+
           // 核心修复：Sortable.js 内部会将 fixed top/left 除以 scale，导致缩放下拖起瞬间大幅向下向右掉落错位；
           // 同步校准 fallback 的初始坐标与宽高，与当前组件屏幕位置精确对齐
           fallback.style.left = `${rect.left}px`;
@@ -346,11 +372,11 @@ onMounted(() => {
         if (frame) {
           frame.style.zIndex = '';
         }
-        globalDraggingItem = null;
+        globalDraggingGroup = null;
       },
       onAdd(evt) {
         const itemEl = evt.item;
-        const newIndex = props.page.fields.length === 0 ? 0 : Math.min(evt.newIndex ?? props.page.fields.length, props.page.fields.length);
+        const insertIdx = props.page.fields.length === 0 ? 0 : Math.min(evt.newIndex ?? elementGroups.value.length, elementGroups.value.length);
 
         // 移除非响应式的克隆节点，由 Vue 响应式数据接管渲染
         itemEl.remove();
@@ -360,38 +386,53 @@ onMounted(() => {
           const type = itemEl.getAttribute('data-type') as ComponentType;
           if (type) {
             const newEl = createElement(type);
-            props.page.fields.splice(newIndex, 0, newEl);
+            const groups = [...elementGroups.value];
+            groups.splice(insertIdx, 0, { id: newEl.id, elements: [newEl] });
+            props.page.fields = groups.flatMap(g => g.elements);
             selectElement(newEl);
             markDirty();
           }
           return;
         }
 
-        // 场景 2：跨画板拖拽已存在组件 (.canvas-element)
-        if (globalDraggingItem) {
-          const { sourcePageId, element } = globalDraggingItem;
+        // 场景 2：跨画板拖拽已存在组件组 (.canvas-element-group)
+        if (globalDraggingGroup) {
+          const { sourcePageId, group } = globalDraggingGroup;
           const sourcePage = store.pages.find(p => p.id === sourcePageId);
           if (sourcePage) {
-            const srcIdx = sourcePage.fields.findIndex(f => f.id === element.id);
-            if (srcIdx !== -1) {
-              sourcePage.fields.splice(srcIdx, 1);
-            }
+            const idsToRemove = new Set(group.elements.map(e => e.id));
+            sourcePage.fields = sourcePage.fields.filter(f => !idsToRemove.has(f.id));
           }
-          props.page.fields.splice(newIndex, 0, element);
-          selectElement(element);
+
+          const groups = [...elementGroups.value];
+          groups.splice(insertIdx, 0, group);
+          props.page.fields = groups.flatMap(g => g.elements);
+
+          selectElement(group.elements[0]);
           markDirty();
-          globalDraggingItem = null;
+          globalDraggingGroup = null;
           return;
         }
 
-        // 兜底机制：通过 DOM id 全局跨画板查找并迁移
-        if (itemEl.id) {
+        // 兜底机制：通过 DOM data-group-id 全局跨画板查找并迁移
+        const fallbackGroupId = itemEl.getAttribute('data-group-id') || itemEl.id;
+        if (fallbackGroupId) {
           for (const p of store.pages) {
-            const idx = p.fields.findIndex(f => f.id === itemEl.id);
+            const idx = p.fields.findIndex(f => f.id === fallbackGroupId);
             if (idx !== -1) {
-              const [moved] = p.fields.splice(idx, 1);
-              props.page.fields.splice(newIndex, 0, moved);
-              selectElement(moved);
+              const el = p.fields[idx];
+              const children: FormElement[] = [];
+              let i = idx + 1;
+              while (i < p.fields.length && p.fields[i]?.dependsOn?.fieldKey === el.key) {
+                children.push(p.fields[i]);
+                i++;
+              }
+              const movedElements = p.fields.splice(idx, 1 + children.length);
+
+              const groups = [...elementGroups.value];
+              groups.splice(insertIdx, 0, { id: el.id, elements: movedElements });
+              props.page.fields = groups.flatMap(g => g.elements);
+              selectElement(el);
               markDirty();
               return;
             }
@@ -399,13 +440,17 @@ onMounted(() => {
         }
       },
       onUpdate(evt) {
-        if (evt.oldIndex !== undefined && evt.newIndex !== undefined) {
-          const moved = props.page.fields.splice(evt.oldIndex, 1)[0];
-          props.page.fields.splice(evt.newIndex, 0, moved);
-          selectElement(moved);
+        if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+          const groups = [...elementGroups.value];
+          const [movedGroup] = groups.splice(evt.oldIndex, 1);
+          groups.splice(evt.newIndex, 0, movedGroup);
+
+          // 平铺回 props.page.fields
+          props.page.fields = groups.flatMap(g => g.elements);
+          selectElement(movedGroup.elements[0]);
           markDirty();
         }
-        globalDraggingItem = null;
+        globalDraggingGroup = null;
       }
     });
   }

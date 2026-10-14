@@ -16,7 +16,7 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
           ? 'The leftmost activity bar provides three core workspaces: Scenario Templates (preset questionnaires), Field Components (form inputs), and Page Outline (multi-page flow).'
           : '最左侧为核心功能导航栏，纵向整合三大主功能区：模板库（开箱即用行业问卷）、组件库（表单字段物料）与页面大纲（多画板流程编排）。',
         side: 'right',
-        align: 'start'
+        align: 'center'
       }
     },
     {
@@ -25,7 +25,7 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
         title: isEn ? '2. Scenario Templates' : '2. 场景模板库',
         description: isEn
           ? 'Browse prebuilt compliance KYC templates (Customer, Individual, Entity). Click any template to load its full structure in 1-click, or click "Create Blank Canvas" to build from scratch.'
-          : '汇集标准合规的 KYC 行业模板（母案例、个人案例、机构案例）。点击任意模板卡片即可一键载入完整架构，或点击顶部“新建空白画布”从零自定义搭建。',
+          : '汇集标准合规的 KYC 行业模板（客户案例、个人案例、机构案例）。点击任意模板卡片即可一键载入完整架构，或点击顶部“新建空白画布”从零自定义搭建。',
         side: 'right',
         align: 'start'
       }

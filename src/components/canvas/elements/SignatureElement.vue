@@ -32,8 +32,8 @@
         />
       </div>
 
-      <!-- 模拟签名板 -->
-      <div class="relative h-28 w-full rounded-lg border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400 text-xs select-none">
+      <!-- 模拟签名板 (纯白高保真设计，避免生硬灰底) -->
+      <div class="relative h-28 w-full rounded-lg border border-dashed border-slate-300/90 bg-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)] flex items-center justify-center text-slate-400 text-xs select-none">
         <span class="flex items-center gap-1.5 text-slate-400 text-xs font-normal">
           <PenLine class="w-3.5 h-3.5 opacity-60" />
           <span>{{ t('canvas.signatureArea') }}</span>

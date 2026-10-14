@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue';
+import { reactive, computed, toRaw } from 'vue';
 import type {
   FormSchema,
   FormPage,
@@ -83,7 +83,7 @@ export const store = reactive({
   rightSidebarVisible: true,
   leftSidebarWidth: 320,
   rightSidebarWidth: 300,
-  sidebarTab: 'templates' as 'templates' | 'components' | 'pages',
+  sidebarTab: 'components' as 'templates' | 'components' | 'pages',
 
   // 国际化语言环境
   currentLocale: 'zh' as 'zh' | 'en',
@@ -244,7 +244,7 @@ export function addElement(type: ComponentType, targetPageId?: string) {
 
   const newEl = createElement(type);
 
-  // 如果当前在目标页面内已选中了某个元素，直接在其正下方插入
+  // 如果当前在目标页面内已选中了某个元素，在其正下方插入（若选中的是父组件，自动顺延到整个联动组下方，杜绝插断树状链路）
   if (selectedElement.value && store.selectedType === 'element') {
     for (const p of store.pages) {
       if (p.pageType === 'system_profile') continue;
@@ -252,7 +252,14 @@ export function addElement(type: ComponentType, targetPageId?: string) {
 
       const searchRes = findElementParentAndIndex(p.fields, selectedElement.value.id);
       if (searchRes) {
-        searchRes.parentArray.splice(searchRes.index + 1, 0, newEl);
+        let insertIdx = searchRes.index + 1;
+        while (
+          insertIdx < searchRes.parentArray.length &&
+          searchRes.parentArray[insertIdx]?.dependsOn?.fieldKey === selectedElement.value.key
+        ) {
+          insertIdx++;
+        }
+        searchRes.parentArray.splice(insertIdx, 0, newEl);
         store.activePageId = p.id;
         selectElement(newEl);
         markDirty();
@@ -272,13 +279,34 @@ export function duplicateElement(elementId: string) {
     const res = findElementParentAndIndex(page.fields, elementId);
     if (res) {
       const original = res.parentArray[res.index];
-      const cloneObj: FormElement = structuredClone(original);
+      const cloneObj: FormElement = JSON.parse(JSON.stringify(toRaw(original)));
 
-      const newId = `cmp_${getUniqueId()}`;
-      cloneObj.id = newId;
-      cloneObj.key = makeFieldKey(cloneObj.type, newId);
+      const newParentId = `cmp_${getUniqueId()}`;
+      cloneObj.id = newParentId;
+      cloneObj.key = makeFieldKey(cloneObj.type, newParentId);
 
-      res.parentArray.splice(res.index + 1, 0, cloneObj);
+      // 检查原组件名下是否有紧随其后的从属联动子组件，若有则打包一同复制并重映射依赖目标
+      const clonedChildren: FormElement[] = [];
+      let insertIdx = res.index + 1;
+      while (
+        insertIdx < res.parentArray.length &&
+        res.parentArray[insertIdx]?.dependsOn?.fieldKey === original.key
+      ) {
+        const childOriginal = res.parentArray[insertIdx];
+        const childClone: FormElement = JSON.parse(JSON.stringify(toRaw(childOriginal)));
+        const newChildId = `cmp_${getUniqueId()}`;
+        childClone.id = newChildId;
+        childClone.key = makeFieldKey(childClone.type, newChildId);
+        childClone.dependsOn = {
+          fieldKey: cloneObj.key,
+          value: childOriginal.dependsOn!.value
+        };
+        clonedChildren.push(childClone);
+        insertIdx++;
+      }
+
+      // 整组整体插入到原组件及其全部从属子项的下方
+      res.parentArray.splice(insertIdx, 0, cloneObj, ...clonedChildren);
       selectElement(cloneObj);
       markDirty();
       return;
@@ -287,13 +315,36 @@ export function duplicateElement(elementId: string) {
 }
 
 export function deleteElement(elementId: string) {
-  if (store.selectedId === elementId) {
-    clearSelection();
-  }
   for (const page of store.pages) {
     const res = findElementParentAndIndex(page.fields, elementId);
     if (res) {
-      res.parentArray.splice(res.index, 1);
+      const original = res.parentArray[res.index];
+      const idsToDelete = new Set<string>([elementId]);
+      const keysToDelete = new Set<string>();
+      if (original?.key) {
+        keysToDelete.add(original.key);
+      }
+
+      // 级联查找所有依附于该父组件（及多级从属）的全部联动子项一并删除
+      let foundMore = true;
+      while (foundMore) {
+        foundMore = false;
+        for (const f of page.fields) {
+          if (!idsToDelete.has(f.id) && f.dependsOn?.fieldKey && keysToDelete.has(f.dependsOn.fieldKey)) {
+            idsToDelete.add(f.id);
+            if (f.key) keysToDelete.add(f.key);
+            foundMore = true;
+          }
+        }
+      }
+
+      // 若当前选中的组件是要被删除的目标或其子项，清空选中态
+      if (store.selectedId && idsToDelete.has(store.selectedId)) {
+        clearSelection();
+      }
+
+      // 从页面字段中彻底级联移除整组节点
+      page.fields = page.fields.filter(f => !idsToDelete.has(f.id));
       markDirty();
       return;
     }
@@ -695,6 +746,7 @@ export function createNewCanvas(options: {
   store.meta.formId = formId;
   store.meta.createdAt = now;
   store.activeTemplateKey = 'blank';
+  store.sidebarTab = 'components';
   establishBaseline();
   syncUrlParams(formId);
 }
@@ -736,6 +788,7 @@ export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'ky
   store.meta.serialNo = formId;
   store.meta.createdAt = now;
   store.activeTemplateKey = tplKey;
+  store.sidebarTab = 'components';
 
   establishBaseline();
   syncUrlParams(formId);

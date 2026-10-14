@@ -159,71 +159,50 @@
             </a-tag>
           </div>
 
-          <!-- 英文模式页面配置 -->
-          <template v-if="store.currentLocale === 'en'">
-            <!-- 英文页面标题 -->
-            <div class="mb-3">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[12px] font-medium text-slate-700">{{ t('prop.pageTitleEn') }}</span>
-                <a-tag v-if="selectedPage.title && !selectedPage.title_en" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                  {{ t('prop.missingEnTag') }}
-                </a-tag>
-              </div>
-              <a-input
-                id="page-prop-title-input"
-                v-model="selectedPage.title_en"
-                allow-clear
-                :placeholder="t('prop.pageTitlePlaceholder')"
-                class="w-full"
-                @focus="setPageFocus('title')"
-                @blur="clearFocus"
-                @input="markDirty"
-              />
+          <!-- 页面配置 (统一单源，根据当前语言自动响应) -->
+          <!-- 页面标题 -->
+          <div class="mb-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[12px] font-medium text-slate-700">
+                {{ store.currentLocale === 'en' ? t('prop.pageTitleEn') : t('prop.pageTitle') }}
+              </span>
+              <a-tag v-if="isPageTitleMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+                {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+              </a-tag>
             </div>
+            <a-input
+              id="page-prop-title-input"
+              v-model="pageTitleModel"
+              allow-clear
+              :placeholder="t('prop.pageTitlePlaceholder')"
+              class="w-full"
+              @focus="setPageFocus('title')"
+              @blur="clearFocus"
+              @input="markDirty"
+            />
+          </div>
 
-            <!-- 英文页面描述 -->
-            <div class="mb-4">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[12px] font-medium text-slate-700">{{ t('prop.pageDescEn') }}</span>
-                <a-tag v-if="selectedPage.description && !selectedPage.description_en" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                  {{ t('prop.missingEnTag') }}
-                </a-tag>
-              </div>
-              <a-textarea
-                id="page-prop-desc-input"
-                v-model="selectedPage.description_en"
-                :auto-size="{ minRows: 3, maxRows: 6 }"
-                :placeholder="t('prop.pageDescPlaceholder')"
-                class="w-full"
-                @focus="setPageFocus('desc')"
-                @blur="clearFocus"
-                @input="markDirty"
-              />
+          <!-- 页面描述 -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[12px] font-medium text-slate-700">
+                {{ store.currentLocale === 'en' ? t('prop.pageDescEn') : t('prop.pageDesc') }}
+              </span>
+              <a-tag v-if="isPageDescMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+                {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+              </a-tag>
             </div>
-          </template>
-
-          <!-- 中文模式页面配置 -->
-          <template v-else>
-            <div class="mb-3">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[12px] font-medium text-slate-700">{{ t('prop.pageTitle') }}</span>
-                <a-tag v-if="selectedPage.title_en && !selectedPage.title" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                  {{ t('prop.missingZhTag') }}
-                </a-tag>
-              </div>
-              <a-input id="page-prop-title-input" v-model="selectedPage.title" allow-clear :placeholder="t('prop.pageTitlePlaceholder')" @focus="setPageFocus('title')" @blur="clearFocus" @input="markDirty" />
-            </div>
-
-            <div class="mb-4">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[12px] font-medium text-slate-700">{{ t('prop.pageDesc') }}</span>
-                <a-tag v-if="selectedPage.description_en && !selectedPage.description" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                  {{ t('prop.missingZhTag') }}
-                </a-tag>
-              </div>
-              <a-textarea id="page-prop-desc-input" v-model="selectedPage.description" :auto-size="{ minRows: 3, maxRows: 6 }" :placeholder="t('prop.pageDescPlaceholder')" @focus="setPageFocus('desc')" @blur="clearFocus" @input="markDirty" />
-            </div>
-          </template>
+            <a-textarea
+              id="page-prop-desc-input"
+              v-model="pageDescModel"
+              :auto-size="{ minRows: 3, maxRows: 6 }"
+              :placeholder="t('prop.pageDescPlaceholder')"
+              class="w-full"
+              @focus="setPageFocus('desc')"
+              @blur="clearFocus"
+              @input="markDirty"
+            />
+          </div>
 
           <div class="pt-3 border-t border-slate-100">
             <a-popconfirm
@@ -257,282 +236,146 @@
               <a-tag size="small" class="text-[11px] font-normal">{{ componentLabel }}</a-tag>
             </div>
 
-            <!-- 英文模式下的字段配置 -->
-            <template v-if="store.currentLocale === 'en'">
-              <!-- 英文字段标题与显示标题开关 -->
-              <div class="mb-3">
-                <div class="flex items-center justify-between mb-1.5">
-                  <div class="flex items-center gap-1.5">
-                    <label for="prop-label-input" class="text-[12px] font-medium text-slate-700">
-                      {{ t('prop.fieldLabelEn') }}
-                    </label>
-                    <a-tag v-if="selectedElement.label && !selectedElement.label_en" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-                      {{ t('prop.missingEnTag') }}
-                    </a-tag>
-                  </div>
-                  <div class="flex items-center gap-1.5 font-normal select-none">
-                    <span class="text-[11px] text-slate-400">{{ t('prop.showLabel') }}</span>
-                    <a-switch v-model="isShowLabel" size="small" />
-                  </div>
-                </div>
-                <a-input
-                  id="prop-label-input"
-                  v-model="selectedElement.label_en"
-                  allow-clear
-                  :placeholder="t('prop.fieldLabelPlaceholder')"
-                  class="w-full"
-                  :class="{ 'prop-field-focused': isFieldFocused('label') }"
-                  @focus="setFocus('label')"
-                  @blur="clearFocus"
-                  @input="markDirty"
-                />
-              </div>
-
-              <!-- 英文副标题 (默认不常驻输入框，点击才展开) -->
-              <div v-if="selectedElement.type !== 'alert'" class="mb-3">
-                <div v-if="!isSubtitleExpanded" class="flex items-center justify-between py-0.5">
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1 text-[11.5px] text-[#1677ff] hover:text-blue-700 font-medium transition-colors cursor-pointer select-none"
-                    @click="expandSubtitle"
-                  >
-                    <Plus class="w-3 h-3" />
-                    <span>{{ t('prop.addHelp') }}</span>
-                  </button>
-                </div>
-                <div v-else class="space-y-1.5">
-                  <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-[12px] font-medium text-slate-700">{{ t('prop.fieldHelpEn') }}</span>
-                      <a-tag v-if="selectedElement.help && !selectedElement.help_en" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-                        {{ t('prop.missingEnTag') }}
-                      </a-tag>
-                    </div>
-                    <button
-                      type="button"
-                      class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-0.5"
-                      @click="removeSubtitle"
-                    >
-                      <Trash2 class="w-3 h-3" />
-                      <span>{{ t('prop.removeHelp') }}</span>
-                    </button>
-                  </div>
-                  <a-input
-                    id="prop-help-input"
-                    v-model="selectedElement.help_en"
-                    allow-clear
-                    :placeholder="t('prop.fieldHelpPlaceholder')"
-                    class="w-full"
-                    :class="{ 'prop-field-focused': isFieldFocused('help') }"
-                    @focus="setFocus('help')"
-                    @blur="clearFocus"
-                    @input="markDirty"
-                  />
-
-                  <!-- 方案 A：二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
-                  <CollapseTransition :key="`${selectedElement.id}-help-en`" :show="hasHelpContent">
-                    <div
-                      class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
-                    >
-                      <div class="flex items-center gap-1.5">
-                        <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
-                      </div>
-
-                      <!-- 现代微型胶囊分段器 -->
-                      <div class="inline-flex items-center p-0.5 rounded-md bg-white border border-slate-200/80 shadow-sm shrink-0 select-none">
-                        <div
-                          role="button"
-                          tabindex="0"
-                          class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                          :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                          @click="helpPositionValue = 'right'"
-                        >
-                          <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
-                            <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
-                          </svg>
-                          <span>{{ t('prop.helpPositionRight') }}</span>
-                        </div>
-
-                        <div
-                          role="button"
-                          tabindex="0"
-                          class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                          :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                          @click="helpPositionValue = 'bottom'"
-                        >
-                          <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="2" y="3" width="12" height="4" rx="1.2" />
-                            <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
-                          </svg>
-                          <span>{{ t('prop.helpPositionBottom') }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CollapseTransition>
-                </div>
-              </div>
-
-              <!-- 英文占位提示 -->
-              <div v-if="hasPlaceholder" class="mb-3">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
-                  <a-tag v-if="selectedElement.placeholder && !selectedElement.placeholder_en" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                    {{ t('prop.missingEnTag') }}
+            <!-- 字段基础配置 (统一单源，按激活语言自动读写) -->
+            <!-- 字段标题与显示标题开关 -->
+            <div class="mb-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <label for="prop-label-input" class="text-[12px] font-medium text-slate-700">
+                    {{ store.currentLocale === 'en' ? t('prop.fieldLabelEn') : t('prop.fieldLabel') }}
+                  </label>
+                  <a-tag v-if="isFieldLabelMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
+                    {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
                   </a-tag>
                 </div>
-                <a-input
-                  id="prop-placeholder-input"
-                  v-model="selectedElement.placeholder_en"
-                  allow-clear
-                  :placeholder="placeholderInputDefault"
-                  class="w-full"
-                  :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
-                  @focus="setFocus('placeholder')"
-                  @blur="clearFocus"
-                  @input="markDirty"
-                />
+                <div class="flex items-center gap-1.5 font-normal select-none">
+                  <span class="text-[11px] text-slate-400">{{ t('prop.showLabel') }}</span>
+                  <a-switch v-model="isShowLabel" size="small" />
+                </div>
               </div>
-            </template>
+              <a-textarea
+                id="prop-label-input"
+                v-model="fieldLabelModel"
+                :auto-size="{ minRows: 1, maxRows: 4 }"
+                allow-clear
+                :placeholder="t('prop.fieldLabelPlaceholder')"
+                class="w-full"
+                :class="{ 'prop-field-focused': isFieldFocused('label') }"
+                @focus="setFocus('label')"
+                @blur="clearFocus"
+                @input="markDirty"
+              />
+            </div>
 
-            <!-- 中文模式下的字段配置 -->
-            <template v-else>
-              <!-- 中文字段标题与显示标题开关 -->
-              <div class="mb-3">
-                <div class="flex items-center justify-between mb-1.5">
+            <!-- 字段副标题 (默认不常驻输入框，点击才展开) -->
+            <div v-if="selectedElement.type !== 'alert'" class="mb-3">
+              <div v-if="!isSubtitleExpanded" class="flex items-center justify-between py-0.5">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 text-[11.5px] text-[#1677ff] hover:text-blue-700 font-medium transition-colors cursor-pointer select-none"
+                  @click="expandSubtitle"
+                >
+                  <Plus class="w-3 h-3" />
+                  <span>{{ t('prop.addHelp') }}</span>
+                </button>
+              </div>
+              <div v-else class="space-y-1.5">
+                <div class="flex items-center justify-between mb-1">
                   <div class="flex items-center gap-1.5">
-                    <label for="prop-label-input" class="text-[12px] font-medium text-slate-700">
-                      {{ t('prop.fieldLabel') }}
-                    </label>
-                    <a-tag v-if="selectedElement.label_en && !selectedElement.label" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-                      {{ t('prop.missingZhTag') }}
+                    <span class="text-[12px] font-medium text-slate-700">
+                      {{ store.currentLocale === 'en' ? t('prop.fieldHelpEn') : t('prop.fieldHelp') }}
+                    </span>
+                    <a-tag v-if="isFieldHelpMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
+                      {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
                     </a-tag>
                   </div>
-                  <div class="flex items-center gap-1.5 font-normal select-none">
-                    <span class="text-[11px] text-slate-400">{{ t('prop.showLabel') }}</span>
-                    <a-switch v-model="isShowLabel" size="small" />
-                  </div>
-                </div>
-                <a-input
-                  id="prop-label-input"
-                  v-model="selectedElement.label"
-                  allow-clear
-                  :placeholder="t('prop.fieldLabelPlaceholder')"
-                  :class="{ 'prop-field-focused': isFieldFocused('label') }"
-                  @focus="setFocus('label')"
-                  @blur="clearFocus"
-                  @input="markDirty"
-                />
-              </div>
-
-              <!-- 中文副标题 -->
-              <!-- 中文副标题 (默认不常驻输入框，点击才展开) -->
-              <div v-if="selectedElement.type !== 'alert'" class="mb-3">
-                <div v-if="!isSubtitleExpanded" class="flex items-center justify-between py-0.5">
                   <button
                     type="button"
-                    class="inline-flex items-center gap-1 text-[11.5px] text-[#1677ff] hover:text-blue-700 font-medium transition-colors cursor-pointer select-none"
-                    @click="expandSubtitle"
+                    class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-0.5"
+                    @click="removeSubtitle"
                   >
-                    <Plus class="w-3 h-3" />
-                    <span>{{ t('prop.addHelp') }}</span>
+                    <Trash2 class="w-3 h-3" />
+                    <span>{{ t('prop.removeHelp') }}</span>
                   </button>
                 </div>
-                <div v-else class="space-y-1.5">
-                  <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-[12px] font-medium text-slate-700">{{ t('prop.fieldHelp') }}</span>
-                      <a-tag v-if="selectedElement.help_en && !selectedElement.help" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                        {{ t('prop.missingZhTag') }}
-                      </a-tag>
-                    </div>
-                    <button
-                      type="button"
-                      class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-0.5"
-                      @click="removeSubtitle"
-                    >
-                      <Trash2 class="w-3 h-3" />
-                      <span>{{ t('prop.removeHelp') }}</span>
-                    </button>
-                  </div>
-                  <a-input
-                    id="prop-help-input"
-                    v-model="selectedElement.help"
-                    allow-clear
-                    :placeholder="t('prop.fieldHelpPlaceholder')"
-                    class="w-full"
-                    :class="{ 'prop-field-focused': isFieldFocused('help') }"
-                    @focus="setFocus('help')"
-                    @blur="clearFocus"
-                    @input="markDirty"
-                  />
-
-                  <!-- 方案 A：二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
-                  <CollapseTransition :key="`${selectedElement.id}-help-zh`" :show="hasHelpContent">
-                    <div
-                      class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
-                    >
-                      <div class="flex items-center gap-1.5">
-                        <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
-                      </div>
-
-                      <!-- 现代微型胶囊分段器 -->
-                      <div class="inline-flex items-center p-0.5 rounded-md bg-white border border-slate-200/80 shadow-sm shrink-0 select-none">
-                        <div
-                          role="button"
-                          tabindex="0"
-                          class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                          :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                          @click="helpPositionValue = 'right'"
-                        >
-                          <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
-                            <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
-                          </svg>
-                          <span>{{ t('prop.helpPositionRight') }}</span>
-                        </div>
-
-                        <div
-                          role="button"
-                          tabindex="0"
-                          class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                          :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                          @click="helpPositionValue = 'bottom'"
-                        >
-                          <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                            <rect x="2" y="3" width="12" height="4" rx="1.2" />
-                            <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
-                          </svg>
-                          <span>{{ t('prop.helpPositionBottom') }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CollapseTransition>
-                </div>
-              </div>
-
-              <!-- 中文占位提示 -->
-              <div v-if="hasPlaceholder" class="mb-3">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
-                  <a-tag v-if="selectedElement.placeholder_en && !selectedElement.placeholder" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-                    {{ t('prop.missingZhTag') }}
-                  </a-tag>
-                </div>
-                <a-input
-                  id="prop-placeholder-input"
-                  v-model="selectedElement.placeholder"
+                <a-textarea
+                  id="prop-help-input"
+                  v-model="fieldHelpModel"
+                  :auto-size="{ minRows: 1, maxRows: 3 }"
                   allow-clear
-                  :placeholder="placeholderInputDefault"
-                  :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
-                  @focus="setFocus('placeholder')"
+                  :placeholder="t('prop.fieldHelpPlaceholder')"
+                  class="w-full"
+                  :class="{ 'prop-field-focused': isFieldFocused('help') }"
+                  @focus="setFocus('help')"
                   @blur="clearFocus"
                   @input="markDirty"
                 />
+
+                <!-- 二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
+                <CollapseTransition :key="`${selectedElement.id}-help-layout`" :show="hasHelpContent">
+                  <div
+                    class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
+                    </div>
+
+                    <!-- 现代微型胶囊分段器 -->
+                    <div class="inline-flex items-center p-0.5 rounded-md bg-white border border-slate-200/80 shadow-sm shrink-0 select-none">
+                      <div
+                        role="button"
+                        tabindex="0"
+                        class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                        :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                        @click="helpPositionValue = 'right'"
+                      >
+                        <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
+                          <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
+                        </svg>
+                        <span>{{ t('prop.helpPositionRight') }}</span>
+                      </div>
+
+                      <div
+                        role="button"
+                        tabindex="0"
+                        class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                        :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                        @click="helpPositionValue = 'bottom'"
+                      >
+                        <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                          <rect x="2" y="3" width="12" height="4" rx="1.2" />
+                          <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
+                        </svg>
+                        <span>{{ t('prop.helpPositionBottom') }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CollapseTransition>
               </div>
-            </template>
+            </div>
+
+            <!-- 字段占位提示 (统一单源) -->
+            <div v-if="hasPlaceholder" class="mb-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
+                <a-tag v-if="isFieldPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+                  {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+                </a-tag>
+              </div>
+              <a-input
+                id="prop-placeholder-input"
+                v-model="fieldPlaceholderModel"
+                allow-clear
+                :placeholder="placeholderInputDefault"
+                class="w-full"
+                :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
+                @focus="setFocus('placeholder')"
+                @blur="clearFocus"
+                @input="markDirty"
+              />
+            </div>
 
             <div v-if="selectedElement.type !== 'alert'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
@@ -547,64 +390,58 @@
             </div>
 
             <!-- 必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格，丝滑展开折叠过渡) -->
-            <!-- 必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格，默认自动提示，按需展开自定义) -->
+            <!-- 必填校验提示展开项 (极简无框设计：默认态简洁文字 + 铅笔图标切换；自定义态输入框 + 恢复图标切换) -->
             <CollapseTransition
               v-if="selectedElement.type !== 'alert'"
               :key="`${selectedElement.id}-req`"
               :show="Boolean(isElementRequired)"
             >
-              <div
-                class="ml-2 pl-3 pt-1 pb-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
-              >
-                <!-- 默认轻量文案提示行，不让用户觉得必须填输入框 -->
-                <div v-if="!isCustomErrorExpanded" class="flex items-center justify-between text-[11px] py-0.5">
-                  <div class="flex items-center gap-1.5 text-slate-400 overflow-hidden pr-2">
-                    <MessageSquare class="w-3 h-3 shrink-0 text-slate-400" />
-                    <span class="truncate" :title="store.currentLocale === 'en' ? customErrorPlaceholderEn : customErrorPlaceholderZh">
-                      {{ store.currentLocale === 'en' ? customErrorPlaceholderEn : customErrorPlaceholderZh }}
-                    </span>
+              <div class="pt-1.5 pb-0.5 space-y-1">
+                <div class="flex items-center justify-between text-[11.5px]">
+                  <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
+                    <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
+                    <span>{{ selectedElement.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg') }}</span>
                   </div>
+                  
+                  <!-- 图标切换按钮 -->
                   <button
+                    v-if="!isCustomErrorExpanded"
                     type="button"
-                    class="text-[11px] text-[#1677ff] hover:text-blue-700 font-medium whitespace-nowrap cursor-pointer shrink-0 transition-colors"
-                    @click="isCustomErrorExpanded = true"
+                    class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
+                    :title="t('prop.customizeError')"
+                    @click="expandCustomError"
                   >
-                    {{ t('prop.customizeError') }}
+                    <Pencil class="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
+                    :title="t('prop.resetToDefaultError')"
+                    @click="resetCustomError"
+                  >
+                    <RotateCcw class="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <!-- 展开后的自定义输入框 -->
-                <div v-else class="space-y-1">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-1.5">
-                      <MessageSquare class="w-3.5 h-3.5 text-slate-400 group-hover:text-[#1677ff] transition-colors shrink-0" />
-                      <span class="text-[11px] font-medium text-slate-600">
-                        {{ selectedElement.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg') }}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
-                      @click="resetCustomError"
-                    >
-                      {{ t('prop.resetToDefaultError') }}
-                    </button>
-                  </div>
+
+                <!-- 默认模式：简洁纯文本展示系统默认提示 -->
+                <div
+                  v-if="!isCustomErrorExpanded"
+                  class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
+                  :title="rawDefaultErrorMessage"
+                >
+                  <span class="text-slate-400">{{ store.currentLocale === 'en' ? 'Default: ' : '默认：' }}</span>“{{ rawDefaultErrorMessage }}”
+                </div>
+
+                <!-- 自定义模式：输入框 (点击铅笔自动聚焦，输入即保存，清空或点击重置即回退) -->
+                <div v-else class="mt-1">
                   <a-input
-                    v-if="store.currentLocale === 'en'"
-                    v-model="selectedElement.customErrorMessage_en"
+                    id="prop-custom-error-input"
+                    v-model="fieldCustomErrorModel"
                     size="mini"
                     allow-clear
-                    class="sub-input-mini w-full"
-                    :placeholder="customErrorPlaceholderEn"
-                    @input="markDirty"
-                  />
-                  <a-input
-                    v-else
-                    v-model="selectedElement.customErrorMessage"
-                    size="mini"
-                    allow-clear
-                    class="sub-input-mini w-full"
-                    :placeholder="customErrorPlaceholderZh"
+                    class="w-full"
+                    :placeholder="rawDefaultErrorMessage"
                     @input="markDirty"
                   />
                 </div>
@@ -621,64 +458,58 @@
               <a-switch v-model="isDeclarationRequired" size="small" />
             </div>
 
-            <!-- 签名组件声明必填校验提示展开项 (极简树形导轨式 Linear/Figma 风格，默认自动提示，按需展开自定义) -->
+            <!-- 签名组件声明必填校验提示展开项 (极简无框设计：默认态简洁文字 + 铅笔图标切换；自定义态输入框 + 恢复图标切换) -->
             <CollapseTransition
               v-if="selectedElement.type === 'signature'"
               :key="`${selectedElement.id}-decl`"
               :show="Boolean(isDeclarationRequired)"
             >
-              <div
-                class="ml-2 pl-3 pt-1 pb-1.5 border-l-2 border-slate-200/90 space-y-1 transition-colors group hover:border-[#1677ff]/60"
-              >
-                <!-- 默认轻量文案提示行 -->
-                <div v-if="!isDeclarationCustomErrorExpanded" class="flex items-center justify-between text-[11px] py-0.5">
-                  <div class="flex items-center gap-1.5 text-slate-400 overflow-hidden pr-2">
-                    <MessageSquare class="w-3 h-3 shrink-0 text-slate-400" />
-                    <span class="truncate" :title="store.currentLocale === 'en' ? declarationErrorPlaceholderEn : declarationErrorPlaceholderZh">
-                      {{ store.currentLocale === 'en' ? declarationErrorPlaceholderEn : declarationErrorPlaceholderZh }}
-                    </span>
+              <div class="pt-1.5 pb-0.5 space-y-1">
+                <div class="flex items-center justify-between text-[11.5px]">
+                  <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
+                    <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
+                    <span>{{ t('prop.declarationErrorMsg') }}</span>
                   </div>
+                  
+                  <!-- 图标切换按钮 -->
                   <button
+                    v-if="!isDeclarationCustomErrorExpanded"
                     type="button"
-                    class="text-[11px] text-[#1677ff] hover:text-blue-700 font-medium whitespace-nowrap cursor-pointer shrink-0 transition-colors"
-                    @click="isDeclarationCustomErrorExpanded = true"
+                    class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
+                    :title="t('prop.customizeError')"
+                    @click="expandDeclarationCustomError"
                   >
-                    {{ t('prop.customizeError') }}
+                    <Pencil class="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
+                    :title="t('prop.resetToDefaultError')"
+                    @click="resetDeclarationCustomError"
+                  >
+                    <RotateCcw class="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <!-- 展开后的自定义输入框 -->
-                <div v-else class="space-y-1">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-1.5">
-                      <MessageSquare class="w-3.5 h-3.5 text-slate-400 group-hover:text-[#1677ff] transition-colors shrink-0" />
-                      <span class="text-[11px] font-medium text-slate-600">
-                        {{ t('prop.declarationErrorMsg') }}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
-                      @click="resetDeclarationCustomError"
-                    >
-                      {{ t('prop.resetToDefaultError') }}
-                    </button>
-                  </div>
+
+                <!-- 默认模式：简洁纯文本展示系统默认提示 -->
+                <div
+                  v-if="!isDeclarationCustomErrorExpanded"
+                  class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
+                  :title="rawDeclarationErrorMessage"
+                >
+                  <span class="text-slate-400">{{ store.currentLocale === 'en' ? 'Default: ' : '默认：' }}</span>“{{ rawDeclarationErrorMessage }}”
+                </div>
+
+                <!-- 自定义模式：输入框 (点击铅笔自动聚焦，输入即保存，清空或点击重置即回退) -->
+                <div v-else class="mt-1">
                   <a-input
-                    v-if="store.currentLocale === 'en'"
-                    v-model="selectedElement.declarationErrorMessage_en"
+                    id="prop-declaration-error-input"
+                    v-model="fieldDeclarationErrorModel"
                     size="mini"
                     allow-clear
-                    class="sub-input-mini w-full"
-                    :placeholder="declarationErrorPlaceholderEn"
-                    @input="markDirty"
-                  />
-                  <a-input
-                    v-else
-                    v-model="selectedElement.declarationErrorMessage"
-                    size="mini"
-                    allow-clear
-                    class="sub-input-mini w-full"
-                    :placeholder="declarationErrorPlaceholderZh"
+                    class="w-full"
+                    :placeholder="rawDeclarationErrorMessage"
                     @input="markDirty"
                   />
                 </div>
@@ -706,14 +537,19 @@
               >
                 <div class="flex items-center gap-1.5">
                   <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
-                  <a-tooltip :content="t('prop.maxSelectionsTip')" position="top">
+                  <a-tooltip
+                    :content="['country', 'nationality'].includes(selectedElement.type)
+                      ? (store.currentLocale === 'en' ? 'Max 3 selections for country/nationality' : '国家/国籍组件最多允许选择 3 项')
+                      : (store.currentLocale === 'en' ? `Max ${maxAllowedLimit} selections (up to options count)` : `最多允许选择 ${maxAllowedLimit} 项（不超过配置选项数）`)"
+                    position="top"
+                  >
                     <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
                   </a-tooltip>
                 </div>
                 <a-input-number
                   v-model="currentMaxSelections"
                   :min="1"
-                  :max="20"
+                  :max="maxAllowedLimit"
                   size="small"
                   style="width: 100px"
                 />
@@ -836,13 +672,29 @@
           <div v-if="hasOptionsConfig" class="space-y-2.5 pt-3.5 border-t border-slate-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5">
-                <span class="text-[12px] font-semibold text-slate-700">{{ t('prop.optionsConfig') }}</span>
-                <a-tooltip :content="t('prop.optionsConfigTip')" position="top">
+                <span class="text-[12px] font-semibold text-slate-700">
+                  {{ selectedElement.type === 'alert'
+                    ? t('prop.noticeConfig')
+                    : (selectedElement.type === 'signature' ? t('prop.clauseConfig') : t('prop.optionsConfig'))
+                  }}
+                </span>
+                <a-tooltip
+                  :content="selectedElement.type === 'alert'
+                    ? t('prop.noticeConfigTip')
+                    : (selectedElement.type === 'signature' ? t('prop.clauseConfigTip') : t('prop.optionsConfigTip'))
+                  "
+                  position="top"
+                >
                   <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
                 </a-tooltip>
               </div>
               <span class="text-[11px] text-slate-400">
-                {{ t('common.totalOptions', undefined, { count: selectedElement.options?.length || 0 }) }}
+                {{ selectedElement.type === 'alert' || selectedElement.type === 'signature'
+                  ? (store.currentLocale === 'en'
+                      ? `${selectedElement.options?.length || 0} items`
+                      : `共 ${selectedElement.options?.length || 0} 条`)
+                  : t('common.totalOptions', undefined, { count: selectedElement.options?.length || 0 })
+                }}
               </span>
             </div>
 
@@ -945,6 +797,37 @@
             </CollapseTransition>
           </div>
 
+          <!-- 条件联动从属信息 (仅当该组件已被某个上游选项联动时展示；普通未联动组件保持 100% 纯净，绝不冗余显示) -->
+          <div
+            v-if="selectedElement && selectedElement.dependsOn"
+            class="space-y-2 pt-3.5 border-t border-slate-100"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <Link2 class="h-3.5 w-3.5 text-[#1677ff]" />
+                <span class="text-[12px] font-semibold text-slate-700">条件联动从属</span>
+              </div>
+              <button
+                type="button"
+                class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+                title="解除联动，恢复为常驻显示字段"
+                @click="onToggleDependency(false)"
+              >
+                解除联动
+              </button>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-blue-50/70 border border-blue-200/80 text-xs space-y-1">
+              <div class="text-[#1677ff] font-semibold flex items-center gap-1">
+                <CornerDownRight class="w-3.5 h-3.5 text-[#1677ff]" />
+                <span>{{ dependencyDesc }}</span>
+              </div>
+              <div class="text-[11px] text-slate-400 leading-normal">
+                该组件已被设置为追问项，仅当对应选项被选中时才会在填写时展开。
+              </div>
+            </div>
+          </div>
+
           <!-- 底部操作按钮 -->
           <div class="pt-5 border-t border-slate-100 flex gap-2">
             <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
@@ -982,7 +865,14 @@ import {
   duplicateElement,
   deleteElement
 } from '@/core/store';
-import { t, getFieldDefaultErrorMessage } from '@/core/i18n';
+import {
+  t,
+  getFieldDefaultErrorMessage,
+  getPageText,
+  setPageText,
+  getFieldText,
+  setFieldText
+} from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
 import { useSidebarResize } from '@/utils/useSidebarResize';
@@ -1003,7 +893,10 @@ import {
   Building2,
   User,
   Users,
-  Lock
+  Lock,
+  Link2,
+  Pencil,
+  RotateCcw
 } from '@lucide/vue';
 import { translationStats } from '@/utils/translationHelper';
 import type { ProfileType } from '@/types/schema';
@@ -1085,6 +978,126 @@ const componentLabel = computed(() => {
   return (store.currentLocale === 'en' ? (meta.label_en || meta.label) : meta.label) || t('prop.fieldFallback');
 });
 
+// ========== 统一单源多语言响应式双向绑定 ==========
+// 页面标题与描述双向绑定
+const pageTitleModel = computed({
+  get() {
+    return selectedPage.value ? getPageText(selectedPage.value, 'title') : '';
+  },
+  set(val: string) {
+    if (selectedPage.value) {
+      setPageText(selectedPage.value, 'title', val);
+    }
+  }
+});
+
+const pageDescModel = computed({
+  get() {
+    return selectedPage.value ? getPageText(selectedPage.value, 'description') : '';
+  },
+  set(val: string) {
+    if (selectedPage.value) {
+      setPageText(selectedPage.value, 'description', val);
+    }
+  }
+});
+
+const isPageTitleMissing = computed(() => {
+  if (!selectedPage.value) return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedPage.value.title && !selectedPage.value.title_en);
+  }
+  return Boolean(selectedPage.value.title_en && !selectedPage.value.title);
+});
+
+const isPageDescMissing = computed(() => {
+  if (!selectedPage.value) return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedPage.value.description && !selectedPage.value.description_en);
+  }
+  return Boolean(selectedPage.value.description_en && !selectedPage.value.description);
+});
+
+// 组件字段属性双向绑定
+const fieldLabelModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'label') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'label', val);
+    }
+  }
+});
+
+const fieldHelpModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'help') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'help', val);
+    }
+  }
+});
+
+const fieldPlaceholderModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'placeholder') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'placeholder', val);
+    }
+  }
+});
+
+const fieldCustomErrorModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'customErrorMessage') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'customErrorMessage', val);
+    }
+  }
+});
+
+const fieldDeclarationErrorModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'declarationErrorMessage') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'declarationErrorMessage', val);
+    }
+  }
+});
+
+const isFieldLabelMissing = computed(() => {
+  if (!selectedElement.value) return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedElement.value.label && !selectedElement.value.label_en);
+  }
+  return Boolean(selectedElement.value.label_en && !selectedElement.value.label);
+});
+
+const isFieldHelpMissing = computed(() => {
+  if (!selectedElement.value) return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedElement.value.help && !selectedElement.value.help_en);
+  }
+  return Boolean(selectedElement.value.help_en && !selectedElement.value.help);
+});
+
+const isFieldPlaceholderMissing = computed(() => {
+  if (!selectedElement.value) return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedElement.value.placeholder && !selectedElement.value.placeholder_en);
+  }
+  return Boolean(selectedElement.value.placeholder_en && !selectedElement.value.placeholder);
+});
+
 const isShowLabel = computed({
   get() {
     return selectedElement.value?.showLabel !== false;
@@ -1114,7 +1127,7 @@ const hasHelpContent = computed(() => {
   const currentVal = store.currentLocale === 'en'
     ? selectedElement.value.help_en
     : selectedElement.value.help;
-  return Boolean(currentVal?.trim());
+  return typeof currentVal === 'string' && currentVal.trim().length > 0;
 });
 
 // 副标题显隐展开状态 (默认根据当前元素是否已有副标题内容决定，避免空输入框常驻误导用户)
@@ -1136,18 +1149,18 @@ watch(
       return;
     }
     const hasHelp = store.currentLocale === 'en'
-      ? Boolean(selectedElement.value.help_en?.trim())
-      : Boolean(selectedElement.value.help?.trim());
+      ? (typeof selectedElement.value.help_en === 'string' && selectedElement.value.help_en.trim().length > 0)
+      : (typeof selectedElement.value.help === 'string' && selectedElement.value.help.trim().length > 0);
     isSubtitleExpanded.value = hasHelp;
 
     const hasCustomErr = store.currentLocale === 'en'
-      ? Boolean(selectedElement.value.customErrorMessage_en?.trim())
-      : Boolean(selectedElement.value.customErrorMessage?.trim());
+      ? (typeof selectedElement.value.customErrorMessage_en === 'string' && selectedElement.value.customErrorMessage_en.trim().length > 0)
+      : (typeof selectedElement.value.customErrorMessage === 'string' && selectedElement.value.customErrorMessage.trim().length > 0);
     isCustomErrorExpanded.value = hasCustomErr;
 
     const hasDeclErr = store.currentLocale === 'en'
-      ? Boolean(selectedElement.value.declarationErrorMessage_en?.trim())
-      : Boolean(selectedElement.value.declarationErrorMessage?.trim());
+      ? (typeof selectedElement.value.declarationErrorMessage_en === 'string' && selectedElement.value.declarationErrorMessage_en.trim().length > 0)
+      : (typeof selectedElement.value.declarationErrorMessage === 'string' && selectedElement.value.declarationErrorMessage.trim().length > 0);
     isDeclarationCustomErrorExpanded.value = hasDeclErr;
   },
   { immediate: true }
@@ -1169,23 +1182,6 @@ function removeSubtitle() {
   isSubtitleExpanded.value = false;
 }
 
-function resetCustomError() {
-  if (selectedElement.value) {
-    selectedElement.value.customErrorMessage = '';
-    selectedElement.value.customErrorMessage_en = '';
-    markDirty();
-  }
-  isCustomErrorExpanded.value = false;
-}
-
-function resetDeclarationCustomError() {
-  if (selectedElement.value) {
-    selectedElement.value.declarationErrorMessage = '';
-    selectedElement.value.declarationErrorMessage_en = '';
-    markDirty();
-  }
-  isDeclarationCustomErrorExpanded.value = false;
-}
 
 const isElementRequired = computed({
   get() {
@@ -1211,24 +1207,66 @@ const isDeclarationRequired = computed({
   }
 });
 
-const customErrorPlaceholderZh = computed(() => {
+const rawDefaultErrorMessage = computed(() => {
   if (!selectedElement.value) return '';
-  return `默认：${getFieldDefaultErrorMessage(selectedElement.value, undefined, 'zh')}`;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    selectedElement.value.type === 'signature' ? 'signature' : undefined,
+    store.currentLocale as 'zh' | 'en'
+  );
 });
 
-const customErrorPlaceholderEn = computed(() => {
+const rawDeclarationErrorMessage = computed(() => {
   if (!selectedElement.value) return '';
-  return `Default: ${getFieldDefaultErrorMessage(selectedElement.value, undefined, 'en')}`;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    'declaration',
+    store.currentLocale as 'zh' | 'en'
+  );
 });
 
-const declarationErrorPlaceholderZh = computed(() => {
-  if (!selectedElement.value) return '';
-  return `默认：${getFieldDefaultErrorMessage(selectedElement.value, 'declaration', 'zh')}`;
-});
+function expandCustomError() {
+  isCustomErrorExpanded.value = true;
+  nextTick(() => {
+    document.getElementById('prop-custom-error-input')?.focus();
+  });
+}
 
-const declarationErrorPlaceholderEn = computed(() => {
-  if (!selectedElement.value) return '';
-  return `Default: ${getFieldDefaultErrorMessage(selectedElement.value, 'declaration', 'en')}`;
+function resetCustomError() {
+  if (selectedElement.value) {
+    selectedElement.value.customErrorMessage = '';
+    selectedElement.value.customErrorMessage_en = '';
+    markDirty();
+  }
+  isCustomErrorExpanded.value = false;
+}
+
+function expandDeclarationCustomError() {
+  isDeclarationCustomErrorExpanded.value = true;
+  nextTick(() => {
+    document.getElementById('prop-declaration-error-input')?.focus();
+  });
+}
+
+function resetDeclarationCustomError() {
+  if (selectedElement.value) {
+    selectedElement.value.declarationErrorMessage = '';
+    selectedElement.value.declarationErrorMessage_en = '';
+    markDirty();
+  }
+  isDeclarationCustomErrorExpanded.value = false;
+}
+
+
+const maxAllowedLimit = computed(() => {
+  if (!selectedElement.value) return 1;
+  // 国家与国籍组件最大限制固定为 3
+  if (['country', 'nationality'].includes(selectedElement.value.type)) {
+    return 3;
+  }
+  // 下拉选择与多选框等自定义选项组件，最大上限为创建的选择配置数量
+  const len = selectedElement.value.options?.length || 0;
+  return len > 0 ? len : 1;
 });
 
 const isSelectMultiple = computed({
@@ -1238,13 +1276,34 @@ const isSelectMultiple = computed({
   set(val: boolean) {
     if (selectedElement.value) {
       selectedElement.value.multiple = val;
-      if (val && (!selectedElement.value.maxSelections || selectedElement.value.maxSelections < 1)) {
-        selectedElement.value.maxSelections = 3;
+      if (val) {
+        // 开启多选后，最大允许选择数默认是 1 个，上限为配置选项数（国家/国籍为3）
+        const limit = maxAllowedLimit.value;
+        const current = Number(selectedElement.value.maxSelections);
+        if (!current || current < 1) {
+          selectedElement.value.maxSelections = 1;
+        } else if (current > limit) {
+          selectedElement.value.maxSelections = limit;
+        }
       }
       markDirty();
     }
   }
 });
+
+watch(
+  () => selectedElement.value?.options?.length,
+  (newLen) => {
+    if (selectedElement.value && newLen && selectedElement.value.maxSelections) {
+      if (!['country', 'nationality'].includes(selectedElement.value.type)) {
+        if (selectedElement.value.maxSelections > newLen) {
+          selectedElement.value.maxSelections = newLen;
+          markDirty();
+        }
+      }
+    }
+  }
+);
 
 const isStrictPhoneValidation = computed({
   get() {
@@ -1301,14 +1360,21 @@ const canHaveMaxSelections = computed(() => {
   return false;
 });
 
-const currentMaxSelections = computed<number>({
+const currentMaxSelections = computed<number | undefined>({
   get() {
-    const val = Number(selectedElement.value?.maxSelections);
-    return !val || val < 1 ? 1 : val;
+    const val = selectedElement.value?.maxSelections;
+    if (val === undefined || val === null || Number(val) < 1) {
+      return undefined;
+    }
+    return Number(val);
   },
-  set(val: number) {
+  set(val: number | undefined) {
     if (selectedElement.value) {
-      selectedElement.value.maxSelections = val;
+      if (val === undefined || val === null || Number(val) < 1) {
+        delete selectedElement.value.maxSelections;
+      } else {
+        selectedElement.value.maxSelections = Number(val);
+      }
       markDirty();
     }
   }
@@ -1388,6 +1454,29 @@ function onEnableLongTermChange(val: any) {
     }
     markDirty();
   }
+}
+
+const dependencyDesc = computed(() => {
+  if (!selectedElement.value?.dependsOn) return '';
+  const dep = selectedElement.value.dependsOn;
+  for (const page of store.pages) {
+    const parentField = page.fields?.find(f => f.key === dep.fieldKey);
+    if (parentField) {
+      const parentLabel = parentField.label || parentField.key;
+      const opt = parentField.options?.find(o => o.value === dep.value);
+      const optLabel = opt ? (opt.label || opt.value) : (dep.value === 'yes' ? '是' : dep.value);
+      return `仅当【${parentLabel}】选择"${optLabel}"时展开`;
+    }
+  }
+  return `仅当选择"${dep.value === 'yes' ? '是' : dep.value}"时展开`;
+});
+
+function onToggleDependency(val: any) {
+  if (!selectedElement.value) return;
+  if (!val) {
+    delete selectedElement.value.dependsOn;
+  }
+  markDirty();
 }
 
 function handleDeletePage() {

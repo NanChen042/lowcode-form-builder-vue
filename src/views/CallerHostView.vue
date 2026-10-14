@@ -239,6 +239,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const customFormId = ref('');
 const customNickname = ref('李总');
@@ -246,7 +249,9 @@ const customCompany = ref('阿尔法数字科技');
 const customLang = ref('zh');
 const iframeUrl = ref('');
 
-const computedCallUrl = computed(() => {
+const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '';
+
+const computedCallPath = computed(() => {
   const params = new URLSearchParams();
   if (customFormId.value.trim()) {
     params.set('id', customFormId.value.trim());
@@ -264,16 +269,20 @@ const computedCallUrl = computed(() => {
   return queryStr ? `/?${queryStr}` : '/';
 });
 
+const computedCallUrl = computed(() => {
+  return `${baseUrl}${computedCallPath.value}`;
+});
+
 function callBuilder(url: string) {
-  window.location.href = url;
+  router.push(url);
 }
 
 function openNewBlankForm() {
-  window.location.href = '/?nickname=李总&company=阿尔法数字科技&lang=zh';
+  router.push('/?nickname=李总&company=阿尔法数字科技&lang=zh');
 }
 
 function openInCurrentWindow() {
-  window.location.href = computedCallUrl.value;
+  router.push(computedCallPath.value);
 }
 
 function openInNewTab() {

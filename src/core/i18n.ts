@@ -113,11 +113,18 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.optionsConfig': '选项配置',
     'prop.optionsConfigTip': '设置列表的具体选项，选项名称用于展示给用户。',
     'prop.addOption': '添加选项',
+    'prop.noticeConfig': '提示内容',
+    'prop.noticeConfigTip': '配置展示给用户的提示条款与说明段落。',
+    'prop.addNoticeItem': '添加提示内容',
+    'prop.clauseConfig': '声明条款',
+    'prop.clauseConfigTip': '配置要求用户阅读并确认的声明条款。',
+    'prop.addClauseItem': '添加条款内容',
     'prop.optionLayout': '排布方式',
     'prop.layoutInline': '并排',
     'prop.layoutStack': '堆叠',
     'prop.maxSelections': '最大允许选择数',
-    'prop.maxSelectionsTip': '限制用户在多选时最多可选择的选项或标签数量。',
+    'prop.maxSelectionsTip': '限制用户在多选时最多可选择的选项或标签数量，留空则不限制。',
+    'prop.unlimited': '不限制',
     'prop.allowMultiple': '开启多选',
     'prop.allowMultipleTip': '开启后支持在下拉框中选择多个选项。',
     'prop.inputType': '格式类型',
@@ -129,6 +136,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.strictPhoneValidation': '严格号码校验',
     'prop.strictPhoneValidationTip': '开启后将按照所选国家的真实国际规则校验手机号位数与号段格式（如新加坡8位且8/9开头，中国11位且1开头等）。',
     'prop.emailPlaceholderLabel': '邮箱占位提示',
+    'prop.conditionalDisplay': '条件显隐联动',
+    'prop.conditionalDisplayTip': '仅当前置选项满足特定条件时才在表单中展示当前字段，其他情况自动隐藏并免除必填校验。',
+    'prop.dependsOnField': '关联前置字段',
+    'prop.selectParentField': '请选择前置单选/下拉组件',
+    'prop.triggerValue': '展开显示的触发选项',
+    'prop.selectTriggerValue': '请选择触发选项',
+    'prop.noEligibleParent': '当前页面前方无可供关联的单选/下拉组件',
     'prop.copy': '复制',
     'prop.delete': '删除',
 
@@ -164,6 +178,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.confirmOverwrite': '会覆盖当前画布内容，是否继续？',
     'sidebar.templateLoaded': '模板已载入',
     'sidebar.pageAdded': '已添加新画板页面',
+    'sidebar.pageDeleted': '画板已删除',
+    'sidebar.deletePagePrompt': '确定删除此画板页面？',
+    'sidebar.systemPreset': '系统预置',
+    'sidebar.locatePage': '聚焦定位画板',
     'sidebar.componentAdded': '组件已添加到画布',
     'sidebar.tabComponents': '组件库',
     'sidebar.tabTemplates': '场景模板库',
@@ -224,7 +242,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'modal.createdSuccess': '表单画布创建成功',
     'modal.individualCase': '个人案例 (Individual)',
     'modal.entityCase': '机构案例 (Entity)',
-    'modal.customerCase': '母案例 (Customer)',
+    'modal.customerCase': '客户案例 (Customer)',
     'modal.defaultIndividualTitle': '留空默认为：SG_CDD_Individual',
     'modal.defaultEntityTitle': '留空默认为：SG_CDD_Entity',
     'modal.defaultCustomerTitle': '留空默认为：SG_CDD_Customer',
@@ -433,8 +451,14 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.optionIndex': '选项',
     'options.toggleDefaultRadio': '点击切换默认选中项',
     'options.toggleDefaultCheckbox': '点击切换默认勾选',
-    'options.optionPlaceholder': '选项{index}',
-    'options.declarationPlaceholder': '声明事项{index}',
+    'options.addOption': '添加选项',
+    'options.addNotice': '添加条款',
+    'options.linkConfigTitle': '设置选择【{name}】时展开的表单组件',
+    'options.linkTriggerHeader': '选择【{name}】时触发显示',
+    'options.chooseFollowupField': '选择想要添加的展开组件：',
+    'options.orLinkExisting': '或勾选已有下游组件：',
+    'options.expandedTag': '展开: {name}',
+    'options.thisOption': '此项',
 
     // 属性面板补充 (PropertyPanel)
     'prop.systemPresetAlert': '该节点为系统预置前置核验步骤，内容与逻辑由系统固化，不支持修改属性配置。',
@@ -542,11 +566,18 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.optionsConfig': 'Option Settings',
     'prop.optionsConfigTip': 'Configure choices displayed to users.',
     'prop.addOption': 'Add Option',
+    'prop.noticeConfig': 'Notice Content',
+    'prop.noticeConfigTip': 'Configure notice paragraphs displayed to users.',
+    'prop.addNoticeItem': 'Add Notice Item',
+    'prop.clauseConfig': 'Declaration Clauses',
+    'prop.clauseConfigTip': 'Configure legal declaration clauses for user acknowledgment.',
+    'prop.addClauseItem': 'Add Clause',
     'prop.optionLayout': 'Layout',
     'prop.layoutInline': 'Inline',
     'prop.layoutStack': 'Stacked',
     'prop.maxSelections': 'Max Allowed Selections',
-    'prop.maxSelectionsTip': 'Limit maximum number of choices allowed.',
+    'prop.maxSelectionsTip': 'Limit maximum number of choices allowed. Leave empty for unlimited.',
+    'prop.unlimited': 'Unlimited',
     'prop.allowMultiple': 'Allow Multi-selection',
     'prop.allowMultipleTip': 'Allow selecting multiple choices from the dropdown.',
     'prop.inputType': 'Format Type',
@@ -558,6 +589,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.strictPhoneValidation': 'Strict Validation',
     'prop.strictPhoneValidationTip': 'Validate phone digits and prefix against official rules for the selected country (e.g., Singapore 8 digits starting with 8/9, China 11 digits starting with 1).',
     'prop.emailPlaceholderLabel': 'Email Placeholder',
+    'prop.conditionalDisplay': 'Conditional Display',
+    'prop.conditionalDisplayTip': 'Show this field only when a preceding choice field meets specific condition; otherwise auto-hide and bypass validation.',
+    'prop.dependsOnField': 'Depends On Field',
+    'prop.selectParentField': 'Select parent choice field',
+    'prop.triggerValue': 'Trigger Option Value',
+    'prop.selectTriggerValue': 'Select trigger option',
+    'prop.noEligibleParent': 'No preceding choice fields available on this page',
     'prop.copy': 'Duplicate',
     'prop.delete': 'Delete',
 
@@ -593,6 +631,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.confirmOverwrite': 'Loading this template will overwrite current canvas contents. Do you want to continue?',
     'sidebar.templateLoaded': 'Template loaded',
     'sidebar.pageAdded': 'New canvas page added',
+    'sidebar.pageDeleted': 'Canvas page deleted',
+    'sidebar.deletePagePrompt': 'Are you sure you want to delete this canvas page?',
+    'sidebar.systemPreset': 'System Preset',
+    'sidebar.locatePage': 'Locate page',
     'sidebar.componentAdded': 'Component added to canvas',
     'sidebar.tabComponents': 'Component Library',
     'sidebar.tabTemplates': 'Templates',
@@ -856,8 +898,14 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.optionIndex': 'Option',
     'options.toggleDefaultRadio': 'Click to toggle default selection',
     'options.toggleDefaultCheckbox': 'Click to toggle default check',
-    'options.optionPlaceholder': 'Option {index}',
-    'options.declarationPlaceholder': 'Declaration item {index}',
+    'options.addOption': 'Add Option',
+    'options.addNotice': 'Add Item',
+    'options.linkConfigTitle': 'Configure fields to reveal when choosing [{name}]',
+    'options.linkTriggerHeader': 'Reveal when selecting [{name}]',
+    'options.chooseFollowupField': 'Add new followup field to reveal:',
+    'options.orLinkExisting': 'Or select existing downstream fields:',
+    'options.expandedTag': 'Reveal: {name}',
+    'options.thisOption': 'This option',
 
     // Property Panel Additions
     'prop.systemPresetAlert': 'This node is a system-level pre-check step with fixed logic. Property modification is not supported.',
@@ -890,50 +938,127 @@ export function t(key: string, locale?: Locale, params?: Record<string, string |
 }
 
 /**
- * 获取组件多语言文本（画布渲染严格遵循当前激活语言，清空输入框时实时同步清空画布）
+ * 中文序号数字映射 (1-10 转为 一、二、三... 保持选项序列命名一致)
+ */
+const CHINESE_NUMS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+
+export function formatOptionLabel(index: number, locale?: Locale): string {
+  const current = locale || store.currentLocale || 'zh';
+  if (current === 'en') {
+    return `Option ${index}`;
+  }
+  if (index >= 1 && index <= 10) {
+    return `选项${CHINESE_NUMS[index - 1]}`;
+  }
+  return `选项${index}`;
+}
+
+/**
+ * 获取组件多语言文本
+ * @param element 组件对象
+ * @param field 属性名 (label, placeholder, help, customErrorMessage 等)
+ * @param locale 指定语言，缺省时取当前激活语言
+ * @param fallback 是否在当前语言未设置时回退另一语言（设计态为 false 保证所见即所得；预览态为 true）
  */
 export function getFieldText(
   element: any,
   field: string,
-  locale?: Locale
+  locale?: Locale,
+  fallback = false
 ): string {
   if (!element) return '';
   const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    return element[`${field}_en`] ?? '';
+  const val = current === 'en' ? element[`${field}_en`] : element[field];
+  if (val !== undefined && val !== null && val !== '') {
+    return String(val);
   }
-  return element[field] ?? '';
+  if (fallback) {
+    const fallbackVal = current === 'en' ? element[field] : element[`${field}_en`];
+    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+  }
+  return '';
 }
 
 /**
- * 获取选项多语言文案（画布渲染严格遵循当前激活语言）
+ * 预览态/只读态获取组件多语言文本（自动回退另一语言，确保终端填表用户绝不出现空白无文字）
+ */
+export function getLocalizedFieldText(
+  element: any,
+  field: string,
+  locale?: Locale
+): string {
+  return getFieldText(element, field, locale, true);
+}
+
+/**
+ * 获取选项多语言文案
+ * @param option 选项对象
+ * @param locale 指定语言
+ * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
 export function getOptionLabel(
   option: FormElementOption,
-  locale?: Locale
+  locale?: Locale,
+  fallback = false
 ): string {
   if (!option) return '';
   const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    return option.label_en ?? '';
+  const val = current === 'en' ? option.label_en : option.label;
+  if (val !== undefined && val !== null && val !== '') {
+    return String(val);
   }
-  return option.label ?? '';
+  if (fallback) {
+    const fallbackVal = current === 'en' ? option.label : option.label_en;
+    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+  }
+  return '';
 }
 
 /**
- * 获取页面多语言文本（画布渲染严格遵循当前激活语言）
+ * 预览态/只读态获取选项多语言文案（自动回退另一语言）
+ */
+export function getLocalizedOptionLabel(
+  option: FormElementOption,
+  locale?: Locale
+): string {
+  return getOptionLabel(option, locale, true);
+}
+
+/**
+ * 获取页面多语言文本
+ * @param page 页面对象
+ * @param field title | description
+ * @param locale 指定语言
+ * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
 export function getPageText(
   page: { title?: string; title_en?: string; description?: string; description_en?: string },
   field: 'title' | 'description',
-  locale?: Locale
+  locale?: Locale,
+  fallback = false
 ): string {
   if (!page) return '';
   const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    return (page as any)[`${field}_en`] ?? '';
+  const val = current === 'en' ? (page as any)[`${field}_en`] : (page as any)[field];
+  if (val !== undefined && val !== null && val !== '') {
+    return String(val);
   }
-  return (page as any)[field] ?? '';
+  if (fallback) {
+    const fallbackVal = current === 'en' ? (page as any)[field] : (page as any)[`${field}_en`];
+    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+  }
+  return '';
+}
+
+/**
+ * 预览态/只读态获取页面多语言文本（自动回退另一语言）
+ */
+export function getLocalizedPageText(
+  page: { title?: string; title_en?: string; description?: string; description_en?: string },
+  field: 'title' | 'description',
+  locale?: Locale
+): string {
+  return getPageText(page, field, locale, true);
 }
 
 /**
@@ -941,42 +1066,56 @@ export function getPageText(
  */
 export function setFieldText(
   element: FormElement,
-  field: 'label' | 'placeholder' | 'help',
-  val: string
+  field: string,
+  val: string,
+  locale?: Locale
 ) {
-  if (store.currentLocale === 'en') {
+  const current = locale || store.currentLocale || 'zh';
+  if (current === 'en') {
     (element as any)[`${field}_en`] = val;
   } else {
-    element[field] = val;
+    (element as any)[field] = val;
   }
   markDirty();
 }
 
 /**
- * 统一设置选项多语言文本并标记变更
+ * 统一设置页面多语言文本并标记变更
+ */
+export function setPageText(
+  page: { title?: string; title_en?: string; description?: string; description_en?: string },
+  field: 'title' | 'description',
+  val: string,
+  locale?: Locale
+) {
+  const current = locale || store.currentLocale || 'zh';
+  if (current === 'en') {
+    (page as any)[`${field}_en`] = val;
+  } else {
+    (page as any)[field] = val;
+  }
+  markDirty();
+}
+
+/**
+ * 统一设置选项多语言文本并标记变更（互不破坏另一语言数据）
  */
 export function setOptionLabel(
   option: FormElementOption,
-  val: string
+  val: string,
+  locale?: Locale
 ) {
-  if (store.currentLocale === 'en') {
-    // 若在英文模式下编辑，且中文原本是默认占位符 "选项一" / "选项1" 等，清空以触发缺失提示
-    if (option.label && /^选项[一二三四五六七八九十\d]+$/.test(option.label.trim()) && val !== option.label_en) {
-      option.label = '';
-    }
+  const current = locale || store.currentLocale || 'zh';
+  if (current === 'en') {
     option.label_en = val;
   } else {
-    // 若在中文模式下修改了选项，且英文原本还是初始假占位符 "Option 1" 等，清空英文以触发待补齐提醒
-    if (option.label_en && /^Option\s*\d+$/i.test(option.label_en.trim()) && val !== option.label) {
-      option.label_en = '';
-    }
     option.label = val;
   }
   markDirty();
 }
 
 /**
- * 获取字段在当前语言下的智能默认/兜底错误提示文字
+ * 获取字段在当前语言下的通用默认/兜底校验错误提示文字
  */
 export function getFieldDefaultErrorMessage(
   element: FormElement,
@@ -987,34 +1126,33 @@ export function getFieldDefaultErrorMessage(
   const isEn = current === 'en';
 
   if (subType === 'declaration') {
-    return isEn ? 'Please agree to the declarations first' : '请先同意声明';
+    return isEn ? 'Please agree to the declarations' : '请确认并同意声明条款';
   }
 
-  const label = isEn
-    ? (element.label_en || element.label || 'this field')
-    : (element.label || '此项');
+  if (subType === 'signature' || element.type === 'signature') {
+    return isEn ? 'Please complete handwritten signature' : '请完成手写签名';
+  }
 
   switch (element.type) {
-    case 'input':
-    case 'textarea':
-      return isEn ? `Please enter ${label}` : `请输入${label}`;
+    case 'radio':
+      return isEn ? 'Please select an option' : '请选择一个选项';
+    case 'checkbox':
+      return isEn ? 'Please select at least one option' : '请至少选择一个选项';
     case 'select':
     case 'country':
     case 'nationality':
+      if (element.multiple) {
+        return isEn ? 'Please select at least one option' : '请至少选择一个选项';
+      }
+      return isEn ? 'Please select an option' : '请选择一个选项';
     case 'date':
-      return isEn ? `Please select ${label}` : `请选择${label}`;
-    case 'radio':
-      return isEn ? `Please select an option for ${label}` : `请选择一项${label}`;
-    case 'checkbox':
-      return isEn ? `Please select at least one option for ${label}` : `请至少选择一项${label}`;
-    case 'signature':
-      return isEn ? 'Please sign in the designated area' : '请在指定区域完成手写签名';
+      return isEn ? 'Please select a date' : '请选择日期';
+    case 'input':
+    case 'textarea':
     case 'phone':
-      return isEn ? 'Please enter phone number' : '请输入手机号码';
     case 'email':
-      return isEn ? 'Please enter email' : '请输入邮箱地址';
     default:
-      return isEn ? 'This field is required' : '此项为必填项';
+      return isEn ? 'This required field cannot be empty' : '必填项不能为空';
   }
 }
 

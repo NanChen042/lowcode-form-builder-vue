@@ -144,6 +144,109 @@
     </transition>
 
 
+    <!-- 画布底部居中：多语言待补齐/巡检浮动胶囊 (轻量非侵入、不遮挡顶栏、点击一键定位补齐) -->
+    <transition name="pill-bounce">
+      <div
+        v-if="store.pages.length > 0 && translationStats.untranslatedCount > 0 && !isPillDismissed"
+        class="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 px-3.5 py-1.5 bg-white/95 text-slate-700 rounded-full shadow-md shadow-slate-900/5 border border-slate-200/90 backdrop-blur-md select-none pointer-events-auto transition-all text-xs"
+      >
+        <!-- 左侧提示与微清单气泡 (多于 1 项时可点击展开查看全部) -->
+        <a-popover
+          v-if="translationStats.untranslatedCount > 1"
+          v-model:popup-visible="isPillPopoverOpen"
+          trigger="click"
+          position="top"
+        >
+          <button
+            type="button"
+            class="flex items-center gap-1.5 cursor-pointer hover:text-[#1677ff] transition-colors py-0.5 outline-none bg-transparent border-0 p-0 text-left"
+            title="点击查看所有待补齐项清单"
+          >
+            <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
+            <span class="font-medium text-[12px] text-slate-700 hover:text-[#1677ff] whitespace-nowrap">
+              {{ pillTitle }}
+            </span>
+            <ChevronUp
+              class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200"
+              :class="{ 'rotate-180 text-[#1677ff]': isPillPopoverOpen }"
+            />
+          </button>
+
+          <template #content>
+            <div class="w-[280px] max-h-[300px] flex flex-col -m-1">
+              <!-- 气泡顶栏 -->
+              <div class="flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-slate-50/80 shrink-0">
+                <span class="text-xs font-semibold text-slate-800">
+                  {{ isMissingZh ? '中文待补齐清单' : '英文待翻译清单' }}
+                </span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200/60">
+                  共 {{ translationStats.untranslatedCount }} 项
+                </span>
+              </div>
+
+              <!-- 清单滚动区 -->
+              <div class="overflow-y-auto custom-scrollbar p-1.5 space-y-1.5 max-h-[220px]">
+                <div
+                  v-for="group in translationStats.groupedByPage"
+                  :key="group.pageId"
+                  class="space-y-0.5"
+                >
+                  <div class="text-[10.5px] font-semibold text-slate-400 px-1.5 pt-1 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
+                    <span class="truncate">{{ group.pageTitle }}</span>
+                    <span class="text-slate-400">({{ group.items.length }})</span>
+                  </div>
+
+                  <div
+                    v-for="item in group.items"
+                    :key="item.id"
+                    class="flex items-center justify-between px-2 py-1 rounded text-xs hover:bg-blue-50/80 hover:text-[#1677ff] transition-all cursor-pointer group/item border border-transparent hover:border-blue-100"
+                    @click="handleJumpToSpecificItem(item)"
+                  >
+                    <div class="min-w-0 flex-1 mr-2">
+                      <div class="font-medium text-slate-700 group-hover/item:text-[#1677ff] truncate text-[11.5px]">
+                        {{ item.fieldName }}
+                      </div>
+                      <div class="text-[10.5px] text-slate-400 group-hover/item:text-blue-500/80 truncate">
+                        {{ item.targetLocale === 'zh' ? '英文' : '中文' }}: {{ item.sourceText }}
+                      </div>
+                    </div>
+                    <ArrowRight class="w-3 h-3 text-slate-300 group-hover/item:text-[#1677ff] shrink-0" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </a-popover>
+
+        <!-- 只有 1 项时，直接显示静态文案（无下拉箭头，保持极致精简） -->
+        <div v-else class="flex items-center gap-1.5 py-0.5 select-none">
+          <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
+          <span class="font-medium text-[12px] text-slate-700 whitespace-nowrap">
+            {{ pillTitle }}
+          </span>
+        </div>
+
+        <div class="w-px h-3.5 bg-slate-200 shrink-0" />
+        <button
+          type="button"
+          class="flex items-center gap-1 font-medium text-[#1677ff] hover:text-blue-700 transition-colors cursor-pointer text-[12px] px-1 py-0.5 whitespace-nowrap active:scale-95"
+          @click="handleJumpToCurrentUntranslated"
+        >
+          <span>{{ translationStats.untranslatedCount > 1 ? `下一项 (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})` : '定位补齐' }}</span>
+          <ArrowRight class="w-3 h-3" />
+        </button>
+        <button
+          type="button"
+          class="flex items-center justify-center w-4 h-4 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer ml-0.5"
+          title="暂时忽略"
+          @click="isPillDismissed = true"
+        >
+          <X class="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </transition>
+
     <!-- 悬浮画布控制与帮助组 (对标 Google Stitch 极简双胶囊/圆形原生设计，彻底移除加减号) -->
     <!-- 悬浮画布控制与帮助组 (现代化高级白色毛玻璃 + Arco 原生组件) -->
     <div
@@ -374,7 +477,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import {
   store,
   adjustZoom,
@@ -398,13 +501,69 @@ import {
   PanelLeft,
   PanelRight,
   Sparkles,
-  Boxes
+  Boxes,
+  ArrowRight,
+  ChevronUp,
+  X
 } from '@lucide/vue';
+import { Message } from '@arco-design/web-vue';
+import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
 import { startAppTour } from '@/utils/useAppTour';
 
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
+
+// 底部巡检胶囊相关状态
+const isPillDismissed = ref(false);
+const isPillPopoverOpen = ref(false);
+const currentUntranslatedIndex = ref(0);
+
+function handleJumpToSpecificItem(item: UntranslatedItem) {
+  isPillPopoverOpen.value = false;
+  navigateToUntranslatedItem(item);
+  Message.info({
+    content: `${item.pageTitle} · ${item.fieldName}`,
+    duration: 1200
+  });
+}
+
+const isMissingZh = computed(() => {
+  return translationStats.value.untranslatedItems[0]?.targetLocale === 'zh';
+});
+
+const pillTitle = computed(() => {
+  const count = translationStats.value.untranslatedCount;
+  const langLabel = isMissingZh.value ? '中文' : '英文';
+  if (count === 1) {
+    const item = translationStats.value.untranslatedItems[0];
+    const fieldName = item ? `（${item.fieldName}）` : '';
+    return `1 项${langLabel}未填写${fieldName}`;
+  }
+  return `${count} 项${langLabel}待补齐`;
+});
+
+function handleJumpToCurrentUntranslated() {
+  const items = translationStats.value.untranslatedItems;
+  if (!items.length) return;
+  const idx = currentUntranslatedIndex.value % items.length;
+  const item = items[idx];
+  navigateToUntranslatedItem(item);
+  Message.info({
+    content: `${item.pageTitle} · ${item.fieldName} (${idx + 1}/${items.length})`,
+    duration: 1200
+  });
+  currentUntranslatedIndex.value = (idx + 1) % items.length;
+}
+
+watch(
+  () => translationStats.value.untranslatedCount,
+  (newCount, oldCount) => {
+    if (newCount > (oldCount || 0)) {
+      isPillDismissed.value = false;
+    }
+  }
+);
 
 const floatingTitle = computed(() => {
   if (store.currentLocale === 'en') {
@@ -828,3 +987,15 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style scoped>
+.pill-bounce-enter-active,
+.pill-bounce-leave-active {
+  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pill-bounce-enter-from,
+.pill-bounce-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 14px) scale(0.96);
+}
+</style>

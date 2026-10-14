@@ -206,13 +206,14 @@
                   </span>
                 </div>
 
-                <!-- 底部标题与代码 -->
-                <div class="p-2 flex flex-col flex-1 justify-center">
-                  <div class="text-[11px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate leading-tight">
+                <!-- 底部标题与字段统计 -->
+                <div class="p-2.5 flex flex-col flex-1 justify-center">
+                  <div class="text-[11.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate leading-tight">
                     {{ getFieldText(tpl, 'title') }}
                   </div>
-                  <div class="text-[9.5px] text-slate-400 font-mono truncate leading-normal mt-0.5">
-                    {{ tpl.code }}
+                  <div class="text-[10px] text-slate-400 truncate leading-normal mt-1 flex items-center gap-1">
+                    <FileText class="w-3 h-3 text-slate-400 shrink-0" />
+                    <span>{{ getFieldText(tpl, 'stats') }}</span>
                   </div>
                 </div>
               </div>
@@ -241,7 +242,8 @@ import {
   X,
   Building2,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
+  FileText
 } from '@lucide/vue';
 
 const props = withDefaults(
@@ -275,38 +277,44 @@ const highlightedTemplateKey = ref<string | null>(null);
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
-    title: 'Customer Registration',
+    title: '客户案例 KYC 模板',
     title_en: 'Customer Registration',
-    tag: 'Customer',
+    tag: '客户案例',
     tag_en: 'Customer',
+    stats: '3 页面 · 9 字段',
+    stats_en: '3 Pages · 9 Fields',
     icon: Building2,
     image: tplCustomerImg,
-    desc: '包含公司统一社会信用代码、注册地、授权代表尽调与法定声明。',
-    desc_en: 'Includes corporate UEN, registered address, authorized representative CDD and declarations.',
+    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+    desc_en: 'Includes business profile, sales turnover, fund sources, listed company stock code linkage and formal declaration.',
     code: 'SG_CDD_Customer',
     bannerBgClass: 'bg-[#faf5ff]',
     tagBadgeClass: 'bg-purple-100/95 text-purple-700'
   },
   {
     key: 'kyc-individual' as const,
-    title: 'Individual KYC',
+    title: '个人案例 KYC 模板',
     title_en: 'Individual KYC',
-    tag: 'Individual',
+    tag: '个人成员',
     tag_en: 'Individual',
+    stats: '5 页面 · 15 字段',
+    stats_en: '5 Pages · 15 Fields',
     icon: UserCheck,
     image: tplIndividualImg,
-    desc: '涵盖身份证件/护照、国籍、就业收入状况与个人手写签名确认。',
-    desc_en: 'Covers ID/Passport, nationality, employment income, and handwritten signature.',
+    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
+    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     code: 'SG_CDD_Individual',
     bannerBgClass: 'bg-[#f0fdf4]',
     tagBadgeClass: 'bg-emerald-100/95 text-emerald-700'
   },
   {
     key: 'kyc-entity' as const,
-    title: 'Entity KYC',
+    title: '机构案例 KYC 模板',
     title_en: 'Entity KYC',
-    tag: 'Entity',
+    tag: '机构成员',
     tag_en: 'Entity',
+    stats: '3 页面 · 16 字段',
+    stats_en: '3 Pages · 16 Fields',
     icon: ShieldCheck,
     image: tplEntityImg,
     desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',

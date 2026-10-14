@@ -1,27 +1,23 @@
 <template>
-  <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label">
-    <div class="flex items-center flex-wrap gap-1">
-      <span v-if="isRequired" class="req-star">*</span>
+  <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label text-[13px] text-slate-800 font-medium leading-5 mb-1.5 pr-12">
+    <span v-if="isRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><EditableText
+      v-model="currentLabel"
+      :placeholder="t('canvas.unnamed')"
+      :element-id="element.id"
+      field="label"
+      custom-class="label-text inline break-words"
+    />
 
-      <EditableText
-        v-model="currentLabel"
-        :placeholder="t('canvas.unnamed')"
-        :element-id="element.id"
-        field="label"
-        custom-class="label-text"
-      />
-
-      <!-- 标题右侧说明 (默认排布) -->
-      <EditableText
-        v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
-        v-model="currentHelp"
-        :placeholder="t('prop.fieldHelp')"
-        :element-id="element.id"
-        field="help"
-        custom-class="field-help text-[11px] text-slate-400 font-normal leading-4"
-        :allow-empty="true"
-      />
-    </div>
+    <!-- 标题右侧说明 (默认排布) -->
+    <EditableText
+      v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
+      v-model="currentHelp"
+      :placeholder="t('prop.fieldHelp')"
+      :element-id="element.id"
+      field="help"
+      custom-class="field-help text-[11px] text-slate-400 font-normal leading-4 ml-1.5 inline"
+      :allow-empty="true"
+    />
 
     <!-- 标题下方说明 (底部换行排布) -->
     <div

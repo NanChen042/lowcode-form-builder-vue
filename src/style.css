@@ -219,7 +219,7 @@ body {
 }
 
 /* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (Arco medium 32px 高度，13px 输入文字) */
-#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini),
+#prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)),
 #prop-editor .arco-picker,
 #page-prop-editor .arco-input-wrapper,
 .sidebar-search-box {
@@ -228,8 +228,8 @@ body {
     font-size: 13px;
 }
 
-#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) input,
-#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) .arco-input,
+#prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)) input,
+#prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)) .arco-input,
 #prop-editor textarea,
 #prop-editor .arco-textarea,
 #prop-editor .arco-textarea-wrapper,
@@ -241,7 +241,7 @@ body {
     line-height: 1.5;
 }
 
-#prop-editor .arco-input-wrapper:not(.sub-input-mini):not(.arco-input-wrapper-size-mini) input::placeholder,
+#prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)) input::placeholder,
 #prop-editor textarea::placeholder,
 #page-prop-editor input::placeholder,
 #page-prop-editor textarea::placeholder {
@@ -249,11 +249,9 @@ body {
     color: #94a3b8;
 }
 
-/* 二级展开校验提示输入框专属规范 (遵循 Arco 官方标准四档尺寸之 mini: 24px 高度，12px 紧凑精致文字与占位符) */
-#prop-editor .sub-input-mini,
-#prop-editor .sub-input-mini.arco-input-wrapper,
-#prop-editor .arco-input-wrapper-size-mini,
-#prop-editor .arco-input-wrapper.arco-input-wrapper-size-mini {
+/* 遵循 Arco 官方标准四档尺寸之 mini: 24px 高度，12px 紧凑文字 */
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini),
+.arco-input-wrapper:has(.arco-input-size-mini) {
     height: 24px !important;
     min-height: 24px !important;
     max-height: 24px !important;
@@ -264,10 +262,8 @@ body {
     line-height: 22px !important;
 }
 
-#prop-editor .sub-input-mini input,
-#prop-editor .sub-input-mini .arco-input,
-#prop-editor .arco-input-wrapper-size-mini input,
-#prop-editor .arco-input-wrapper-size-mini .arco-input,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) .arco-input,
 #prop-editor .arco-input-size-mini,
 #prop-editor input.arco-input-size-mini {
     font-size: 12px !important;
@@ -277,10 +273,8 @@ body {
     line-height: 22px !important;
 }
 
-#prop-editor .sub-input-mini input::placeholder,
-#prop-editor .sub-input-mini .arco-input::placeholder,
-#prop-editor .arco-input-wrapper-size-mini input::placeholder,
-#prop-editor .arco-input-wrapper-size-mini .arco-input::placeholder,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input::placeholder,
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) .arco-input::placeholder,
 #prop-editor .arco-input-size-mini::placeholder,
 #prop-editor input.arco-input-size-mini::placeholder {
     font-size: 12px !important;
@@ -288,27 +282,54 @@ body {
     color: #94a3b8;
 }
 
-#prop-editor .sub-input-mini .arco-input-clear-btn,
-#prop-editor .arco-input-wrapper-size-mini .arco-input-clear-btn {
+#prop-editor .arco-input-wrapper:has(.arco-input-size-mini) .arco-input-clear-btn {
     font-size: 12px;
 }
 
-/* 确保属性面板内的操作按钮字号与行高严格生效，不被组件库默认的 button 样式 (font-size: 100%, line-height: 1.15) 干扰 */
-#prop-editor button,
-#page-prop-editor button {
+/* 确保全局所有原生操作按钮字号与行高严格生效，不被组件库默认的 button 样式 (font-size: 100%, line-height: 1.15) 干扰 */
+button:not(.arco-btn) {
     font-family: inherit;
+    line-height: normal;
 }
 
-#prop-editor button.text-\[11px\],
-#prop-editor button[class*="text-[11px]"] {
+button:not(.arco-btn).text-\[10px\],
+button:not(.arco-btn)[class*="text-[10px]"] {
+    font-size: 10px !important;
+    line-height: normal !important;
+}
+
+button:not(.arco-btn).text-\[11px\],
+button:not(.arco-btn)[class*="text-[11px]"] {
     font-size: 11px !important;
-    line-height: normal;
+    line-height: normal !important;
 }
 
-#prop-editor button.text-\[11\.5px\],
-#prop-editor button[class*="text-[11.5px]"] {
+button:not(.arco-btn).text-\[11\.5px\],
+button:not(.arco-btn)[class*="text-[11.5px]"] {
     font-size: 11.5px !important;
-    line-height: normal;
+    line-height: normal !important;
+}
+
+button:not(.arco-btn).text-\[12px\],
+button:not(.arco-btn)[class*="text-[12px]"],
+button:not(.arco-btn).text-xs,
+button:not(.arco-btn)[class*="text-xs"] {
+    font-size: 12px !important;
+    line-height: normal !important;
+}
+
+button:not(.arco-btn).text-\[13px\],
+button:not(.arco-btn)[class*="text-[13px]"] {
+    font-size: 13px !important;
+    line-height: normal !important;
+}
+
+button:not(.arco-btn).text-\[14px\],
+button:not(.arco-btn)[class*="text-[14px]"],
+button:not(.arco-btn).text-sm,
+button:not(.arco-btn)[class*="text-sm"] {
+    font-size: 14px !important;
+    line-height: normal !important;
 }
 
 #prop-editor .arco-select-view {
@@ -554,21 +575,26 @@ body.is-panning * {
     line-height: 20px;
 }
 
+/* 画布专属手势指针 (高保真 Figma / Stitch 风格蓝色微倾斜矢量箭头，统领无限画布与页面画板) */
+:root {
+    --canvas-cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%23000000' fill-opacity='0.28' transform='translate(1, 1)'/><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%231677ff' stroke='%23ffffff' stroke-width='1.8' stroke-linejoin='round' stroke-linecap='round'/></svg>") 1 1,
+        -webkit-image-set(
+            url('./assets/canvas-cursor.png') 1x,
+            url('./assets/canvas-cursor@2x.png') 2x
+        ) 1 1,
+        image-set(
+            url('./assets/canvas-cursor.png') 1x,
+            url('./assets/canvas-cursor@2x.png') 2x
+        ) 1 1,
+        url('./assets/canvas-cursor.png') 1 1,
+        default;
+}
+
 /* 谷歌 Bento / Material 极简纯净微点阵画幅 (精确复刻原版设计规范) */
 .canvas-grid {
     background-color: #f1f3f4;
     position: relative;
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%23000000' fill-opacity='0.28' transform='translate(1, 1)'/><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%231677ff' stroke='%23ffffff' stroke-width='1.8' stroke-linejoin='round' stroke-linecap='round'/></svg>") 1 1,
-    -webkit-image-set(
-        url('./assets/canvas-cursor.png') 1x,
-        url('./assets/canvas-cursor@2x.png') 2x
-    ) 1 1,
-    image-set(
-        url('./assets/canvas-cursor.png') 1x,
-        url('./assets/canvas-cursor@2x.png') 2x
-    ) 1 1,
-    url('./assets/canvas-cursor.png') 1 1,
-    default;
+    cursor: var(--canvas-cursor);
     touch-action: none;
     overflow: hidden;
 }
@@ -650,8 +676,15 @@ body.space-panning-ready * {
     transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.mobile-frame,
+.canvas-pages-container,
+.canvas-dropzone,
+.page-header-area,
+.system-profile-view {
+    cursor: var(--canvas-cursor);
+}
+
 .mobile-frame {
-    cursor: default;
     position: absolute;
     transform-origin: 0 0;
     transition:
@@ -719,7 +752,7 @@ body.space-panning-ready * {
 .canvas-element {
     position: relative;
     margin-bottom: 12px;
-    cursor: pointer;
+    cursor: var(--canvas-cursor);
     border-radius: 8px;
     border: 1.5px solid #edf1f5;
     background: #fff;
@@ -736,6 +769,10 @@ body.space-panning-ready * {
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 
+.canvas-element.is-branch-child {
+    cursor: default !important;
+}
+
 .canvas-element.is-selected {
     border-color: #1677ff !important;
     box-shadow: none !important;
@@ -743,12 +780,24 @@ body.space-panning-ready * {
 }
 
 
-.canvas-element .label-text,
+.canvas-element .label-text {
+    display: inline !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
 .canvas-element .option-text,
 .canvas-element .signature-declaration-text,
 .canvas-element .signature-pad-text,
 .canvas-element .field-help {
     display: inline-block;
+}
+
+.canvas-element .label-text,
+.canvas-element .option-text,
+.canvas-element .signature-declaration-text,
+.canvas-element .signature-pad-text,
+.canvas-element .field-help {
     border-bottom: 2px solid transparent !important;
     border-top: none !important;
     border-left: none !important;
@@ -841,8 +890,8 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 .req-star {
-    display: inline-block;
-    margin-right: 4px;
+    display: inline;
+    margin-right: 3px;
     color: #ff4d4f;
 }
 
@@ -975,6 +1024,41 @@ body.is-dragging-component .canvas-element .field-help {
    画布中的虚拟占位槽均展示完整、逼真的选择器/输入控件外观
    ======================================================== */
 
+.canvas-dropzone .canvas-element-group.sortable-ghost {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative !important;
+}
+
+.canvas-dropzone .canvas-element-group.sortable-ghost .element-actions {
+    display: none !important;
+}
+
+.canvas-dropzone .canvas-element-group.sortable-ghost .canvas-element {
+    background: #eff6ff !important;
+    border: 1.5px dashed #60a5fa !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    margin-bottom: 12px !important;
+    box-sizing: border-box !important;
+    transition: none !important;
+}
+
+.canvas-dropzone .canvas-element-group.sortable-ghost .canvas-element > * {
+    opacity: 0.45 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+}
+
+.canvas-dropzone .canvas-element-group.sortable-ghost .canvas-element .element-actions {
+    display: none !important;
+}
+
 .canvas-dropzone .canvas-element.sortable-ghost {
     display: block !important;
     width: 100% !important;
@@ -1062,12 +1146,22 @@ body.is-dragging-component .canvas-element .field-help {
     opacity: 0.65 !important;
 }
 
-.canvas-dropzone .component-item.sortable-ghost .label-text,
+.canvas-dropzone .component-item.sortable-ghost .label-text {
+    display: inline !important;
+}
+
 .canvas-dropzone .component-item.sortable-ghost .option-text,
 .canvas-dropzone .component-item.sortable-ghost .signature-declaration-text,
 .canvas-dropzone .component-item.sortable-ghost .signature-pad-text,
 .canvas-dropzone .component-item.sortable-ghost .field-help {
     display: inline-block;
+}
+
+.canvas-dropzone .component-item.sortable-ghost .label-text,
+.canvas-dropzone .component-item.sortable-ghost .option-text,
+.canvas-dropzone .component-item.sortable-ghost .signature-declaration-text,
+.canvas-dropzone .component-item.sortable-ghost .signature-pad-text,
+.canvas-dropzone .component-item.sortable-ghost .field-help {
     border-bottom: 2px solid transparent !important;
     border-top: none !important;
     border-left: none !important;
@@ -1146,6 +1240,41 @@ body.is-dragging-component .canvas-element .field-help {
     background: #ffffff !important;
     box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25) !important;
     pointer-events: none !important;
+}
+
+/* 核心优化：当拖拽已有组件组（.canvas-element-group）时，外层组容器纯透明、无边框、无阴影，
+   由内部具体的组件卡片独立渲染高质量悬浮卡片外观，彻底消除外层大框嵌套与多重边框问题 */
+.canvas-element-group.drag-fallback-visual {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.canvas-element-group.drag-fallback-visual .canvas-element {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(22, 119, 255, 0.12) !important;
+    pointer-events: none !important;
+}
+
+.canvas-element-group.drag-fallback-visual .canvas-element:first-child {
+    border: 1.5px solid #1677ff !important;
+}
+
+.canvas-element-group.drag-fallback-visual .canvas-element.is-branch-child {
+    border: 1.5px solid #93c5fd !important;
+}
+
+.canvas-element-group.drag-fallback-visual .element-actions {
+    display: none !important;
+}
+
+.canvas-element-group.sortable-drag {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
 }
 
 @keyframes highlightPulse {
@@ -1261,7 +1390,11 @@ body.is-dragging-component .canvas-element .field-help {
 .arco-dropdown,
 .arco-dropdown-submenu,
 .arco-dropdown-list-wrapper {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+}
+
+.arco-dropdown .arco-scrollbar-track-direction-horizontal {
+    display: none !important;
 }
 
 /* 下拉菜单整体容器：现代圆角、精致微阴影与紧凑内边距 */
@@ -1275,6 +1408,13 @@ body.is-dragging-component .canvas-element .field-help {
 
 .arco-dropdown-list {
     padding: 0;
+}
+
+/* 下拉菜单内的分割线重置：彻底消除 Arco 默认 20px 巨大外边距留白 */
+.arco-dropdown .arco-divider-horizontal,
+.arco-dropdown .arco-divider {
+    margin: 4px 0 !important;
+    border-bottom-color: #f1f5f9 !important;
 }
 
 /* 当子菜单在右侧弹出 (rt) 时，向左微调 5px，完全抵消 Arco 默认的 4px 偏移，使两级菜单无缝贴合 */
@@ -1460,14 +1600,16 @@ body.is-dragging-component .canvas-element .field-help {
     border-top: none;
 }
 
-/* 气泡确认框：确定在左，取消在右 */
+/* 气泡确认框按钮顺序规范：严格遵循【确定在左，取消在右】 */
 .arco-popconfirm-footer {
     display: flex;
-    justify-content: flex-end;
     flex-direction: row-reverse;
+    justify-content: flex-end;
     gap: 8px;
     align-items: center;
 }
+
+
 
 /* 选项配置拖拽排序行外边框与焦点抑制 */
 .option-row,

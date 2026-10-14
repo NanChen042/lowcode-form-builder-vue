@@ -44,7 +44,6 @@
           >
             <component :is="item.icon" class="w-4 h-4 mb-1" />
             <span class="text-[12px] leading-tight">{{ item.label }}</span>
-            <span class="text-[10px] text-slate-400 mt-0.5 leading-tight">{{ item.sub }}</span>
           </button>
         </div>
       </div>
@@ -116,16 +115,16 @@ const customTitle = ref('');
 const titleInputRef = ref<any>(null);
 
 const profileOptions = computed(() => [
-  { value: 'customer' as const, label: store.currentLocale === 'en' ? 'Customer' : '母案例', sub: 'Customer', icon: Building2 },
-  { value: 'individual' as const, label: store.currentLocale === 'en' ? 'Individual' : '个人案例', sub: 'Individual', icon: UserCheck },
-  { value: 'entity' as const, label: store.currentLocale === 'en' ? 'Entity' : '机构案例', sub: 'Entity', icon: ShieldCheck }
+  { value: 'customer' as const, label: store.currentLocale === 'en' ? 'Customer' : '客户案例', icon: Building2 },
+  { value: 'individual' as const, label: store.currentLocale === 'en' ? 'Individual' : '个人案例', icon: UserCheck },
+  { value: 'entity' as const, label: store.currentLocale === 'en' ? 'Entity' : '机构案例', icon: ShieldCheck }
 ]);
 
 const lockedTypeName = computed(() => {
   const t = store.lockedProfileType;
-  if (t === 'individual') return store.currentLocale === 'en' ? 'Individual' : '个人案例 (Individual)';
-  if (t === 'entity') return store.currentLocale === 'en' ? 'Entity' : '机构案例 (Entity)';
-  return store.currentLocale === 'en' ? 'Customer' : '母案例 (Customer)';
+  if (t === 'individual') return store.currentLocale === 'en' ? 'Individual' : '个人案例';
+  if (t === 'entity') return store.currentLocale === 'en' ? 'Entity' : '机构案例';
+  return store.currentLocale === 'en' ? 'Customer' : '客户案例';
 });
 
 const computedTitlePlaceholder = computed(() => {

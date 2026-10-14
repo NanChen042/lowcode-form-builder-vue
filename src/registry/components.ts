@@ -98,7 +98,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       help_en: '',
       defaultValue: '',
       multiple: false,
-      maxSelections: 3,
       required: true,
       showLabel: true,
       options: [
@@ -143,7 +142,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       layout: 'inline',
       required: true,
       showLabel: true,
-      maxSelections: 3,
       options: [
         { label: '选项一', label_en: 'Option 1', value: 'option_1' },
         { label: '选项二', label_en: 'Option 2', value: 'option_2' }
@@ -175,13 +173,13 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   country: {
     type: 'country',
-    label: '国家选择',
+    label: '国家',
     label_en: 'Country',
     category: 'business',
     icon: 'Globe',
     defaultData: () => ({
-      label: '国家选择',
-      label_en: 'Country Select',
+      label: '国家',
+      label_en: 'Country',
       placeholder: '请选择国家',
       placeholder_en: 'Please select a country',
       help: '',
@@ -190,19 +188,18 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       required: true,
       showLabel: true,
       multiple: false,
-      maxSelections: 3,
       options: []
     })
   },
   nationality: {
     type: 'nationality',
-    label: '国籍选择',
+    label: '国籍',
     label_en: 'Nationality',
     category: 'business',
     icon: 'Flag',
     defaultData: () => ({
-      label: '国籍选择',
-      label_en: 'Nationality Select',
+      label: '国籍',
+      label_en: 'Nationality',
       placeholder: '请选择国籍',
       placeholder_en: 'Please select nationality',
       help: '',
@@ -211,7 +208,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       required: true,
       showLabel: true,
       multiple: false,
-      maxSelections: 3,
       options: []
     })
   },

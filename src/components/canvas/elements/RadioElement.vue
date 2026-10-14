@@ -12,7 +12,7 @@
         </span>
         <EditableText
           :model-value="getOptionLabel(opt)"
-          :placeholder="t('options.optionPlaceholder', undefined, { index: idx + 1 })"
+          :placeholder="formatOptionLabel(idx + 1)"
           :element-id="element.id"
           field="option"
           :option-index="idx"
@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import type { FormElement } from '@/types/schema';
 import { markDirty } from '@/core/store';
-import { t, getOptionLabel, setOptionLabel } from '@/core/i18n';
+import { t, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 

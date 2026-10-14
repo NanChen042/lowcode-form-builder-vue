@@ -5,60 +5,32 @@
       <div
         v-for="(option, idx) in options"
         :key="idx"
-        class="notice-row group flex items-start gap-2 py-1 transition-all"
+        class="notice-row group flex items-start gap-1.5 py-1 transition-all"
       >
         <!-- 序号徽标 -->
-        <div class="mt-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium shrink-0 select-none">
+        <div class="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium shrink-0 select-none">
           {{ idx + 1 }}
         </div>
 
-        <!-- 英文模式 -->
-        <div v-if="store.currentLocale === 'en'" class="flex-1 relative">
+        <!-- 统一单源输入 (自动适配当前激活语言) -->
+        <div class="flex-1 relative">
           <a-textarea
-            v-model="option.label_en"
-            :auto-size="{ minRows: 2, maxRows: 4 }"
+            :model-value="getOptionLabel(option)"
+            :auto-size="{ minRows: 1, maxRows: 5 }"
             size="small"
             :placeholder="t('options.noticePlaceholder')"
-            class="w-full !rounded-md"
+            class="w-full !rounded-md !text-[12px]"
             :class="{ 'prop-field-focused': isOptionFocused(idx) }"
             @focus="onFocus(idx)"
             @blur="onBlur"
-            @input="onInput(idx, $event)"
+            @input="onOptionInput(option, idx, $event)"
           />
-          <span
-            v-if="option.label && !option.label_en"
-            class="absolute right-2 bottom-2 text-[10px] text-amber-600 bg-amber-50/90 px-1.5 py-0.5 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-            :title="`中文: ${option.label}`"
-          >
-            {{ t('prop.missingEnTag') }}
-          </span>
-        </div>
-        <!-- 中文模式 -->
-        <div v-else class="flex-1 relative">
-          <a-textarea
-            v-model="option.label"
-            :auto-size="{ minRows: 2, maxRows: 4 }"
-            size="small"
-            :placeholder="t('options.noticePlaceholder')"
-            class="w-full !rounded-md"
-            :class="{ 'prop-field-focused': isOptionFocused(idx) }"
-            @focus="onFocus(idx)"
-            @blur="onBlur"
-            @input="onInput(idx, $event)"
-          />
-          <span
-            v-if="option.label_en && !option.label"
-            class="absolute right-2 bottom-2 text-[10px] text-amber-600 bg-amber-50/90 px-1.5 py-0.5 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-            :title="`EN: ${option.label_en}`"
-          >
-            {{ t('prop.missingZhTag') }}
-          </span>
         </div>
 
         <!-- 删除按钮 -->
         <button
           type="button"
-          class="mt-1 option-del-btn flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50/80 active:bg-red-100 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0"
+          class="mt-0.5 option-del-btn flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
           :disabled="options.length <= 1"
           :title="t('options.deleteOption')"
           @click="removeOption(idx)"
@@ -74,117 +46,175 @@
         <div
           v-for="(option, idx) in options"
           :key="option.value ? ((props.element?.id || '') + '_' + option.value) : ((props.element?.id || '') + '_' + idx)"
-          class="option-row group flex items-center gap-1.5 py-0.5 transition-all"
+          class="option-row group flex flex-col gap-1 py-0.5"
         >
-          <!-- 拖拽/排序手柄图标 -->
-          <div
-            class="drag-handle flex items-center justify-center w-5 h-7 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
-            :title="t('options.dragToReorderIndexed', undefined, { index: idx + 1 })"
-          >
-            <GripVertical class="h-3.5 w-3.5" />
+          <div class="flex items-center gap-1.5 w-full">
+            <!-- 拖拽/排序手柄图标 -->
+            <div
+              class="drag-handle flex items-center justify-center w-4 h-6 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
+              :title="t('options.dragToReorderIndexed', undefined, { index: idx + 1 })"
+            >
+              <GripVertical class="h-3.5 w-3.5" />
+            </div>
+
+            <!-- 统一单源输入框 -->
+            <a-input
+              :model-value="getOptionLabel(option)"
+              size="mini"
+              :placeholder="formatOptionLabel(idx + 1, store.currentLocale)"
+              class="flex-1"
+              :class="{ 'prop-field-focused': isOptionFocused(idx) }"
+              @focus="onFocus(idx)"
+              @blur="onBlur"
+              @input="onOptionInput(option, idx, $event)"
+              @keydown.enter.prevent="addOptionAt(idx + 1)"
+            />
+
+            <!-- 选项级联动展开组件按钮 (仅 radio / select 选项生效) -->
+            <a-popover
+              v-if="['radio', 'select'].includes(props.element.type)"
+              trigger="click"
+              position="br"
+              :content-style="{ padding: '10px 12px', width: '280px' }"
+            >
+              <button
+                type="button"
+                class="flex items-center justify-center w-6 h-6 rounded transition-all shrink-0 cursor-pointer"
+                :class="getLinkedFieldsForOption(option).length > 0
+                  ? 'text-[#1677ff] bg-blue-50/90 hover:bg-blue-100 font-semibold shadow-2xs border border-blue-200/80'
+                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'"
+                :title="t('options.linkConfigTitle', undefined, { name: getOptionLabel(option, undefined, true) || t('options.thisOption') })"
+              >
+                <Link2 class="h-3.5 w-3.5" />
+              </button>
+
+              <template #content>
+                <div class="space-y-2.5 text-xs">
+                  <div class="font-semibold text-slate-800 flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <div class="flex items-center gap-1">
+                      <Link2 class="w-3.5 h-3.5 text-[#1677ff]" />
+                      <span>{{ t('options.linkTriggerHeader', undefined, { name: getOptionLabel(option, undefined, true) || t('options.thisOption') }) }}</span>
+                    </div>
+                  </div>
+
+                  <!-- 1. 直接选择想要添加的组件类型（一键生成并联动） -->
+                  <div>
+                    <div class="text-[11px] font-medium text-slate-500 mb-1.5">
+                      {{ t('options.chooseFollowupField') }}
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                      <button
+                        v-for="item in branchTypes"
+                        :key="item.type"
+                        type="button"
+                        class="flex items-center gap-1.5 px-2 py-1.5 rounded border border-slate-200/80 bg-white hover:bg-blue-50/70 hover:border-blue-300 hover:text-[#1677ff] text-[11px] text-slate-700 transition-all cursor-pointer text-left select-none"
+                        @click.stop="quickInsertFollowupField(option, item.type, item.label)"
+                      >
+                        <Plus class="w-3 h-3 text-[#1677ff] shrink-0" />
+                        <span class="truncate">{{ item.label }}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 2. 或关联已有下游组件 (若有) -->
+                  <div v-if="downstreamFields.length > 0" class="pt-2 border-t border-slate-100">
+                    <div class="text-[11px] font-medium text-slate-500 mb-1">
+                      {{ t('options.orLinkExisting') }}
+                    </div>
+                    <div class="max-h-36 overflow-y-auto space-y-1 custom-scrollbar pr-0.5">
+                      <div
+                        v-for="df in downstreamFields"
+                        :key="df.id"
+                        class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer select-none transition-colors"
+                        @click.stop="toggleFieldLinkToOption(df.id, option)"
+                      >
+                        <a-checkbox
+                          :model-value="isFieldLinkedToOption(df.id, option)"
+                          size="small"
+                          class="!m-0 pointer-events-none"
+                        />
+                        <span class="truncate flex-1 font-medium text-slate-700 text-[11px]">{{ getFieldText(df, 'label', undefined, true) || df.key }}</span>
+                        <span class="text-[10px] text-slate-400 font-mono shrink-0">({{ df.type }})</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </a-popover>
+
+            <!-- 现代精致删除按钮 (不受全局 Arco 样式污染) -->
+            <button
+              type="button"
+              class="option-del-btn flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
+              :disabled="options.length <= 1"
+              :title="t('options.deleteOption')"
+              @click="removeOption(idx)"
+            >
+              <Trash2 class="h-3.5 w-3.5" />
+            </button>
           </div>
 
-          <!-- 英文模式输入框 -->
-          <template v-if="store.currentLocale === 'en'">
-            <a-input
-              v-model="option.label_en"
-              size="small"
-              :placeholder="`${t('options.optionNamePlaceholder')} ${idx + 1}`"
-              class="flex-1 !rounded-md"
-              :class="{ 'prop-field-focused': isOptionFocused(idx) }"
-              allow-clear
-              @focus="onFocus(idx)"
-              @blur="onBlur"
-              @input="onInput(idx, $event)"
-              @keydown.enter.prevent="addOptionAt(idx + 1)"
-            >
-              <template #suffix>
-                <span
-                  v-if="option.label && !option.label_en"
-                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-                  :title="`中文: ${option.label}`"
-                >
-                  {{ t('prop.missingEnTag') }}
-                </span>
-                <span
-                  v-else-if="option.label_en && !option.label"
-                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-                >
-                  {{ t('prop.missingZhTag') }}
-                </span>
-              </template>
-            </a-input>
-          </template>
-          <!-- 中文模式输入框 -->
-          <template v-else>
-            <a-input
-              v-model="option.label"
-              size="small"
-              :placeholder="`${t('options.optionNamePlaceholder')} ${idx + 1}`"
-              class="flex-1 !rounded-md"
-              :class="{ 'prop-field-focused': isOptionFocused(idx) }"
-              allow-clear
-              @focus="onFocus(idx)"
-              @blur="onBlur"
-              @input="onInput(idx, $event)"
-              @keydown.enter.prevent="addOptionAt(idx + 1)"
-            >
-              <template #suffix>
-                <span
-                  v-if="option.label && !option.label_en"
-                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-                >
-                  {{ t('prop.missingEnTag') }}
-                </span>
-                <span
-                  v-else-if="option.label_en && !option.label"
-                  class="text-[10px] text-amber-600 bg-amber-50 px-1 py-0.2 rounded border border-amber-200/60 font-medium whitespace-nowrap select-none"
-                  :title="`EN: ${option.label_en}`"
-                >
-                  {{ t('prop.missingZhTag') }}
-                </span>
-              </template>
-            </a-input>
-          </template>
-
-          <!-- 现代精致删除按钮 (不受全局 Arco 样式污染) -->
-          <button
-            type="button"
-            class="option-del-btn flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50/80 active:bg-red-100 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0"
-            :disabled="options.length <= 1"
-            :title="t('options.deleteOption')"
-            @click="removeOption(idx)"
+          <!-- 已绑定的展开组件标签 (一目了然) -->
+          <div
+            v-if="['radio', 'select'].includes(props.element.type) && getLinkedFieldsForOption(option).length > 0"
+            class="flex flex-wrap items-center gap-1 pl-6 pt-0.5"
           >
-            <Trash2 class="h-3.5 w-3.5" />
-          </button>
+            <span
+              v-for="lf in getLinkedFieldsForOption(option)"
+              :key="lf.id"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50/90 text-[#1677ff] text-[10.5px] border border-blue-200/80 shadow-2xs group"
+            >
+              <CornerDownRight class="w-2.5 h-2.5 text-blue-400" />
+              <span class="font-medium max-w-[130px] truncate">
+                {{ t('options.expandedTag', undefined, { name: getFieldText(lf, 'label', undefined, true) || lf.key }) }}
+              </span>
+              <button
+                type="button"
+                class="ml-0.5 text-blue-400 hover:text-red-500 transition-colors cursor-pointer text-xs font-bold leading-none"
+                title="解除关联"
+                @click.stop="unlinkField(lf.id)"
+              >
+                ×
+              </button>
+            </span>
+          </div>
         </div>
       </div>
     </template>
 
-    <!-- 底部快捷添加选项按钮 (采用标准 Arco a-button，配合 long 属性宽度自适应容器) -->
+    <!-- 底部快捷添加按钮 (原生 Arco 标准虚线按钮，size="mini") -->
     <a-button
       type="dashed"
       long
-      size="small"
-      class="mt-2.5 !h-7 !text-[12px] !rounded-[6px] !font-medium"
+      size="mini"
+      class="mt-2"
       @click="addOption"
     >
       <template #icon>
         <Plus class="h-3.5 w-3.5" />
       </template>
-      {{ t('prop.addOption') }}
+      {{ addButtonLabel }}
     </a-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
-import type { FormElement, FormElementOption } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
-import { t } from '@/core/i18n';
-import { Trash2, GripVertical, Plus } from '@lucide/vue';
+import type { FormElement, FormElementOption, ComponentType } from '@/types/schema';
+import { store, markDirty, createElement, selectElement } from '@/core/store';
+import { t, formatOptionLabel, getOptionLabel, setOptionLabel, getFieldText } from '@/core/i18n';
+import { Trash2, GripVertical, Plus, Link2, CornerDownRight } from '@lucide/vue';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import Sortable from 'sortablejs';
+
+const branchTypes = computed(() => [
+  { type: 'input' as const, label: store.currentLocale === 'en' ? 'Input' : '单行输入' },
+  { type: 'textarea' as const, label: store.currentLocale === 'en' ? 'Textarea' : '多行文本' },
+  { type: 'select' as const, label: store.currentLocale === 'en' ? 'Dropdown' : '下拉选择' },
+  { type: 'date' as const, label: store.currentLocale === 'en' ? 'Date' : '日期选择' },
+  { type: 'phone' as const, label: store.currentLocale === 'en' ? 'Phone' : '手机号码' },
+  { type: 'checkbox' as const, label: store.currentLocale === 'en' ? 'Checkbox' : '多选框组' }
+]);
 
 const props = defineProps<{ element: FormElement }>();
 
@@ -194,6 +224,16 @@ const options = computed<FormElementOption[]>(() => {
 
 const isDisplayOnly = computed(() => {
   return props.element?.type === 'signature' || props.element?.type === 'alert';
+});
+
+const addButtonLabel = computed(() => {
+  if (props.element?.type === 'alert') {
+    return t('prop.addNoticeItem');
+  }
+  if (props.element?.type === 'signature') {
+    return t('prop.addClauseItem');
+  }
+  return t('prop.addOption');
 });
 
 const sortableListRef = ref<HTMLElement | null>(null);
@@ -276,7 +316,13 @@ function onBlur() {
   store.focusedTarget = null;
 }
 
-function onInput(_idx?: number, _val?: any) {
+function onOptionInput(option: FormElementOption, idx: number, val: string) {
+  setOptionLabel(option, val);
+  store.focusedTarget = {
+    elementId: props.element.id,
+    field: 'option',
+    optionIndex: idx
+  };
   markDirty();
 }
 
@@ -286,8 +332,8 @@ function addOption() {
   }
   const nextIdx = props.element.options.length + 1;
   props.element.options.push({
-    label: store.currentLocale === 'zh' ? `选项${nextIdx}` : '',
-    label_en: store.currentLocale === 'en' ? `Option ${nextIdx}` : '',
+    label: formatOptionLabel(nextIdx, 'zh'),
+    label_en: formatOptionLabel(nextIdx, 'en'),
     value: `option_${nextIdx}_${Date.now().toString(36)}`
   });
   markDirty();
@@ -302,8 +348,8 @@ function addOptionAt(targetIndex: number) {
   }
   const nextIdx = props.element.options.length + 1;
   const newOpt = {
-    label: store.currentLocale === 'zh' ? `选项${nextIdx}` : '',
-    label_en: store.currentLocale === 'en' ? `Option ${nextIdx}` : '',
+    label: formatOptionLabel(nextIdx, 'zh'),
+    label_en: formatOptionLabel(nextIdx, 'en'),
     value: `option_${nextIdx}_${Date.now().toString(36)}`
   };
   props.element.options.splice(targetIndex, 0, newOpt);
@@ -311,6 +357,77 @@ function addOptionAt(targetIndex: number) {
   nextTick(() => {
     initSortable();
   });
+}
+
+// 当前画板与下方可用组件
+const currentPage = computed(() => {
+  if (!props.element) return null;
+  return store.pages.find(p => p.fields?.some(f => f.id === props.element.id)) || null;
+});
+
+const downstreamFields = computed(() => {
+  if (!currentPage.value || !props.element) return [];
+  const fields = currentPage.value.fields || [];
+  const currentIndex = fields.findIndex(f => f.id === props.element.id);
+  if (currentIndex < 0) return [];
+  return fields.slice(currentIndex + 1);
+});
+
+function getLinkedFieldsForOption(option: FormElementOption) {
+  if (!props.element?.key || !option.value) return [];
+  return downstreamFields.value.filter(f => {
+    return f.dependsOn?.fieldKey === props.element.key && f.dependsOn?.value === option.value;
+  });
+}
+
+function isFieldLinkedToOption(fieldId: string, option: FormElementOption): boolean {
+  const f = downstreamFields.value.find(field => field.id === fieldId);
+  return f?.dependsOn?.fieldKey === props.element.key && f?.dependsOn?.value === option.value;
+}
+
+function toggleFieldLinkToOption(fieldId: string, option: FormElementOption) {
+  const f = downstreamFields.value.find(field => field.id === fieldId);
+  if (!f) return;
+  if (isFieldLinkedToOption(fieldId, option)) {
+    delete f.dependsOn;
+  } else {
+    f.dependsOn = {
+      fieldKey: props.element.key,
+      value: option.value
+    };
+  }
+  markDirty();
+}
+
+function unlinkField(fieldId: string) {
+  const f = downstreamFields.value.find(field => field.id === fieldId);
+  if (f) {
+    delete f.dependsOn;
+    markDirty();
+  }
+}
+
+function quickInsertFollowupField(option: FormElementOption, type: ComponentType = 'input', typeLabel: string = '单行输入') {
+  if (!currentPage.value || !props.element) return;
+  const newEl = createElement(type);
+  newEl.label = typeLabel;
+  newEl.required = false;
+  newEl.defaultValue = '';
+  newEl.dependsOn = {
+    fieldKey: props.element.key,
+    value: option.value
+  };
+
+  const fields = currentPage.value.fields || [];
+  const currentIdx = fields.findIndex(f => f.id === props.element.id);
+  let insertIdx = currentIdx + 1;
+  while (insertIdx < fields.length && fields[insertIdx].dependsOn?.fieldKey === props.element.key) {
+    insertIdx++;
+  }
+
+  fields.splice(insertIdx, 0, newEl);
+  selectElement(newEl);
+  markDirty();
 }
 
 function removeOption(idx: number) {
@@ -326,6 +443,20 @@ function removeOption(idx: number) {
       const vals = parseMultiValue(props.element.defaultValue).filter(v => v !== removed.value);
       props.element.defaultValue = stringifyMultiValue(vals);
     }
+  }
+  // 清除所有关联到该被删选项的下游组件联动
+  if (removed && props.element.key) {
+    for (const page of store.pages) {
+      for (const f of (page.fields || [])) {
+        if (f.dependsOn?.fieldKey === props.element.key && f.dependsOn?.value === removed.value) {
+          delete f.dependsOn;
+        }
+      }
+    }
+  }
+  // 如果删减后选项数量小于 maxSelections，自动同步收缩
+  if (props.element.maxSelections && props.element.maxSelections > props.element.options.length) {
+    props.element.maxSelections = props.element.options.length;
   }
   markDirty();
   nextTick(() => {

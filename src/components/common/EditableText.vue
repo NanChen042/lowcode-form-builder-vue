@@ -77,22 +77,13 @@ onMounted(() => {
 });
 
 watch(
-  () => props.modelValue,
-  newVal => {
+  () => [props.modelValue, props.placeholder, store.currentLocale],
+  () => {
     // 当自身正在编辑或为当前活动聚焦元素时，绝对不同步，避免破坏用户正在输入的光标选区
     if (isEditing.value || (typeof document !== 'undefined' && document.activeElement === textRef.value)) {
       return;
     }
-    syncTextToDOM(newVal);
-  }
-);
-
-watch(
-  () => props.placeholder,
-  () => {
-    if (typeof document !== 'undefined' && document.activeElement !== textRef.value && !props.modelValue) {
-      syncTextToDOM(props.modelValue);
-    }
+    syncTextToDOM(props.modelValue);
   }
 );
 

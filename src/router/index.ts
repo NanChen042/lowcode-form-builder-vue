@@ -1,21 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import BuilderView from '@/views/BuilderView.vue';
-import CallerHostView from '@/views/CallerHostView.vue';
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'Builder',
-      component: BuilderView
+      component: () => import('@/views/BuilderView.vue')
     },
     {
       path: '/caller',
       name: 'Caller',
-      component: CallerHostView
+      component: () => import('@/views/CallerHostView.vue')
     }
   ]
 });
 
 export default router;
+

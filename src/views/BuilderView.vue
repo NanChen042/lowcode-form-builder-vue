@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import {
   store,
   buildSchema,
@@ -102,9 +102,10 @@ function handleWizardOpenBlank() {
   createCanvasModalVisible.value = true;
 }
 
-// 首次向导或二次弹窗创建表单后，平滑衔接工作区新手漫游引导
+// 首次向导或二次弹窗创建表单后，自动切至组件物料库并平滑衔接工作区操作指南
 function handleTemplateSelected(_tplKey: string) {
   welcomeWizardVisible.value = false;
+  store.sidebarTab = 'components';
   setTimeout(() => {
     checkAutoStartTour(true);
   }, 500);
@@ -112,6 +113,7 @@ function handleTemplateSelected(_tplKey: string) {
 
 function handleFormCreated() {
   createCanvasModalVisible.value = false;
+  store.sidebarTab = 'components';
   setTimeout(() => {
     checkAutoStartTour(true);
   }, 500);
@@ -119,6 +121,7 @@ function handleFormCreated() {
 
 function handleWelcomeWizardClosed() {
   welcomeWizardVisible.value = false;
+  store.sidebarTab = 'components';
   if (store.pages.length > 0) {
     setTimeout(() => {
       checkAutoStartTour(true);
@@ -214,24 +217,7 @@ onMounted(async () => {
   }).catch(() => {});
 
   // 监听来自父级母系统 (iframe postMessage) 的动态同步
-  window.addEventListener('message', (event: MessageEvent) => {
-    try {
-      const data = event.data;
-      if (!data) return;
-      if (data.type === 'ALGO_USER_INIT' || data.type === 'SYNC_USER_INFO') {
-        const payload = data.data || data;
-        if (payload.token) store.user.token = payload.token;
-        if (payload.nickname) store.user.nickname = payload.nickname;
-        if (payload.email) store.user.email = payload.email;
-        if (payload.org_id || payload.sc_org_id) store.org.orgId = payload.org_id || payload.sc_org_id;
-        if (payload.company_name || payload.company) store.org.companyName = payload.company_name || payload.company;
-        if (payload.language || payload.lang) {
-          const l = String(payload.language || payload.lang).toLowerCase();
-          store.currentLocale = l.startsWith('en') ? 'en' : 'zh';
-        }
-      }
-    } catch (_) {}
-  });
+  window.addEventListener('message', handleWindowMessage);
 
   // 2. 解析并锁定外部业务主体类型 (customer/client, individual, entity)
   if (typeParam === 'individual') {
@@ -342,11 +328,37 @@ onMounted(async () => {
   }
 
   // 离开页面时未保存拦截
-  window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
-    if (store.isDirty) {
-      e.preventDefault();
-      e.returnValue = '您有未保存的更改，确定要离开吗？';
+  window.addEventListener('beforeunload', handleBeforeUnload);
+});
+
+function handleWindowMessage(event: MessageEvent) {
+  try {
+    const data = event.data;
+    if (!data) return;
+    if (data.type === 'ALGO_USER_INIT' || data.type === 'SYNC_USER_INFO') {
+      const payload = data.data || data;
+      if (payload.token) store.user.token = payload.token;
+      if (payload.nickname) store.user.nickname = payload.nickname;
+      if (payload.email) store.user.email = payload.email;
+      if (payload.org_id || payload.sc_org_id) store.org.orgId = payload.org_id || payload.sc_org_id;
+      if (payload.company_name || payload.company) store.org.companyName = payload.company_name || payload.company;
+      if (payload.language || payload.lang) {
+        const l = String(payload.language || payload.lang).toLowerCase();
+        store.currentLocale = l.startsWith('en') ? 'en' : 'zh';
+      }
     }
-  });
+  } catch (_) {}
+}
+
+function handleBeforeUnload(e: BeforeUnloadEvent) {
+  if (store.isDirty) {
+    e.preventDefault();
+    e.returnValue = '您有未保存的更改，确定要离开吗？';
+  }
+}
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleWindowMessage);
+  window.removeEventListener('beforeunload', handleBeforeUnload);
 });
 </script>

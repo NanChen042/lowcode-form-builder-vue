@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <div class="rounded-lg bg-slate-50/90 border border-slate-100 p-3">
+      <div class="rounded-xl bg-white border border-slate-200/80 p-3 shadow-2xs">
         <div class="text-[11.5px] text-slate-400 font-medium">
           {{ t('profile.associatedEntity') }}
         </div>

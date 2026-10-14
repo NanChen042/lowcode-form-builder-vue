@@ -169,40 +169,65 @@ function handleVisibleChange(val: boolean) {
 }
 
 function handleQuickAddComponent(type: ComponentType) {
-  if (props.targetType === 'element' && props.targetElementId) {
-    addElement(type, props.targetPageId || undefined);
-  } else {
-    const targetPageId = props.targetPageId || store.activePageId || (store.pages[0]?.id ?? undefined);
-    if (store.selectedType !== 'element') {
-      clearSelection();
+  try {
+    if (props.targetType === 'element' && props.targetElementId) {
+      addElement(type, props.targetPageId || undefined);
+    } else {
+      const targetPageId = props.targetPageId || store.activePageId || (store.pages[0]?.id ?? undefined);
+      if (store.selectedType !== 'element') {
+        clearSelection();
+      }
+      addElement(type, targetPageId);
     }
-    addElement(type, targetPageId);
+  } catch (err) {
+    console.error('Failed to add component via context menu:', err);
+  } finally {
+    emit('close');
   }
-  emit('close');
 }
 
 function handleDuplicateElement() {
-  if (props.targetElementId) {
-    duplicateElement(props.targetElementId);
+  try {
+    if (props.targetElementId) {
+      duplicateElement(props.targetElementId);
+    }
+  } catch (err) {
+    console.error('Failed to duplicate element via context menu:', err);
+  } finally {
+    emit('close');
   }
-  emit('close');
 }
 
 function handleDeleteElement() {
-  if (props.targetElementId) {
-    deleteElement(props.targetElementId);
+  try {
+    if (props.targetElementId) {
+      deleteElement(props.targetElementId);
+    }
+  } catch (err) {
+    console.error('Failed to delete element via context menu:', err);
+  } finally {
+    emit('close');
   }
-  emit('close');
 }
 
 function handleAddPage() {
-  addPage(props.targetPageId);
-  emit('close');
+  try {
+    addPage(props.targetPageId);
+  } catch (err) {
+    console.error('Failed to add page via context menu:', err);
+  } finally {
+    emit('close');
+  }
 }
 
 function handleResetView() {
-  resetCanvasView();
-  emit('close');
+  try {
+    resetCanvasView();
+  } catch (err) {
+    console.error('Failed to reset view via context menu:', err);
+  } finally {
+    emit('close');
+  }
 }
 
 function handleDeletePage() {

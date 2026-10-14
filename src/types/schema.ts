@@ -55,6 +55,11 @@ export interface FormElement {
   customErrorMessage_en?: string;
   declarationErrorMessage?: string;
   declarationErrorMessage_en?: string;
+  // 条件联动显示规则 (例如: 仅当指定字段等于某值时展开)
+  dependsOn?: {
+    fieldKey: string;
+    value: string;
+  };
 }
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';

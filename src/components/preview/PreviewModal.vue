@@ -143,7 +143,7 @@
                     {{ t('preview.submitSuccessDesc') }}
                   </p>
 
-                  <div class="w-full bg-slate-50 rounded-xl p-3 mb-6 text-left border border-slate-100 space-y-1.5 text-xs">
+                  <div class="w-full bg-emerald-50/30 rounded-xl p-3 mb-6 text-left border border-emerald-100/80 space-y-1.5 text-xs">
                     <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                       {{ t('preview.validationSummary') }}
                     </div>
@@ -288,7 +288,7 @@
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
 import type { FormSchema, FormElement } from '@/types/schema';
 import { store } from '@/core/store';
-import { t, getPageText, getFieldValidationMessage } from '@/core/i18n';
+import { t, getLocalizedPageText, getFieldValidationMessage } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -368,6 +368,11 @@ watch(
 // 校验单个字段
 function validateField(field: FormElement): string | null {
   if (field.type === 'alert') return null;
+
+  // 如果设置了联动依赖，且当前依赖未达成（处于隐藏状态），则跳过校验
+  if (field.dependsOn && formData[field.dependsOn.fieldKey] !== field.dependsOn.value) {
+    return null;
+  }
 
   const isRequired = field.type === 'signature'
     ? Boolean(field.declarationRequired || field.required)
@@ -617,7 +622,7 @@ function getStepNumber(idx: number): string {
 
 function getPageTitleDisplay(p: any, idx: number): string {
   const stepNo = getStepNumber(idx);
-  const rawTitle = getPageText(p, 'title') || (p.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
+  const rawTitle = getLocalizedPageText(p, 'title') || (p.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
   if (rawTitle.startsWith(stepNo) || /^\d{2}\s*·/.test(rawTitle)) {
     return rawTitle;
   }
@@ -634,7 +639,7 @@ const totalFieldsCount = computed(() => {
 
 const currentLocalizedTitle = computed(() => {
   if (currentPage.value) {
-    return getPageText(currentPage.value, 'title') || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
+    return getLocalizedPageText(currentPage.value, 'title') || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
   }
   return props.schema.meta?.title || t('header.untitledForm');
 });
@@ -645,7 +650,7 @@ const formBrandTitle = computed(() => {
 
 const currentLocalizedDesc = computed(() => {
   if (currentPage.value) {
-    const desc = getPageText(currentPage.value, 'description') || currentPage.value.description;
+    const desc = getLocalizedPageText(currentPage.value, 'description');
     return desc && desc.trim() ? desc.trim() : '';
   }
   const metaDesc = props.schema.meta?.description;

@@ -92,94 +92,10 @@
         <span>{{ t('app.saving') }}</span>
       </div>
 
-      <!-- 待翻译项巡检胶囊：仅在有未翻译/未填写项时展示，纯检测与一键定位清单 -->
-      <a-popover
-        v-if="translationStats.untranslatedCount > 0"
-        v-model:popup-visible="translationPopoverVisible"
-        trigger="click"
-        position="bottom"
-      >
-        <button
-          type="button"
-          class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium text-amber-700 bg-amber-50/90 border border-amber-200/80 whitespace-nowrap cursor-pointer hover:bg-amber-100 hover:border-amber-300 active:scale-95 transition-all shadow-2xs mr-1"
-          :title="badgeTooltip"
-        >
-          <AlertCircle class="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span>{{ badgeText }}</span>
-          <ChevronRight class="w-3 h-3 text-amber-500 shrink-0" />
-        </button>
 
-        <template #content>
-          <div class="w-[320px] max-h-[360px] flex flex-col -m-1">
-            <!-- 弹窗顶栏 -->
-            <div class="flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-slate-50/80 shrink-0">
-              <span class="text-xs font-semibold text-slate-800">
-                {{ badgeText }}
-              </span>
-              <a-tag color="orangered" size="small" class="text-[10px]">
-                {{ isMissingZh ? (store.currentLocale === 'en' ? 'Missing Chinese' : '中文待补齐') : t('header.untranslatedTag') }}
-              </a-tag>
-            </div>
-
-            <!-- 清单滚动区 (按页面分组) -->
-            <div class="overflow-y-auto custom-scrollbar p-2 space-y-2.5 max-h-[260px]">
-              <div
-                v-for="group in translationStats.groupedByPage"
-                :key="group.pageId"
-                class="space-y-1"
-              >
-                <!-- 页面标题组头 -->
-                <div class="text-[11px] font-medium text-slate-500 px-1.5 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
-                  <span class="truncate">{{ group.pageTitle }}</span>
-                  <span class="text-slate-400">({{ group.items.length }})</span>
-                </div>
-
-                <!-- 页面内的未翻译项目 -->
-                <div
-                  v-for="item in group.items"
-                  :key="item.id"
-                  class="flex items-center justify-between px-2 py-1.5 rounded-md text-xs hover:bg-blue-50/80 hover:text-[#1677ff] transition-all cursor-pointer group/item border border-transparent hover:border-blue-100"
-                  @click="handleJumpToUntranslated(item)"
-                >
-                  <div class="min-w-0 flex-1 mr-2">
-                    <div class="font-medium text-slate-700 group-hover/item:text-[#1677ff] truncate text-[12px]">
-                      {{ item.fieldName }}
-                    </div>
-                    <div class="text-[11px] text-slate-400 group-hover/item:text-blue-500/80 truncate">
-                      {{ item.targetLocale === 'zh' ? '英文' : '中文' }}: {{ item.sourceText }}
-                    </div>
-                  </div>
-                  <ChevronRight class="w-3.5 h-3.5 text-slate-300 group-hover/item:text-[#1677ff] shrink-0 transition-transform group-hover/item:translate-x-0.5" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 底部快速指引 -->
-            <div class="px-3 py-1.5 bg-slate-50/50 border-t border-slate-100 text-[11px] text-slate-400 text-center shrink-0">
-              {{ isMissingZh ? (store.currentLocale === 'en' ? 'Click item to focus and switch to Chinese' : '点击条目自动定位并切至中文编辑') : (store.currentLocale === 'en' ? 'Click item to focus and switch to English' : t('header.clickToSwitchEn')) }}
-            </div>
-          </div>
-        </template>
-      </a-popover>
 
       <!-- 主要操作按钮 (原生标准 Arco 规范，简约不喧宾夺主) -->
       <a-space size="small">
-        <!-- 操作指南快捷按钮 -->
-        <a-tooltip :content="t('header.tourTooltip')" position="bottom">
-          <a-button
-            id="tour-guide-header-btn"
-            type="text"
-            class="text-slate-600 hover:text-[#1677ff] hover:bg-blue-50/80 cursor-pointer"
-            @click="handleTriggerTour"
-          >
-            <template #icon>
-              <Sparkles class="h-4 w-4 text-[#1677ff]" />
-            </template>
-            {{ t('header.tour') }}
-          </a-button>
-        </a-tooltip>
-
         <a-tooltip :content="`${t('app.save')} (${isMac ? '⌘S' : 'Ctrl+S'})`" position="bottom">
           <a-button
             type="secondary"
@@ -251,7 +167,7 @@
             <div v-if="store.org.companyName" class="text-[11px] font-medium text-blue-600 mt-1 truncate max-w-[180px]">
               {{ store.org.companyName }}
             </div>
-            <div class="text-[11px] text-slate-400 mt-0.5">
+            <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[180px]">
               {{ store.user.email || t('user.role') }}
             </div>
           </div>
@@ -268,7 +184,7 @@
               <template #icon><IconSettings class="text-[14px]" /></template>
               {{ t('user.settings') }}
             </a-doption>
-            <a-divider class="my-1" />
+            <div class="h-px bg-slate-100 my-1 mx-1"></div>
             <a-doption class="logout-option" @click="handleUserAction('logout')">
               <template #icon><IconExport class="text-[14px]" /></template>
               {{ t('user.logout') }}
@@ -323,11 +239,11 @@
 
       <template #footer>
         <div class="flex items-center justify-end gap-2">
-          <a-button @click="handleProceedPublish">
-            {{ t('header.warnPublishAnyway') }}
-          </a-button>
           <a-button type="primary" class="bg-[#1677ff]" @click="handleGoToTranslate">
             {{ t('header.warnComplete') }}
+          </a-button>
+          <a-button @click="handleProceedPublish">
+            {{ t('header.warnPublishAnyway') }}
           </a-button>
         </div>
       </template>
@@ -356,11 +272,8 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  Pencil,
-  ChevronRight,
-  Sparkles
+  Pencil
 } from '@lucide/vue';
-import { startAppTour } from '@/utils/useAppTour';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
 
 import logoUrl from '@/assets/logo.png';
@@ -371,36 +284,9 @@ const isSaving = ref(false);
 const saveSuccess = ref(false);
 const isUserDropdownOpen = ref(false);
 const publishCheckModalVisible = ref(false);
-const translationPopoverVisible = ref(false);
 
-const isMissingZh = computed(() => {
-  return translationStats.value.untranslatedItems[0]?.targetLocale === 'zh';
-});
 
-const badgeText = computed(() => {
-  if (isMissingZh.value) {
-    return store.currentLocale === 'en'
-      ? `${translationStats.value.untranslatedCount} items missing Chinese`
-      : `还有 ${translationStats.value.untranslatedCount} 项中文未填写`;
-  }
-  return t('header.itemsUntranslated', undefined, { count: translationStats.value.untranslatedCount });
-});
 
-const badgeTooltip = computed(() => {
-  if (isMissingZh.value) {
-    return store.currentLocale === 'zh' ? '点击查看未填写的中文项' : 'Click to view items missing Chinese';
-  }
-  return store.currentLocale === 'zh' ? t('header.clickToSwitchEn') : t('header.hasUntranslated');
-});
-
-function handleJumpToUntranslated(item: UntranslatedItem) {
-  translationPopoverVisible.value = false;
-  navigateToUntranslatedItem(item);
-  Message.info({
-    content: item.targetLocale === 'zh' ? t('header.switchedZh') : t('header.switchedEn'),
-    duration: 1200
-  });
-}
 
 function handleDeployClick() {
   if (translationStats.value.untranslatedCount > 0) {
@@ -518,10 +404,6 @@ async function handleSave() {
   }
 }
 
-function handleTriggerTour() {
-  startAppTour();
-}
-
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 function handleGlobalKeyDown(e: KeyboardEvent) {
@@ -559,10 +441,16 @@ onUnmounted(() => {
 .header-user-avatar:hover {
   transform: scale(1.05);
 }
-:deep(.logout-option) {
-  color: #ef4444;
+:deep(.logout-option),
+:deep(.logout-option .arco-dropdown-option-icon),
+:deep(.logout-option .arco-dropdown-option-content) {
+  color: #ef4444 !important;
 }
 :deep(.logout-option:hover) {
-  background-color: #fef2f2;
+  background-color: #fef2f2 !important;
+}
+:deep(.logout-option:hover .arco-dropdown-option-icon),
+:deep(.logout-option:hover .arco-dropdown-option-content) {
+  color: #dc2626 !important;
 }
 </style>

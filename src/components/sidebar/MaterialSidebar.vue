@@ -16,7 +16,7 @@
       :style="{ width: `${store.leftSidebarWidth}px` }"
     >
       <!-- 1. 64px 侧边垂直导航列 (Activity Bar) - 纵向排列在侧边，严格使用框架图标，杜绝 emoji -->
-      <div id="tour-activity-bar" class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3 z-20">
+      <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3 z-20">
         <!-- 顶部 Logo 标识与导航分类 (垂直排列) -->
         <div class="flex flex-col items-center gap-3.5 w-full">
           <!-- 品牌标识 -->
@@ -24,64 +24,58 @@
             <Boxes class="h-4 w-4 stroke-[2.4]" />
           </div>
 
-          <!-- 3 个垂直分类图标按钮 -->
-          <div class="flex flex-col items-center gap-1.5 w-full px-1">
+          <!-- 3 个垂直分类图标按钮 (新手引导仅聚焦这 3 个主功能图标) -->
+          <div id="tour-activity-bar" class="flex flex-col items-center gap-1.5 w-full px-1">
             <!-- 分类 1：场景模板 (Templates) -->
-            <a-tooltip :content="t('sidebar.tooltipTemplates')" position="right">
-              <button
-                type="button"
-                class="figma-activity-btn"
-                :class="{ active: activeTab === 'templates' }"
-                @click="activeTab = 'templates'"
+            <button
+              type="button"
+              class="figma-activity-btn"
+              :class="{ active: activeTab === 'templates' }"
+              @click="activeTab = 'templates'"
+            >
+              <LayoutTemplate class="h-4 w-4 shrink-0" />
+              <span
+                class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
+                :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
               >
-                <LayoutTemplate class="h-4 w-4 shrink-0" />
-                <span
-                  class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
-                  :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
-                >
-                  {{ t('sidebar.templates') }}
-                </span>
-              </button>
-            </a-tooltip>
+                {{ t('sidebar.templates') }}
+              </span>
+            </button>
 
             <!-- 分类 2：组件物料 (Components) -->
-            <a-tooltip :content="t('sidebar.tooltipComponents')" position="right">
-              <button
-                type="button"
-                class="figma-activity-btn"
-                :class="{ active: activeTab === 'components' }"
-                @click="activeTab = 'components'"
+            <button
+              type="button"
+              class="figma-activity-btn"
+              :class="{ active: activeTab === 'components' }"
+              @click="activeTab = 'components'"
+            >
+              <Component class="h-4 w-4 shrink-0" />
+              <span
+                class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
+                :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
               >
-                <Component class="h-4 w-4 shrink-0" />
-                <span
-                  class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
-                  :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
-                >
-                  {{ t('sidebar.components') }}
-                </span>
-              </button>
-            </a-tooltip>
+                {{ t('sidebar.components') }}
+              </span>
+            </button>
 
             <!-- 分类 3：页面大纲 (Pages) -->
-            <a-tooltip :content="t('sidebar.tooltipPages')" position="right">
-              <button
-                type="button"
-                class="figma-activity-btn relative"
-                :class="{ active: activeTab === 'pages' }"
-                @click="activeTab = 'pages'"
+            <button
+              type="button"
+              class="figma-activity-btn relative"
+              :class="{ active: activeTab === 'pages' }"
+              @click="activeTab = 'pages'"
+            >
+              <Files class="h-4 w-4 shrink-0" />
+              <span
+                class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
+                :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
               >
-                <Files class="h-4 w-4 shrink-0" />
-                <span
-                  class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
-                  :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
-                >
-                  {{ t('sidebar.pages') }}
-                </span>
-                <span v-if="store.pages.length > 0" class="figma-page-count-badge">
-                  {{ store.pages.length }}
-                </span>
-              </button>
-            </a-tooltip>
+                {{ t('sidebar.pages') }}
+              </span>
+              <span v-if="store.pages.length > 0" class="figma-page-count-badge">
+                {{ store.pages.length }}
+              </span>
+            </button>
           </div>
         </div>
 
@@ -201,72 +195,88 @@
         <!-- 面板主体内容区 -->
         <main class="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
           <!-- ================= 视图 1：场景模板库 (Templates) ================= -->
-          <div id="tour-template-panel" v-show="activeTab === 'templates'" class="space-y-2">
-            <!-- 顶部快捷新建空白画布卡片 -->
+          <div id="tour-template-panel" v-show="activeTab === 'templates'" class="flex flex-col">
+            <!-- 顶部快捷新建空白画布卡片 (对标高阶 SaaS 快捷卡片规范) -->
             <button
               type="button"
-              class="w-full flex items-center gap-2.5 p-2 rounded border border-dashed border-slate-300 hover:border-blue-500 bg-white hover:bg-blue-50/30 text-slate-700 hover:text-blue-600 transition-colors duration-150 cursor-pointer group"
+              class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-dashed border-slate-300 hover:border-[#1677ff] bg-white hover:bg-blue-50/40 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs"
               @click="$emit('open-create-canvas')"
             >
-              <div class="flex items-center justify-center w-6 h-6 rounded bg-slate-100 group-hover:bg-blue-500 text-slate-500 group-hover:text-white transition-colors shrink-0">
-                <Plus class="w-3.5 h-3.5 stroke-[2.2]" />
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 group-hover:bg-[#1677ff] text-[#1677ff] group-hover:text-white transition-colors shrink-0">
+                  <Plus class="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div class="flex flex-col text-left min-w-0">
+                  <span class="text-[12.5px] font-semibold text-slate-800 group-hover:text-[#1677ff] leading-tight">
+                    {{ t('sidebar.createBlank') }}
+                  </span>
+                  <span class="text-[10.5px] text-slate-400 leading-tight mt-0.5 truncate">
+                    {{ t('sidebar.createBlankDesc') }}
+                  </span>
+                </div>
               </div>
-              <div class="flex flex-col text-left min-w-0">
-                <span class="text-[12px] font-semibold text-slate-800 group-hover:text-blue-600 leading-tight">
-                  {{ t('sidebar.createBlank') }}
-                </span>
-                <span class="text-[10px] text-slate-400 leading-tight mt-0.5 truncate">
-                  {{ t('sidebar.createBlankDesc') }}
-                </span>
-              </div>
+              <ArrowRight class="w-3.5 h-3.5 text-slate-300 group-hover:text-[#1677ff] group-hover:translate-x-0.5 transition-all shrink-0 ml-1.5" />
             </button>
 
-            <!-- 模板列表分区提示 -->
-            <div class="flex items-center justify-between px-0.5 pt-0.5 text-[11px] font-medium text-slate-400 select-none">
+            <!-- 模板列表分区提示 (上拉开 15px 独立呼吸间隙，下紧贴 8px 列表卡片) -->
+            <div class="mt-3.5 mb-2 flex items-center justify-between px-0.5 text-[11px] font-medium text-slate-400 select-none">
               <span>{{ t('sidebar.presetScenarios') }}</span>
-              <span>{{ filteredTemplates.length }} {{ t('common.templatesUnit') }}</span>
+              <span class="font-mono text-[10.5px] text-slate-500 bg-slate-100/90 px-1.5 py-0.5 rounded-full">
+                {{ filteredTemplates.length }}
+              </span>
             </div>
 
-            <!-- 图文列表：每个预置模板顶部带有业务流程缩略图，下方为信息说明 -->
-            <div
-              v-for="tpl in filteredTemplates"
-              :key="tpl.key"
-              class="group flex flex-col rounded border border-slate-200/90 bg-white hover:border-blue-400 hover:shadow-2xs transition-all duration-150 cursor-pointer select-none overflow-hidden"
-              @click="handleSelectTemplate(tpl.key)"
-            >
-              <!-- 顶部 3D 插画缩略图横幅 (对齐客户紫色、机构蓝色、个人绿色) -->
+            <!-- 图文列表：卡片间距拉大至 12px (gap-3)，内部统一高度与规整底栏 -->
+            <div class="flex flex-col gap-3 pb-3">
               <div
-                class="h-[84px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none bg-slate-50"
-                :class="tpl.bannerBgClass"
+                v-for="tpl in filteredTemplates"
+                :key="tpl.key"
+                class="group flex flex-col rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs transition-all duration-150 cursor-pointer select-none overflow-hidden"
+                @click="handleSelectTemplate(tpl.key)"
               >
-                <img
-                  :src="tpl.image"
-                  :alt="getFieldText(tpl, 'title')"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-              </div>
-
-              <!-- 下方图文说明 -->
-              <div class="p-2.5">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[12px] font-semibold text-slate-800 group-hover:text-blue-600 transition-colors truncate">
-                    {{ getFieldText(tpl, 'title') }}
-                  </span>
-                  <a-tag size="small" :color="tpl.tagColor" class="shrink-0 text-[10px] px-1 h-4 leading-none rounded">
+                <!-- 顶部 3D 插画缩略图横幅 (对齐客户紫色、机构蓝色、个人绿色) -->
+                <div
+                  class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none bg-slate-50"
+                  :class="tpl.bannerBgClass"
+                >
+                  <img
+                    :src="tpl.image"
+                    :alt="getFieldText(tpl, 'title')"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <!-- 右上角漂浮徽标 Tag -->
+                  <a-tag
+                    size="small"
+                    :color="tpl.tagColor"
+                    class="absolute top-2 right-2 text-[10px] px-1.5 h-4.5 leading-none rounded shadow-2xs font-medium"
+                  >
                     {{ getFieldText(tpl, 'tag') }}
                   </a-tag>
                 </div>
 
-                <p class="text-[11px] text-slate-500 leading-normal m-0 mb-2 line-clamp-2">
-                  {{ getFieldText(tpl, 'desc') }}
-                </p>
+                <!-- 下方图文说明 (高度统一定高，彻底消除底栏高低抖动) -->
+                <div class="p-3 flex flex-col flex-1 justify-between">
+                  <div>
+                    <div class="mb-1 text-[13px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate">
+                      {{ getFieldText(tpl, 'title') }}
+                    </div>
 
-                <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-slate-100">
-                  <span class="font-mono text-slate-400">{{ tpl.code }}</span>
-                  <div class="flex items-center gap-1">
-                    <span>{{ getFieldText(tpl, 'stats') }}</span>
-                    <ArrowRight class="w-3 h-3 text-blue-500 opacity-0 -translate-x-0.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    <p class="text-[11.5px] text-slate-500 leading-[18px] m-0 mb-2 line-clamp-2 min-h-[36px]">
+                      {{ getFieldText(tpl, 'desc') }}
+                    </p>
+                  </div>
+
+                  <!-- 底部元信息与操作指示 -->
+                  <div class="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100">
+                    <div class="flex items-center gap-1.5 text-slate-400 font-medium">
+                      <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{{ getFieldText(tpl, 'stats') }}</span>
+                    </div>
+                    <div class="flex items-center gap-0.5 text-[#1677ff] font-medium opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-150">
+                      <span class="text-[11px]">{{ store.currentLocale === 'en' ? 'Use' : '选用模板' }}</span>
+                      <ArrowRight class="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -354,72 +364,92 @@
             <div
               v-for="(page, idx) in store.pages"
               :key="page.id"
-              class="figma-page-row group flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all"
+              class="figma-page-row group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
               :class="[
                 (store.selectedType === 'page' && store.selectedId === page.id)
-                  ? 'border-[#1677ff] bg-blue-50/60 shadow-xs ring-1 ring-[#1677ff]/20'
+                  ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
                   : store.activePageId === page.id
-                    ? 'border-blue-200 bg-blue-50/20'
-                    : 'border-slate-200/90 bg-white shadow-2xs hover:border-blue-300 hover:shadow-xs'
+                    ? 'border-blue-200/90 bg-blue-50/25 shadow-2xs'
+                    : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-xs'
               ]"
               @click="focusPage(page.id)"
             >
-              <div class="flex items-center gap-2.5 min-w-0">
+              <!-- 序号 + 标题/描述 (带 min-w-0 flex-1 pr-2 防止文字与右侧操作按钮挤压撞车) -->
+              <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                <!-- 精炼微型序号徽标 (20px × 20px，自然数 1/2/3，4px 圆角，极简轻量) -->
                 <span
-                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-bold transition-colors"
+                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
                   :class="[
                     (store.selectedType === 'page' && store.selectedId === page.id)
-                      ? 'bg-[#1677ff] text-white'
-                      : 'bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600'
+                      ? 'bg-[#1677ff] text-white shadow-2xs'
+                      : store.activePageId === page.id
+                        ? 'bg-blue-100 text-[#1677ff]'
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-[#1677ff]'
                   ]"
                 >
-                  {{ String(idx + 1).padStart(2, '0') }}
+                  {{ idx + 1 }}
                 </span>
 
-                <div class="min-w-0">
-                  <div
-                    class="text-[12px] truncate transition-colors"
-                    :class="[
-                      (store.selectedType === 'page' && store.selectedId === page.id)
-                        ? 'font-bold text-[#1677ff]'
-                        : 'font-semibold text-slate-800 group-hover:text-blue-600'
-                    ]"
-                  >
-                    {{ getPageText(page, 'title') || (page.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage')) }}
+                <div class="min-w-0 flex-1">
+                  <!-- 标题行：锁图标放在标题后面，无只读核验文字 -->
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span
+                      class="text-[12px] truncate leading-snug transition-colors"
+                      :class="[
+                        (store.selectedType === 'page' && store.selectedId === page.id)
+                          ? 'font-bold text-[#1677ff]'
+                          : store.activePageId === page.id
+                            ? 'font-semibold text-slate-800'
+                            : 'font-medium text-slate-700 group-hover:text-[#1677ff]'
+                      ]"
+                      :title="getPageDisplayInfo(page, idx).mainTitle"
+                    >
+                      {{ getPageDisplayInfo(page, idx).mainTitle }}
+                    </span>
+                    <Lock v-if="page.pageType === 'system_profile'" class="w-3 h-3 text-slate-400 shrink-0" />
                   </div>
-                  <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-                    <span v-if="page.pageType === 'system_profile'" class="text-blue-500 font-medium flex items-center gap-0.5">
-                      <Lock class="w-2.5 h-2.5" /> {{ t('common.readOnly') }}
-                    </span>
-                    <span v-else>
-                      {{ page.fields?.length || 0 }} {{ t('common.fieldsUnit') }}
-                    </span>
+                  <!-- 副标行：展示分节及字段数，或系统预置 -->
+                  <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
+                    {{ getPageDisplayInfo(page, idx).subtitle }}
                   </div>
                 </div>
               </div>
 
-              <div
-                class="shrink-0 transition-colors"
-                :class="[
-                  (store.selectedType === 'page' && store.selectedId === page.id)
-                    ? 'text-[#1677ff]'
-                    : 'text-slate-300 group-hover:text-blue-500'
-                ]"
-              >
-                <Eye class="h-3.5 w-3.5" />
+              <!-- 右侧快捷操作区：移除多余十字瞄准定位图标，仅保留删除气泡 -->
+              <div class="flex items-center gap-0.5 shrink-0">
+                <!-- 快捷删除画板 (仅非第一页支持，标准 Arco Popconfirm) -->
+                <a-popconfirm
+                  v-if="idx > 0"
+                  :content="t('sidebar.deletePagePrompt')"
+                  position="tr"
+                  :ok-text="t('modal.confirm')"
+                  :cancel-text="t('modal.cancel')"
+                  @ok="handleDeletePage(page.id)"
+                >
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    :title="t('prop.deletePage')"
+                    @click.stop
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </a-popconfirm>
               </div>
             </div>
 
-            <div class="pt-2">
-              <a-button
-                type="outline"
-                long
-                class="figma-outline-action-btn"
+            <!-- 添加新画板按钮 (精炼 6px 圆角，与卡片和输入框标准对齐) -->
+            <div class="pt-1.5">
+              <button
+                type="button"
+                class="group flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300/90 bg-white py-2 px-3 text-[12px] font-medium text-slate-600 transition-all duration-180 hover:border-[#1677ff] hover:bg-blue-50/40 hover:text-[#1677ff] hover:shadow-xs active:scale-[0.99] cursor-pointer"
                 @click="handleAddNewPage"
               >
-                <Plus class="h-3.5 w-3.5 mr-1 stroke-[2.5]" />
-                {{ t('sidebar.addCanvasPage') }}
-              </a-button>
+                <span class="flex h-4.5 w-4.5 items-center justify-center rounded bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#1677ff] group-hover:text-white group-hover:rotate-90">
+                  <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+                </span>
+                <span>{{ t('sidebar.addCanvasPage') }}</span>
+              </button>
             </div>
           </div>
         </main>
@@ -441,14 +471,14 @@
     <a-modal
       v-model:visible="confirmModalVisible"
       :title="t('sidebar.confirmTitle')"
-      :width="400"
+      :width="380"
       :title-align="'start'"
       draggable
       unmount-on-close
       class="clean-confirm-modal"
       @cancel="confirmModalVisible = false"
     >
-      <div class="py-2.5 text-[13px] text-slate-600 leading-relaxed">
+      <div class="text-[13px] text-slate-600 leading-normal">
         {{ t('sidebar.confirmOverwrite') }}
       </div>
 
@@ -468,7 +498,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { store, addElement, focusOnPage, addPage, applyTemplateKey, selectPage } from '@/core/store';
+import { store, addElement, focusOnPage, addPage, applyTemplateKey, selectPage, deletePage } from '@/core/store';
 import { t, getPageText, getFieldText } from '@/core/i18n';
 import { componentRegistry, getComponentIcon } from '@/registry/components';
 import { syncDragPlaceholderHeight } from '@/utils/helpers';
@@ -499,12 +529,13 @@ import {
   Plus,
   ArrowRight,
   Lock,
-  Eye,
+  Trash2,
   Building2,
   UserCheck,
   ShieldCheck,
   Settings,
-  Sparkles
+  Sparkles,
+  FileText
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 import { useSidebarResize } from '@/utils/useSidebarResize';
@@ -528,17 +559,17 @@ const activeTab = computed({
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
-    title: '母案例 KYC 模板',
+    title: '客户案例 KYC 模板',
     title_en: 'Customer KYC Template',
-    tag: '母案例',
+    tag: '客户案例',
     tag_en: 'Customer',
     tagColor: 'purple',
     icon: Building2,
     image: tplCustomerImg,
-    desc: '包含公司统一社会信用代码、注册地、授权代表尽调与法定声明。',
-    desc_en: 'Includes corporate UEN, registered address, authorized representative CDD and declarations.',
-    stats: '3 页面 · 18 字段',
-    stats_en: '3 Pages · 18 Fields',
+    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+    desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+    stats: '3 页面 · 9 字段',
+    stats_en: '3 Pages · 9 Fields',
     code: 'SG_CDD_Customer',
     bannerBgClass: 'bg-[#faf5ff]'
   },
@@ -546,15 +577,15 @@ const scenarioTemplates = [
     key: 'kyc-individual' as const,
     title: '个人案例 KYC 模板',
     title_en: 'Individual KYC Template',
-    tag: '个人成员',
+    tag: '个人案例',
     tag_en: 'Individual',
     tagColor: 'green',
     icon: UserCheck,
     image: tplIndividualImg,
-    desc: '涵盖身份证件/护照、国籍、就业收入状况与个人手写签名确认。',
-    desc_en: 'Covers ID/Passport, nationality, employment income, and handwritten signature.',
-    stats: '3 页面 · 15 字段',
-    stats_en: '3 Pages · 15 Fields',
+    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
+    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
+    stats: '5 页面 · 15 字段',
+    stats_en: '5 Pages · 15 Fields',
     code: 'SG_CDD_Individual',
     bannerBgClass: 'bg-[#f0fdf4]'
   },
@@ -562,7 +593,7 @@ const scenarioTemplates = [
     key: 'kyc-entity' as const,
     title: '机构案例 KYC 模板',
     title_en: 'Entity KYC Template',
-    tag: '机构成员',
+    tag: '机构案例',
     tag_en: 'Entity',
     tagColor: 'arcoblue',
     icon: ShieldCheck,
@@ -653,9 +684,39 @@ function focusPage(pageId: string) {
   focusOnPage(pageId, { duration: 400 });
 }
 
+function getPageDisplayInfo(page: any, _idx: number) {
+  if (page.pageType === 'system_profile') {
+    return {
+      mainTitle: getPageText(page, 'title') || t('common.basicInfo'),
+      subtitle: t('sidebar.systemPreset') || '系统预置'
+    };
+  }
+
+  const rawTitle = getPageText(page, 'title') || t('common.untitledPage');
+  const match = rawTitle.match(/^(第[一二三四五六七八九十0-9]+部分|Part\s*\d+)[：:\s]+(.+)$/i);
+  const fieldsCount = `${page.fields?.length || 0} ${t('common.fieldsUnit')}`;
+
+  if (match) {
+    return {
+      mainTitle: match[2].trim(),
+      subtitle: `${match[1].trim()} · ${fieldsCount}`
+    };
+  }
+
+  return {
+    mainTitle: rawTitle,
+    subtitle: fieldsCount
+  };
+}
+
 function handleAddNewPage() {
   addPage();
   Message.success(t('sidebar.pageAdded'));
+}
+
+function handleDeletePage(pageId: string) {
+  deletePage(pageId);
+  Message.success(t('sidebar.pageDeleted'));
 }
 
 const basicGroupRef = ref<HTMLElement | null>(null);
@@ -892,5 +953,9 @@ function handleComponentClick(type: ComponentType) {
 /* 提示弹窗样式 (对齐新建表单画布的正常标准样式) */
 .clean-confirm-modal :deep(.arco-modal) {
   border-radius: 6px;
+}
+
+.clean-confirm-modal :deep(.arco-modal-body) {
+  padding: 14px 16px;
 }
 </style>

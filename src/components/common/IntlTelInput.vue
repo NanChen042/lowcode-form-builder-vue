@@ -236,8 +236,8 @@ function validateAndEmit() {
   if (!raw) {
     if (props.required) {
       valid = false;
-      message = props.customErrorMessage || '请输入手机号码';
-      message_en = props.customErrorMessage || 'Please enter phone number';
+      message = props.customErrorMessage || '必填项不能为空';
+      message_en = props.customErrorMessage || 'This required field cannot be empty';
     }
   } else if (props.strict) {
     valid = iti.isValidNumber();
@@ -304,6 +304,16 @@ watch(
     }
   }
 );
+
+onUnmounted(() => {
+  if (inputRef.value) {
+    inputRef.value.removeEventListener('countrychange', handleCountryChange);
+  }
+  if (iti) {
+    iti.destroy();
+    iti = null;
+  }
+});
 </script>
 
 <style>
