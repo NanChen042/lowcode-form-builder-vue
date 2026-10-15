@@ -1,17 +1,11 @@
 <template>
-  <header
-    class="w-full flex h-14 shrink-0 items-center justify-between px-6 relative z-40 bg-white border-b border-slate-200/80 transition-all select-none pointer-events-auto"
-  >
+  <header class="w-full flex h-14 shrink-0 items-center justify-between px-6 relative z-40 bg-white border-b border-slate-200/80 transition-all select-none pointer-events-auto">
     <!-- 左侧品牌 Logo 与标题 -->
     <div class="flex min-w-0 items-center gap-2.5">
 
       <!-- Logo 图片与 SG 品牌徽标 (对齐母系统 algo) -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <img
-          :src="logoUrl"
-          alt="AlgoCandy"
-          class="h-[28px] w-auto max-w-[150px] object-contain shrink-0 select-none"
-        />
+        <img :src="logoUrl" alt="AlgoCandy" class="h-[28px] w-auto max-w-[150px] object-contain shrink-0 select-none" />
         <span class="px-1.5 py-0.5 text-[10px] font-bold text-slate-500 bg-slate-100 rounded border border-slate-200/80 leading-none select-none tracking-wider">
           SG
         </span>
@@ -24,43 +18,18 @@
       <div class="flex items-center min-w-0">
         <!-- 编辑输入态 -->
         <div v-if="isEditingTitle" class="flex items-center gap-1.5 min-w-0">
-          <input
-            ref="titleInputRef"
-            v-model="editTitleValue"
-            type="text"
-            maxlength="50"
-            class="h-7 w-[180px] sm:w-[240px] px-2 text-[13px] font-medium text-slate-800 bg-white border border-blue-500 rounded-md shadow-2xs outline-none ring-2 ring-blue-100 transition-all"
-            :placeholder="t('header.formTitlePlaceholder')"
-            @keydown.enter.prevent="handleConfirmTitle"
-            @keydown.esc.prevent="handleCancelTitle"
-            @blur="handleConfirmTitle"
-          />
-          <button
-            type="button"
-            class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer shrink-0"
-            :title="t('header.confirmRename')"
-            @mousedown.prevent="handleConfirmTitle"
-          >
+          <input ref="titleInputRef" v-model="editTitleValue" type="text" maxlength="50" class="h-7 w-[180px] sm:w-[240px] px-2 text-[13px] font-medium text-slate-800 bg-white border border-blue-500 rounded-md shadow-2xs outline-none ring-2 ring-blue-100 transition-all" :placeholder="t('header.formTitlePlaceholder')" @keydown.enter.prevent="handleConfirmTitle" @keydown.esc.prevent="handleCancelTitle" @blur="handleConfirmTitle" />
+          <button type="button" class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer shrink-0" :title="t('header.confirmRename')" @mousedown.prevent="handleConfirmTitle">
             <Check class="h-3.5 w-3.5" />
           </button>
         </div>
 
         <!-- 正常展示态：标题文本 + 独立修改按钮 -->
-        <div
-          v-else
-          class="group flex items-center gap-1.5 px-2 py-1 -ml-1 rounded-md hover:bg-slate-100/80 cursor-pointer transition-colors min-w-0 select-none"
-          :title="t('header.clickToRename')"
-          @click="startEditTitle"
-        >
+        <div v-else class="group flex items-center gap-1.5 px-2 py-1 -ml-1 rounded-md hover:bg-slate-100/80 cursor-pointer transition-colors min-w-0 select-none" :title="t('header.clickToRename')" @click="startEditTitle">
           <span class="text-[13px] font-semibold text-slate-800 tracking-tight truncate max-w-[200px] sm:max-w-[320px]">
             {{ displayTitle }}
           </span>
-          <button
-            type="button"
-            class="flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50/80 group-hover:text-slate-600 transition-all cursor-pointer shrink-0"
-            :title="t('header.renameForm')"
-            @click.stop="startEditTitle"
-          >
+          <button type="button" class="flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50/80 group-hover:text-slate-600 transition-all cursor-pointer shrink-0" :title="t('header.renameForm')" @click.stop="startEditTitle">
             <Pencil class="h-3.5 w-3.5" />
           </button>
         </div>
@@ -70,24 +39,15 @@
     <!-- 右侧操作与状态组 -->
     <div class="flex items-center gap-2.5">
       <!-- 保存状态轻量微提示 -->
-      <div
-        v-if="store.isDirty"
-        class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 bg-amber-50/70 border border-amber-200/50"
-      >
+      <div v-if="store.isDirty" class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 bg-amber-50/70 border border-amber-200/50">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
         <span>{{ t('app.dirty') }}</span>
       </div>
-      <div
-        v-else-if="saveSuccess"
-        class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-emerald-600 bg-emerald-50/70 border border-emerald-200/50"
-      >
+      <div v-else-if="saveSuccess" class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-emerald-600 bg-emerald-50/70 border border-emerald-200/50">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
         <span>{{ t('app.saved') }}</span>
       </div>
-      <div
-        v-else-if="isSaving"
-        class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-blue-600 bg-blue-50/70 border border-blue-200/50"
-      >
+      <div v-else-if="isSaving" class="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium text-blue-600 bg-blue-50/70 border border-blue-200/50">
         <Loader2 class="h-3 w-3 animate-spin shrink-0 text-blue-500" />
         <span>{{ t('app.saving') }}</span>
       </div>
@@ -97,11 +57,7 @@
       <!-- 主要操作按钮 (原生标准 Arco 规范，简约不喧宾夺主) -->
       <a-space size="small">
         <a-tooltip :content="`${t('app.save')} (${isMac ? '⌘S' : 'Ctrl+S'})`" position="bottom">
-          <a-button
-            type="secondary"
-            :loading="isSaving"
-            @click="handleSave"
-          >
+          <a-button type="secondary" :loading="isSaving" @click="handleSave">
             <template #icon>
               <Save class="h-4 w-4" />
             </template>
@@ -109,22 +65,14 @@
           </a-button>
         </a-tooltip>
 
-        <a-button
-          id="tour-preview-btn"
-          type="secondary"
-          @click="$emit('open-preview')"
-        >
+        <a-button id="tour-preview-btn" type="secondary" @click="$emit('open-preview')">
           <template #icon>
             <Eye class="h-4 w-4" />
           </template>
           {{ t('app.preview') }}
         </a-button>
 
-        <a-button
-          id="tour-deploy-btn"
-          type="primary"
-          @click="handleDeployClick"
-        >
+        <a-button id="tour-deploy-btn" type="primary" @click="handleDeployClick">
           <template #icon>
             <CloudUpload class="h-4 w-4" />
           </template>
@@ -137,26 +85,30 @@
       <!-- 语言切换组件 (对齐母系统 algo 标准规范，唯一系统语言入口) -->
       <LanguageSwitcher />
 
+      <!-- 问号新手引导 / 操作指南快捷入口 (HelpCircle) -->
+      <a-tooltip :content="t('header.tourTooltip')" position="bottom">
+        <button
+          id="tour-guide-btn"
+          type="button"
+          class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-[#1677ff] hover:bg-slate-100 transition-colors cursor-pointer"
+          :title="t('header.tourTooltip')"
+          @click="handleTriggerTour"
+        >
+          <HelpCircle class="w-4 h-4" />
+        </button>
+      </a-tooltip>
+
       <!-- 最右侧：头像 + 昵称 + 下拉箭头 (对齐母系统 algo 规范，无底色纯净悬浮) -->
       <a-dropdown trigger="hover" position="br" :popup-max-height="false" v-model:popup-visible="isUserDropdownOpen">
-        <div
-          class="flex items-center gap-1.5 px-1 py-1 cursor-pointer transition-colors select-none text-slate-700 hover:text-[#1677ff]"
-          :title="store.user.nickname || 'ceshi'"
-        >
-          <a-avatar
-            :size="26"
-            class="header-user-avatar shrink-0"
-          >
+        <div class="flex items-center gap-1.5 px-1 py-1 cursor-pointer transition-colors select-none text-slate-700 hover:text-[#1677ff]" :title="store.user.nickname || 'ceshi'">
+          <a-avatar :size="26" class="header-user-avatar shrink-0">
             <img v-if="store.user.avatar" :src="store.user.avatar" alt="Avatar" />
             <IconUser v-else class="text-white text-[13px]" />
           </a-avatar>
           <span class="text-[13px] font-medium max-w-[120px] truncate leading-none transition-colors">
             {{ store.user.nickname || 'ceshi' }}
           </span>
-          <IconDown
-            class="text-[10px] text-slate-400 shrink-0 transition-transform duration-200"
-            :class="{ 'rotate-180 text-[#1677ff]': isUserDropdownOpen }"
-          />
+          <IconDown class="text-[10px] text-slate-400 shrink-0 transition-transform duration-200" :class="{ 'rotate-180 text-[#1677ff]': isUserDropdownOpen }" />
         </div>
 
         <template #content>
@@ -173,20 +125,28 @@
           </div>
           <div class="p-1">
             <a-doption @click="handleUserAction('profile')">
-              <template #icon><IconUser class="text-[14px]" /></template>
+              <template #icon>
+                <IconUser class="text-[14px]" />
+              </template>
               {{ t('user.profile') }}
             </a-doption>
             <a-doption @click="handleUserAction('activity')">
-              <template #icon><IconHistory class="text-[14px]" /></template>
+              <template #icon>
+                <IconHistory class="text-[14px]" />
+              </template>
               {{ t('user.activity') }}
             </a-doption>
             <a-doption @click="handleUserAction('settings')">
-              <template #icon><IconSettings class="text-[14px]" /></template>
+              <template #icon>
+                <IconSettings class="text-[14px]" />
+              </template>
               {{ t('user.settings') }}
             </a-doption>
             <div class="h-px bg-slate-100 my-1 mx-1"></div>
             <a-doption class="logout-option" @click="handleUserAction('logout')">
-              <template #icon><IconExport class="text-[14px]" /></template>
+              <template #icon>
+                <IconExport class="text-[14px]" />
+              </template>
               {{ t('user.logout') }}
             </a-doption>
           </div>
@@ -195,14 +155,7 @@
     </div>
 
     <!-- 5. 发布前未翻译项校验提醒弹窗 -->
-    <a-modal
-      v-model:visible="publishCheckModalVisible"
-      :title="t('header.warnTitle')"
-      :width="460"
-      :title-align="'start'"
-      draggable
-      unmount-on-close
-    >
+    <a-modal v-model:visible="publishCheckModalVisible" :title="t('header.warnTitle')" :width="460" :title-align="'start'" draggable unmount-on-close>
       <div class="py-2 space-y-3">
         <div class="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50/80 border border-amber-200/70 text-amber-900 text-xs leading-relaxed">
           <AlertCircle class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
@@ -218,12 +171,7 @@
 
         <!-- 缺失项列表快速预览 -->
         <div class="max-h-[170px] overflow-y-auto custom-scrollbar rounded-lg border border-slate-200 p-1.5 space-y-1 bg-slate-50/50">
-          <div
-            v-for="item in translationStats.untranslatedItems.slice(0, 10)"
-            :key="item.id"
-            class="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-white hover:text-blue-600 transition-colors cursor-pointer group"
-            @click="handleJumpFromPublishCheck(item)"
-          >
+          <div v-for="item in translationStats.untranslatedItems.slice(0, 10)" :key="item.id" class="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-white hover:text-blue-600 transition-colors cursor-pointer group" @click="handleJumpFromPublishCheck(item)">
             <span class="text-slate-700 group-hover:text-blue-600 truncate pr-2 font-medium">
               {{ item.fieldName }}
             </span>
@@ -251,10 +199,7 @@
 
     <!-- 顶部 2.5px 极光流动微进度条 (Linear / Vercel 风格，无感且优雅) -->
     <transition name="nano-progress-fade">
-      <div
-        v-if="store.isCanvasLoading"
-        class="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50 bg-blue-50/70"
-      >
+      <div v-if="store.isCanvasLoading" class="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50 bg-blue-50/70">
         <div class="nano-stream-bar h-full w-full" />
       </div>
     </transition>
@@ -282,8 +227,10 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  Pencil
+  Pencil,
+  HelpCircle
 } from '@lucide/vue';
+import { startAppTour } from '@/utils/useAppTour';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
 
 import logoUrl from '@/assets/logo.png';
@@ -414,6 +361,10 @@ async function handleSave() {
   }
 }
 
+function handleTriggerTour() {
+  startAppTour();
+}
+
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 function handleGlobalKeyDown(e: KeyboardEvent) {
@@ -448,17 +399,21 @@ onUnmounted(() => {
   transition: transform 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
+
 .header-user-avatar:hover {
   transform: scale(1.05);
 }
+
 :deep(.logout-option),
 :deep(.logout-option .arco-dropdown-option-icon),
 :deep(.logout-option .arco-dropdown-option-content) {
   color: #ef4444 !important;
 }
+
 :deep(.logout-option:hover) {
   background-color: #fef2f2 !important;
 }
+
 :deep(.logout-option:hover .arco-dropdown-option-icon),
 :deep(.logout-option:hover .arco-dropdown-option-content) {
   color: #dc2626 !important;
@@ -470,21 +425,26 @@ onUnmounted(() => {
   background-size: 200% 100%;
   animation: nano-stream-anim 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+
 @keyframes nano-stream-anim {
   0% {
     transform: translateX(-100%);
   }
+
   50% {
     transform: translateX(0%);
   }
+
   100% {
     transform: translateX(100%);
   }
 }
+
 .nano-progress-fade-enter-active,
 .nano-progress-fade-leave-active {
   transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .nano-progress-fade-enter-from,
 .nano-progress-fade-leave-to {
   opacity: 0;

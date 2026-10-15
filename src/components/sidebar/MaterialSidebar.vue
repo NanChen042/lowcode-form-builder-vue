@@ -82,7 +82,7 @@
         <!-- 底部区域：设置快捷菜单与收起按钮 (对标 VS Code / Figma 左下角规范) -->
         <div class="flex flex-col items-center gap-1.5 w-full px-1">
           <!-- 设置快捷菜单 -->
-          <a-dropdown trigger="click" position="tr" :popup-max-height="false">
+          <a-dropdown trigger="click" position="tr" :popup-max-height="false" v-model:popup-visible="isSettingsDropdownOpen">
             <a-tooltip :content="t('app.settings')" position="right">
               <button
                 type="button"
@@ -551,7 +551,10 @@ import { startAppTour } from '@/utils/useAppTour';
 
 const emit = defineEmits(['open-template-gallery', 'open-create-canvas', 'open-create-form']);
 
+const isSettingsDropdownOpen = ref(false);
+
 function handleTriggerTour() {
+  isSettingsDropdownOpen.value = false;
   startAppTour();
 }
 

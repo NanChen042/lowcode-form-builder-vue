@@ -117,6 +117,19 @@ export function startAppTour(initialIndex = 0) {
 
   const isEn = store.currentLocale === 'en';
 
+  if (store.pages.length === 0) {
+    Message.info(isEn ? 'Please create a form canvas first.' : '请先完成首张画布创建');
+    return;
+  }
+
+  // If sidebars are hidden, ensure they are visible during tour
+  if (!store.leftSidebarVisible) {
+    store.leftSidebarVisible = true;
+  }
+  if (!store.rightSidebarVisible) {
+    store.rightSidebarVisible = true;
+  }
+
   if (typeof document !== 'undefined') {
     document.body.classList.add('tour-active');
   }
@@ -158,6 +171,8 @@ export function startAppTour(initialIndex = 0) {
           e.stopPropagation();
           localStorage.setItem('diy_form_tour_never_show', 'true');
           sessionStorage.setItem('diy_form_tour_shown_session', 'true');
+          localStorage.setItem('diy_form_tour_shown', 'true');
+          store.sidebarTab = 'components';
           if (driverInstance) {
             driverInstance.destroy();
             driverInstance = null;
@@ -172,6 +187,8 @@ export function startAppTour(initialIndex = 0) {
         document.body.classList.remove('tour-active');
       }
       sessionStorage.setItem('diy_form_tour_shown_session', 'true');
+      localStorage.setItem('diy_form_tour_shown', 'true');
+      store.sidebarTab = 'components';
       if (driverInstance) {
         driverInstance.destroy();
         driverInstance = null;
@@ -184,6 +201,7 @@ export function startAppTour(initialIndex = 0) {
 
 export function checkAutoStartTour(force = false) {
   if (typeof window === 'undefined') return;
+  if (store.pages.length === 0) return;
 
   const urlParams = new URLSearchParams(window.location.search);
   const tourParam = urlParams.get('tour');

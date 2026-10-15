@@ -106,17 +106,23 @@ function handleWizardOpenBlank() {
   createCanvasModalVisible.value = true;
 }
 
-// 首次向导或二次弹窗创建表单后，自动切至组件物料库
+// 首次向导或二次弹窗创建表单后，自动切至组件物料库并按需触发漫游引导
 function handleTemplateSelected(_tplKey: string) {
   welcomeWizardVisible.value = false;
   openedFromWizard.value = false;
   store.sidebarTab = 'components';
+  setTimeout(() => {
+    checkAutoStartTour();
+  }, 400);
 }
 
 function handleFormCreated() {
   createCanvasModalVisible.value = false;
   openedFromWizard.value = false;
   store.sidebarTab = 'components';
+  setTimeout(() => {
+    checkAutoStartTour();
+  }, 400);
 }
 
 function handleCreateCanvasCancel() {
