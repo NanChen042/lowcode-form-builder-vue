@@ -223,11 +223,43 @@
       </div>
     </div>
   </a-modal>
+
+  <!-- 模板覆盖二次确认弹窗 -->
+  <a-modal
+    v-model:visible="confirmOverwriteVisible"
+    :title="store.currentLocale === 'en' ? 'Confirm Overwrite' : '覆盖确认'"
+    :width="380"
+    :title-align="'start'"
+    draggable
+    unmount-on-close
+    class="clean-confirm-modal"
+    @cancel="confirmOverwriteVisible = false"
+  >
+    <div class="text-[13px] text-slate-600 leading-normal">
+      <template v-if="store.currentLocale === 'en'">
+        The current canvas already contains <strong>{{ store.pages.length }} artboard page(s)</strong>. Applying <strong>{{ pendingTemplateTitle }}</strong> will overwrite all current canvas contents. Are you sure you want to continue?
+      </template>
+      <template v-else>
+        当前画布已包含 <strong>{{ store.pages.length }} 个画板页面</strong>，载入 <strong>{{ pendingTemplateTitle }}</strong> 将完全覆盖当前画布内容。是否确认继续？
+      </template>
+    </div>
+
+    <template #footer>
+      <div class="flex items-center justify-end gap-2">
+        <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="executeApplyTemplate">
+          {{ store.currentLocale === 'en' ? 'Confirm Overwrite' : '确定覆盖' }}
+        </a-button>
+        <a-button @click="confirmOverwriteVisible = false">
+          {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
+        </a-button>
+      </div>
+    </template>
+  </a-modal>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { applyTemplateKey } from '@/core/store';
+import { store, applyTemplateKey } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
@@ -337,11 +369,33 @@ function handleCreateBlank() {
   emit('open-blank');
 }
 
-// 选择某个场景模板：载入模板并直接关闭弹窗进入画布
+const confirmOverwriteVisible = ref(false);
+const pendingTemplateKey = ref<'kyc-customer' | 'kyc-individual' | 'kyc-entity' | null>(null);
+
+const pendingTemplateTitle = computed(() => {
+  if (!pendingTemplateKey.value) return '';
+  const item = scenarioTemplates.find(t => t.key === pendingTemplateKey.value);
+  if (!item) return '';
+  return store.currentLocale === 'en' ? item.title_en : item.title;
+});
+
+// 选择某个场景模板：若画布已有画板则先二次确认，确认后载入并进入画布
 function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
-  applyTemplateKey(tplKey);
+  pendingTemplateKey.value = tplKey;
+  if (store.pages.length > 0) {
+    confirmOverwriteVisible.value = true;
+    return;
+  }
+  executeApplyTemplate();
+}
+
+function executeApplyTemplate() {
+  if (!pendingTemplateKey.value) return;
+  applyTemplateKey(pendingTemplateKey.value);
   Message.success(t('sidebar.templateLoaded') || '场景模板已成功载入');
-  emit('selected-template', tplKey);
+  emit('selected-template', pendingTemplateKey.value);
+  pendingTemplateKey.value = null;
+  confirmOverwriteVisible.value = false;
   modalVisible.value = false;
 }
 

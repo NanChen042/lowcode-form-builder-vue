@@ -4,12 +4,13 @@
     :data-page-id="page.id"
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
-    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col transition-all duration-200"
+    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col"
     :class="[
       isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
       isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
       store.isDraggingComponent && !isSystemProfile ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
-      store.isDraggingComponent && isSystemProfile ? 'opacity-85' : ''
+      store.isDraggingComponent && isSystemProfile ? 'opacity-85' : '',
+      store.isDraggingFrame && store.draggedFrameId === page.id ? '!transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
     ]"
     :style="{
       transform: `translate(${page.x}px, ${page.y}px)`
@@ -83,15 +84,31 @@
           </div>
         </template>
         <template v-else>
-          <input v-model="displayPageTitle" class="page-title-input text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full bg-transparent outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageTitle }" :placeholder="t('prop.pageTitle')" @focus="onPageTitleFocus" @blur="onPageTitleBlur" @click.stop="onPageTitleFocus" @input="markDirty" />
-          <textarea v-model="displayPageDesc" class="page-desc-input mt-1.5 w-full overflow-hidden resize-none bg-transparent text-[15px] leading-6 text-slate-500 outline-none transition-colors border-b-2 border-transparent focus:text-blue-500 focus:border-blue-500 pb-1" :class="{ 'canvas-text-focus': isFocusedPageDesc }" rows="1" :placeholder="t('prop.pageDescPlaceholder')" @focus="onPageDescFocus" @blur="onPageDescBlur" @click.stop="onPageDescFocus" @input="markDirty"></textarea>
+          <EditableText
+            v-model="displayPageTitle"
+            :placeholder="t('prop.pageTitle')"
+            :element-id="page.id"
+            field="title"
+            tag="h2"
+            custom-class="page-title-text text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full block border-b-2 border-transparent pb-1"
+          />
+          <EditableText
+            v-model="displayPageDesc"
+            :placeholder="t('prop.pageDescPlaceholder')"
+            :element-id="page.id"
+            field="description"
+            tag="p"
+            :allow-empty="true"
+            multiline
+            custom-class="page-desc-text mt-1.5 w-full text-[15px] leading-6 text-slate-500 block border-b-2 border-transparent pb-1"
+          />
         </template>
       </div>
 
       <!-- 系统预设基础资料页：直接自然平铺展开高保真业务资料卡片 -->
       <div v-if="isSystemProfile" class="flex-1 bg-white p-3" @click="selectPage(page.id)">
         <SystemProfileView
-          :profile-type="page.profileType || store.meta.profileType || 'client'"
+          :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
           :is-canvas="true"
         />
@@ -155,10 +172,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import type { FormPage, FormElement, ComponentType } from '@/types/schema';
-import { store, selectPage, addPage, createElement, selectElement, markDirty, triggerHighlight } from '@/core/store';
+import { store, selectPage, addPage, createElement, selectElement, markDirty } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
+import EditableText from '@/components/common/EditableText.vue';
 import SystemProfileView from '@/components/common/SystemProfileView.vue';
 import { Smartphone, ArrowDownToLine, Plus, Lock } from '@lucide/vue';
 
@@ -211,56 +229,6 @@ const isFrameElevated = computed(() => {
   );
 });
 
-const isFocusedPageTitle = computed(() => {
-  return (
-    store.focusedTarget?.elementId === props.page.id &&
-    store.focusedTarget?.field === 'label'
-  );
-});
-
-const isFocusedPageDesc = computed(() => {
-  return (
-    store.focusedTarget?.elementId === props.page.id &&
-    store.focusedTarget?.field === 'help'
-  );
-});
-
-function onPageTitleFocus() {
-  selectPage(props.page.id);
-  store.focusedTarget = {
-    elementId: props.page.id,
-    field: 'label'
-  };
-  setTimeout(() => {
-    const input = document.getElementById('page-prop-title-input');
-    triggerHighlight(input);
-  }, 40);
-}
-
-function onPageTitleBlur() {
-  if (store.focusedTarget?.elementId === props.page.id && store.focusedTarget?.field === 'label') {
-    store.focusedTarget = null;
-  }
-}
-
-function onPageDescFocus() {
-  selectPage(props.page.id);
-  store.focusedTarget = {
-    elementId: props.page.id,
-    field: 'help'
-  };
-  setTimeout(() => {
-    const input = document.getElementById('page-prop-desc-input');
-    triggerHighlight(input);
-  }, 40);
-}
-
-function onPageDescBlur() {
-  if (store.focusedTarget?.elementId === props.page.id && store.focusedTarget?.field === 'help') {
-    store.focusedTarget = null;
-  }
-}
-
 interface ElementGroup {
   id: string;
   elements: FormElement[];
@@ -273,8 +241,8 @@ const elementGroups = computed<ElementGroup[]>(() => {
 
   for (let i = 0; i < fields.length; i++) {
     const el = fields[i];
-    // 核心从属判定：若当前元素是条件联动从属子项，且依附于当前组的根节点组件，则吸纳到该组中一同拖拽移动
-    if (currentGroup && el.dependsOn && currentGroup.elements[0].key === el.dependsOn.fieldKey) {
+    // 核心从属判定：若当前元素是条件联动从属子项（含多级嵌套），且依附于当前组内的组件，则吸纳到该组中一同拖拽移动
+    if (currentGroup && el.dependsOn && currentGroup.elements.some(m => m.key === el.dependsOn?.fieldKey)) {
       currentGroup.elements.push(el);
     } else {
       currentGroup = {
@@ -311,7 +279,7 @@ onMounted(() => {
       swapThreshold: 0.65,
       emptyInsertThreshold: 28,
       draggable: '.canvas-element-group, .component-item',
-      filter: '.is-branch-child, input, textarea, select, button, [contenteditable], .action-btn',
+      filter: '.is-branch-child, input, textarea, select, button, [contenteditable], .action-btn, .alert-canvas-parsed, .alert-content-text',
       preventOnFilter: false,
       onStart(evt) {
         store.isDraggingComponent = true;
@@ -421,11 +389,18 @@ onMounted(() => {
             const idx = p.fields.findIndex(f => f.id === fallbackGroupId);
             if (idx !== -1) {
               const el = p.fields[idx];
+              const descendantKeys = new Set<string>([el.key]);
               const children: FormElement[] = [];
               let i = idx + 1;
-              while (i < p.fields.length && p.fields[i]?.dependsOn?.fieldKey === el.key) {
-                children.push(p.fields[i]);
-                i++;
+              while (i < p.fields.length) {
+                const next = p.fields[i];
+                if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
+                  if (next.key) descendantKeys.add(next.key);
+                  children.push(next);
+                  i++;
+                } else {
+                  break;
+                }
               }
               const movedElements = p.fields.splice(idx, 1 + children.length);
 
@@ -477,8 +452,15 @@ function handleFrameMouseDown(e: MouseEvent) {
     }
   }
 
-  // 如果点击的是内部的输入框、按钮或组件，则不启动画板整体拖拽平移
+  // 如果点击的是表单组件内的交互输入控件、按钮、或正在编辑划选的文本节点，则不启动画板整体拖拽
+  const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+  const isEditingThisText = Boolean(
+    activeEl &&
+    (e.target as HTMLElement).closest('[contenteditable]') === activeEl
+  );
+
   if (
+    isEditingThisText ||
     (e.target as HTMLElement).closest(
       'input, textarea, select, button, .canvas-element, .icon-btn, .add-next-page-btn'
     )

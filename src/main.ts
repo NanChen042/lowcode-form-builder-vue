@@ -11,6 +11,8 @@ import { store } from './core/store';
 const app = createApp(App);
 app.use(ArcoVue);
 app.use(router);
-;(window as any).__store = store;
+if (import.meta.env.DEV) {
+  ;(window as any).__store = store;
+}
 
 app.mount('#app');

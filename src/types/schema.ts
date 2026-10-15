@@ -36,6 +36,9 @@ export interface FormElement {
   multiple?: boolean;
   // 单行文本格式
   inputType?: 'text' | 'number';
+  // 多行文本自适应行数
+  minRows?: number;
+  maxRows?: number;
   // 电话特有属性
   dialCode?: string;
   countryCode?: string;
@@ -50,6 +53,10 @@ export interface FormElement {
   maxSelections?: number | null;
   layout?: 'inline' | 'stack';
   declarationRequired?: boolean;
+  // 提示区块文本内容 (支持换行、- 列表、[文字](链接))
+  content?: string;
+  content_en?: string;
+  listStyle?: 'circle' | 'number';
   // 自定义校验错误提示 (中英双语)
   customErrorMessage?: string;
   customErrorMessage_en?: string;

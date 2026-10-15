@@ -422,8 +422,11 @@
                   v-if="idx > 0"
                   :content="t('sidebar.deletePagePrompt')"
                   position="tr"
+                  type="warning"
                   :ok-text="t('modal.confirm')"
                   :cancel-text="t('modal.cancel')"
+                  :ok-button-props="{ status: 'danger', size: 'small' }"
+                  :cancel-button-props="{ size: 'small' }"
                   @ok="handleDeletePage(page.id)"
                 >
                   <button
@@ -479,13 +482,18 @@
       @cancel="confirmModalVisible = false"
     >
       <div class="text-[13px] text-slate-600 leading-normal">
-        {{ t('sidebar.confirmOverwrite') }}
+        <template v-if="store.currentLocale === 'en'">
+          The current canvas already contains <strong>{{ store.pages.length }} artboard page(s)</strong>. Loading a new template will overwrite current canvas contents. Are you sure you want to continue?
+        </template>
+        <template v-else>
+          当前画布已包含 <strong>{{ store.pages.length }} 个画板页面</strong>，载入新预置模板将会完全覆盖当前画布内容。是否确认继续？
+        </template>
       </div>
 
       <template #footer>
         <div class="flex items-center justify-end gap-2">
-          <a-button type="primary" class="bg-[#1677ff]" @click="handleConfirmApplyTemplate">
-            {{ t('modal.confirm') }}
+          <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="handleConfirmApplyTemplate">
+            {{ store.currentLocale === 'en' ? 'Confirm Overwrite' : '确定覆盖' }}
           </a-button>
           <a-button @click="confirmModalVisible = false">
             {{ t('modal.cancel') }}
@@ -667,7 +675,11 @@ const pendingTemplateKey = ref<'kyc-customer' | 'kyc-individual' | 'kyc-entity' 
 
 function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
   pendingTemplateKey.value = tplKey;
-  confirmModalVisible.value = true;
+  if (store.pages.length > 0) {
+    confirmModalVisible.value = true;
+    return;
+  }
+  handleConfirmApplyTemplate();
 }
 
 function handleConfirmApplyTemplate() {
@@ -688,7 +700,7 @@ function getPageDisplayInfo(page: any, _idx: number) {
   if (page.pageType === 'system_profile') {
     return {
       mainTitle: getPageText(page, 'title') || t('common.basicInfo'),
-      subtitle: t('sidebar.systemPreset') || '系统预置'
+      subtitle: t('sidebar.systemPreset')
     };
   }
 

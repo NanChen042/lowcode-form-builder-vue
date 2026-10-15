@@ -80,7 +80,9 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       help_en: '',
       defaultValue: '',
       required: true,
-      showLabel: true
+      showLabel: true,
+      minRows: 3,
+      maxRows: 6
     })
   },
   select: {
@@ -243,10 +245,9 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       label_en: 'Notice',
       required: false,
       showLabel: true,
-      options: [
-        { label: '您将作为以下公司的授权代表，完成KYC问卷填写。', label_en: 'You are completing this KYC questionnaire as an authorized representative.', value: 'opt_1' },
-        { label: '请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。', label_en: 'Please verify the details below. Contact support if changes are needed before proceeding.', value: 'opt_2' }
-      ]
+      listStyle: 'circle',
+      content: '',
+      content_en: ''
     })
   },
   email: {

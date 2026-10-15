@@ -30,6 +30,36 @@ export default defineConfig({
         secure: false
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@arco-design')) {
+              return 'arco-vendor';
+            }
+            if (id.includes('vue') || id.includes('vue-router')) {
+              return 'vue-vendor';
+            }
+            if (id.includes('@lucide')) {
+              return 'lucide-vendor';
+            }
+            if (id.includes('mockjs')) {
+              return 'mock-vendor';
+            }
+            if (id.includes('sortablejs')) {
+              return 'sortable-vendor';
+            }
+            if (id.includes('driver.js')) {
+              return 'driver-vendor';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 })
 

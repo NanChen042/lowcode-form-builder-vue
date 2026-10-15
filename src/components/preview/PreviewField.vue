@@ -4,7 +4,11 @@
     class="preview-field w-full mb-4.5 transition-all duration-200"
     :data-type="field.type"
     :data-error="Boolean(error)"
-    :class="{ 'has-error': Boolean(error) }"
+    :class="{
+      'has-error': Boolean(error),
+      'pl-3 border-l-2 border-blue-200/90 rounded-l': fieldDepth === 1,
+      'pl-5 border-l-2 border-blue-400 rounded-l': fieldDepth >= 2
+    }"
   >
     <!-- 提示区块 (仅展示无校验) -->
     <template v-if="field.type === 'alert'">
@@ -15,11 +19,35 @@
           <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
           <span class="text-[14px] font-bold text-slate-800 leading-5">{{ localizedLabel || t('common.notice') }}</span>
         </div>
-        <div class="space-y-2 text-[13px] leading-5 text-slate-700">
-          <p v-for="(opt, idx) in field.options" :key="idx" class="m-0 flex items-start gap-2.5">
-            <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-[2px] bg-[#1677ff]"></span>
-            <span>{{ getLocalizedOptionLabel(opt) }}</span>
-          </p>
+        <div v-if="alertSegments.length > 0" class="space-y-2 text-[13px] leading-5 text-slate-700">
+          <template v-for="seg in alertSegments" :key="seg.id">
+            <!-- 间距行 -->
+            <div v-if="seg.type === 'spacer'" class="h-1.5"></div>
+
+            <!-- 列表项 (圆形圆点 或 数字有序) -->
+            <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-2">
+              <!-- 数字型 (有序) -->
+              <span
+                v-if="field.listStyle === 'number'"
+                class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 min-w-[16px] select-none"
+              >
+                {{ seg.orderIndex }}.
+              </span>
+              <!-- 圆形 (无序) -->
+              <span
+                v-else
+                class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1677ff]"
+              ></span>
+              <span class="flex-1 break-words leading-relaxed" v-html="seg.html"></span>
+            </p>
+
+            <!-- 普通文本段落 -->
+            <p v-else class="m-0 break-words leading-relaxed" v-html="seg.html"></p>
+          </template>
+        </div>
+        <!-- 空白占位提示 (未输入内容时) -->
+        <div v-else class="text-[12px] text-slate-400 italic py-1">
+          {{ t('prop.alertEmptyContentPlaceholder') }}
         </div>
       </div>
     </template>
@@ -82,7 +110,7 @@
         :custom-placeholder="localizedPlaceholder"
         :custom-error-message="localizedCustomErrorMessage"
         :required="isFieldRequired"
-        :strict="field.strictPhoneValidation !== false"
+        :strict="true"
         :error="Boolean(error)"
         :error-message="error"
         @change="handlePhoneChange"
@@ -95,7 +123,7 @@
         class="w-full"
         :error="Boolean(error)"
         :placeholder="localizedPlaceholder"
-        :auto-size="{ minRows: 3, maxRows: 6 }"
+        :auto-size="{ minRows: field.minRows || 3, maxRows: field.maxRows || 6 }"
         @input="handleFieldInput"
       />
 
@@ -268,7 +296,6 @@
               v-model="formData[field.key]"
               style="width: 100%"
               :error="Boolean(error)"
-              :disabled="isLongTermChecked"
               :placeholder="[t('common.startDate'), t('common.endDate')]"
               @change="handleFieldInput"
             />
@@ -283,8 +310,8 @@
             />
           </div>
 
-          <!-- 启用长期选项 (框架自带 Arco Checkbox 组件) -->
-          <div v-if="field.enableLongTerm" class="flex-shrink-0 flex items-center">
+          <!-- 启用长期选项 (仅单日期模式生效；起止日期不展示长期选项) -->
+          <div v-if="field.enableLongTerm && field.dateMode !== 'range'" class="flex-shrink-0 flex items-center">
             <a-checkbox
               v-model="isLongTermChecked"
               class="!m-0 select-none"
@@ -301,27 +328,24 @@
       <!-- 电子签名 (拼多选声明事项 + 手写签名板，各自下方独立展示校验错误) -->
       <div
         v-else-if="field.type === 'signature'"
-        class="w-full bg-white rounded-lg"
+        class="w-full space-y-3"
       >
         <!-- 声明事项复选 -->
-        <div v-if="field.options && field.options.length" class="mb-3">
-          <div
-            class="space-y-2 rounded-lg transition-all"
-            :class="{ 'p-2 bg-red-50/40 border border-red-300 ring-1 ring-red-300/50': Boolean(declarationError) }"
-          >
+        <div v-if="field.options && field.options.length" class="space-y-1.5">
+          <div class="space-y-2">
             <label
               v-for="(opt, idx) in field.options"
               :key="opt.value || idx"
               class="flex items-start gap-2.5 text-sm text-slate-700 cursor-pointer select-none group"
-              @click.prevent="declarationChecks[idx] = !declarationChecks[idx]; onDeclarationChange();"
+              @click.prevent="toggleDeclaration(idx)"
             >
               <span
                 class="mt-0.5 flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-all"
-                :class="declarationChecks[idx]
+                :class="isDeclarationChecked(idx)
                   ? 'border-[#1677ff] bg-[#1677ff] text-white shadow-xs'
                   : (declarationError ? 'border-red-400 bg-white ring-2 ring-red-100' : 'border-slate-300 bg-white group-hover:border-blue-400')"
               >
-                <svg v-if="declarationChecks[idx]" class="w-2.5 h-2.5 text-white stroke-[2.5]" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                <svg v-if="isDeclarationChecked(idx)" class="w-2.5 h-2.5 text-white stroke-[2.5]" viewBox="0 0 16 16" fill="none" stroke="currentColor">
                   <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </span>
@@ -342,7 +366,7 @@
           >
             <div
               v-if="declarationError"
-              class="mt-1.5 pl-0.5 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
+              class="mt-1 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
             >
               <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -354,64 +378,70 @@
           </transition>
         </div>
 
-        <!-- 签名画板提示 -->
-        <div class="mb-2 text-xs font-medium text-slate-600">
-          <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
-          {{ localizedPlaceholder }}
-        </div>
-
-        <!-- 模拟签名绘制区 -->
-        <div
-          class="relative h-24 w-full rounded-lg border border-dashed flex items-center justify-center text-xs select-none cursor-pointer transition-all"
-          :class="formData[field.key]
-            ? 'border-emerald-400 bg-emerald-50/40 text-emerald-700 font-serif'
-            : (signatureError
-              ? 'border-red-400 bg-red-50/45 shadow-[0_0_0_2px_rgba(239,68,68,0.18)] text-red-500'
-              : 'border-slate-300 bg-slate-50/80 text-slate-400 hover:border-blue-400')"
-          @click="toggleSignature"
-        >
-          <template v-if="formData[field.key]">
-            <span class="text-base italic font-semibold text-slate-800 tracking-wider">
-              {{ t('common.signed') }}
-            </span>
-            <button
-              type="button"
-              class="absolute right-2 bottom-2 w-6 h-6 flex items-center justify-center rounded bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 border border-slate-200 shadow-xs transition-colors cursor-pointer"
-              :title="t('common.clearSignature')"
-              @click.stop="clearSignature"
-            >
-              <Eraser class="w-3.5 h-3.5" />
-            </button>
-          </template>
-          <template v-else>
-            <span class="flex items-center gap-1.5 text-slate-400 text-xs">
-              <PenLine class="w-3.5 h-3.5 opacity-60" />
-              <span>{{ t('common.clickToSign') }}</span>
-            </span>
-          </template>
-        </div>
-
-        <!-- 手写签名板独立校验错误提示 (直接显示在签名画板下方) -->
-        <transition
-          enter-active-class="transition-all duration-150 ease-out"
-          enter-from-class="opacity-0 -translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition-all duration-100 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 -translate-y-1"
-        >
-          <div
-            v-if="signatureError"
-            class="mt-1.5 pl-0.5 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
-          >
-            <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span>{{ signatureError }}</span>
+        <!-- 签名画板区 -->
+        <div class="space-y-1.5">
+          <!-- 签名画板提示/副标签 -->
+          <div v-if="localizedPlaceholder || field.required" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+            <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
+            <span>{{ localizedPlaceholder || (store.currentLocale === 'en' ? 'Signature Area' : '签名区域') }}</span>
           </div>
-        </transition>
+
+          <!-- 模拟签名绘制区 (高保真纯白设计，与画布一致，杜绝生硬灰底) -->
+          <div
+            class="relative h-28 w-full rounded-lg border border-dashed flex items-center justify-center text-xs select-none cursor-pointer transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
+            :class="formData[field.key]
+              ? 'border-emerald-400 bg-emerald-50/30 text-emerald-700 font-serif'
+              : (signatureError
+                ? 'border-red-400 bg-red-50/25 ring-2 ring-red-100/80'
+                : 'border-slate-300 bg-white hover:border-[#1677ff] hover:bg-blue-50/20')"
+            @click="toggleSignature"
+          >
+            <template v-if="formData[field.key]">
+              <span class="text-base italic font-semibold text-slate-800 tracking-wider font-serif">
+                {{ t('common.signed') }}
+              </span>
+              <button
+                type="button"
+                class="absolute right-2.5 bottom-2.5 w-6 h-6 flex items-center justify-center rounded bg-white hover:bg-slate-50 text-slate-400 hover:text-red-500 border border-slate-200 shadow-xs transition-colors cursor-pointer"
+                :title="t('common.clearSignature')"
+                @click.stop="clearSignature"
+              >
+                <Eraser class="w-3.5 h-3.5" />
+              </button>
+            </template>
+            <template v-else>
+              <span
+                class="flex items-center gap-1.5 text-xs transition-colors"
+                :class="signatureError ? 'text-red-500 font-medium' : 'text-slate-400'"
+              >
+                <PenLine class="w-3.5 h-3.5" :class="signatureError ? 'text-red-500' : 'opacity-60'" />
+                <span>{{ t('common.clickToSign') }}</span>
+              </span>
+            </template>
+          </div>
+
+          <!-- 手写签名板独立校验错误提示 (直接显示在签名画板下方) -->
+          <transition
+            enter-active-class="transition-all duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-100 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
+          >
+            <div
+              v-if="signatureError"
+              class="mt-1 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
+            >
+              <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ signatureError }}</span>
+            </div>
+          </transition>
+        </div>
       </div>
 
       <!-- 统一字段校验错误提示 (除已就近展示的 phone 和 signature 以外) -->
@@ -443,17 +473,28 @@
 import { ref, computed, reactive } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { t, getLocalizedFieldText, getLocalizedOptionLabel } from '@/core/i18n';
+import { store } from '@/core/store';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
 import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
+import { parseAlertContent } from '@/utils/alertParser';
 
 const props = defineProps<{
   field: FormElement;
+  allFields?: FormElement[];
   formData: Record<string, any>;
   error?: string;
   errors?: Record<string, string>;
 }>();
+
+const localizedAlertContent = computed(() => {
+  return getLocalizedFieldText(props.field, 'content');
+});
+
+const alertSegments = computed(() => {
+  return parseAlertContent(localizedAlertContent.value, props.field.listStyle);
+});
 
 const resolvedCountryOptions = computed(() => {
   if (props.field.options && props.field.options.length > 0) {
@@ -487,9 +528,53 @@ const emit = defineEmits<{
   (e: 'clear-error', key: string): void;
 }>();
 
-const isFieldVisible = computed(() => {
-  if (!props.field.dependsOn) return true;
-  return props.formData[props.field.dependsOn.fieldKey] === props.field.dependsOn.value;
+const fieldDepth = computed(() => {
+  if (!props.field.dependsOn) return 0;
+  let depth = 0;
+  let current: FormElement | undefined = props.field;
+  const visited = new Set<string>();
+  const fields = props.allFields || store.pages.flatMap(p => p.fields || []);
+  while (current?.dependsOn?.fieldKey) {
+    if (visited.has(current.dependsOn.fieldKey)) break;
+    visited.add(current.dependsOn.fieldKey);
+    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
+    if (!parent) break;
+    depth++;
+    current = parent;
+  }
+  return depth;
+});
+
+const isFieldVisible = computed<boolean>(() => {
+  let cur: FormElement | undefined = props.field;
+  const visited = new Set<string>();
+  const fields = props.allFields || store.pages.flatMap(p => p.fields || []);
+
+  while (cur?.dependsOn) {
+    const parentKey: string = cur.dependsOn.fieldKey;
+    const targetVal: any = cur.dependsOn.value;
+    if (visited.has(parentKey)) break;
+    visited.add(parentKey);
+
+    const parentVal = props.formData[parentKey];
+    let matches = false;
+    if (parentVal === targetVal) {
+      matches = true;
+    } else if (Array.isArray(parentVal)) {
+      matches = parentVal.includes(targetVal);
+    } else if (typeof parentVal === 'string' && parentVal) {
+      const list = parseMultiValue(parentVal);
+      matches = list.includes(targetVal);
+    }
+
+    if (!matches) {
+      return false;
+    }
+
+    cur = fields.find(f => f.key === parentKey);
+  }
+
+  return true;
 });
 
 function handleFieldInput() {
@@ -561,16 +646,16 @@ function handlePhoneChange(data: any) {
   emit('clear-error', props.field.key);
 }
 
-// 长期有效选项
+// 长期有效选项 (仅单日期模式生效)
 const isLongTermChecked = ref(
-  props.formData[props.field.key] === '9999-12-31' ||
-  props.formData[props.field.key] === 'Long-term' ||
-  props.formData[props.field.key] === '长期' ||
-  Boolean(props.formData[`${props.field.key}_isLongTerm`]) ||
-  Boolean(props.field.defaultLongTerm)
+  props.field.dateMode !== 'range' && (
+    props.formData[props.field.key] === '9999-12-31' ||
+    Boolean(props.formData[`${props.field.key}_isLongTerm`]) ||
+    Boolean(props.field.defaultLongTerm)
+  )
 );
 
-if (props.field.type === 'date' && props.field.enableLongTerm && props.field.defaultLongTerm && !props.formData[props.field.key]) {
+if (props.field.type === 'date' && props.field.dateMode !== 'range' && props.field.enableLongTerm && props.field.defaultLongTerm && !props.formData[props.field.key]) {
   props.formData[props.field.key] = '9999-12-31';
   props.formData[`${props.field.key}_isLongTerm`] = true;
 }
@@ -604,6 +689,15 @@ function onDeclarationChange() {
       emit('clear-error', props.field.key);
     }
   }
+}
+
+function isDeclarationChecked(idx: number): boolean {
+  return Boolean(declarationChecks[idx]);
+}
+
+function toggleDeclaration(idx: number) {
+  declarationChecks[idx] = !declarationChecks[idx];
+  onDeclarationChange();
 }
 
 function toggleSignature() {

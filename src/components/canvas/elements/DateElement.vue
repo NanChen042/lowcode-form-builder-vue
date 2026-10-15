@@ -8,7 +8,6 @@
           style="width: 100%"
           :placeholder="[t('common.startDate'), t('common.endDate')]"
           :model-value="element.defaultValue && element.endValue ? [element.defaultValue, element.endValue] : undefined"
-          :disabled="Boolean(element.defaultLongTerm)"
         />
         <a-date-picker
           v-else
@@ -19,8 +18,8 @@
         />
       </div>
 
-      <!-- 启用长期选项 (框架自带 Arco Checkbox 组件，现代化排版) -->
-      <div v-if="element.enableLongTerm" class="flex-shrink-0 flex items-center">
+      <!-- 启用长期选项 (仅单日期模式生效；起止日期不展示长期选项) -->
+      <div v-if="element.enableLongTerm && element.dateMode !== 'range'" class="flex-shrink-0 flex items-center">
         <a-checkbox
           :model-value="Boolean(element.defaultLongTerm)"
           class="m-0 select-none"

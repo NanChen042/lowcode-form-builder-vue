@@ -28,7 +28,8 @@
       <CreateFormModal
         v-model:visible="createCanvasModalVisible"
         @created="handleFormCreated"
-        @close="createCanvasModalVisible = false"
+        @cancel="handleCreateCanvasCancel"
+        @close="handleCreateCanvasClose"
       />
 
       <!-- 欢迎向导弹窗 (空 URL 时首次进入引导，可点击新建空白唤起二次弹窗，或直接选用模板) -->
@@ -84,9 +85,11 @@ const welcomeWizardVisible = ref(false);
 const isInitialWizardMandatory = ref(false);
 const previewModalVisible = ref(false);
 const previewMode = ref<'preview' | 'deploy'>('preview');
+const openedFromWizard = ref(false);
 
 // 从侧边栏或画布打开新建空白表单二次弹窗 (支持选择业务类型：客户案例/个人案例/实体案例及设置表单名称)
 function handleOpenCreateCanvas() {
+  openedFromWizard.value = store.pages.length === 0;
   createCanvasModalVisible.value = true;
 }
 
@@ -98,35 +101,42 @@ function handleOpenTemplateModal() {
 
 // 从向导弹窗点击“新建空白画布”唤起二次弹窗
 function handleWizardOpenBlank() {
+  openedFromWizard.value = true;
   welcomeWizardVisible.value = false;
   createCanvasModalVisible.value = true;
 }
 
-// 首次向导或二次弹窗创建表单后，自动切至组件物料库并平滑衔接工作区操作指南
+// 首次向导或二次弹窗创建表单后，自动切至组件物料库
 function handleTemplateSelected(_tplKey: string) {
   welcomeWizardVisible.value = false;
+  openedFromWizard.value = false;
   store.sidebarTab = 'components';
-  setTimeout(() => {
-    checkAutoStartTour(true);
-  }, 500);
 }
 
 function handleFormCreated() {
   createCanvasModalVisible.value = false;
+  openedFromWizard.value = false;
   store.sidebarTab = 'components';
-  setTimeout(() => {
-    checkAutoStartTour(true);
-  }, 500);
+}
+
+function handleCreateCanvasCancel() {
+  createCanvasModalVisible.value = false;
+  // 若从向导弹窗唤起，或者当前画布无画板页面（首次空画布状态），点击取消时必须返回上一个向导弹窗，避免用户停留在空白画板导致第一页系统资料表无法初始化
+  if (openedFromWizard.value || store.pages.length === 0) {
+    welcomeWizardVisible.value = true;
+  }
+}
+
+function handleCreateCanvasClose() {
+  createCanvasModalVisible.value = false;
+  if (store.pages.length === 0) {
+    welcomeWizardVisible.value = true;
+  }
 }
 
 function handleWelcomeWizardClosed() {
   welcomeWizardVisible.value = false;
   store.sidebarTab = 'components';
-  if (store.pages.length > 0) {
-    setTimeout(() => {
-      checkAutoStartTour(true);
-    }, 500);
-  }
 }
 const currentPreviewSchema = ref<FormSchema>({
   schemaVersion: '1.0.0',
@@ -152,7 +162,11 @@ watch(
 
 // 初始化加载模板
 onMounted(async () => {
-  store.isCanvasLoading = true;
+  // 150ms 防抖静默加载：若初始化在 150ms 内极速就绪（本地/新建），彻底杜绝微进度条闪烁
+  let loadingTimer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+    store.isCanvasLoading = true;
+  }, 150);
+
   try {
     localStorage.removeItem('mock_db_schema');
   } catch (_) {}
@@ -233,6 +247,19 @@ onMounted(async () => {
   let targetTemplate: FormSchema = blankTemplate;
   let targetTemplateKey = 'blank';
 
+  const resetToBlankState = () => {
+    store.pages = [];
+    store.selectedType = null;
+    store.selectedId = null;
+    store.activePageId = null;
+    store.meta.formId = '';
+    store.meta.serialNo = '';
+    syncUrlParams('');
+    store.activeTemplateKey = 'blank';
+    isInitialWizardMandatory.value = true;
+    welcomeWizardVisible.value = true;
+  };
+
   try {
     // 2. 如果 URL 带有纯小写 id 参数 (例如 cus_diy_..., ind_diy_..., ent_tpl_...)
     if (rawId) {
@@ -279,33 +306,17 @@ onMounted(async () => {
       targetTemplateKey = 'kyc-entity';
     } else {
       // 默认 URL 为空（无任何 id 与预设模板参数）：画布完全置空，必须通过向导弹窗选择模板或自建空白
-      store.pages = [];
-      store.selectedType = null;
-      store.selectedId = null;
-      store.activePageId = null;
-      store.meta.formId = '';
-      store.meta.serialNo = '';
-      syncUrlParams('');
-      store.activeTemplateKey = 'blank';
-
-      isInitialWizardMandatory.value = true;
-      welcomeWizardVisible.value = true;
+      resetToBlankState();
       targetTemplateKey = 'blank';
     }
   } catch {
     // 异常兜底：保证画布干净并唤起强制向导
-    store.pages = [];
-    store.selectedType = null;
-    store.selectedId = null;
-    store.activePageId = null;
-    store.meta.formId = '';
-    store.meta.serialNo = '';
-    syncUrlParams('');
-    store.activeTemplateKey = 'blank';
-
-    isInitialWizardMandatory.value = true;
-    welcomeWizardVisible.value = true;
+    resetToBlankState();
   } finally {
+    if (loadingTimer) {
+      clearTimeout(loadingTimer);
+      loadingTimer = null;
+    }
     if (rawId || tplParam) {
       loadSchema(targetTemplate);
       if (rawId) {
@@ -322,7 +333,7 @@ onMounted(async () => {
     store.isCanvasLoading = false;
   }
 
-  // 仅在带有模板或表单 ID 进入时自动检查新手漫游引导
+  // 首次访问时若未看过引导，则触发一次轻量漫游引导
   if (rawId || tplParam) {
     checkAutoStartTour();
   }

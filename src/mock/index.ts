@@ -194,11 +194,11 @@ Mock.mock(/\/pc\/user\/getUserInfo.*/, 'get', () => {
     success: true,
     data: {
       uid: 9527,
-      nickname: '李总',
+      nickname: 'SouthernWind',
       avatar: '',
       email: 'lizong@alpha-tech.io',
       org_id: 1024,
-      company_name: '阿尔法数字科技',
+      company_name: '公司1',
       language: 'zh'
     }
   };

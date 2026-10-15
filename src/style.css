@@ -176,6 +176,24 @@ body {
     color: #1e293b;
 }
 
+/* 彻底清除输入控件内部 input/textarea 元素的任何浏览器原生 outline 与边框，杜绝聚焦时出现内层方框 (double focus outline) */
+.arco-input,
+.arco-textarea,
+.arco-input-wrapper input,
+.arco-textarea-wrapper textarea,
+.arco-input:focus,
+.arco-input:focus-visible,
+.arco-textarea:focus,
+.arco-textarea:focus-visible,
+.arco-input-wrapper input:focus,
+.arco-input-wrapper input:focus-visible,
+.arco-textarea-wrapper textarea:focus,
+.arco-textarea-wrapper textarea:focus-visible {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .arco-input::placeholder,
 .arco-textarea::placeholder,
 .arco-select-view-input::placeholder,
@@ -249,6 +267,21 @@ body {
     color: #94a3b8;
 }
 
+/* 属性面板自适应 textarea 垂直居中规范：修复 13px 字体下因 Arco 默认 min-height 导致的文字偏上问题 */
+#prop-editor .arco-textarea,
+#page-prop-editor .arco-textarea {
+    min-height: 30px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box;
+}
+
+#prop-editor .arco-textarea-wrapper,
+#page-prop-editor .arco-textarea-wrapper {
+    min-height: 32px;
+}
+
 /* 遵循 Arco 官方标准四档尺寸之 mini: 24px 高度，12px 紧凑文字 */
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini),
 .arco-input-wrapper:has(.arco-input-size-mini) {
@@ -271,6 +304,9 @@ body {
     min-height: 22px !important;
     max-height: 22px !important;
     line-height: 22px !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini) input::placeholder,
@@ -695,6 +731,12 @@ body.space-panning-ready * {
     animation: frameEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.mobile-frame.is-dragging-frame,
+body.is-panning .mobile-frame,
+body.is-dragging-frame .mobile-frame {
+    transition: none !important;
+}
+
 @keyframes frameEnter {
     0% {
         opacity: 0;
@@ -814,6 +856,19 @@ body.space-panning-ready * {
     transition: color 0.15s ease, border-color 0.15s ease;
 }
 
+.canvas-element .label-text,
+.canvas-element .alert-content-text,
+.canvas-element .alert-canvas-parsed,
+.canvas-element .option-text,
+.canvas-element .signature-declaration-text,
+.canvas-element .signature-pad-text,
+.canvas-element .field-help,
+.page-title-input,
+.page-desc-input {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
 body.is-dragging-component .canvas-element .label-text,
 body.is-dragging-component .canvas-element .option-text,
 body.is-dragging-component .canvas-element .signature-declaration-text,
@@ -842,9 +897,17 @@ body.is-dragging-component .canvas-element .field-help {
 
 .canvas-element [contenteditable]:focus,
 .canvas-element [contenteditable]:focus-visible,
+.page-header-area [contenteditable]:focus,
+.page-header-area [contenteditable]:focus-visible,
 .canvas-text-focus,
+.page-title-text:focus,
+.page-title-text:focus-visible,
+.page-desc-text:focus,
+.page-desc-text:focus-visible,
 .canvas-element .label-text:focus,
 .canvas-element .label-text:focus-visible,
+.canvas-element .alert-content-text:focus,
+.canvas-element .alert-content-text:focus-visible,
 .canvas-element .field-help:focus,
 .canvas-element .field-help:focus-visible,
 .canvas-element .option-text:focus,
@@ -864,6 +927,9 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 .canvas-text-focus::selection,
+.page-title-text::selection,
+.page-desc-text::selection,
+.page-header-area [contenteditable]::selection,
 .label-text::selection,
 .field-help::selection,
 .option-text::selection,
@@ -871,6 +937,15 @@ body.is-dragging-component .canvas-element .field-help {
 .signature-pad-text::selection {
     background-color: rgba(22, 119, 255, 0.18) !important;
     color: #1677ff !important;
+}
+
+.page-title-text,
+.page-desc-text {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .canvas-control-focus {
@@ -1311,6 +1386,9 @@ body.is-dragging-component .canvas-element .field-help {
 .prop-field-focused textarea,
 .pulse-highlight textarea {
     background-color: #ffffff !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* 画布页面标题规范：默认 text-xl (20px / 28px) 字体排版 */
@@ -1591,7 +1669,7 @@ body.is-dragging-component .canvas-element .field-help {
 
 .arco-modal-simple .arco-modal-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-direction: row-reverse;
     gap: 8px;
     align-items: center;
@@ -1600,13 +1678,19 @@ body.is-dragging-component .canvas-element .field-help {
     border-top: none;
 }
 
-/* 气泡确认框按钮顺序规范：严格遵循【确定在左，取消在右】 */
+/* 气泡确认框按钮顺序规范：严格遵循【确定在左，取消在右】且右对齐 */
 .arco-popconfirm-footer {
     display: flex;
     flex-direction: row-reverse;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 8px;
     align-items: center;
+    margin-top: 10px;
+}
+
+.arco-popconfirm-footer .arco-btn {
+    border-radius: 4px;
+    font-size: 12px;
 }
 
 
@@ -1796,10 +1880,3 @@ body.tour-active .driver-overlay {
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
     border-bottom-color: #ffffff !important;
 }
-
-
-
-
-
-
-

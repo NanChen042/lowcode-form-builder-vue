@@ -70,9 +70,9 @@
               @keydown.enter.prevent="addOptionAt(idx + 1)"
             />
 
-            <!-- 选项级联动展开组件按钮 (仅 radio / select 选项生效) -->
+            <!-- 选项级联动展开组件按钮 (仅 radio / select / checkbox 选项生效) -->
             <a-popover
-              v-if="['radio', 'select'].includes(props.element.type)"
+              v-if="['radio', 'select', 'checkbox'].includes(props.element.type)"
               trigger="click"
               position="br"
               :content-style="{ padding: '10px 12px', width: '280px' }"
@@ -82,8 +82,12 @@
                 class="flex items-center justify-center w-6 h-6 rounded transition-all shrink-0 cursor-pointer"
                 :class="getLinkedFieldsForOption(option).length > 0
                   ? 'text-[#1677ff] bg-blue-50/90 hover:bg-blue-100 font-semibold shadow-2xs border border-blue-200/80'
-                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'"
-                :title="t('options.linkConfigTitle', undefined, { name: getOptionLabel(option, undefined, true) || t('options.thisOption') })"
+                  : (isMaxDepthReached
+                      ? 'text-slate-300 hover:text-slate-500 hover:bg-slate-100'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100')"
+                :title="isMaxDepthReached && getLinkedFieldsForOption(option).length === 0
+                  ? (store.currentLocale === 'en' ? 'Max nesting depth reached (up to 2 levels)' : '已达最大追问层级（最多支持2级嵌套）')
+                  : t('options.linkConfigTitle', undefined, { name: getOptionLabel(option, undefined, true) || t('options.thisOption') })"
               >
                 <Link2 class="h-3.5 w-3.5" />
               </button>
@@ -97,8 +101,16 @@
                     </div>
                   </div>
 
+                  <!-- 达到最大嵌套层级友好警告 -->
+                  <div
+                    v-if="isMaxDepthReached"
+                    class="p-2 rounded bg-amber-50 border border-amber-200/80 text-amber-800 text-[11px] leading-relaxed"
+                  >
+                    {{ store.currentLocale === 'en' ? 'Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability.' : '已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。' }}
+                  </div>
+
                   <!-- 1. 直接选择想要添加的组件类型（一键生成并联动） -->
-                  <div>
+                  <div v-if="!isMaxDepthReached">
                     <div class="text-[11px] font-medium text-slate-500 mb-1.5">
                       {{ t('options.chooseFollowupField') }}
                     </div>
@@ -156,7 +168,7 @@
 
           <!-- 已绑定的展开组件标签 (一目了然) -->
           <div
-            v-if="['radio', 'select'].includes(props.element.type) && getLinkedFieldsForOption(option).length > 0"
+            v-if="['radio', 'select', 'checkbox'].includes(props.element.type) && getLinkedFieldsForOption(option).length > 0"
             class="flex flex-wrap items-center gap-1 pl-6 pt-0.5"
           >
             <span
@@ -171,7 +183,7 @@
               <button
                 type="button"
                 class="ml-0.5 text-blue-400 hover:text-red-500 transition-colors cursor-pointer text-xs font-bold leading-none"
-                title="解除关联"
+                :title="t('options.unlink')"
                 @click.stop="unlinkField(lf.id)"
               >
                 ×
@@ -210,10 +222,12 @@ import Sortable from 'sortablejs';
 const branchTypes = computed(() => [
   { type: 'input' as const, label: store.currentLocale === 'en' ? 'Input' : '单行输入' },
   { type: 'textarea' as const, label: store.currentLocale === 'en' ? 'Textarea' : '多行文本' },
+  { type: 'radio' as const, label: store.currentLocale === 'en' ? 'Radio' : '单选框组' },
+  { type: 'checkbox' as const, label: store.currentLocale === 'en' ? 'Checkbox' : '多选框组' },
   { type: 'select' as const, label: store.currentLocale === 'en' ? 'Dropdown' : '下拉选择' },
   { type: 'date' as const, label: store.currentLocale === 'en' ? 'Date' : '日期选择' },
   { type: 'phone' as const, label: store.currentLocale === 'en' ? 'Phone' : '手机号码' },
-  { type: 'checkbox' as const, label: store.currentLocale === 'en' ? 'Checkbox' : '多选框组' }
+  { type: 'email' as const, label: store.currentLocale === 'en' ? 'Email' : '电子邮箱' }
 ]);
 
 const props = defineProps<{ element: FormElement }>();
@@ -223,13 +237,10 @@ const options = computed<FormElementOption[]>(() => {
 });
 
 const isDisplayOnly = computed(() => {
-  return props.element?.type === 'signature' || props.element?.type === 'alert';
+  return props.element?.type === 'signature';
 });
 
 const addButtonLabel = computed(() => {
-  if (props.element?.type === 'alert') {
-    return t('prop.addNoticeItem');
-  }
   if (props.element?.type === 'signature') {
     return t('prop.addClauseItem');
   }
@@ -365,12 +376,43 @@ const currentPage = computed(() => {
   return store.pages.find(p => p.fields?.some(f => f.id === props.element.id)) || null;
 });
 
+// 最大支持 2 级追问嵌套（行业公认最佳体验，避免移动端狭窄排版与过度嵌套）
+const MAX_NESTING_DEPTH = 2;
+
+const currentElementDepth = computed(() => {
+  if (!props.element?.dependsOn || !currentPage.value) return 0;
+  let depth = 0;
+  let current: FormElement | undefined = props.element;
+  const visited = new Set<string>();
+  const fields = currentPage.value.fields || [];
+  while (current?.dependsOn?.fieldKey) {
+    if (visited.has(current.dependsOn.fieldKey)) break;
+    visited.add(current.dependsOn.fieldKey);
+    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
+    if (!parent) break;
+    depth++;
+    current = parent;
+  }
+  return depth;
+});
+
+const isMaxDepthReached = computed(() => {
+  return currentElementDepth.value >= MAX_NESTING_DEPTH;
+});
+
 const downstreamFields = computed(() => {
   if (!currentPage.value || !props.element) return [];
   const fields = currentPage.value.fields || [];
   const currentIndex = fields.findIndex(f => f.id === props.element.id);
   if (currentIndex < 0) return [];
-  return fields.slice(currentIndex + 1);
+  // 排除掉所有祖先字段，避免形成死循环依赖
+  const ancestorKeys = new Set<string>();
+  let cur: FormElement | undefined = props.element;
+  while (cur?.dependsOn?.fieldKey) {
+    ancestorKeys.add(cur.dependsOn.fieldKey);
+    cur = fields.find(f => f.key === cur?.dependsOn?.fieldKey);
+  }
+  return fields.slice(currentIndex + 1).filter(f => !ancestorKeys.has(f.key));
 });
 
 function getLinkedFieldsForOption(option: FormElementOption) {
@@ -407,10 +449,10 @@ function unlinkField(fieldId: string) {
   }
 }
 
-function quickInsertFollowupField(option: FormElementOption, type: ComponentType = 'input', typeLabel: string = '单行输入') {
-  if (!currentPage.value || !props.element) return;
+function quickInsertFollowupField(option: FormElementOption, type: ComponentType = 'input', typeLabel?: string) {
+  if (!currentPage.value || !props.element || isMaxDepthReached.value) return;
   const newEl = createElement(type);
-  newEl.label = typeLabel;
+  newEl.label = typeLabel || t('options.singleInputDefault');
   newEl.required = false;
   newEl.defaultValue = '';
   newEl.dependsOn = {
@@ -420,9 +462,18 @@ function quickInsertFollowupField(option: FormElementOption, type: ComponentType
 
   const fields = currentPage.value.fields || [];
   const currentIdx = fields.findIndex(f => f.id === props.element.id);
+
+  // 寻找到当前组件及其名下所有层级从属子组件的末尾进行插入
+  const descendantKeys = new Set<string>([props.element.key]);
   let insertIdx = currentIdx + 1;
-  while (insertIdx < fields.length && fields[insertIdx].dependsOn?.fieldKey === props.element.key) {
-    insertIdx++;
+  while (insertIdx < fields.length) {
+    const next = fields[insertIdx];
+    if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
+      if (next.key) descendantKeys.add(next.key);
+      insertIdx++;
+    } else {
+      break;
+    }
   }
 
   fields.splice(insertIdx, 0, newEl);
@@ -473,6 +524,22 @@ function removeOption(idx: number) {
 .option-row:focus-visible,
 .option-row:active {
   outline: none !important;
+  box-shadow: none !important;
+}
+:deep(.arco-input),
+:deep(.arco-input:focus),
+:deep(.arco-input:focus-visible),
+:deep(input),
+:deep(input:focus),
+:deep(input:focus-visible),
+:deep(.arco-textarea),
+:deep(.arco-textarea:focus),
+:deep(.arco-textarea:focus-visible),
+:deep(textarea),
+:deep(textarea:focus),
+:deep(textarea:focus-visible) {
+  outline: none !important;
+  border: none !important;
   box-shadow: none !important;
 }
 .option-del-btn {

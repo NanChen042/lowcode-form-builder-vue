@@ -127,7 +127,7 @@
               readonly
             >
               <template #prefix>
-                <Users v-if="currentProfileType === 'client'" class="h-3.5 w-3.5 text-blue-600 mr-1" />
+                <Users v-if="currentProfileType === 'customer' || currentProfileType === 'client'" class="h-3.5 w-3.5 text-blue-600 mr-1" />
                 <Building2 v-else-if="currentProfileType === 'entity'" class="h-3.5 w-3.5 text-[#1677ff] mr-1" />
                 <User v-else class="h-3.5 w-3.5 text-emerald-600 mr-1" />
               </template>
@@ -198,7 +198,7 @@
               :auto-size="{ minRows: 3, maxRows: 6 }"
               :placeholder="t('prop.pageDescPlaceholder')"
               class="w-full"
-              @focus="setPageFocus('desc')"
+              @focus="setPageFocus('description')"
               @blur="clearFocus"
               @input="markDirty"
             />
@@ -207,9 +207,11 @@
           <div class="pt-3 border-t border-slate-100">
             <a-popconfirm
               :content="t('prop.deletePageConfirm')"
-              type="error"
+              type="warning"
               :ok-text="t('modal.confirm')"
               :cancel-text="t('modal.cancel')"
+              :ok-button-props="{ status: 'danger', size: 'small' }"
+              :cancel-button-props="{ size: 'small' }"
               @ok="handleDeletePage"
             >
               <a-button status="danger" long size="small">
@@ -267,92 +269,73 @@
               />
             </div>
 
-            <!-- 字段副标题 (默认不常驻输入框，点击才展开) -->
+            <!-- 字段副标题与排布方式分段器 -->
             <div v-if="selectedElement.type !== 'alert'" class="mb-3">
-              <div v-if="!isSubtitleExpanded" class="flex items-center justify-between py-0.5">
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-1 text-[11.5px] text-[#1677ff] hover:text-blue-700 font-medium transition-colors cursor-pointer select-none"
-                  @click="expandSubtitle"
-                >
-                  <Plus class="w-3 h-3" />
-                  <span>{{ t('prop.addHelp') }}</span>
-                </button>
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <label for="prop-help-input" class="text-[12px] font-medium text-slate-700">
+                    {{ store.currentLocale === 'en' ? t('prop.fieldHelpEn') : t('prop.fieldHelp') }}
+                  </label>
+                  <a-tag v-if="isFieldHelpMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
+                    {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+                  </a-tag>
+                </div>
               </div>
-              <div v-else class="space-y-1.5">
-                <div class="flex items-center justify-between mb-1">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[12px] font-medium text-slate-700">
-                      {{ store.currentLocale === 'en' ? t('prop.fieldHelpEn') : t('prop.fieldHelp') }}
-                    </span>
-                    <a-tag v-if="isFieldHelpMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-                      {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
-                    </a-tag>
-                  </div>
+              <a-textarea
+                id="prop-help-input"
+                v-model="fieldHelpModel"
+                :auto-size="{ minRows: 1, maxRows: 3 }"
+                allow-clear
+                :placeholder="t('prop.fieldHelpPlaceholder')"
+                class="w-full"
+                :class="{ 'prop-field-focused': isFieldFocused('help') }"
+                @focus="setFocus('help')"
+                @blur="clearFocus"
+                @input="markDirty"
+              />
+
+              <!-- 排布方式切换分段器：可选 标题右侧显示（默认同排浅灰色小字）或 标题下方换行显示 -->
+              <div
+                class="mt-2 flex items-center justify-between py-1 pl-1"
+              >
+                <div class="flex items-center gap-1.5">
+                  <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
+                  <a-tooltip :content="t('prop.helpPositionTip')">
+                    <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+
+                <!-- 现代微型胶囊分段器 -->
+                <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
                   <button
                     type="button"
-                    class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer flex items-center gap-0.5"
-                    @click="removeSubtitle"
+                    class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                    :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                    :title="t('prop.helpPositionRightDesc')"
+                    @click="helpPositionValue = 'right'"
                   >
-                    <Trash2 class="w-3 h-3" />
-                    <span>{{ t('prop.removeHelp') }}</span>
+                    <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                      <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
+                      <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
+                    </svg>
+                    <span>{{ t('prop.helpPositionRight') }}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                    :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                    :title="t('prop.helpPositionBottomDesc')"
+                    @click="helpPositionValue = 'bottom'"
+                  >
+                    <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                      <rect x="2" y="3" width="12" height="4" rx="1.2" />
+                      <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
+                    </svg>
+                    <span>{{ t('prop.helpPositionBottom') }}</span>
                   </button>
                 </div>
-                <a-textarea
-                  id="prop-help-input"
-                  v-model="fieldHelpModel"
-                  :auto-size="{ minRows: 1, maxRows: 3 }"
-                  allow-clear
-                  :placeholder="t('prop.fieldHelpPlaceholder')"
-                  class="w-full"
-                  :class="{ 'prop-field-focused': isFieldFocused('help') }"
-                  @focus="setFocus('help')"
-                  @blur="clearFocus"
-                  @input="markDirty"
-                />
-
-                <!-- 二级缩进子卡片层次感 (仅在有副标题内容时微缩进展开) -->
-                <CollapseTransition :key="`${selectedElement.id}-help-layout`" :show="hasHelpContent">
-                  <div
-                    class="mt-1.5 ml-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
-                  >
-                    <div class="flex items-center gap-1.5">
-                      <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
-                    </div>
-
-                    <!-- 现代微型胶囊分段器 -->
-                    <div class="inline-flex items-center p-0.5 rounded-md bg-white border border-slate-200/80 shadow-sm shrink-0 select-none">
-                      <div
-                        role="button"
-                        tabindex="0"
-                        class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                        :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                        @click="helpPositionValue = 'right'"
-                      >
-                        <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                          <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
-                          <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
-                        </svg>
-                        <span>{{ t('prop.helpPositionRight') }}</span>
-                      </div>
-
-                      <div
-                        role="button"
-                        tabindex="0"
-                        class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                        :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                        @click="helpPositionValue = 'bottom'"
-                      >
-                        <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-                          <rect x="2" y="3" width="12" height="4" rx="1.2" />
-                          <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
-                        </svg>
-                        <span>{{ t('prop.helpPositionBottom') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CollapseTransition>
               </div>
             </div>
 
@@ -588,15 +571,39 @@
               </div>
             </div>
 
-            <!-- 电话号码专属：严格号码校验开关 (对齐 algo) -->
-            <div v-if="selectedElement.type === 'phone'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[12px] font-medium text-slate-600">{{ t('prop.strictPhoneValidation') }}</span>
-                <a-tooltip :content="t('prop.strictPhoneValidationTip')" position="top">
-                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-                </a-tooltip>
+            <!-- 多行文本自适应行数配置 (最小行数 / 最大行数，无灰底标准行) -->
+            <div v-if="selectedElement.type === 'textarea'" class="space-y-0.5">
+              <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[12px] font-medium text-slate-600">{{ t('prop.minRows') }}</span>
+                  <a-tooltip :content="t('prop.minRowsTip')" position="top">
+                    <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+                <a-input-number
+                  v-model="textareaMinRows"
+                  :min="1"
+                  :max="10"
+                  size="small"
+                  style="width: 100px"
+                />
               </div>
-              <a-switch v-model="isStrictPhoneValidation" size="small" />
+
+              <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxRows') }}</span>
+                  <a-tooltip :content="t('prop.maxRowsTip')" position="top">
+                    <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
+                <a-input-number
+                  v-model="textareaMaxRows"
+                  :min="textareaMinRows"
+                  :max="20"
+                  size="small"
+                  style="width: 100px"
+                />
+              </div>
             </div>
           </div>
 
@@ -668,28 +675,85 @@
             </div>
           </div>
 
-          <!-- 选项配置 -->
+          <!-- 提示区块专属：提示内容多行编辑 -->
+          <div v-if="selectedElement.type === 'alert'" class="space-y-2 pt-3.5 border-t border-slate-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-[12px] font-semibold text-slate-700 whitespace-nowrap">
+                  {{ t('prop.alertContentTitle') }}
+                </span>
+                <span
+                  v-if="isAlertContentMissing"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-200/60 shrink-0"
+                >
+                  {{ t('prop.untranslated') }}
+                </span>
+                <a-tooltip :content="t('prop.alertContentTip')" position="top">
+                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors shrink-0" />
+                </a-tooltip>
+              </div>
+
+              <!-- 快捷插入辅助条 (基于标准 Arco a-dropdown 与 a-button 组件) -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <!-- 列表项二级下拉菜单 (官方标准 Arco a-dropdown 组件) -->
+                <a-dropdown position="bl" @select="handleListDropdownSelect">
+                  <a-button
+                    size="mini"
+                    type="secondary"
+                    class="!text-[12px] !h-6 !px-2 !rounded"
+                  >
+                    <template #icon>
+                      <List class="w-3.5 h-3.5 text-slate-500" />
+                    </template>
+                    <span>{{ t('prop.alertInsertBullet') }}</span>
+                    <ChevronDown class="w-3 h-3 ml-1 text-slate-400" />
+                  </a-button>
+                  <template #content>
+                    <a-doption value="circle">圆点列表 (无序)</a-doption>
+                    <a-doption value="number">数字列表 (有序)</a-doption>
+                  </template>
+                </a-dropdown>
+
+                <!-- 超链接插入按钮 (官方标准 Arco a-button 组件) -->
+                <a-button
+                  size="mini"
+                  type="secondary"
+                  class="!text-[12px] !h-6 !px-2 !rounded"
+                  @click="insertAlertLink"
+                >
+                  <template #icon>
+                    <Link2 class="w-3.5 h-3.5 text-slate-500" />
+                  </template>
+                  <span>{{ t('prop.alertInsertLink') }}</span>
+                </a-button>
+              </div>
+            </div>
+
+            <a-textarea
+              id="prop-alert-content-input"
+              v-model="alertContentModel"
+              :auto-size="{ minRows: 6, maxRows: 14 }"
+              :placeholder="t('prop.alertContentPlaceholder')"
+              class="w-full !text-[12px] font-sans"
+            />
+          </div>
+
+          <!-- 选项配置 (单选、多选、下拉、签名声明条款) -->
           <div v-if="hasOptionsConfig" class="space-y-2.5 pt-3.5 border-t border-slate-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5">
                 <span class="text-[12px] font-semibold text-slate-700">
-                  {{ selectedElement.type === 'alert'
-                    ? t('prop.noticeConfig')
-                    : (selectedElement.type === 'signature' ? t('prop.clauseConfig') : t('prop.optionsConfig'))
-                  }}
+                  {{ selectedElement.type === 'signature' ? t('prop.clauseConfig') : t('prop.optionsConfig') }}
                 </span>
                 <a-tooltip
-                  :content="selectedElement.type === 'alert'
-                    ? t('prop.noticeConfigTip')
-                    : (selectedElement.type === 'signature' ? t('prop.clauseConfigTip') : t('prop.optionsConfigTip'))
-                  "
+                  :content="selectedElement.type === 'signature' ? t('prop.clauseConfigTip') : t('prop.optionsConfigTip')"
                   position="top"
                 >
                   <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
                 </a-tooltip>
               </div>
               <span class="text-[11px] text-slate-400">
-                {{ selectedElement.type === 'alert' || selectedElement.type === 'signature'
+                {{ selectedElement.type === 'signature'
                   ? (store.currentLocale === 'en'
                       ? `${selectedElement.options?.length || 0} items`
                       : `共 ${selectedElement.options?.length || 0} 条`)
@@ -700,10 +764,10 @@
 
             <OptionsEditor v-if="selectedElement" :element="selectedElement" />
 
-            <!-- 选项排布方式 (方案 A 规范：二级缩进子卡片，现代化小巧精致) -->
+            <!-- 选项排布方式 (统一二级子配置规范：精致微型无框分段器) -->
             <div
               v-if="canStackChoices"
-              class="mt-1 pl-2.5 pr-2 py-1.5 rounded-lg bg-slate-50/90 border border-slate-200/70 border-l-[2.5px] border-l-[#1677ff] flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              class="mt-2 flex items-center justify-between py-1 pl-1"
             >
               <div class="flex items-center gap-1.5 shrink-0">
                 <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -711,7 +775,7 @@
               </div>
 
               <!-- 现代微型胶囊分段器 (小巧精致) -->
-              <div class="inline-flex items-center p-0.5 rounded-md bg-white border border-slate-200/80 shadow-sm shrink-0 select-none">
+              <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
                 <!-- 横向并排 -->
                 <div
                   role="button"
@@ -747,24 +811,42 @@
 
 
 
-          <!-- 日期选择器专属配置 (现代化 Arco 原生组件) -->
-          <div v-if="selectedElement.type === 'date'" class="space-y-3 pt-3.5 border-t border-slate-100">
+          <!-- 日期选择器专属配置 (微型胶囊分段器 + 规范二级子项) -->
+          <div v-if="selectedElement && selectedElement.type === 'date'" class="space-y-0.5 pt-1.5 border-t border-slate-100">
             <!-- 日期模式 (单日期 / 起止日期) -->
-            <a-form-item :label="t('prop.dateMode')" class="mb-0">
-              <a-radio-group
-                v-model="selectedElement.dateMode"
-                type="button"
-                size="small"
-                class="w-full flex"
-                @change="markDirty"
-              >
-                <a-radio value="single" class="flex-1 text-center">{{ t('prop.dateModeSingle') }}</a-radio>
-                <a-radio value="range" class="flex-1 text-center">{{ t('prop.dateModeRange') }}</a-radio>
-              </a-radio-group>
-            </a-form-item>
+            <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[12px] font-medium text-slate-600">{{ t('prop.dateMode') }}</span>
+                <a-tooltip :content="t('prop.dateModeTip')" position="top">
+                  <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                </a-tooltip>
+              </div>
 
-            <!-- 启用长期选项 -->
-            <div class="flex items-center justify-between py-1">
+              <!-- 微型胶囊分段器: 单日期 / 起止日期 -->
+              <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs select-none">
+                <div
+                  role="button"
+                  tabindex="0"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                  :class="(!selectedElement.dateMode || selectedElement.dateMode === 'single') ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                  @click="setDateMode('single')"
+                >
+                  {{ t('prop.dateModeSingle') }}
+                </div>
+                <div
+                  role="button"
+                  tabindex="0"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                  :class="selectedElement.dateMode === 'range' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                  @click="setDateMode('range')"
+                >
+                  {{ t('prop.dateModeRange') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- 启用长期选项 (仅单日期模式生效；起止日期不展示长期选项) -->
+            <div v-if="selectedElement.dateMode !== 'range'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
               <div class="flex items-center gap-1.5">
                 <span class="text-[12px] font-medium text-slate-600">{{ t('prop.enableLongTerm') }}</span>
                 <a-tooltip :content="t('prop.enableLongTermTip')" position="top">
@@ -778,17 +860,22 @@
               />
             </div>
 
-            <!-- 默认勾选长期 (丝滑展开折叠过渡) -->
+            <!-- 默认勾选长期 (二级子项：无框缩进导轨规范，丝滑展开折叠过渡) -->
             <CollapseTransition
-              v-if="selectedElement.type === 'date'"
-              :key="`${selectedElement.id}-longterm`"
-              :show="Boolean(selectedElement.enableLongTerm)"
+              v-if="selectedElement && selectedElement.type === 'date' && selectedElement.dateMode !== 'range'"
+              :key="`${selectedElement?.id}-longterm`"
+              :show="Boolean(selectedElement?.enableLongTerm)"
             >
-              <div
-                class="flex items-center justify-between py-1.5 px-3 rounded-lg bg-blue-50/60 border border-blue-100 transition-all"
-              >
-                <span class="text-[12px] font-medium text-blue-900">{{ t('prop.defaultLongTerm') }}</span>
+              <div class="flex items-center justify-between py-1 pl-1">
+                <div class="flex items-center gap-1.5">
+                  <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span class="text-[12px] font-medium text-slate-600">{{ t('prop.defaultLongTerm') }}</span>
+                  <a-tooltip :content="t('prop.defaultLongTermTip')" position="top">
+                    <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+                  </a-tooltip>
+                </div>
                 <a-switch
+                  v-if="selectedElement"
                   v-model="selectedElement.defaultLongTerm"
                   size="small"
                   @change="markDirty"
@@ -797,39 +884,76 @@
             </CollapseTransition>
           </div>
 
-          <!-- 条件联动从属信息 (仅当该组件已被某个上游选项联动时展示；普通未联动组件保持 100% 纯净，绝不冗余显示) -->
+          <!-- 条件联动从属信息：现代结构化逻辑卡片 (Option A) -->
           <div
-            v-if="selectedElement && selectedElement.dependsOn"
-            class="space-y-2 pt-3.5 border-t border-slate-100"
+            v-if="selectedElement && selectedElement.dependsOn && dependencyInfo"
+            class="pt-3.5 border-t border-slate-100"
           >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <Link2 class="h-3.5 w-3.5 text-[#1677ff]" />
-                <span class="text-[12px] font-semibold text-slate-700">条件联动从属</span>
-              </div>
-              <button
-                type="button"
-                class="text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
-                title="解除联动，恢复为常驻显示字段"
-                @click="onToggleDependency(false)"
-              >
-                解除联动
-              </button>
-            </div>
+            <div class="rounded-xl border border-blue-200/90 bg-gradient-to-b from-blue-50/70 to-indigo-50/20 p-2.5 shadow-xs space-y-2.5 transition-all">
+              <!-- 卡片顶栏：标题 + 生效中徽标 + 解除联动操作 -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <Link2 class="h-3.5 w-3.5 text-[#1677ff]" />
+                  <span class="text-[12px] font-semibold text-slate-800">{{ t('prop.linkageRuleTitle') }}</span>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/70 text-[10px] font-medium leading-none">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {{ t('prop.linkageActive') }}
+                  </span>
+                </div>
 
-            <div class="p-2.5 rounded-lg bg-blue-50/70 border border-blue-200/80 text-xs space-y-1">
-              <div class="text-[#1677ff] font-semibold flex items-center gap-1">
-                <CornerDownRight class="w-3.5 h-3.5 text-[#1677ff]" />
-                <span>{{ dependencyDesc }}</span>
+                <!-- 解除联动按钮 (带气泡防误触) -->
+                <a-popconfirm
+                  :content="t('prop.unlinkRuleConfirm')"
+                  type="warning"
+                  position="bottom"
+                  @ok="onToggleDependency(false)"
+                >
+                  <button
+                    type="button"
+                    class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-slate-400 hover:text-red-600 hover:bg-red-50/80 transition-all cursor-pointer border border-transparent hover:border-red-200/60"
+                    :title="t('prop.unlink')"
+                  >
+                    <Unlink class="w-3 h-3" />
+                    <span>{{ t('prop.unlink') }}</span>
+                  </button>
+                </a-popconfirm>
               </div>
-              <div class="text-[11px] text-slate-400 leading-normal">
-                该组件已被设置为追问项，仅当对应选项被选中时才会在填写时展开。
+
+              <!-- 逻辑结构化胶囊区：当 [父字段 ↗] 选择 [选项值] 时展开 -->
+              <div class="flex flex-wrap items-center gap-1.5 text-[12px] leading-relaxed select-none bg-white/95 p-2 rounded-lg border border-blue-100/90 shadow-2xs">
+                <span class="text-slate-400 font-medium">{{ t('prop.linkageWhen') }}</span>
+                
+                <!-- 父级组件胶囊 (点击穿透定位高亮父组件) -->
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-[#1677ff] hover:bg-blue-100 hover:text-blue-700 transition-colors font-medium cursor-pointer border border-blue-200/80 max-w-[130px] truncate group"
+                  :title="t('prop.locateParentTip')"
+                  @click="locateParentField"
+                >
+                  <span class="truncate">{{ dependencyInfo.parentLabel }}</span>
+                  <ExternalLink class="w-2.5 h-2.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+                </button>
+
+                <span class="text-slate-400 font-medium">{{ t('prop.linkageEquals') }}</span>
+
+                <!-- 触发选项胶囊 -->
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-medium border border-slate-200/80 max-w-[130px] truncate shadow-2xs">
+                  <span class="truncate">{{ dependencyInfo.optLabel }}</span>
+                </span>
+
+                <span class="text-slate-500 font-medium">{{ t('prop.linkageThenShow') }}</span>
+              </div>
+
+              <!-- 底部辅助说明 (极简一行) -->
+              <div class="flex items-center gap-1 text-[11px] text-slate-400 leading-tight">
+                <Info class="w-3 h-3 text-slate-400 shrink-0" />
+                <span>{{ t('prop.linkageTipSimple') }}</span>
               </div>
             </div>
           </div>
 
           <!-- 底部操作按钮 -->
-          <div class="pt-5 border-t border-slate-100 flex gap-2">
+          <div v-if="selectedElement" class="pt-5 border-t border-slate-100 flex gap-2">
             <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
               <template #icon>
                 <Copy class="h-3.5 w-3.5" />
@@ -863,7 +987,10 @@ import {
   markDirty,
   deletePage,
   duplicateElement,
-  deleteElement
+  deleteElement,
+  selectElement,
+  highlightPropertyField,
+  triggerHighlight
 } from '@/core/store';
 import {
   t,
@@ -871,7 +998,8 @@ import {
   getPageText,
   setPageText,
   getFieldText,
-  setFieldText
+  setFieldText,
+  getOptionLabel
 } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
@@ -881,7 +1009,6 @@ import CountryDirectoryModal from './CountryDirectoryModal.vue';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
 import {
   SlidersHorizontal,
-  Plus,
   Copy,
   Trash2,
   HelpCircle,
@@ -895,21 +1022,26 @@ import {
   Users,
   Lock,
   Link2,
+  Unlink,
+  ExternalLink,
+  Info,
   Pencil,
-  RotateCcw
+  RotateCcw,
+  List,
+  ChevronDown
 } from '@lucide/vue';
 import { translationStats } from '@/utils/translationHelper';
 import type { ProfileType } from '@/types/schema';
 
 function getProfileTypeName(type?: ProfileType) {
-  if (type === 'client') return t('prop.clientCase');
+  if (type === 'customer' || type === 'client') return t('prop.clientCase');
   if (type === 'entity') return t('prop.entityCase');
   return t('prop.individualCase');
 }
 
 // 当前基础资料业务类型
 const currentProfileType = computed(() => {
-  return selectedPage.value?.profileType || store.meta.profileType || 'client';
+  return selectedPage.value?.profileType || store.meta.profileType || 'customer';
 });
 
 // 全球国家/国籍/区号统一预设清单弹窗状态
@@ -1098,6 +1230,58 @@ const isFieldPlaceholderMissing = computed(() => {
   return Boolean(selectedElement.value.placeholder_en && !selectedElement.value.placeholder);
 });
 
+// 提示区块专属提示内容双向绑定
+const alertContentModel = computed({
+  get() {
+    return selectedElement.value ? getFieldText(selectedElement.value, 'content') : '';
+  },
+  set(val: string) {
+    if (selectedElement.value) {
+      setFieldText(selectedElement.value, 'content', val);
+    }
+  }
+});
+
+const isAlertContentMissing = computed(() => {
+  if (!selectedElement.value || selectedElement.value.type !== 'alert') return false;
+  if (store.currentLocale === 'en') {
+    return Boolean(selectedElement.value.content && !selectedElement.value.content_en);
+  }
+  return Boolean(selectedElement.value.content_en && !selectedElement.value.content);
+});
+
+function handleListDropdownSelect(value: any) {
+  if (!selectedElement.value) return;
+  if (value === 'number') {
+    selectedElement.value.listStyle = 'number';
+    const current = alertContentModel.value || '';
+    const prefix = current && !current.endsWith('\n') ? '\n' : '';
+    const lines = current.split('\n');
+    let maxNum = 0;
+    for (const line of lines) {
+      const match = line.trim().match(/^(\d+)[\.、]/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    }
+    const nextNum = maxNum + 1;
+    alertContentModel.value = `${current}${prefix}${nextNum}. `;
+  } else {
+    selectedElement.value.listStyle = 'circle';
+    const current = alertContentModel.value || '';
+    const prefix = current && !current.endsWith('\n') ? '\n' : '';
+    alertContentModel.value = `${current}${prefix}- `;
+  }
+  markDirty();
+}
+
+function insertAlertLink() {
+  const current = alertContentModel.value || '';
+  const prefix = current && !current.endsWith('\n') && !current.endsWith(' ') ? ' ' : '';
+  alertContentModel.value = `${current}${prefix}[提示文字](xxx.com)`;
+}
+
 const isShowLabel = computed({
   get() {
     return selectedElement.value?.showLabel !== false;
@@ -1122,17 +1306,6 @@ const helpPositionValue = computed<'right' | 'bottom'>({
   }
 });
 
-const hasHelpContent = computed(() => {
-  if (!selectedElement.value) return false;
-  const currentVal = store.currentLocale === 'en'
-    ? selectedElement.value.help_en
-    : selectedElement.value.help;
-  return typeof currentVal === 'string' && currentVal.trim().length > 0;
-});
-
-// 副标题显隐展开状态 (默认根据当前元素是否已有副标题内容决定，避免空输入框常驻误导用户)
-const isSubtitleExpanded = ref(false);
-
 // 必填未填自定义错误提示显隐展开状态 (默认折叠使用系统自动提示，点击才展开自定义)
 const isCustomErrorExpanded = ref(false);
 
@@ -1143,15 +1316,10 @@ watch(
   () => [selectedElement.value?.id, store.currentLocale],
   () => {
     if (!selectedElement.value) {
-      isSubtitleExpanded.value = false;
       isCustomErrorExpanded.value = false;
       isDeclarationCustomErrorExpanded.value = false;
       return;
     }
-    const hasHelp = store.currentLocale === 'en'
-      ? (typeof selectedElement.value.help_en === 'string' && selectedElement.value.help_en.trim().length > 0)
-      : (typeof selectedElement.value.help === 'string' && selectedElement.value.help.trim().length > 0);
-    isSubtitleExpanded.value = hasHelp;
 
     const hasCustomErr = store.currentLocale === 'en'
       ? (typeof selectedElement.value.customErrorMessage_en === 'string' && selectedElement.value.customErrorMessage_en.trim().length > 0)
@@ -1165,22 +1333,6 @@ watch(
   },
   { immediate: true }
 );
-
-function expandSubtitle() {
-  isSubtitleExpanded.value = true;
-  nextTick(() => {
-    document.getElementById('prop-help-input')?.focus();
-  });
-}
-
-function removeSubtitle() {
-  if (selectedElement.value) {
-    selectedElement.value.help = '';
-    selectedElement.value.help_en = '';
-    markDirty();
-  }
-  isSubtitleExpanded.value = false;
-}
 
 
 const isElementRequired = computed({
@@ -1305,13 +1457,31 @@ watch(
   }
 );
 
-const isStrictPhoneValidation = computed({
+const textareaMinRows = computed<number>({
   get() {
-    return selectedElement.value?.strictPhoneValidation !== false;
+    return selectedElement.value?.minRows || 3;
   },
-  set(val: boolean) {
+  set(val: number) {
     if (selectedElement.value) {
-      selectedElement.value.strictPhoneValidation = val;
+      const num = Number(val) || 1;
+      selectedElement.value.minRows = num;
+      if (selectedElement.value.maxRows && selectedElement.value.maxRows < num) {
+        selectedElement.value.maxRows = num;
+      }
+      markDirty();
+    }
+  }
+});
+
+const textareaMaxRows = computed<number>({
+  get() {
+    return selectedElement.value?.maxRows || 6;
+  },
+  set(val: number) {
+    if (selectedElement.value) {
+      const min = selectedElement.value.minRows || 1;
+      const num = Number(val) || min;
+      selectedElement.value.maxRows = Math.max(num, min);
       markDirty();
     }
   }
@@ -1343,7 +1513,7 @@ const placeholderFieldLabel = computed(() => {
 
 const hasOptionsConfig = computed(() => {
   if (!selectedElement.value) return false;
-  return ['select', 'radio', 'checkbox', 'signature', 'alert'].includes(
+  return ['select', 'radio', 'checkbox', 'signature'].includes(
     selectedElement.value.type
   );
 });
@@ -1397,11 +1567,11 @@ function setFocus(field: 'label' | 'placeholder' | 'help' | 'default') {
   }
 }
 
-function setPageFocus(field: 'title' | 'desc') {
+function setPageFocus(field: 'title' | 'description') {
   if (selectedPage.value) {
     store.focusedTarget = {
       elementId: selectedPage.value.id,
-      field: field === 'title' ? 'label' : 'help'
+      field
     };
   }
 }
@@ -1414,18 +1584,51 @@ watch(
   () => store.focusedTarget,
   (target) => {
     if (!target) return;
-    // 如果当前正在画布中的 contenteditable 节点编辑输入，绝不偷走焦点
-    if (typeof document !== 'undefined' && document.activeElement && document.activeElement.closest('[contenteditable]')) {
+    // 如果当前正在画布区域编辑输入（contenteditable、输入框等），绝不强行抢夺光标焦点到右侧
+    if (
+      typeof document !== 'undefined' &&
+      document.activeElement &&
+      document.activeElement.closest('#tour-canvas-viewport, .canvas-viewport, .canvas-world, [contenteditable], input, textarea')
+    ) {
+      nextTick(() => {
+        let targetInput: HTMLElement | null = null;
+        if (target.field === 'label') {
+          targetInput = document.getElementById('prop-label-input');
+        } else if (target.field === 'title') {
+          targetInput = document.getElementById('page-prop-title-input');
+        } else if (target.field === 'help') {
+          targetInput = document.getElementById('prop-help-input');
+        } else if (target.field === 'description') {
+          targetInput = document.getElementById('page-prop-desc-input');
+        } else if (target.field === 'placeholder') {
+          targetInput = document.getElementById('prop-placeholder-input');
+        } else if (target.field === 'option' && target.optionIndex !== undefined) {
+          const optionInputs = document.querySelectorAll('#options-editor input, #options-editor textarea');
+          if (optionInputs && optionInputs[target.optionIndex]) {
+            targetInput = optionInputs[target.optionIndex] as HTMLElement;
+          }
+        }
+        if (targetInput) {
+          targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          triggerHighlight(targetInput);
+        }
+      });
       return;
     }
     nextTick(() => {
       let targetInput: HTMLElement | null = null;
       if (target.field === 'label') {
-        targetInput = document.getElementById('prop-label-input') || document.getElementById('page-prop-title-input');
+        targetInput = document.getElementById('prop-label-input');
+      } else if (target.field === 'title') {
+        targetInput = document.getElementById('page-prop-title-input');
       } else if (target.field === 'help') {
-        targetInput = document.getElementById('prop-help-input') || document.getElementById('page-prop-desc-input');
+        targetInput = document.getElementById('prop-help-input');
+      } else if (target.field === 'description') {
+        targetInput = document.getElementById('page-prop-desc-input');
       } else if (target.field === 'placeholder') {
         targetInput = document.getElementById('prop-placeholder-input');
+      } else if (target.field === 'content') {
+        targetInput = document.getElementById('prop-alert-content-input');
       } else if (target.field === 'option' && target.optionIndex !== undefined) {
         const optionInputs = document.querySelectorAll('#options-editor input, #options-editor textarea');
         if (optionInputs && optionInputs[target.optionIndex]) {
@@ -1434,17 +1637,22 @@ watch(
       }
       if (targetInput) {
         targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        const inputElem = (targetInput.tagName === 'INPUT' || targetInput.tagName === 'TEXTAREA')
-          ? targetInput
-          : (targetInput.querySelector('input, textarea') as HTMLElement);
-        if (inputElem) {
-          inputElem.focus();
-        }
+        triggerHighlight(targetInput);
       }
     });
   },
   { deep: true }
 );
+
+function setDateMode(mode: 'single' | 'range') {
+  if (!selectedElement.value) return;
+  selectedElement.value.dateMode = mode;
+  if (mode === 'range') {
+    selectedElement.value.enableLongTerm = false;
+    selectedElement.value.defaultLongTerm = false;
+  }
+  markDirty();
+}
 
 function onEnableLongTermChange(val: any) {
   if (selectedElement.value) {
@@ -1456,20 +1664,47 @@ function onEnableLongTermChange(val: any) {
   }
 }
 
-const dependencyDesc = computed(() => {
-  if (!selectedElement.value?.dependsOn) return '';
+const dependencyInfo = computed(() => {
+  if (!selectedElement.value?.dependsOn) return null;
   const dep = selectedElement.value.dependsOn;
+  const yesLabel = t('canvas.yes');
   for (const page of store.pages) {
     const parentField = page.fields?.find(f => f.key === dep.fieldKey);
     if (parentField) {
-      const parentLabel = parentField.label || parentField.key;
+      const parentLabel = getFieldText(parentField, 'label', undefined, true) || parentField.label || parentField.key;
       const opt = parentField.options?.find(o => o.value === dep.value);
-      const optLabel = opt ? (opt.label || opt.value) : (dep.value === 'yes' ? '是' : dep.value);
-      return `仅当【${parentLabel}】选择"${optLabel}"时展开`;
+      const optLabel = opt ? (getOptionLabel(opt, undefined, true) || opt.label || opt.value) : (dep.value === 'yes' ? yesLabel : dep.value);
+      return {
+        parentField,
+        page,
+        parentLabel,
+        optLabel,
+        rawDep: dep
+      };
     }
   }
-  return `仅当选择"${dep.value === 'yes' ? '是' : dep.value}"时展开`;
+  const fallbackOpt = dep.value === 'yes' ? yesLabel : dep.value;
+  return {
+    parentField: null,
+    page: null,
+    parentLabel: dep.fieldKey,
+    optLabel: fallbackOpt,
+    rawDep: dep
+  };
 });
+
+function locateParentField() {
+  if (!dependencyInfo.value?.parentField) return;
+  const field = dependencyInfo.value.parentField;
+  selectElement(field);
+  nextTick(() => {
+    const el = document.querySelector(`[data-element-id="${field.id}"]`) || document.getElementById(`el_${field.id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+    highlightPropertyField('label');
+  });
+}
 
 function onToggleDependency(val: any) {
   if (!selectedElement.value) return;

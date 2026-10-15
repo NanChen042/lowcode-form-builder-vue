@@ -289,15 +289,10 @@ export const kycIndividualTemplate: FormSchema = {
           label: '提示',
           label_en: 'Note',
           key: 'alert_ubo_note',
-          showLabel: true,
           required: false,
-          options: [
-            {
-              label: '如果某一名自然人 直接或间接持有公司 25% 以上的股份，或 对公司拥有 重大影响力或实际控制权 (即使不持股)，该自然人应被视为公司的 最终受益所有人(UBO)。',
-              label_en: "If an individual directly or indirectly holds more than 25% of the company's shares, or has significant influence or actual control over the company (even without shareholding), that individual should be deemed an Ultimate Beneficial Owner (UBO) of the company.",
-              value: 'opt_ubo_desc'
-            }
-          ]
+          showLabel: true,
+          content: '- 如果某一名自然人 直接或间接持有公司 25% 以上的股份，或 对公司拥有 重大影响力或实际控制权 (即使不持股)，该自然人应被视为公司的 最终受益所有人(UBO)。',
+          content_en: "- If an individual directly or indirectly holds more than 25% of the company's shares, or has significant influence or actual control over the company (even without shareholding), that individual should be deemed an Ultimate Beneficial Owner (UBO) of the company."
         },
         {
           id: 'cmp_ind_ubo_q1',
@@ -345,20 +340,10 @@ export const kycIndividualTemplate: FormSchema = {
           label: '提示',
           label_en: 'Note',
           key: 'alert_pep_note',
-          showLabel: true,
           required: false,
-          options: [
-            {
-              label: '政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n· 国家元首或政府首脑（如总统、总理）\n· 高级政治人物（如部长、副部长、议员）\n· 高级政府官员（如政府部门或重要监管机构高级官员）\n· 司法或军事机构的高级官员（如最高法院法官、将军）\n· 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n· 中央银行高级管理人员（如行长、副行长）\n· 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员（如执行董事、理事会成员）',
-              label_en: 'Politically Exposed Persons (PEPs) refer to individuals who currently hold or have held prominent public functions in Singapore, foreign countries, or international organizations, including heads of state, senior politicians, government officials, judicial/military officers, SOE executives, central bankers, and international organization directors.',
-              value: 'opt_pep_desc1'
-            },
-            {
-              label: '基于 AML/CFT 合规要求，PEP 还包括：\n· PEP 的直系家庭成员\n· PEP 的密切关联人士',
-              label_en: 'Under AML/CFT compliance requirements, PEPs also include immediate family members and close associates.',
-              value: 'opt_pep_desc2'
-            }
-          ]
+          showLabel: true,
+          content: '政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n- 国家元首或政府首脑（如总统、总理）\n- 高级政治人物（如部长、副部长、议员）\n- 高级政府官员（如政府部门或重要监管机构高级官员）\n- 司法或军事机构的高级官员（如最高法院法官、将军）\n- 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n- 中央银行高级管理人员（如行长、副行长）\n- 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员\n\n基于 AML/CFT 合规要求，PEP 还包括：\n- PEP 的直系家庭成员\n- PEP 的密切关联人士',
+          content_en: 'Politically Exposed Persons (PEPs) refer to individuals who currently hold or have held prominent public functions in Singapore, foreign countries, or international organizations, including:\n- Heads of state or government\n- Senior politicians and officials\n- Judicial or military officers\n- Senior executives of state-owned enterprises\n- Central bank executives and directors of international organizations\n\nUnder AML/CFT compliance requirements, PEPs also include:\n- Immediate family members of PEPs\n- Close associates of PEPs'
         },
         {
           id: 'cmp_ind_pep_q1',
@@ -608,10 +593,8 @@ export const kycEntityTemplate: FormSchema = {
           label_en: 'Notice',
           key: 'alert_26',
           required: false,
-          options: [
-            { label: '您将作为以下公司的授权代表，完成KYC问卷填写。', label_en: 'You will complete the KYC survey as the authorized representative of the company.', value: 'opt_1' },
-            { label: '请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。', label_en: 'Please confirm if the information is accurate. If changes are needed, contact your provider before proceeding.', value: 'opt_2' }
-          ]
+          content: '',
+          content_en: ''
         },
         { id: 'cmp_27', type: 'input', label: '授权代表姓名', label_en: 'Authorized Representative Name', key: 'input_27', required: true, placeholder: '法定代表人或被授权人', placeholder_en: 'Legal representative or authorized proxy' },
         {

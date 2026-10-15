@@ -125,7 +125,7 @@ export function startAppTour(initialIndex = 0) {
     showProgress: true,
     animate: true,
     allowClose: true,
-    disableActiveInteraction: true,
+    disableActiveInteraction: false,
     overlayColor: 'rgba(15, 23, 42, 0.65)',
     stageRadius: 8,
     stagePadding: 6,

@@ -18,10 +18,17 @@
     <!-- 专属新手引导视口目标（严格对齐顶栏 56px 下方，杜绝负外边距穿透顶栏） -->
     <div id="tour-canvas-viewport" style="position: absolute; top: 56px; left: 0; right: 0; bottom: 0; pointer-events: none;" />
 
-    <!-- 画布世界 -->
-    <div class="canvas-world" :class="{ 'is-animating': store.isCanvasAnimating }" :style="{
-      transform: `translate(${store.canvasState.x}px, ${store.canvasState.y}px) scale(${store.canvasState.scale})`
-    }">
+    <!-- 画布世界 (加载时柔和静默，就绪后平滑淡入) -->
+    <div
+      class="canvas-world transition-opacity duration-300 ease-out"
+      :class="{
+        'opacity-0': store.isCanvasLoading,
+        'is-animating': store.isCanvasAnimating
+      }"
+      :style="{
+        transform: `translate(${store.canvasState.x}px, ${store.canvasState.y}px) scale(${store.canvasState.scale})`
+      }"
+    >
       <!-- SVG 页面连线 -->
       <CanvasConnections />
 
@@ -34,59 +41,7 @@
       />
     </div>
 
-    <!-- 全局画布初始化加载状态 -->
-    <div v-if="store.isCanvasLoading" class="absolute inset-0 flex items-center justify-center z-40 bg-slate-50/70 backdrop-blur-sm">
-      <div class="flex flex-col items-center justify-center p-8 bg-white/95 rounded-xl shadow-lg border border-slate-200/80">
-        <a-spin :size="32" :tip="t('canvas.initializing')" />
-        <span class="mt-3 text-xs text-slate-400">{{ t('canvas.preparingEnv') }}</span>
-      </div>
-    </div>
 
-    <!-- 全局空状态提示（标准简约实线边框微圆角，与网格点阵自然融合） -->
-    <div
-      v-else-if="store.pages.length === 0"
-      class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none select-none"
-    >
-      <div
-        class="pointer-events-auto flex flex-col items-center justify-center w-full max-w-[400px] mx-4 px-8 py-6 rounded-lg border border-slate-200/90 bg-white/95 shadow-sm transition-all duration-150"
-      >
-        <!-- 顶部轻拟物图标 -->
-        <div class="w-9 h-9 rounded-md bg-blue-50 text-[#1677ff] flex items-center justify-center mb-2.5 border border-blue-100">
-          <FilePlus2 class="w-4.5 h-4.5 stroke-[2]" />
-        </div>
-
-        <h3 class="mb-1 text-sm font-bold text-slate-800 tracking-tight">
-          {{ t('canvas.noPages') }}
-        </h3>
-        <p class="mb-4 text-xs text-slate-500 text-center max-w-[280px] leading-relaxed m-0">
-          {{ t('canvas.noPagesDesc') }}
-        </p>
-
-        <!-- 横排并列双按钮 (主按钮在左，次按钮在右，标准微圆角) -->
-        <div class="flex items-center gap-2.5">
-          <a-button
-            type="primary"
-            class="h-8 px-3.5 rounded bg-[#1677ff] text-xs font-medium flex items-center gap-1.5 shadow-2xs hover:bg-blue-600 transition-colors cursor-pointer"
-            @click="$emit('open-create-canvas')"
-          >
-            <template #icon>
-              <Plus class="h-3.5 w-3.5" />
-            </template>
-            {{ t('canvas.newCanvas') }}
-          </a-button>
-
-          <a-button
-            class="h-8 px-3.5 rounded border border-slate-200 bg-white text-slate-700 text-xs font-medium flex items-center gap-1.5 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer shadow-2xs"
-            @click="$emit('open-template-gallery')"
-          >
-            <template #icon>
-              <LayoutTemplate class="h-3.5 w-3.5 text-slate-500" />
-            </template>
-            {{ t('canvas.browseTemplates') }}
-          </a-button>
-        </div>
-      </div>
-    </div>
 
     <!-- 左上角 Figma UI3 独立悬浮胶囊小组件 (完全收起时浮现，1:1 还原 Figma 截图) -->
     <transition name="fade">
@@ -160,7 +115,7 @@
           <button
             type="button"
             class="flex items-center gap-1.5 cursor-pointer hover:text-[#1677ff] transition-colors py-0.5 outline-none bg-transparent border-0 p-0 text-left"
-            title="点击查看所有待补齐项清单"
+            :title="t('canvas.todoZhTitle')"
           >
             <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
             <span class="font-medium text-[12px] text-slate-700 hover:text-[#1677ff] whitespace-nowrap">
@@ -177,10 +132,10 @@
               <!-- 气泡顶栏 -->
               <div class="flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-slate-50/80 shrink-0">
                 <span class="text-xs font-semibold text-slate-800">
-                  {{ isMissingZh ? '中文待补齐清单' : '英文待翻译清单' }}
+                  {{ isMissingZh ? t('canvas.todoZhTitle') : t('canvas.todoEnTitle') }}
                 </span>
                 <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200/60">
-                  共 {{ translationStats.untranslatedCount }} 项
+                  {{ t('canvas.todoTotalCount', undefined, { count: translationStats.untranslatedCount }) }}
                 </span>
               </div>
 
@@ -208,7 +163,7 @@
                         {{ item.fieldName }}
                       </div>
                       <div class="text-[10.5px] text-slate-400 group-hover/item:text-blue-500/80 truncate">
-                        {{ item.targetLocale === 'zh' ? '英文' : '中文' }}: {{ item.sourceText }}
+                        {{ item.targetLocale === 'zh' ? (store.currentLocale === 'en' ? 'EN' : '英文') : (store.currentLocale === 'en' ? 'ZH' : '中文') }}: {{ item.sourceText }}
                       </div>
                     </div>
                     <ArrowRight class="w-3 h-3 text-slate-300 group-hover/item:text-[#1677ff] shrink-0" />
@@ -233,13 +188,13 @@
           class="flex items-center gap-1 font-medium text-[#1677ff] hover:text-blue-700 transition-colors cursor-pointer text-[12px] px-1 py-0.5 whitespace-nowrap active:scale-95"
           @click="handleJumpToCurrentUntranslated"
         >
-          <span>{{ translationStats.untranslatedCount > 1 ? `下一项 (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})` : '定位补齐' }}</span>
+          <span>{{ translationStats.untranslatedCount > 1 ? (store.currentLocale === 'en' ? `Next (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})` : `下一项 (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})`) : t('canvas.todoLocate') }}</span>
           <ArrowRight class="w-3 h-3" />
         </button>
         <button
           type="button"
           class="flex items-center justify-center w-4 h-4 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer ml-0.5"
-          title="暂时忽略"
+          :title="t('canvas.todoIgnore')"
           @click="isPillDismissed = true"
         >
           <X class="w-3.5 h-3.5" />
@@ -254,7 +209,12 @@
       class="absolute bottom-8 right-8 z-50 flex items-center gap-2 select-none"
     >
       <!-- 缩放控制胶囊按钮与 Arco 原生下拉菜单 -->
-      <a-dropdown v-model:popup-visible="isZoomMenuOpen" trigger="click" position="top">
+      <a-dropdown
+        v-model:popup-visible="isZoomMenuOpen"
+        trigger="click"
+        position="top"
+        :popup-max-height="false"
+      >
         <button
           type="button"
           class="flex h-8 min-w-[64px] cursor-pointer items-center justify-center rounded-full border border-slate-200/90 bg-white/90 px-3.5 font-mono text-[13px] font-semibold text-slate-700 shadow-sm shadow-black/5 backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95"
@@ -264,7 +224,7 @@
         </button>
         <template #content>
           <a-doption value="in" @click="handleZoomAction('in')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
+            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
                 {{ t('canvas.zoomIn') }}
               </span>
@@ -274,7 +234,7 @@
             </div>
           </a-doption>
           <a-doption value="out" @click="handleZoomAction('out')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
+            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
                 {{ t('canvas.zoomOut') }}
               </span>
@@ -284,7 +244,7 @@
             </div>
           </a-doption>
           <a-doption value="100" @click="handleZoomAction('100')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
+            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
                 {{ t('canvas.zoom100') }}
               </span>
@@ -294,7 +254,7 @@
             </div>
           </a-doption>
           <a-doption value="fit" @click="handleZoomAction('fit')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
+            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
                 {{ t('canvas.zoomFit') }}
               </span>
@@ -304,7 +264,7 @@
             </div>
           </a-doption>
           <a-doption value="selection" @click="handleZoomAction('selection')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[170px] py-0.5 whitespace-nowrap">
+            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
               <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
                 {{ t('canvas.zoomSelection') }}
               </span>
@@ -315,161 +275,7 @@
           </a-doption>
         </template>
       </a-dropdown>
-
-      <!-- 帮助与快捷键圆形按钮 (现代化高级白色毛玻璃 + 原生深黑气泡提示) -->
-      <a-tooltip
-        :content="t('canvas.helpTooltip')"
-        position="top"
-      >
-        <button
-          type="button"
-          class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-[14px] font-semibold text-slate-600 shadow-sm shadow-black/5 backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95"
-          @click="showHelpAlert"
-        >
-          ?
-        </button>
-      </a-tooltip>
     </div>
-
-    <!-- 平台帮助与快捷键指南弹窗 (现代化分类卡片排版) -->
-    <a-modal
-      v-model:visible="helpModalVisible"
-      :title="t('canvas.helpModalTitle')"
-      :footer="false"
-      :width="500"
-      draggable
-      unmount-on-close
-    >
-      <div class="space-y-4 py-1 select-none">
-        <!-- 视口与缩放 -->
-        <div>
-          <div class="text-[12px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            {{ t('canvas.secCanvasZoom') }}
-          </div>
-          <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-50/80 p-3 border border-slate-100">
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.zoomIn') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⌘ +' : 'Ctrl +' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.zoomOut') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⌘ -' : 'Ctrl -' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.zoom100') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⇧ 0' : 'Shift + 0' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.zoomFit') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⇧ 1' : 'Shift + 1' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.zoomSelection') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⇧ 2' : 'Shift + 2' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.panCanvas') }}
-              </span>
-              <span class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
-                <span>+</span>
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ t('canvas.leftDrag') }}</kbd>
-              </span>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.smoothZoom') }}
-              </span>
-              <span class="flex items-center gap-1 font-mono text-[11px] text-slate-600">
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ isMac ? '⌘' : 'Ctrl' }}</kbd>
-                <span>+</span>
-                <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white shadow-xs">{{ t('canvas.wheel') }}</kbd>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 常用编辑快捷操作 -->
-        <div>
-          <div class="text-[12px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            {{ t('canvas.secFormEditing') }}
-          </div>
-          <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-50/80 p-3 border border-slate-100">
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.searchComponents') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⌘ K' : 'Ctrl + K' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.contextMenu') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ t('canvas.rightClick') }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.inlineTextEdit') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ t('canvas.clickText') }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.duplicateElement') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                {{ isMac ? '⌘ D' : 'Ctrl + D' }}
-              </kbd>
-            </div>
-            <div class="flex items-center justify-between text-[13px]">
-              <span class="text-slate-700 font-medium">
-                {{ t('canvas.deleteElement') }}
-              </span>
-              <kbd class="px-2 py-0.5 rounded border border-slate-200 bg-white font-mono text-[11px] text-slate-600 shadow-xs">
-                Delete
-              </kbd>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-5 flex items-center justify-between">
-        <a-button type="outline" class="rounded-lg" @click="handleRestartTour">
-          <template #icon><Sparkles class="h-4 w-4 text-[#1677ff]" /></template>
-          {{ t('canvas.productTour') }}
-        </a-button>
-        <a-button type="primary" class="rounded-lg px-5" @click="helpModalVisible = false">
-          {{ t('canvas.gotIt') }}
-        </a-button>
-      </div>
-    </a-modal>
 
     <!-- 右键菜单 -->
     <ContextMenu :visible="contextMenuVisible" :x="contextMenuPos.x" :y="contextMenuPos.y" :target-page-id="contextMenuTargetPageId" :target-element-id="contextMenuTargetElementId" :target-type="contextMenuTargetType" @close="contextMenuVisible = false" />
@@ -495,12 +301,8 @@ import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
 import ContextMenu from './ContextMenu.vue';
 import {
-  Plus,
-  LayoutTemplate,
-  FilePlus2,
   PanelLeft,
   PanelRight,
-  Sparkles,
   Boxes,
   ArrowRight,
   ChevronUp,
@@ -508,7 +310,6 @@ import {
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
-import { startAppTour } from '@/utils/useAppTour';
 
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
@@ -534,13 +335,17 @@ const isMissingZh = computed(() => {
 
 const pillTitle = computed(() => {
   const count = translationStats.value.untranslatedCount;
-  const langLabel = isMissingZh.value ? '中文' : '英文';
   if (count === 1) {
     const item = translationStats.value.untranslatedItems[0];
-    const fieldName = item ? `（${item.fieldName}）` : '';
-    return `1 项${langLabel}未填写${fieldName}`;
+    const fieldName = item ? ` (${item.fieldName})` : '';
+    const base = isMissingZh.value
+      ? t('canvas.todoZhCount', undefined, { count: 1 })
+      : t('canvas.todoEnCount', undefined, { count: 1 });
+    return `${base}${fieldName}`;
   }
-  return `${count} 项${langLabel}待补齐`;
+  return isMissingZh.value
+    ? t('canvas.todoZhCount', undefined, { count })
+    : t('canvas.todoEnCount', undefined, { count });
 });
 
 function handleJumpToCurrentUntranslated() {
@@ -671,30 +476,67 @@ const contextMenuTargetPageId = ref<string | null>(null);
 const contextMenuTargetElementId = ref<string | null>(null);
 const contextMenuTargetType = ref<'element' | 'page' | 'canvas'>('canvas');
 
-// 平移鼠标跟踪状态
+// 平移鼠标跟踪与微阻尼物理顺滑跟随状态
 let panStartX = 0;
 let panStartY = 0;
 let panStartCanvasX = 0;
 let panStartCanvasY = 0;
+let targetCanvasX = 0;
+let targetCanvasY = 0;
+let panRafId: number | null = null;
 let frameStartX = 0;
 let frameStartY = 0;
 
+// 微阻尼平滑平移物理引擎（方案一：对齐 Figma / Google Stitch 高级空气阻尼质感）
+function updateSmoothPan() {
+  const dx = targetCanvasX - store.canvasState.x;
+  const dy = targetCanvasY - store.canvasState.y;
+
+  if (store.isPanning) {
+    // 拖拽平移中：柔和微阻尼物理跟随（0.28 阻尼系数，完美吸收人手微颤与急停，质感极度柔和丝滑）
+    if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+      store.canvasState.x += dx * 0.28;
+      store.canvasState.y += dy * 0.28;
+    } else {
+      store.canvasState.x = targetCanvasX;
+      store.canvasState.y = targetCanvasY;
+    }
+    panRafId = requestAnimationFrame(updateSmoothPan);
+  } else {
+    // 鼠标释放后：柔和微衰减贴合至目标终点，彻底消除急停机械感与突兀感
+    if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+      store.canvasState.x += dx * 0.28;
+      store.canvasState.y += dy * 0.28;
+      panRafId = requestAnimationFrame(updateSmoothPan);
+    } else {
+      store.canvasState.x = targetCanvasX;
+      store.canvasState.y = targetCanvasY;
+      panRafId = null;
+    }
+  }
+}
+
 // 缩放预设菜单状态与动作
 const isZoomMenuOpen = ref(false);
-const helpModalVisible = ref(false);
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || '');
 
 function zoomTo100() {
   const oldScale = store.canvasState.scale;
-  if (oldScale === 1.0) return;
+  if (Math.abs(oldScale - 1.0) < 0.001) return;
   animateCanvasTransition(300);
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
+  const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+  const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+  const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
+  const viewportHeight = Math.max(320, window.innerHeight - 56);
+  const centerX = leftWidth + viewportWidth / 2;
+  const centerY = 56 + viewportHeight / 2;
   const worldX = (centerX - store.canvasState.x) / oldScale;
   const worldY = (centerY - store.canvasState.y) / oldScale;
   store.canvasState.scale = 1.0;
   store.canvasState.x = centerX - worldX;
   store.canvasState.y = centerY - worldY;
+  targetCanvasX = store.canvasState.x;
+  targetCanvasY = store.canvasState.y;
 }
 
 function zoomToSelection() {
@@ -735,17 +577,6 @@ function handleZoomAction(action: 'in' | 'out' | '100' | 'fit' | 'selection') {
   isZoomMenuOpen.value = false;
 }
 
-function showHelpAlert() {
-  helpModalVisible.value = true;
-}
-
-function handleRestartTour() {
-  helpModalVisible.value = false;
-  setTimeout(() => {
-    startAppTour();
-  }, 250);
-}
-
 function onMouseDown(e: MouseEvent) {
   if (isZoomMenuOpen.value) {
     isZoomMenuOpen.value = false;
@@ -753,7 +584,6 @@ function onMouseDown(e: MouseEvent) {
   if (contextMenuVisible.value) {
     contextMenuVisible.value = false;
   }
-  if (store.pages.length === 0) return;
   if ((e.target as HTMLElement).closest('.ruler')) return;
 
   const isSpaceDrag = store.isSpacePressed;
@@ -767,11 +597,17 @@ function onMouseDown(e: MouseEvent) {
 
   if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag) {
     e.preventDefault();
+    if (panRafId) {
+      cancelAnimationFrame(panRafId);
+      panRafId = null;
+    }
     store.isPanning = true;
     panStartX = e.clientX;
     panStartY = e.clientY;
     panStartCanvasX = store.canvasState.x;
     panStartCanvasY = store.canvasState.y;
+    targetCanvasX = store.canvasState.x;
+    targetCanvasY = store.canvasState.y;
     document.body.classList.add('is-panning');
 
     if (e.button === 0 && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
@@ -792,8 +628,11 @@ function onMouseDown(e: MouseEvent) {
 function onMouseMove(e: MouseEvent) {
   if (store.isPanning) {
     e.preventDefault();
-    store.canvasState.x = panStartCanvasX + (e.clientX - panStartX);
-    store.canvasState.y = panStartCanvasY + (e.clientY - panStartY);
+    targetCanvasX = panStartCanvasX + (e.clientX - panStartX);
+    targetCanvasY = panStartCanvasY + (e.clientY - panStartY);
+    if (!panRafId) {
+      panRafId = requestAnimationFrame(updateSmoothPan);
+    }
   } else if (store.isDraggingFrame && store.draggedFrameId) {
     e.preventDefault();
     const dx = (e.clientX - panStartX) / store.canvasState.scale;
@@ -810,6 +649,14 @@ function onMouseUp() {
   if (store.isPanning) {
     store.isPanning = false;
     document.body.classList.remove('is-panning');
+    // 若平移结束时仍有微小距离，唤醒动画平滑衰减贴合终点
+    if (!panRafId) {
+      const dx = targetCanvasX - store.canvasState.x;
+      const dy = targetCanvasY - store.canvasState.y;
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        panRafId = requestAnimationFrame(updateSmoothPan);
+      }
+    }
   }
   if (store.isDraggingFrame) {
     store.isDraggingFrame = false;
@@ -825,8 +672,12 @@ function onWheel(e: WheelEvent) {
   if (contextMenuVisible.value) {
     contextMenuVisible.value = false;
   }
-  if (store.pages.length === 0) return;
   e.preventDefault();
+
+  if (panRafId) {
+    cancelAnimationFrame(panRafId);
+    panRafId = null;
+  }
 
   if (e.ctrlKey || e.metaKey) {
     const oldScale = store.canvasState.scale;
@@ -850,6 +701,9 @@ function onWheel(e: WheelEvent) {
       store.canvasState.x -= dx;
     }
   }
+
+  targetCanvasX = store.canvasState.x;
+  targetCanvasY = store.canvasState.y;
 }
 
 function onContextMenu(e: MouseEvent) {
@@ -895,11 +749,6 @@ function onContextMenu(e: MouseEvent) {
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
-    if (helpModalVisible.value) {
-      helpModalVisible.value = false;
-      e.preventDefault();
-      return;
-    }
     if (isZoomMenuOpen.value) {
       isZoomMenuOpen.value = false;
       e.preventDefault();
@@ -910,6 +759,23 @@ function handleKeyDown(e: KeyboardEvent) {
       e.preventDefault();
       return;
     }
+  }
+
+  // 1. 全局最高优先拦截 Ctrl/Cmd + D 复制组件（在任何输入框检查之前拦截，彻底封死浏览器添加书签弹窗）
+  const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+  const isKeyD = e.code === 'KeyD' || (e.key && e.key.toLowerCase() === 'd');
+
+  if (isCtrlOrCmd && isKeyD) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (store.selectedType === 'element' && store.selectedId) {
+      duplicateElement(store.selectedId);
+      Message.success(store.currentLocale === 'en' ? 'Component duplicated (Ctrl+D)' : '已复制所选组件 (Ctrl+D)');
+    } else {
+      Message.info(store.currentLocale === 'en' ? 'Please select a component on canvas to duplicate' : '请先在画布中选中要复制的组件');
+    }
+    return;
   }
 
   const activeEl = document.activeElement as HTMLElement | null;
@@ -923,38 +789,34 @@ function handleKeyDown(e: KeyboardEvent) {
 
   // 快捷键支持
   // 1. Zoom in: Ctrl/Cmd + '+' or '='
-  if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+  if (isCtrlOrCmd && (e.key === '=' || e.key === '+' || e.code === 'Equal' || e.code === 'NumpadAdd')) {
     e.preventDefault();
     adjustZoom(0.1);
   }
   // 2. Zoom out: Ctrl/Cmd + '-' or '_'
-  else if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+  else if (isCtrlOrCmd && (e.key === '-' || e.key === '_' || e.code === 'Minus' || e.code === 'NumpadSubtract')) {
     e.preventDefault();
     adjustZoom(-0.1);
   }
-  // 3. Zoom to 100%: Shift+0 或 Ctrl/Cmd+0
-  else if (((e.ctrlKey || e.metaKey) && e.key === '0') || (e.shiftKey && e.key === '0')) {
+  // 3. Zoom to 100% (还原): Shift+0 或 Ctrl/Cmd+0
+  else if (
+    (isCtrlOrCmd && (e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0')) ||
+    (e.shiftKey && (e.key === '0' || e.key === ')' || e.code === 'Digit0' || e.code === 'Numpad0') && !isCtrlOrCmd)
+  ) {
     e.preventDefault();
     handleZoomAction('100');
   }
   // 4. Zoom to Fit: Shift+1
-  else if (e.shiftKey && (e.key === '1' || e.code === 'Digit1') && !e.ctrlKey && !e.metaKey) {
+  else if (e.shiftKey && (e.key === '1' || e.key === '!' || e.code === 'Digit1' || e.code === 'Numpad1') && !isCtrlOrCmd) {
     e.preventDefault();
     handleZoomAction('fit');
   }
   // 5. Zoom to Selection: Shift+2
-  else if (e.shiftKey && (e.key === '2' || e.code === 'Digit2') && !e.ctrlKey && !e.metaKey) {
+  else if (e.shiftKey && (e.key === '2' || e.key === '@' || e.code === 'Digit2' || e.code === 'Numpad2') && !isCtrlOrCmd) {
     e.preventDefault();
     handleZoomAction('selection');
   }
-  // 6. Duplicate Element: Ctrl/Cmd + D
-  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
-    if (store.selectedType === 'element' && store.selectedId) {
-      e.preventDefault();
-      duplicateElement(store.selectedId);
-    }
-  }
-  // 7. Delete Element: Delete / Backspace
+  // 6. Delete Element: Delete / Backspace
   else if (e.key === 'Delete' || e.key === 'Backspace') {
     if (store.selectedType === 'element' && store.selectedId) {
       e.preventDefault();
@@ -972,18 +834,22 @@ function handleKeyUp(e: KeyboardEvent) {
 onMounted(() => {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
-  window.addEventListener('keydown', handleKeyDown);
-  window.addEventListener('keyup', handleKeyUp);
+  window.addEventListener('keydown', handleKeyDown, true);
+  window.addEventListener('keyup', handleKeyUp, true);
 });
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove);
   window.removeEventListener('mouseup', onMouseUp);
-  window.removeEventListener('keydown', handleKeyDown);
-  window.removeEventListener('keyup', handleKeyUp);
+  window.removeEventListener('keydown', handleKeyDown, true);
+  window.removeEventListener('keyup', handleKeyUp, true);
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = null;
+  }
+  if (panRafId) {
+    cancelAnimationFrame(panRafId);
+    panRafId = null;
   }
 });
 </script>

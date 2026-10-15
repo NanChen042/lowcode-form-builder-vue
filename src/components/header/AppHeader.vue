@@ -248,6 +248,16 @@
         </div>
       </template>
     </a-modal>
+
+    <!-- 顶部 2.5px 极光流动微进度条 (Linear / Vercel 风格，无感且优雅) -->
+    <transition name="nano-progress-fade">
+      <div
+        v-if="store.isCanvasLoading"
+        class="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50 bg-blue-50/70"
+      >
+        <div class="nano-stream-bar h-full w-full" />
+      </div>
+    </transition>
   </header>
 </template>
 
@@ -408,7 +418,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(na
 
 function handleGlobalKeyDown(e: KeyboardEvent) {
   // 拦截 Ctrl+S (Windows/Linux) 或 Cmd+S (Mac)，阻止浏览器原生另存为网页行为，执行应用保存
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+  if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || (e.key && e.key.toLowerCase() === 's'))) {
     e.preventDefault();
     e.stopPropagation();
     handleSave();
@@ -452,5 +462,31 @@ onUnmounted(() => {
 :deep(.logout-option:hover .arco-dropdown-option-icon),
 :deep(.logout-option:hover .arco-dropdown-option-content) {
   color: #dc2626 !important;
+}
+
+/* 顶部极光微流光进度条 */
+.nano-stream-bar {
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 35%, #93c5fd 65%, #2563eb 100%);
+  background-size: 200% 100%;
+  animation: nano-stream-anim 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes nano-stream-anim {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.nano-progress-fade-enter-active,
+.nano-progress-fade-leave-active {
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nano-progress-fade-enter-from,
+.nano-progress-fade-leave-to {
+  opacity: 0;
 }
 </style>

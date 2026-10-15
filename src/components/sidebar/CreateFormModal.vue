@@ -1,9 +1,12 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :title="store.currentLocale === 'en' ? 'New Form Canvas' : '新建表单画布'"
+    :title="t('modal.createForm.title')"
     :width="460"
     :title-align="'start'"
+    :closable="false"
+    :mask-closable="false"
+    :esc-to-close="false"
     draggable
     unmount-on-close
     class="clean-create-modal"
@@ -19,13 +22,13 @@
         <template #icon>
           <Lock class="h-3.5 w-3.5 text-[#1677ff]" />
         </template>
-        <span>{{ store.currentLocale === 'en' ? 'Locked Profile: ' : '已锁定主体：' }}{{ lockedTypeName }}</span>
+        <span>{{ t('modal.createForm.lockedProfile') }}{{ lockedTypeName }}</span>
       </a-alert>
 
       <!-- 1. 业务主体选择 (平铺标准微圆角卡片) -->
       <div>
         <div class="text-xs font-semibold text-slate-700 mb-1.5">
-          {{ store.currentLocale === 'en' ? 'Profile Type' : '业务主体' }}
+          {{ t('modal.createForm.profileType') }}
         </div>
         <div class="grid grid-cols-3 gap-2">
           <button
@@ -51,7 +54,7 @@
       <!-- 2. 表单名称设置 -->
       <div>
         <div class="text-xs font-semibold text-slate-700 mb-1.5">
-          {{ store.currentLocale === 'en' ? 'Form Title' : '表单名称' }}
+          {{ t('modal.createForm.formTitle') }}
         </div>
         <a-input
           ref="titleInputRef"
@@ -64,18 +67,45 @@
       </div>
 
       <p class="text-[11.5px] text-slate-400 m-0 leading-normal">
-        {{ store.currentLocale === 'en' ? 'Initializes basic profile artboard for the selected entity. You can freely orchestrate components on the canvas afterward.' : '初始化所选主体的基本资料画板，后续可在画布中自由拖拽编排。' }}
+        {{ t('modal.createForm.desc') }}
       </p>
     </div>
 
-    <!-- 弹窗底部操作栏 (主操作 立即创建 在左，次操作 取消 在右) -->
+    <!-- 弹窗底部操作栏 -->
     <template #footer>
       <div class="flex items-center justify-end gap-2">
         <a-button type="primary" class="bg-[#1677ff]" @click="handleConfirm">
-          {{ store.currentLocale === 'en' ? 'Create Canvas' : '立即创建' }}
+          {{ t('modal.createForm.create') }}
         </a-button>
         <a-button @click="handleCancel">
-          {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
+          {{ t('modal.createForm.cancel') }}
+        </a-button>
+      </div>
+    </template>
+  </a-modal>
+
+  <!-- 画布覆盖二次确认弹窗 -->
+  <a-modal
+    v-model:visible="confirmOverwriteVisible"
+    :title="t('modal.createForm.confirmOverwriteTitle')"
+    :width="380"
+    :title-align="'start'"
+    draggable
+    unmount-on-close
+    class="clean-confirm-modal"
+    @cancel="confirmOverwriteVisible = false"
+  >
+    <div class="text-[13px] text-slate-600 leading-normal">
+      {{ t('modal.createForm.confirmOverwriteDesc', undefined, { pages: store.pages.length }) }}
+    </div>
+
+    <template #footer>
+      <div class="flex items-center justify-end gap-2">
+        <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="executeCreateCanvas">
+          {{ t('modal.createForm.confirmOverwriteBtn') }}
+        </a-button>
+        <a-button @click="confirmOverwriteVisible = false">
+          {{ t('modal.createForm.cancel') }}
         </a-button>
       </div>
     </template>
@@ -89,6 +119,7 @@ import {
   store,
   createNewCanvas
 } from '@/core/store';
+import { t } from '@/core/i18n';
 import {
   Building2,
   UserCheck,
@@ -100,7 +131,7 @@ import { Message } from '@arco-design/web-vue';
 const props = defineProps<{
   visible: boolean;
 }>();
-const emit = defineEmits(['close', 'update:visible', 'created']);
+const emit = defineEmits(['close', 'update:visible', 'created', 'cancel']);
 
 const modalVisible = computed({
   get: () => props.visible,
@@ -115,26 +146,26 @@ const customTitle = ref('');
 const titleInputRef = ref<any>(null);
 
 const profileOptions = computed(() => [
-  { value: 'customer' as const, label: store.currentLocale === 'en' ? 'Customer' : '客户案例', icon: Building2 },
-  { value: 'individual' as const, label: store.currentLocale === 'en' ? 'Individual' : '个人案例', icon: UserCheck },
-  { value: 'entity' as const, label: store.currentLocale === 'en' ? 'Entity' : '机构案例', icon: ShieldCheck }
+  { value: 'customer' as const, label: t('modal.createForm.customer'), icon: Building2 },
+  { value: 'individual' as const, label: t('modal.createForm.individual'), icon: UserCheck },
+  { value: 'entity' as const, label: t('modal.createForm.entity'), icon: ShieldCheck }
 ]);
 
 const lockedTypeName = computed(() => {
-  const t = store.lockedProfileType;
-  if (t === 'individual') return store.currentLocale === 'en' ? 'Individual' : '个人案例';
-  if (t === 'entity') return store.currentLocale === 'en' ? 'Entity' : '机构案例';
-  return store.currentLocale === 'en' ? 'Customer' : '客户案例';
+  const profile = store.lockedProfileType;
+  if (profile === 'individual') return t('modal.createForm.individual');
+  if (profile === 'entity') return t('modal.createForm.entity');
+  return t('modal.createForm.customer');
+});
+
+const defaultTitleForProfile = computed(() => {
+  if (selectedProfile.value === 'individual') return 'SG_CDD_Individual';
+  if (selectedProfile.value === 'entity') return 'SG_CDD_Entity';
+  return 'SG_CDD_Customer';
 });
 
 const computedTitlePlaceholder = computed(() => {
-  if (selectedProfile.value === 'individual') {
-    return store.currentLocale === 'en' ? 'Default: SG_CDD_Individual' : '留空默认为：SG_CDD_Individual';
-  }
-  if (selectedProfile.value === 'entity') {
-    return store.currentLocale === 'en' ? 'Default: SG_CDD_Entity' : '留空默认为：SG_CDD_Entity';
-  }
-  return store.currentLocale === 'en' ? 'Default: SG_CDD_Customer' : '留空默认为：SG_CDD_Customer';
+  return t('modal.createForm.defaultPlaceholder', undefined, { title: defaultTitleForProfile.value });
 });
 
 watch(
@@ -143,7 +174,7 @@ watch(
     if (val) {
       customTitle.value = '';
       if (store.lockedProfileType) {
-        selectedProfile.value = store.lockedProfileType === 'client' ? 'customer' : store.lockedProfileType;
+        selectedProfile.value = store.lockedProfileType;
       } else {
         selectedProfile.value = 'customer';
       }
@@ -154,27 +185,35 @@ watch(
   }
 );
 
+const confirmOverwriteVisible = ref(false);
+
 function handleCancel() {
+  confirmOverwriteVisible.value = false;
   modalVisible.value = false;
+  emit('cancel');
   emit('close');
 }
 
 function handleConfirm() {
-  const pType = selectedProfile.value === 'client' ? 'customer' : selectedProfile.value;
-  const defaultTitle = pType === 'individual'
-    ? 'SG_CDD_Individual'
-    : pType === 'entity'
-    ? 'SG_CDD_Entity'
-    : 'SG_CDD_Customer';
-  const title = customTitle.value.trim() || defaultTitle;
+  if (store.pages.length > 0) {
+    confirmOverwriteVisible.value = true;
+    return;
+  }
+  executeCreateCanvas();
+}
+
+function executeCreateCanvas() {
+  const pType = selectedProfile.value;
+  const title = customTitle.value.trim() || defaultTitleForProfile.value;
 
   createNewCanvas({
     title,
-    description: store.currentLocale === 'en' ? 'Custom form created from blank canvas' : '从空白画布创建的自定义表单',
+    description: t('modal.createForm.defaultDesc'),
     profileType: pType
   });
 
-  Message.success(store.currentLocale === 'en' ? 'Form canvas created successfully' : '表单画布创建成功');
+  Message.success(t('modal.createForm.createdSuccess'));
+  confirmOverwriteVisible.value = false;
   modalVisible.value = false;
   emit('created');
   emit('close');

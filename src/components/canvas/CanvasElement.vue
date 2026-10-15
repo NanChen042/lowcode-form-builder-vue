@@ -5,7 +5,8 @@
     :class="{
       'is-selected': isSelected,
       'is-branch-child': Boolean(element.dependsOn),
-      '!ml-6': Boolean(element.dependsOn)
+      'branch-depth-1': elementDepth === 1,
+      'branch-depth-2': elementDepth >= 2
     }"
     :data-type="element.type"
     @click.stop="handleClick"
@@ -17,6 +18,12 @@
     >
       <div class="absolute -top-1 -left-[3px] w-2 h-2 rounded-full bg-blue-500 border border-white shadow-xs"></div>
     </div>
+
+    <!-- 祖先贯穿导轨 (仅当 2 级子项后续还有 1 级同辈时在 x=13px 绘制贯穿线) -->
+    <div
+      v-if="hasGrandparentPassThrough"
+      class="absolute -left-[35px] top-[-13px] -bottom-[13px] w-[2px] bg-blue-500 z-10 pointer-events-none"
+    ></div>
 
     <!-- 连线：子级左侧连续树状导轨连线与指向箭头 (将整组组件真正串联) -->
     <div
@@ -63,7 +70,8 @@
         title="条件从属项：位置已锁定并跟随父级联动"
       >
         <Lock class="w-2.5 h-2.5 text-blue-500 shrink-0" />
-        若选「{{ triggerOptName }}」
+        {{ t('canvas.conditionPrefix', undefined, { option: triggerOptName }) }}
+        <span v-if="elementDepth >= 2" class="text-[9.5px] bg-blue-100/90 text-blue-700 px-1 py-0.2 rounded font-semibold ml-0.5">2级</span>
       </span>
     </div>
 
@@ -76,6 +84,7 @@
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
+import { t, getOptionLabel } from '@/core/i18n';
 import { Copy, Trash2, Lock } from '@lucide/vue';
 
 import InputElement from './elements/InputElement.vue';
@@ -104,10 +113,12 @@ const triggerOptName = computed(() => {
     const parentField = page.fields.find(f => f.key === dep.fieldKey);
     if (parentField) {
       const opt = parentField.options?.find(o => o.value === dep.value);
-      if (opt && opt.label) return opt.label;
+      if (opt) {
+        return getOptionLabel(opt, undefined, true) || opt.label || opt.value;
+      }
     }
   }
-  return dep.value === 'yes' ? '是' : (dep.value === 'no' ? '否' : dep.value);
+  return dep.value === 'yes' ? t('canvas.yes') : (dep.value === 'no' ? t('canvas.no') : dep.value);
 });
 
 const currentPage = computed(() => {
@@ -119,6 +130,23 @@ const currentFieldIndex = computed(() => {
   return currentPage.value.fields.findIndex(f => f.id === props.element.id);
 });
 
+const elementDepth = computed(() => {
+  if (!props.element?.dependsOn || !currentPage.value) return 0;
+  let depth = 0;
+  let current: FormElement | undefined = props.element;
+  const visited = new Set<string>();
+  const fields = currentPage.value.fields;
+  while (current?.dependsOn?.fieldKey) {
+    if (visited.has(current.dependsOn.fieldKey)) break;
+    visited.add(current.dependsOn.fieldKey);
+    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
+    if (!parent) break;
+    depth++;
+    current = parent;
+  }
+  return depth;
+});
+
 // 是否作为联动分支的父级组件（当紧随其后的组件有依赖当前组件时，向下引出主干母线）
 const isBranchParent = computed(() => {
   if (!currentPage.value || currentFieldIndex.value === -1) return false;
@@ -127,13 +155,35 @@ const isBranchParent = computed(() => {
   return Boolean(nextField && nextField.dependsOn?.fieldKey === props.element.key);
 });
 
+// 是否在此分支组中后面还有依赖同一父级的兄弟组件
+const hasLaterSibling = computed(() => {
+  if (!props.element.dependsOn || !currentPage.value || currentFieldIndex.value === -1) return false;
+  const fields = currentPage.value.fields;
+  for (let i = currentFieldIndex.value + 1; i < fields.length; i++) {
+    if (fields[i].dependsOn?.fieldKey === props.element.dependsOn.fieldKey) {
+      return true;
+    }
+  }
+  return false;
+});
+
 // 是否是分支序列中的最后一个子组件（如果是最后一个，导轨向下弯折收口；如果后面还有同组子组件，主干导轨继续贯穿向下）
 const isLastBranchChild = computed(() => {
   if (!props.element.dependsOn) return false;
-  if (!currentPage.value || currentFieldIndex.value === -1) return true;
+  return !hasLaterSibling.value;
+});
+
+// 如果当前组件是 2 级追问，且祖父组件名下在当前组件后面还有同辈 1 级组件，则在 x=13px 位置绘制贯穿竖线
+const hasGrandparentPassThrough = computed(() => {
+  if (elementDepth.value < 2 || !currentPage.value || currentFieldIndex.value === -1) return false;
   const fields = currentPage.value.fields;
-  const nextField = fields[currentFieldIndex.value + 1];
-  return !nextField || nextField.dependsOn?.fieldKey !== props.element.dependsOn.fieldKey;
+  const parent = fields.find(f => f.key === props.element.dependsOn?.fieldKey);
+  if (!parent?.dependsOn?.fieldKey) return false;
+  const grandparentKey = parent.dependsOn.fieldKey;
+  for (let i = currentFieldIndex.value + 1; i < fields.length; i++) {
+    if (fields[i].dependsOn?.fieldKey === grandparentKey) return true;
+  }
+  return false;
 });
 
 const renderComponent = computed(() => {
@@ -182,3 +232,12 @@ function handleClick(e: MouseEvent) {
   }
 }
 </script>
+
+<style scoped>
+.canvas-element.branch-depth-1 {
+  margin-left: 24px !important;
+}
+.canvas-element.branch-depth-2 {
+  margin-left: 48px !important;
+}
+</style>

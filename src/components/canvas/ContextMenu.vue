@@ -20,7 +20,7 @@
           </template>
           <span>{{ t('context.duplicate') }}</span>
           <template #suffix>
-            <span class="text-[10px] text-slate-400 font-mono">Ctrl+D</span>
+            <span class="text-[10px] text-slate-400 font-mono">{{ isMac ? '⌘D' : 'Ctrl+D' }}</span>
           </template>
         </a-doption>
 
@@ -146,6 +146,8 @@ const props = withDefaults(
     targetType: 'canvas'
   }
 );
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 const emit = defineEmits<{
   (e: 'close'): void;

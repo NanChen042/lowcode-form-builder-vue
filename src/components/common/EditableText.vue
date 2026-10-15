@@ -2,7 +2,7 @@
   <component
     :is="tag"
     ref="textRef"
-    class="outline-none transition-all duration-200 cursor-text hover:text-[#1677ff] editable-text-node"
+    class="outline-none cursor-text hover:text-[#1677ff] editable-text-node"
     :class="[
       customClass,
       { 'canvas-text-focus': isFocused }
@@ -11,28 +11,31 @@
     contenteditable="plaintext-only"
     spellcheck="false"
     style="user-select: text !important; -webkit-user-select: text !important; outline: none !important;"
+    @mousedown="handleMouseDown"
+    @dragstart.prevent
     @focus="handleFocus"
     @blur="handleBlur"
     @input="handleInput"
-    @keydown.enter.prevent="handleEnter"
+    @keydown.enter="handleEnter"
   />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { store, markDirty, highlightPropertyField, selectElement } from '@/core/store';
+import { store, markDirty, highlightPropertyField, selectElement, selectPage } from '@/core/store';
 
 const props = withDefaults(
   defineProps<{
     modelValue?: string;
     placeholder?: string;
     elementId?: string;
-    field?: 'label' | 'help' | 'placeholder' | 'option' | 'title' | 'description';
+    field?: 'label' | 'help' | 'placeholder' | 'option' | 'title' | 'description' | 'content';
     optionIndex?: number;
     customClass?: string;
     tag?: string;
     autoSelect?: boolean;
     allowEmpty?: boolean;
+    multiline?: boolean;
   }>(),
   {
     modelValue: '',
@@ -40,7 +43,8 @@ const props = withDefaults(
     field: 'label',
     tag: 'span',
     autoSelect: true,
-    allowEmpty: false
+    allowEmpty: false,
+    multiline: false
   }
 );
 
@@ -64,10 +68,18 @@ const isFocused = computed(() => {
   return true;
 });
 
+function getElementText(): string {
+  if (!textRef.value) return '';
+  if (props.multiline) {
+    return textRef.value.innerText || textRef.value.textContent || '';
+  }
+  return textRef.value.textContent || '';
+}
+
 function syncTextToDOM(val: string | undefined) {
   if (!textRef.value) return;
   const targetText = val !== undefined && val !== null && val !== '' ? val : (!props.allowEmpty ? (props.placeholder || '') : '');
-  if (textRef.value.textContent !== targetText) {
+  if (getElementText() !== targetText) {
     textRef.value.textContent = targetText;
   }
 }
@@ -87,28 +99,41 @@ watch(
   }
 );
 
+function handleMouseDown(e: MouseEvent) {
+  // 如果处于空格抓手模式、中键拖拽、或 Ctrl/Cmd 组合键，允许冒泡让 InfiniteCanvas 正常平移画布！
+  if (store.isSpacePressed || e.button === 1 || e.ctrlKey || e.metaKey) {
+    return;
+  }
+  // 如果当前文本元素已经聚焦处于编辑划选中，阻止冒泡，避免划选文本时意外带动底层画板
+  if (typeof document !== 'undefined' && document.activeElement === textRef.value) {
+    e.stopPropagation();
+  }
+}
+
 function handleFocus(e: FocusEvent) {
   isEditing.value = true;
   if (props.autoSelect && props.elementId) {
-    selectElement(props.elementId);
+    if (props.field === 'title' || props.field === 'description') {
+      selectPage(props.elementId);
+    } else {
+      selectElement(props.elementId);
+    }
     store.focusedTarget = {
       elementId: props.elementId,
       field: props.field,
       optionIndex: props.optionIndex
     };
-    if (['label', 'placeholder', 'help', 'option'].includes(props.field)) {
-      highlightPropertyField(
-        props.field as 'label' | 'placeholder' | 'help' | 'option',
-        props.optionIndex
-      );
-    }
+    highlightPropertyField(
+      props.field,
+      props.optionIndex
+    );
   }
   emit('focus', e);
 }
 
 function handleBlur(e: FocusEvent) {
   isEditing.value = false;
-  const currentText = textRef.value?.textContent?.trim() || '';
+  const currentText = (getElementText() || '').trim();
   let finalVal = currentText;
 
   if (!finalVal && !props.allowEmpty) {
@@ -134,13 +159,17 @@ function handleBlur(e: FocusEvent) {
 }
 
 function handleInput() {
-  const currentText = textRef.value?.textContent || '';
+  const currentText = getElementText();
   emit('update:modelValue', currentText);
   emit('change', currentText);
   markDirty();
 }
 
-function handleEnter() {
+function handleEnter(e: KeyboardEvent) {
+  if (props.multiline || props.field === 'description' || props.field === 'content') {
+    return;
+  }
+  e.preventDefault();
   textRef.value?.blur();
 }
 </script>

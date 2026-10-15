@@ -208,7 +208,7 @@
                     <!-- 系统预设基础资料页 (无表单验证，直接渲染结构化卡片与骨架屏) -->
                     <div v-if="currentPage?.pageType === 'system_profile'" class="w-full flex flex-col">
                       <SystemProfileView
-                        :profile-type="currentPage.profileType || schema?.meta?.profileType || 'client'"
+                        :profile-type="currentPage.profileType || schema?.meta?.profileType || 'customer'"
                         :show-skeleton="currentPage.showSkeleton !== false"
                         :is-canvas="false"
                       />
@@ -235,7 +235,7 @@
 
                       <!-- 将所有页面常驻在 DOM 中，通过 v-show 进行步骤切换，杜绝跨步切换时测试数据丢失 -->
                       <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep && page.pageType !== 'system_profile'" class="w-full flex flex-col">
-                        <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
+                        <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :all-fields="page.fields" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
                       </div>
 
                       <!-- 表单底部操作按钮 (下一步 / 提交表单) -->
@@ -365,12 +365,44 @@ watch(
   { immediate: true }
 );
 
+function isFieldVisibleInForm(field: FormElement): boolean {
+  let cur: FormElement | undefined = field;
+  const visited = new Set<string>();
+  const allFields = pages.value.flatMap(p => p.fields || []);
+
+  while (cur?.dependsOn) {
+    const parentKey: string = cur.dependsOn.fieldKey;
+    const targetVal: any = cur.dependsOn.value;
+    if (visited.has(parentKey)) break;
+    visited.add(parentKey);
+
+    const parentVal = formData[parentKey];
+    let matches = false;
+    if (parentVal === targetVal) {
+      matches = true;
+    } else if (Array.isArray(parentVal)) {
+      matches = parentVal.includes(targetVal);
+    } else if (typeof parentVal === 'string' && parentVal) {
+      const list = parseMultiValue(parentVal);
+      matches = list.includes(targetVal);
+    }
+
+    if (!matches) {
+      return false;
+    }
+
+    cur = allFields.find(f => f.key === parentKey);
+  }
+
+  return true;
+}
+
 // 校验单个字段
 function validateField(field: FormElement): string | null {
   if (field.type === 'alert') return null;
 
   // 如果设置了联动依赖，且当前依赖未达成（处于隐藏状态），则跳过校验
-  if (field.dependsOn && formData[field.dependsOn.fieldKey] !== field.dependsOn.value) {
+  if (field.dependsOn && !isFieldVisibleInForm(field)) {
     return null;
   }
 
@@ -427,7 +459,7 @@ function validateField(field: FormElement): string | null {
       // 备用：基于当前选择的国家代码或区号校验 (全量 244 国)
       const countryCode = formData[`${field.key}_countryCode`];
       const dialCode = formData[`${field.key}_areacode`] || field.dialCode || '+65';
-      const res = validatePhoneNumber(countryCode || dialCode, strVal, field.strictPhoneValidation !== false);
+      const res = validatePhoneNumber(countryCode || dialCode, strVal, true);
       if (!res.valid) {
         return store.currentLocale === 'en' ? res.message_en : res.message;
       }
@@ -493,7 +525,7 @@ function validateField(field: FormElement): string | null {
 
   // 9. 日期
   if (field.type === 'date') {
-    if (field.enableLongTerm && formData[`${field.key}_isLongTerm`]) {
+    if (field.dateMode !== 'range' && field.enableLongTerm && formData[`${field.key}_isLongTerm`]) {
       return null;
     }
     if (isRequired && !strVal) {

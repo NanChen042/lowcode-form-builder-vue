@@ -6,7 +6,7 @@
       :class="{ 'canvas-control-focus': isFocusedPlaceholder }"
       :placeholder="getFieldText(element, 'placeholder')"
       :model-value="element.defaultValue || ''"
-      :auto-size="{ minRows: 3, maxRows: 5 }"
+      :auto-size="{ minRows: element.minRows || 3, maxRows: element.maxRows || 6 }"
       readonly
     />
   </div>

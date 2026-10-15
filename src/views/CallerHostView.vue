@@ -244,8 +244,8 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const customFormId = ref('');
-const customNickname = ref('李总');
-const customCompany = ref('阿尔法数字科技');
+const customNickname = ref('SouthernWind');
+const customCompany = ref('公司1');
 const customLang = ref('zh');
 const iframeUrl = ref('');
 

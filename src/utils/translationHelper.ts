@@ -7,6 +7,7 @@ export type TranslationFieldType =
   | 'field_label'
   | 'field_placeholder'
   | 'field_help'
+  | 'field_content'
   | 'field_option';
 
 export interface UntranslatedItem {
@@ -171,35 +172,56 @@ export function calculateTranslationStats(): TranslationStats {
         });
       }
 
-      // 输入提示 / 占位符
-      registerItem({
-        id: `${element.id}_placeholder`,
-        pageId: page.id,
-        pageIndex: pageIdx,
-        pageTitle,
-        elementId: element.id,
-        elementLabel: elLabel,
-        componentType: element.type,
-        fieldType: 'field_placeholder',
-        fieldName: `字段提示: ${elLabel}`,
-        zhText: element.placeholder,
-        enText: element.placeholder_en
-      });
+      // 提示区块专属：提示内容
+      if (element.type === 'alert') {
+        registerItem({
+          id: `${element.id}_content`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_content',
+          fieldName: `提示内容: ${elLabel}`,
+          zhText: element.content,
+          enText: element.content_en
+        });
+      }
 
-      // 字段副标题 / 辅助说明
-      registerItem({
-        id: `${element.id}_help`,
-        pageId: page.id,
-        pageIndex: pageIdx,
-        pageTitle,
-        elementId: element.id,
-        elementLabel: elLabel,
-        componentType: element.type,
-        fieldType: 'field_help',
-        fieldName: `副标题: ${elLabel}`,
-        zhText: element.help,
-        enText: element.help_en
-      });
+      // 输入提示 / 占位符 (提示区块无输入提示)
+      if (element.type !== 'alert') {
+        registerItem({
+          id: `${element.id}_placeholder`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_placeholder',
+          fieldName: `字段提示: ${elLabel}`,
+          zhText: element.placeholder,
+          enText: element.placeholder_en
+        });
+      }
+
+      // 字段副标题 / 辅助说明 (提示区块无副标题)
+      if (element.type !== 'alert') {
+        registerItem({
+          id: `${element.id}_help`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_help',
+          fieldName: `副标题: ${elLabel}`,
+          zhText: element.help,
+          enText: element.help_en
+        });
+      }
 
       // 选项列表 (单选、多选、下拉、声明条款等)
       if (element.options && Array.isArray(element.options)) {
@@ -314,6 +336,7 @@ export function navigateToUntranslatedItem(item: UntranslatedItem) {
         field: item.fieldType === 'field_label' ? 'label'
              : item.fieldType === 'field_placeholder' ? 'placeholder'
              : item.fieldType === 'field_help' ? 'help'
+             : item.fieldType === 'field_content' ? 'content'
              : 'option',
         optionIndex: item.optionIndex
       };

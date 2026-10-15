@@ -23,7 +23,7 @@ const MAX_SCALE = 1.6;
 
 export interface FocusedTarget {
   elementId: string;
-  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'default';
+  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'default' | 'content';
   optionIndex?: number;
 }
 
@@ -68,7 +68,7 @@ export const store = reactive({
   isDraggingFrame: false,
   draggedFrameId: null as string | null,
   isCanvasAnimating: false,
-  isCanvasLoading: true,
+  isCanvasLoading: false,
 
   // 虚拟焦点高亮目标
   focusedTarget: null as FocusedTarget | null,
@@ -252,12 +252,16 @@ export function addElement(type: ComponentType, targetPageId?: string) {
 
       const searchRes = findElementParentAndIndex(p.fields, selectedElement.value.id);
       if (searchRes) {
+        const descendantKeys = new Set<string>([selectedElement.value.key]);
         let insertIdx = searchRes.index + 1;
-        while (
-          insertIdx < searchRes.parentArray.length &&
-          searchRes.parentArray[insertIdx]?.dependsOn?.fieldKey === selectedElement.value.key
-        ) {
-          insertIdx++;
+        while (insertIdx < searchRes.parentArray.length) {
+          const next = searchRes.parentArray[insertIdx];
+          if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
+            if (next.key) descendantKeys.add(next.key);
+            insertIdx++;
+          } else {
+            break;
+          }
         }
         searchRes.parentArray.splice(insertIdx, 0, newEl);
         store.activePageId = p.id;
@@ -285,24 +289,27 @@ export function duplicateElement(elementId: string) {
       cloneObj.id = newParentId;
       cloneObj.key = makeFieldKey(cloneObj.type, newParentId);
 
-      // 检查原组件名下是否有紧随其后的从属联动子组件，若有则打包一同复制并重映射依赖目标
+      // 检查原组件名下是否有紧随其后的从属联动子组件（含多级嵌套），若有则打包一同复制并重映射依赖目标
       const clonedChildren: FormElement[] = [];
+      const keyMap: Record<string, string> = { [original.key]: cloneObj.key };
       let insertIdx = res.index + 1;
-      while (
-        insertIdx < res.parentArray.length &&
-        res.parentArray[insertIdx]?.dependsOn?.fieldKey === original.key
-      ) {
+      while (insertIdx < res.parentArray.length) {
         const childOriginal = res.parentArray[insertIdx];
-        const childClone: FormElement = JSON.parse(JSON.stringify(toRaw(childOriginal)));
-        const newChildId = `cmp_${getUniqueId()}`;
-        childClone.id = newChildId;
-        childClone.key = makeFieldKey(childClone.type, newChildId);
-        childClone.dependsOn = {
-          fieldKey: cloneObj.key,
-          value: childOriginal.dependsOn!.value
-        };
-        clonedChildren.push(childClone);
-        insertIdx++;
+        if (childOriginal?.dependsOn?.fieldKey && keyMap[childOriginal.dependsOn.fieldKey]) {
+          const childClone: FormElement = JSON.parse(JSON.stringify(toRaw(childOriginal)));
+          const newChildId = `cmp_${getUniqueId()}`;
+          childClone.id = newChildId;
+          childClone.key = makeFieldKey(childClone.type, newChildId);
+          keyMap[childOriginal.key] = childClone.key;
+          childClone.dependsOn = {
+            fieldKey: keyMap[childOriginal.dependsOn.fieldKey],
+            value: childOriginal.dependsOn.value
+          };
+          clonedChildren.push(childClone);
+          insertIdx++;
+        } else {
+          break;
+        }
       }
 
       // 整组整体插入到原组件及其全部从属子项的下方
@@ -928,17 +935,23 @@ export function triggerHighlight(input: HTMLElement | null) {
 }
 
 export function highlightPropertyField(
-  field: 'label' | 'placeholder' | 'help' | 'option',
+  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'content',
   optionIndex?: number
 ) {
   setTimeout(() => {
     let targetInput: HTMLElement | null = null;
     if (field === 'label') {
       targetInput = document.getElementById('prop-label-input');
+    } else if (field === 'title') {
+      targetInput = document.getElementById('page-prop-title-input');
     } else if (field === 'placeholder') {
       targetInput = document.getElementById('prop-placeholder-input');
     } else if (field === 'help') {
       targetInput = document.getElementById('prop-help-input');
+    } else if (field === 'content') {
+      targetInput = document.getElementById('prop-alert-content-input');
+    } else if (field === 'description') {
+      targetInput = document.getElementById('page-prop-desc-input');
     } else if (field === 'option' && optionIndex !== undefined) {
       const editor = document.getElementById('options-editor');
       if (editor && editor.children[optionIndex]) {
