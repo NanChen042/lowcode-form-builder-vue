@@ -1709,15 +1709,15 @@ body.is-dragging-component .canvas-element .field-help {
 /* ==========================================================================
    Driver.js 操作指南 - Arco Design 极简科技蓝主题定制
    ========================================================================== */
-/* 引导进行期间全局锁定背景交互，防止用户误触或污染表单 */
-body.tour-active .app-main,
-body.tour-active header {
+/* 引导进行期间全局锁定背景交互，防止用户误触或污染表单；引导关闭后立即恢复全部交互 */
+body.tour-active.driver-active .app-main,
+body.tour-active.driver-active header {
     pointer-events: none !important;
     user-select: none !important;
 }
 
-body.tour-active .driver-popover,
-body.tour-active .driver-overlay {
+body.tour-active.driver-active .driver-popover,
+body.tour-active.driver-active .driver-overlay {
     pointer-events: auto !important;
 }
 

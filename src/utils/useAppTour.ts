@@ -99,21 +99,25 @@ export function getTourSteps(isEn: boolean): DriveStep[] {
   ];
 }
 
-export function startAppTour(initialIndex = 0) {
+export function cleanupTour() {
+  if (typeof document !== 'undefined') {
+    document.body.classList.remove('tour-active', 'driver-active', 'driver-fade', 'driver-simple', 'driver-no-scroll');
+    // 彻底清除页面上所有残留的 driver 遮罩与气泡节点，防止残留遮挡画布交互
+    document.querySelectorAll('.driver-overlay, .driver-popover, #driver-dummy-element').forEach(el => el.remove());
+  }
+  sessionStorage.setItem('diy_form_tour_shown_session', 'true');
+  localStorage.setItem('diy_form_tour_shown', 'true');
+  store.sidebarTab = 'components';
   if (driverInstance) {
     try {
       driverInstance.destroy();
     } catch (_) {}
     driverInstance = null;
   }
+}
 
-  // If sidebars are hidden, ensure they are visible during tour
-  if (!store.leftSidebarVisible) {
-    store.leftSidebarVisible = true;
-  }
-  if (!store.rightSidebarVisible) {
-    store.rightSidebarVisible = true;
-  }
+export function startAppTour(initialIndex = 0) {
+  cleanupTour();
 
   const isEn = store.currentLocale === 'en';
 
@@ -170,29 +174,17 @@ export function startAppTour(initialIndex = 0) {
         neverBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           localStorage.setItem('diy_form_tour_never_show', 'true');
-          sessionStorage.setItem('diy_form_tour_shown_session', 'true');
-          localStorage.setItem('diy_form_tour_shown', 'true');
-          store.sidebarTab = 'components';
-          if (driverInstance) {
-            driverInstance.destroy();
-            driverInstance = null;
-          }
+          cleanupTour();
           Message.info(t('tour.closedMsg'));
         });
         footer.insertBefore(neverBtn, footer.firstChild);
       }
     },
     onDestroyStarted: () => {
-      if (typeof document !== 'undefined') {
-        document.body.classList.remove('tour-active');
-      }
-      sessionStorage.setItem('diy_form_tour_shown_session', 'true');
-      localStorage.setItem('diy_form_tour_shown', 'true');
-      store.sidebarTab = 'components';
-      if (driverInstance) {
-        driverInstance.destroy();
-        driverInstance = null;
-      }
+      cleanupTour();
+    },
+    onDestroyed: () => {
+      cleanupTour();
     }
   });
 
