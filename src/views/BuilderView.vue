@@ -173,9 +173,6 @@ onMounted(async () => {
     store.isCanvasLoading = true;
   }, 150);
 
-  try {
-    localStorage.removeItem('mock_db_schema');
-  } catch (_) {}
   const urlParams = new URLSearchParams(window.location.search);
   const rawId = (urlParams.get('id') || '').toLowerCase().trim();
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();

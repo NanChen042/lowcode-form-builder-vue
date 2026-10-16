@@ -11,12 +11,7 @@ import {
   Signature,
   Info,
   Smartphone,
-  Mail,
-  // 保持兼容旧名称
-  ListCollapse,
-  CheckCircle,
-  PenTool,
-  Phone
+  Mail
 } from '@lucide/vue';
 
 export interface ComponentMeta {
@@ -303,12 +298,7 @@ export const componentIconMap: Record<string, any> = {
   Signature,
   Info,
   Smartphone,
-  Mail,
-  // 兼容旧名称
-  ListCollapse,
-  CheckCircle,
-  PenTool,
-  Phone
+  Mail
 };
 
 export function getComponentIcon(iconName: string) {

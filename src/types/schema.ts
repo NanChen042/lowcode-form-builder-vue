@@ -71,18 +71,21 @@ export interface FormElement {
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
 
-export interface FormPage {
+export interface FormPageSchema {
   id: string;
   title: string;
   title_en?: string;
   description: string;
   description_en?: string;
   fields: FormElement[];
-  x: number;
-  y: number;
   pageType?: 'form' | 'system_profile';
   profileType?: ProfileType;
   showSkeleton?: boolean;
+}
+
+export interface FormPage extends FormPageSchema {
+  x: number;
+  y: number;
 }
 
 export interface PageConnection {
@@ -109,17 +112,7 @@ export interface FormMeta {
 export interface FormSchema {
   schemaVersion: string;
   meta: FormMeta;
-  pages: {
-    id: string;
-    title: string;
-    title_en?: string;
-    description: string;
-    description_en?: string;
-    fields: FormElement[];
-    pageType?: 'form' | 'system_profile';
-    profileType?: ProfileType;
-    showSkeleton?: boolean;
-  }[];
+  pages: FormPageSchema[];
   pageConnections?: PageConnection[];
 }
 

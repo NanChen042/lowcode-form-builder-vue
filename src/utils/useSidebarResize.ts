@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 
 export interface SidebarResizeOptions {
   getWidth: () => number;
@@ -11,12 +11,30 @@ export interface SidebarResizeOptions {
 export function useSidebarResize(options: SidebarResizeOptions) {
   const isResizing = ref(false);
 
+  let onMouseMove: ((moveEvent: MouseEvent) => void) | null = null;
+  let onMouseUp: (() => void) | null = null;
+
+  function stopResize() {
+    isResizing.value = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    if (onMouseMove) {
+      window.removeEventListener('mousemove', onMouseMove);
+      onMouseMove = null;
+    }
+    if (onMouseUp) {
+      window.removeEventListener('mouseup', onMouseUp);
+      onMouseUp = null;
+    }
+  }
+
   function startResize(e: MouseEvent) {
+    stopResize();
     isResizing.value = true;
     const startX = e.clientX;
     const startWidth = options.getWidth();
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const rawWidth =
         options.direction === 'right'
@@ -26,12 +44,8 @@ export function useSidebarResize(options: SidebarResizeOptions) {
       options.setWidth(Math.round(clamped));
     };
 
-    const onMouseUp = () => {
-      isResizing.value = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+    onMouseUp = () => {
+      stopResize();
     };
 
     document.body.style.cursor = 'col-resize';
@@ -39,6 +53,10 @@ export function useSidebarResize(options: SidebarResizeOptions) {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   }
+
+  onBeforeUnmount(() => {
+    stopResize();
+  });
 
   return {
     isResizing,

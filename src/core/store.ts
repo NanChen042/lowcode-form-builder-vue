@@ -895,7 +895,7 @@ export function loadSchema(schema: FormSchema) {
 }
 
 // 脏状态比对
-let dirtyTimer: any = null;
+let dirtyTimer: ReturnType<typeof setTimeout> | null = null;
 export function markDirty() {
   if (dirtyTimer) clearTimeout(dirtyTimer);
   dirtyTimer = setTimeout(() => {

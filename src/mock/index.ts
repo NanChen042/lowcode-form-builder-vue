@@ -1,5 +1,5 @@
 import Mock from 'mockjs';
-import type { FormSchema } from '@/types/schema';
+import type { FormSchema, ProfileType } from '@/types/schema';
 import {
   kycCustomerTemplate,
   kycIndividualTemplate,
@@ -138,7 +138,7 @@ Mock.mock(/\/pc\/form\/getTemplate.*/, 'get', (options: any) => {
 
   // 若为自建格式 ID (diy)，动态创建空白表单并持久化到 Mock 库
   if (id.includes('_diy_')) {
-    let pType: any = 'customer';
+    let pType: ProfileType = 'customer';
     if (id.startsWith('ent_')) pType = 'entity';
     else if (id.startsWith('ind_')) pType = 'individual';
 

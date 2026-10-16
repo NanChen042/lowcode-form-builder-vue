@@ -189,9 +189,8 @@ const confirmOverwriteVisible = ref(false);
 
 function handleCancel() {
   confirmOverwriteVisible.value = false;
-  modalVisible.value = false;
   emit('cancel');
-  emit('close');
+  modalVisible.value = false;
 }
 
 function handleConfirm() {
@@ -214,9 +213,8 @@ function executeCreateCanvas() {
 
   Message.success(t('modal.createForm.createdSuccess'));
   confirmOverwriteVisible.value = false;
-  modalVisible.value = false;
   emit('created');
-  emit('close');
+  modalVisible.value = false;
 }
 </script>
 

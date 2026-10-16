@@ -28,6 +28,14 @@ import { getSmartEdges, getEdgePoint, getControlPoint, type Rect } from '@/utils
 const PAGE_WIDTH = 390;
 const PAGE_HEIGHT = 720;
 
+function getPageHeight(page: any): number {
+  if (page.pageType === 'system_profile') {
+    const pType = page.profileType || store.meta.profileType || 'customer';
+    return pType === 'individual' ? 620 : 1220;
+  }
+  return PAGE_HEIGHT;
+}
+
 const connections = computed(() => {
   const result: { pathD: string; isSystemFlow: boolean }[] = [];
   if (!store.pages || store.pages.length <= 1) return result;
@@ -36,8 +44,8 @@ const connections = computed(() => {
     const pageA = store.pages[i];
     const pageB = store.pages[i + 1];
 
-    const rectA: Rect = { x: pageA.x, y: pageA.y, w: PAGE_WIDTH, h: PAGE_HEIGHT };
-    const rectB: Rect = { x: pageB.x, y: pageB.y, w: PAGE_WIDTH, h: PAGE_HEIGHT };
+    const rectA: Rect = { x: pageA.x, y: pageA.y, w: PAGE_WIDTH, h: getPageHeight(pageA) };
+    const rectB: Rect = { x: pageB.x, y: pageB.y, w: PAGE_WIDTH, h: getPageHeight(pageB) };
 
     const { sourceEdge, targetEdge } = getSmartEdges(rectA, rectB);
     const p1 = getEdgePoint(rectA, sourceEdge);

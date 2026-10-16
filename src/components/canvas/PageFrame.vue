@@ -160,9 +160,9 @@
       </div>
     </div>
 
-    <!-- 右侧中间添加新页面按钮 -->
+    <!-- 右侧中间添加新页面按钮 (自适应居中对齐边框中点与连线锚点) -->
     <a-tooltip :content="t('canvas.addPageRight')" position="top">
-      <div class="add-next-page-btn absolute -right-5 top-[340px] flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md transition hover:scale-110" @click.stop="addPage(page.id)">
+      <div class="add-next-page-btn absolute -right-3 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md border border-slate-200/90 transition hover:scale-110 hover:border-[#1677ff]" @click.stop="addPage(page.id)">
         <Plus class="h-4 w-4" />
       </div>
     </a-tooltip>
