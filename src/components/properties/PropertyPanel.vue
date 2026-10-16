@@ -52,7 +52,10 @@
         </div>
 
         <!-- 语言模式快捷指示与切换器 (带双语完备率百分比指示) -->
-        <div class="px-3.5 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0 gap-2">
+        <div
+          class="px-3.5 py-2 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0 gap-2"
+          :title="store.currentLocale === 'en' ? t('prop.configuringEnMode') : t('prop.configuringZhMode')"
+        >
           <span class="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
             <Globe class="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <span>{{ store.currentLocale === 'en' ? 'Language' : '编辑语言' }}</span>

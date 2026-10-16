@@ -54,8 +54,8 @@
 | 点击画布中的字段开始编辑 | Click any field on the canvas to edit | | | |
 | 基础信息 | Basic Information | | | |
 | 设置字段标题、展示与校验 | Configure field label, display and validation | | | |
-| 配置中文模式 | Chinese Config Mode | | | |
-| 配置英文模式 | English Config Mode | | | |
+| 当前正在配置：中文内容 | Configuring: Chinese Content | | | |
+| 当前正在配置：英文内容 | Configuring: English Content | | | |
 | 中文原文： | Original (ZH):  | | | |
 | 中文原标题： | Original Title (ZH):  | | | |
 | 中文原描述： | Original Description (ZH):  | | | |
