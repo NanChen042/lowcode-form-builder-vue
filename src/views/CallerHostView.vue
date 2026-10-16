@@ -249,7 +249,18 @@ const customCompany = ref('公司1');
 const customLang = ref('zh');
 const iframeUrl = ref('');
 
-const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '';
+const getDynamicBaseUrl = () => {
+  const envBase = import.meta.env.BASE_URL;
+  if (envBase && envBase.startsWith('/') && envBase !== '/') {
+    return envBase.replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const p = window.location.pathname.replace(/\/[^/]+\.html?$/i, '/').replace(/\/caller\/?$/i, '/');
+    return p.replace(/\/+$/, '');
+  }
+  return '';
+};
+const baseUrl = getDynamicBaseUrl();
 
 const computedCallPath = computed(() => {
   const params = new URLSearchParams();
