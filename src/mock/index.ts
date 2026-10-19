@@ -186,20 +186,22 @@ Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
 });
 
 /**
- * 4. Mock 母系统当前用户信息: GET /pc/user/getUserInfo
+ * 4. Mock 母系统当前用户信息: GET /pc/user/authInfo
  */
-Mock.mock(/\/pc\/user\/getUserInfo.*/, 'get', () => {
+Mock.mock(/\/pc\/user\/authInfo.*/, 'get', () => {
   return {
-    code: 200,
+    code: 0,
     success: true,
     data: {
-      uid: 9527,
-      nickname: 'SouthernWind',
-      avatar: '',
-      email: 'lizong@alpha-tech.io',
-      org_id: 1024,
-      company_name: '公司1',
-      language: 'zh'
+      user: {
+        uid: 9527,
+        nickname: 'SouthernWind',
+        avatar: '',
+        email: 'lizong@alpha-tech.io',
+        org_id: 1024,
+        company_name: '公司1',
+        language: 'zh'
+      }
     }
   };
 });

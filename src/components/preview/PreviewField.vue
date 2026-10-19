@@ -470,7 +470,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { t, getLocalizedFieldText, getLocalizedOptionLabel } from '@/core/i18n';
 import { store } from '@/core/store';
@@ -655,6 +655,13 @@ const isLongTermChecked = ref(
   )
 );
 
+watch(
+  () => [props.formData[props.field.key], props.formData[`${props.field.key}_isLongTerm`]],
+  ([val, isLt]) => {
+    isLongTermChecked.value = props.field.dateMode !== 'range' && (val === '9999-12-31' || Boolean(isLt));
+  }
+);
+
 if (props.field.type === 'date' && props.field.dateMode !== 'range' && props.field.enableLongTerm && props.field.defaultLongTerm && !props.formData[props.field.key]) {
   props.formData[props.field.key] = '9999-12-31';
   props.formData[`${props.field.key}_isLongTerm`] = true;
@@ -672,14 +679,9 @@ function onLongTermChange(val: boolean | (string | number | boolean)[]) {
 }
 
 // 声明事项复选勾选状态 (持久化存入 formData，避免切换页面时状态丢失)
-if (!props.formData[`${props.field.key}_checks`]) {
-  props.formData[`${props.field.key}_checks`] = {};
-}
-const declarationChecks = reactive<Record<number, boolean>>(props.formData[`${props.field.key}_checks`]);
-
 function onDeclarationChange() {
-  props.formData[`${props.field.key}_checks`] = { ...declarationChecks };
-  const allChecked = (props.field.options || []).every((_, idx) => Boolean(declarationChecks[idx]));
+  const checks = props.formData[`${props.field.key}_checks`] || {};
+  const allChecked = (props.field.options || []).every((_, idx) => Boolean(checks[idx]));
   props.formData[`${props.field.key}_declared`] = allChecked;
   if (allChecked) {
     if (props.errors) {
@@ -692,11 +694,15 @@ function onDeclarationChange() {
 }
 
 function isDeclarationChecked(idx: number): boolean {
-  return Boolean(declarationChecks[idx]);
+  return Boolean(props.formData[`${props.field.key}_checks`]?.[idx]);
 }
 
 function toggleDeclaration(idx: number) {
-  declarationChecks[idx] = !declarationChecks[idx];
+  if (!props.formData[`${props.field.key}_checks`]) {
+    props.formData[`${props.field.key}_checks`] = {};
+  }
+  const current = Boolean(props.formData[`${props.field.key}_checks`][idx]);
+  props.formData[`${props.field.key}_checks`][idx] = !current;
   onDeclarationChange();
 }
 

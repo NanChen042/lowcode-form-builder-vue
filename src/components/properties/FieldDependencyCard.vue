@@ -113,7 +113,7 @@ function locateParentField() {
   const field = dependencyInfo.value.parentField;
   selectElement(field);
   nextTick(() => {
-    const el = document.querySelector(`[data-element-id="${field.id}"]`) || document.getElementById(`el_${field.id}`);
+    const el = document.querySelector(`[data-element-id="${field.id}"]`) || document.getElementById(field.id) || document.getElementById(`el_${field.id}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }

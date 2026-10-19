@@ -377,7 +377,7 @@ export function toChineseNum(num: number): string {
 // 页面操作方法
 export function addPage(afterPageId?: string | null, options: { focus?: boolean } = {}) {
   const isFirst = store.pages.length === 0;
-  const newId = `page_${Date.now()}`;
+  const newId = `page_${Date.now()}_${getUniqueId()}`;
   let insertIndex = store.pages.length;
   let x = 0;
   let y = 0;
@@ -856,7 +856,7 @@ export function loadSchema(schema: FormSchema) {
         }
       }
       return {
-        id: p.id || `page_${Date.now()}_${idx}`,
+        id: p.id || `page_${Date.now()}_${getUniqueId()}_${idx}`,
         pageType: (isSystemProfile ? 'system_profile' : 'form') as 'form' | 'system_profile',
         profileType: isSystemProfile ? (store.meta.profileType || p.profileType || 'entity') : p.profileType,
         showSkeleton: p.showSkeleton !== false,

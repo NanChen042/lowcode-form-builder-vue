@@ -128,7 +128,7 @@ export const UserAPI = {
     try {
       const res = await request.get<any, any>('/pc/user/authInfo', { silent: true } as any);
       const user = res?.data?.user;
-      if (res?.code === 0 && user) {
+      if ((res?.code === 0 || res?.code === 200) && user) {
         return {
           code: 200,
           success: true,

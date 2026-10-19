@@ -307,7 +307,7 @@
 | 欢迎使用 AlgoCandy | Welcome to AlgoCandy | | | |
 | 选择创建表单的方式，几秒钟即可开启高效编排。 | Choose how you want to create your form, and get started in seconds. | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
-| 从零开始，自由搭建您的专属表单。 | Start from scratch and build your form freely. | | | |
+| 从零开始，自由搭建属于你的表单 | Start from scratch and build your form freely. | | | |
 | 立即创建 | Create Now | | | |
 | 选用场景模板 | Use a Template | | | |
 | 精选合规预设场景，开箱即用加速构建。 | Choose from ready-made templates to build faster. | | | |
@@ -315,8 +315,16 @@
 | 热门场景模板 | Popular Templates | | | |
 | 查看全部模板 | View All Templates | | | |
 | Build Better Forms, | Build Better Forms, | | | |
-| Power Your Business. | Power Your Business. | | | |
 | 先逛逛画布 | Explore Canvas First | | | |
+| 新建表单 | New Form | | | |
+| KYC 模板库 | KYC Templates | | | |
+| 最近使用 | Recent | | | |
+| 精选 KYC 模板 | Featured KYC Templates | | | |
+| 全部 | All | | | |
+| 客户 | Customer | | | |
+| 个人 | Individual | | | |
+| 机构 | Entity | | | |
+| 点击任意卡片即可直接进入画布开启编排 | Click any card to enter the canvas directly | | | |
 
 ## 顶部导航栏 (AppHeader)
 

@@ -221,7 +221,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
-import { store, buildSchema, establishBaseline, markDirty } from '@/core/store';
+import { store, buildSchema, establishBaseline, markDirty, syncUrlParams } from '@/core/store';
 import { FormAPI } from '@/core/api';
 import { t } from '@/core/i18n';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
@@ -354,6 +354,10 @@ async function handleSave() {
     const schema = buildSchema();
     const res = await FormAPI.saveTemplate(schema);
     if (res.success) {
+      if (res.data?.id) {
+        store.meta.formId = res.data.id;
+        syncUrlParams(res.data.id);
+      }
       establishBaseline();
       saveSuccess.value = true;
       Message.success(t('header.saveSuccess'));

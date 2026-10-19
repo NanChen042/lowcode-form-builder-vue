@@ -1,15 +1,15 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="'min(860px, 94vw)'"
+    :width="'min(840px, 94vw)'"
     :align-center="true"
     :footer="false"
     :header="false"
     :closable="false"
     draggable
     unmount-on-close
-    :mask-closable="!mandatory"
-    :esc-to-close="!mandatory"
+    :mask-closable="true"
+    :esc-to-close="true"
     modal-class="clean-welcome-modal"
     :modal-style="{
       padding: 0,
@@ -29,8 +29,8 @@
     @cancel="handleClose"
   >
     <div class="flex flex-col bg-white rounded-[8px] overflow-hidden select-none">
-      <!-- 顶栏：Logo | DIY 表单设计器 + (非强制模式下的关闭按钮) -->
-      <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 px-6 bg-white select-none">
+      <!-- 顶栏：Logo | DIY 表单设计器 + 关闭按钮 (紧凑规范 8px 架构) -->
+      <header class="flex h-13 shrink-0 items-center justify-between border-b border-slate-100 px-6 bg-white select-none">
         <div class="flex items-center gap-2.5">
           <img
             :src="logoUrl"
@@ -43,11 +43,10 @@
           </span>
         </div>
 
-        <!-- 仅在非强制模式时展示关闭按钮 (首次空 URL 进入时必须执行操作，无关闭按钮) -->
+        <!-- 关闭按钮 (方案 A 即开即用：点击关闭直接进入已就绪的画布) -->
         <button
-          v-if="!mandatory"
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+          class="flex h-7 w-7 items-center justify-center rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           :title="t('common.close') || '关闭'"
           @click="handleClose"
         >
@@ -55,123 +54,129 @@
         </button>
       </header>
 
-      <!-- 主体内容区：用户认可的 4 列横排架构 (1 张空白画布专属卡 + 3 张 3D 模板卡，紧凑无多余空隙) -->
-      <div class="p-6 sm:p-7 select-none">
-        <!-- 欢迎标语 -->
-        <div class="text-center max-w-lg mx-auto mb-5">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900 m-0 tracking-tight leading-tight">
-            {{ t('wizard.title') }}
-          </h2>
-          <p class="text-[12px] text-slate-500 m-0 mt-1 leading-normal">
-            {{ t('wizard.subtitle') }}
-          </p>
+      <!-- 主体内容区：纯粹舒展的「1（Hero横幅）+ 3（精选模板）」黄金单体结构 -->
+      <div class="p-6 pt-5 pb-5 select-none">
+        
+        <!-- 上方 Hero 横幅：新建空白画布 (主角，全宽舒展，8px 圆角，一体化蓝白微光渐变) -->
+        <div
+          class="group rounded-lg border border-blue-200/90 bg-gradient-to-r from-[#eef6ff] via-[#f3f7fd] to-[#f8faff] hover:border-[#1677ff] hover:shadow-sm transition-all duration-200 p-4 px-5 flex items-center justify-between cursor-pointer relative overflow-hidden mb-4"
+          @click="handleCreateBlank"
+        >
+          <!-- 左侧文案 -->
+          <div class="max-w-[300px] sm:max-w-[340px] z-10">
+            <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 leading-tight">
+              {{ t('wizard.createBlank') }}
+            </h3>
+            <p class="text-[12px] text-slate-500 mt-1 m-0 leading-normal truncate">
+              {{ t('wizard.createBlankDesc') }}
+            </p>
+          </div>
+
+          <!-- 中间 3D 画布创意插画 (带光环轨道与浮动面板) -->
+          <div class="h-[70px] w-[200px] flex items-center justify-center pointer-events-none select-none z-10">
+            <img
+              :src="tplBlankImg"
+              alt="Blank Canvas"
+              class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </div>
+
+          <!-- 右侧高亮操作按钮 (Arco Primary 规范按钮) -->
+          <div class="z-10 shrink-0">
+            <a-button
+              type="primary"
+              size="small"
+              class="rounded font-medium px-4 h-8 shadow-2xs bg-[#1677ff] hover:bg-blue-600 flex items-center gap-1"
+            >
+              <span>{{ t('wizard.createNowBtn') }}</span>
+              <ArrowRight class="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+            </a-button>
+          </div>
         </div>
 
-        <!-- 4 张横排卡片 (彻底拿掉 min-h 强制撑高，消除上下空旷死角) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 mb-2">
-          
-          <!-- 卡片 1：新建空白画布 (专属特殊高亮画板，与 3 款模板有明确的主次区隔) -->
-          <div
-            class="group rounded-lg border border-blue-200/90 hover:border-[#1677ff] bg-gradient-to-b from-blue-50/50 via-white to-white hover:shadow-md flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
-            @click="handleCreateBlank"
-          >
-            <div>
-              <!-- 顶部专属空白画板插画 (无廉价点阵，无虚线，清爽微质感) -->
-              <div class="h-[88px] w-full bg-blue-50/60 border-b border-blue-100/80 flex items-center justify-center relative overflow-hidden select-none">
-                <div class="w-10 h-10 rounded-lg bg-white border border-blue-200/80 shadow-2xs flex items-center justify-center text-[#1677ff] group-hover:scale-110 transition-transform">
-                  <Plus class="w-5 h-5 stroke-[2.4]" />
-                </div>
-                <!-- 右上角专属胶囊 Tag -->
-                <span class="absolute top-2 right-2 text-[9.5px] px-1.5 py-0.5 rounded font-semibold bg-blue-100 text-blue-700 leading-none">
-                  {{ store.currentLocale === 'en' ? 'Blank' : '从零开始' }}
-                </span>
-              </div>
+        <!-- 下方区域：精选 KYC 模板 + 紧凑分类药丸 -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <h4 class="text-[13.5px] font-bold text-slate-800 m-0">
+              {{ t('wizard.featuredTemplates') }}
+            </h4>
 
-              <!-- 标题与描述 -->
-              <div class="p-3 pb-2">
-                <h4 class="text-[12.5px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
-                  {{ t('wizard.createBlank') }}
-                </h4>
-                <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal flex items-center gap-1 truncate">
-                  <FileText class="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                  <span>{{ store.currentLocale === 'en' ? '0 Fields · Free Layout' : '0 初始字段 · 自由搭建' }}</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- 底部操作按钮 (专属主色实心按钮，紧贴在信息下方，间距恰到好处) -->
-            <div class="p-3 pt-0">
-              <div class="pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  class="w-full h-7 rounded border border-transparent bg-[#1677ff] hover:bg-blue-600 text-white text-[11.5px] font-medium flex items-center justify-center gap-1 shadow-2xs transition-all duration-150 cursor-pointer"
-                >
-                  <span>{{ t('wizard.createNowBtn') }}</span>
-                  <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </div>
+            <!-- 分类过滤药丸 Tabs: 全部 / 客户 / 个人 / 机构 (4px 紧凑微圆角) -->
+            <div class="bg-slate-100 p-0.5 rounded flex items-center gap-0.5 text-[11px]">
+              <button
+                v-for="cat in categoryTabs"
+                :key="cat.key"
+                type="button"
+                class="px-2.5 py-0.5 rounded transition-all cursor-pointer select-none"
+                :class="selectedCategory === cat.key ? 'bg-white text-slate-900 font-semibold shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
+                @click.stop="selectedCategory = cat.key"
+              >
+                {{ cat.label }}
+              </button>
             </div>
           </div>
 
-          <!-- 卡片 2~4：客户案例、个人案例、机构案例 (经典 3D 渲染图，白底微边框，次级按钮) -->
-          <div
-            v-for="tpl in scenarioTemplates"
-            :key="tpl.key"
-            class="group rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-md flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
-            @click="handleSelectTemplate(tpl.key)"
-          >
-            <div>
-              <!-- 顶部 3D 场景图 -->
-              <div
-                class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
-                :class="tpl.bannerBgClass"
-              >
-                <img
-                  :src="tpl.image"
-                  :alt="getFieldText(tpl, 'title')"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-                <!-- 右上角胶囊 Tag -->
-                <span
-                  class="absolute top-2 right-2 text-[9.5px] px-2 py-0.5 rounded font-semibold shadow-2xs leading-none"
-                  :class="tpl.tagBadgeClass"
+          <!-- 模板卡片网格 (3 列，充足宽度，每张卡片宽敞舒展) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-2">
+            <div
+              v-for="tpl in filteredTemplates"
+              :key="tpl.key"
+              class="group rounded-lg border bg-white hover:shadow-sm flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
+              :class="tpl.cardBorderClass"
+              @click="handleSelectTemplate(tpl.key)"
+            >
+              <div>
+                <!-- 顶部 3D 场景图 -->
+                <div
+                  class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
+                  :class="tpl.bannerBgClass"
                 >
-                  {{ getFieldText(tpl, 'tag') }}
-                </span>
+                  <img
+                    :src="tpl.image"
+                    :alt="getFieldText(tpl, 'title')"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <!-- 右上角胶囊 Tag -->
+                  <span
+                    class="absolute top-2 right-2 text-[9.5px] px-1.5 py-0.5 rounded font-semibold shadow-2xs leading-none"
+                    :class="tpl.tagBadgeClass"
+                  >
+                    {{ getFieldText(tpl, 'tag') }}
+                  </span>
+                </div>
+
+                <!-- 标题与字段统计 -->
+                <div class="p-3 pb-2">
+                  <h5 class="text-[12.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
+                    {{ getFieldText(tpl, 'title') }}
+                  </h5>
+                  <p class="text-[11px] text-slate-400 mt-1 m-0 leading-normal flex items-center gap-1 truncate">
+                    <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{{ getFieldText(tpl, 'stats') }}</span>
+                  </p>
+                </div>
               </div>
 
-              <!-- 标题与字段统计 -->
-              <div class="p-3 pb-2">
-                <h4 class="text-[12.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
-                  {{ getFieldText(tpl, 'title') }}
-                </h4>
-                <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal flex items-center gap-1 truncate">
-                  <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{{ getFieldText(tpl, 'stats') }}</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- 底部操作按钮 (白底微灰边框次级按钮，紧贴信息下方) -->
-            <div class="p-3 pt-0">
-              <div class="pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  class="w-full h-7 rounded border border-slate-200/90 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-[11.5px] font-medium flex items-center justify-center gap-1 transition-all duration-150 cursor-pointer"
+              <!-- 底部操作按钮 (Arco Secondary 规范按钮) -->
+              <div class="p-3 pt-0">
+                <a-button
+                  type="secondary"
+                  long
+                  class="welcome-card-btn rounded font-medium text-[11.5px] text-slate-700 hover:text-[#1677ff] flex items-center justify-center gap-1"
                 >
                   <span>{{ store.currentLocale === 'en' ? 'Load Template' : '载入模板' }}</span>
-                  <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </button>
+                  <ArrowRight class="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+                </a-button>
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- 底部轻量指引 -->
-        <div class="text-center text-[11px] text-slate-400 pt-3 select-none">
-          {{ store.currentLocale === 'en' ? 'Click any card to start building directly' : '点击任意卡片即可直接进入画布开启编排' }}
+        <div class="text-center text-[11px] text-slate-400 pt-2 select-none">
+          {{ t('wizard.hintClickCard') }}
         </div>
       </div>
     </div>
@@ -216,16 +221,13 @@ import { store, applyTemplateKey } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
+import tplBlankImg from '@/assets/templates/tpl-blank.webp';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
 import tplEntityImg from '@/assets/templates/tpl-entity.webp';
 import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
 import {
-  Plus,
   ArrowRight,
   X,
-  Building2,
-  UserCheck,
-  ShieldCheck,
   FileText
 } from '@lucide/vue';
 
@@ -254,65 +256,69 @@ const modalVisible = computed({
   }
 });
 
+// 分类筛选药丸: 'all' | 'customer' | 'individual' | 'entity'
+const selectedCategory = ref<'all' | 'customer' | 'individual' | 'entity'>('all');
+
+const categoryTabs = computed(() => [
+  { key: 'all' as const, label: t('wizard.filterAll') },
+  { key: 'customer' as const, label: t('wizard.filterCustomer') },
+  { key: 'individual' as const, label: t('wizard.filterIndividual') },
+  { key: 'entity' as const, label: t('wizard.filterEntity') }
+]);
+
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
+    category: 'customer' as const,
     title: '客户案例 KYC 模板',
     title_en: 'Customer Registration',
     tag: '客户案例',
     tag_en: 'Customer',
     stats: '3 页面 · 9 字段',
     stats_en: '3 Pages · 9 Fields',
-    icon: Building2,
     image: tplCustomerImg,
-    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
-    desc_en: 'Includes business profile, sales turnover, fund sources, listed company stock code linkage and formal declaration.',
-    code: 'SG_CDD_Customer',
     bannerBgClass: 'bg-[#faf5ff]',
     tagBadgeClass: 'bg-purple-100/95 text-purple-700',
-    iconColorClass: 'text-purple-600',
-    tagColor: 'purple'
+    cardBorderClass: 'border-purple-200/90 hover:border-purple-400'
   },
   {
     key: 'kyc-individual' as const,
+    category: 'individual' as const,
     title: '个人案例 KYC 模板',
     title_en: 'Individual KYC',
     tag: '个人成员',
     tag_en: 'Individual',
     stats: '5 页面 · 15 字段',
     stats_en: '5 Pages · 15 Fields',
-    icon: UserCheck,
     image: tplIndividualImg,
-    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
-    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
-    code: 'SG_CDD_Individual',
     bannerBgClass: 'bg-[#f0fdf4]',
     tagBadgeClass: 'bg-emerald-100/95 text-emerald-700',
-    iconColorClass: 'text-emerald-600',
-    tagColor: 'green'
+    cardBorderClass: 'border-emerald-200/90 hover:border-emerald-400'
   },
   {
     key: 'kyc-entity' as const,
+    category: 'entity' as const,
     title: '机构案例 KYC 模板',
     title_en: 'Entity KYC',
     tag: '机构成员',
     tag_en: 'Entity',
     stats: '3 页面 · 16 字段',
     stats_en: '3 Pages · 16 Fields',
-    icon: ShieldCheck,
     image: tplEntityImg,
-    desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',
-    desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
-    code: 'SG_CDD_Entity',
     bannerBgClass: 'bg-[#eff6ff]',
     tagBadgeClass: 'bg-blue-100/95 text-blue-700',
-    iconColorClass: 'text-blue-600',
-    tagColor: 'blue'
+    cardBorderClass: 'border-blue-200/90 hover:border-blue-400'
   }
 ];
 
+const filteredTemplates = computed(() => {
+  if (selectedCategory.value === 'all') {
+    return scenarioTemplates;
+  }
+  return scenarioTemplates.filter(tpl => tpl.category === selectedCategory.value);
+});
+
 function handleClose() {
-  if (props.mandatory) return;
   modalVisible.value = false;
   emit('close');
 }
@@ -352,7 +358,6 @@ function executeApplyTemplate() {
   confirmOverwriteVisible.value = false;
   modalVisible.value = false;
 }
-
 </script>
 
 <style scoped>
@@ -371,16 +376,16 @@ function executeApplyTemplate() {
 }
 
 :deep(.welcome-card-btn) {
-  height: 32px !important;
+  height: 28px !important;
   line-height: 1 !important;
-  padding: 0 12px !important;
+  padding: 0 10px !important;
 }
 
 :deep(.welcome-card-btn .arco-btn-content) {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
   line-height: 1 !important;
 }
 </style>

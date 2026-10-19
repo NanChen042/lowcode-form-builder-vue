@@ -1,6 +1,7 @@
 <template>
   <div
     :id="element.id"
+    :data-element-id="element.id"
     class="canvas-element"
     :class="{
       'is-selected': isSelected,

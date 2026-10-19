@@ -143,6 +143,9 @@ function handleCreateCanvasClose() {
 function handleWelcomeWizardClosed() {
   welcomeWizardVisible.value = false;
   store.sidebarTab = 'components';
+  if (store.pages.length === 0) {
+    loadSchema(blankTemplate);
+  }
 }
 const currentPreviewSchema = ref<FormSchema>({
   schemaVersion: '1.0.0',
@@ -218,15 +221,15 @@ onMounted(async () => {
   let targetTemplateKey = 'blank';
 
   const resetToBlankState = () => {
-    store.pages = [];
+    // 方案 A（即开即用模式）：初始化默认空白画板，确保底层画布始终 100% 鲜活可用
+    loadSchema(blankTemplate);
     store.selectedType = null;
     store.selectedId = null;
-    store.activePageId = null;
     store.meta.formId = '';
     store.meta.serialNo = '';
     syncUrlParams('');
     store.activeTemplateKey = 'blank';
-    isInitialWizardMandatory.value = true;
+    isInitialWizardMandatory.value = false;
     welcomeWizardVisible.value = true;
   };
 
