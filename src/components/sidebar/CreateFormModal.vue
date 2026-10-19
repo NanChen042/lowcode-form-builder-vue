@@ -193,8 +193,17 @@ function handleCancel() {
   modalVisible.value = false;
 }
 
+function isCanvasDirty(): boolean {
+  if (store.pages.length === 0) return false;
+  const totalFields = store.pages.reduce((acc, p) => acc + (p.fields?.length || 0), 0);
+  if (totalFields === 0 && store.pages.length <= 2) {
+    return false;
+  }
+  return true;
+}
+
 function handleConfirm() {
-  if (store.pages.length > 0) {
+  if (isCanvasDirty()) {
     confirmOverwriteVisible.value = true;
     return;
   }

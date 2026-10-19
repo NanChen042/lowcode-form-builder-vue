@@ -1,15 +1,15 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="'min(840px, 94vw)'"
+    :width="'min(860px, 94vw)'"
     :align-center="true"
     :footer="false"
     :header="false"
     :closable="false"
     draggable
     unmount-on-close
-    :mask-closable="true"
-    :esc-to-close="true"
+    :mask-closable="false"
+    :esc-to-close="false"
     modal-class="clean-welcome-modal"
     :modal-style="{
       padding: 0,
@@ -26,10 +26,9 @@
       backdropFilter: 'blur(6px)',
       backgroundColor: 'rgba(15, 23, 42, 0.45)'
     }"
-    @cancel="handleClose"
   >
-    <div class="flex flex-col bg-white rounded-[8px] overflow-hidden select-none">
-      <!-- 顶栏：Logo | DIY 表单设计器 + 关闭按钮 (紧凑规范 8px 架构) -->
+    <div class="flex flex-col bg-white rounded-lg overflow-hidden select-none">
+      <!-- 顶栏：Logo | DIY 表单设计器 (无关闭按钮，强制完成创建引导) -->
       <header class="flex h-13 shrink-0 items-center justify-between border-b border-slate-100 px-6 bg-white select-none">
         <div class="flex items-center gap-2.5">
           <img
@@ -42,150 +41,143 @@
             {{ t('wizard.brandSubtitle') }}
           </span>
         </div>
-
-        <!-- 关闭按钮 (方案 A 即开即用：点击关闭直接进入已就绪的画布) -->
-        <button
-          type="button"
-          class="flex h-7 w-7 items-center justify-center rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-          :title="t('common.close') || '关闭'"
-          @click="handleClose"
-        >
-          <X class="h-4 w-4" />
-        </button>
       </header>
 
-      <!-- 主体内容区：纯粹舒展的「1（Hero横幅）+ 3（精选模板）」黄金单体结构 -->
-      <div class="p-6 pt-5 pb-5 select-none">
-        
-        <!-- 上方 Hero 横幅：新建空白画布 (主角，全宽舒展，8px 圆角，一体化蓝白微光渐变) -->
-        <div
-          class="group rounded-lg border border-blue-200/90 bg-gradient-to-r from-[#eef6ff] via-[#f3f7fd] to-[#f8faff] hover:border-[#1677ff] hover:shadow-sm transition-all duration-200 p-4 px-5 flex items-center justify-between cursor-pointer relative overflow-hidden mb-4"
-          @click="handleCreateBlank"
-        >
-          <!-- 左侧文案 -->
-          <div class="max-w-[300px] sm:max-w-[340px] z-10">
-            <h3 class="text-[15px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 leading-tight">
-              {{ t('wizard.createBlank') }}
-            </h3>
-            <p class="text-[12px] text-slate-500 mt-1 m-0 leading-normal truncate">
-              {{ t('wizard.createBlankDesc') }}
-            </p>
-          </div>
-
-          <!-- 中间 3D 画布创意插画 (带光环轨道与浮动面板) -->
-          <div class="h-[70px] w-[200px] flex items-center justify-center pointer-events-none select-none z-10">
-            <img
-              :src="tplBlankImg"
-              alt="Blank Canvas"
-              class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </div>
-
-          <!-- 右侧高亮操作按钮 (Arco Primary 规范按钮) -->
-          <div class="z-10 shrink-0">
-            <a-button
-              type="primary"
-              size="small"
-              class="rounded font-medium px-4 h-8 shadow-2xs bg-[#1677ff] hover:bg-blue-600 flex items-center gap-1"
-            >
-              <span>{{ t('wizard.createNowBtn') }}</span>
-              <ArrowRight class="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
-            </a-button>
-          </div>
-        </div>
-
-        <!-- 下方区域：精选 KYC 模板 + 紧凑分类药丸 -->
-        <div>
-          <div class="flex items-center justify-between mb-2.5">
-            <h4 class="text-[13.5px] font-bold text-slate-800 m-0">
-              {{ t('wizard.featuredTemplates') }}
-            </h4>
-
-            <!-- 分类过滤药丸 Tabs: 全部 / 客户 / 个人 / 机构 (4px 紧凑微圆角) -->
-            <div class="bg-slate-100 p-0.5 rounded flex items-center gap-0.5 text-[11px]">
-              <button
-                v-for="cat in categoryTabs"
-                :key="cat.key"
-                type="button"
-                class="px-2.5 py-0.5 rounded transition-all cursor-pointer select-none"
-                :class="selectedCategory === cat.key ? 'bg-white text-slate-900 font-semibold shadow-2xs' : 'text-slate-500 hover:text-slate-700'"
-                @click.stop="selectedCategory = cat.key"
-              >
-                {{ cat.label }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 模板卡片网格 (3 列，充足宽度，每张卡片宽敞舒展) -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-2">
+      <!-- 主体内容区：纯粹现代的「左1（新建空白画布）+ 右3（KYC模板）」1-3 架构 -->
+      <div class="p-6 select-none">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+          
+          <!-- 左侧 1：新建空白画布卡片 (统一 8px 标准圆角，紧凑现代排版) -->
+          <div class="md:col-span-5 flex">
             <div
-              v-for="tpl in filteredTemplates"
-              :key="tpl.key"
-              class="group rounded-lg border bg-white hover:shadow-sm flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
-              :class="tpl.cardBorderClass"
-              @click="handleSelectTemplate(tpl.key)"
+              class="group flex flex-1 flex-col justify-between items-start rounded-lg bg-gradient-to-b from-[#edf5fe] via-[#e5f0fe] to-[#d8ebfe] hover:from-[#e6f2fe] hover:to-[#d2e6fe] p-5 cursor-pointer transition-all duration-150 select-none text-left relative overflow-hidden"
+              @click="handleCreateBlank"
             >
-              <div>
-                <!-- 顶部 3D 场景图 -->
-                <div
-                  class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
-                  :class="tpl.bannerBgClass"
-                >
-                  <img
-                    :src="tpl.image"
-                    :alt="getFieldText(tpl, 'title')"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <!-- 右上角胶囊 Tag -->
-                  <span
-                    class="absolute top-2 right-2 text-[9.5px] px-1.5 py-0.5 rounded font-semibold shadow-2xs leading-none"
-                    :class="tpl.tagBadgeClass"
-                  >
-                    {{ getFieldText(tpl, 'tag') }}
-                  </span>
-                </div>
-
-                <!-- 标题与字段统计 -->
-                <div class="p-3 pb-2">
-                  <h5 class="text-[12.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
-                    {{ getFieldText(tpl, 'title') }}
-                  </h5>
-                  <p class="text-[11px] text-slate-400 mt-1 m-0 leading-normal flex items-center gap-1 truncate">
-                    <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{{ getFieldText(tpl, 'stats') }}</span>
-                  </p>
-                </div>
+              <!-- 顶部文案区 -->
+              <div class="z-10">
+                <span class="text-[11px] font-bold text-[#1677ff] tracking-wider uppercase">
+                  {{ t('wizard.createNewTag') }}
+                </span>
+                <h3 class="text-[18px] font-bold text-slate-900 mt-1 leading-tight tracking-tight group-hover:text-[#1677ff] transition-colors">
+                  {{ t('wizard.createBlank') }}
+                </h3>
+                <p class="text-[12px] text-slate-400 mt-1 leading-normal m-0">
+                  {{ t('wizard.createBlankDesc') }}
+                </p>
               </div>
 
-              <!-- 底部操作按钮 (Arco Secondary 规范按钮) -->
-              <div class="p-3 pt-0">
+              <!-- 中间透明插画 (悬浮画板微缩图) -->
+              <div class="w-full flex items-center justify-center my-auto py-2 z-10">
+                <img
+                  :src="tplBlankHeroImg"
+                  :alt="t('wizard.createBlank')"
+                  class="w-full max-h-[170px] object-contain select-none pointer-events-none group-hover:scale-102 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+
+              <!-- 底部操作按钮 (左对齐药丸按钮，Arco Primary 风格) -->
+              <div class="z-10 mt-1">
                 <a-button
-                  type="secondary"
-                  long
-                  class="welcome-card-btn rounded font-medium text-[11.5px] text-slate-700 hover:text-[#1677ff] flex items-center justify-center gap-1"
+                  type="primary"
+                  shape="round"
+                  class="px-5 h-8 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12.5px] flex items-center gap-1.5 shadow-sm"
                 >
-                  <span>{{ store.currentLocale === 'en' ? 'Load Template' : '载入模板' }}</span>
-                  <ArrowRight class="w-3.5 h-3.5 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+                  <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>{{ t('wizard.createNowBtn') }}</span>
+                  <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </a-button>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 底部轻量指引 -->
-        <div class="text-center text-[11px] text-slate-400 pt-2 select-none">
-          {{ t('wizard.hintClickCard') }}
+          <!-- 右侧 3：选择模板 (统一 8px 标准圆角，统一一致的「标签 + 箭头」卡片交互) -->
+          <div class="md:col-span-7 flex flex-col justify-between">
+            <div>
+              <!-- 顶部标题区：图标 + 标题 + 说明 (无任何多余 Tab 栏) -->
+              <div class="flex items-start gap-2.5 mb-3.5">
+                <LayoutGrid class="w-5 h-5 text-[#1677ff] shrink-0 mt-0.5" />
+                <div>
+                  <h4 class="text-[16px] font-bold text-slate-900 m-0 tracking-tight leading-tight">
+                    {{ t('wizard.selectTemplate') }}
+                  </h4>
+                  <p class="text-[12px] text-slate-400 m-0 mt-0.5 leading-tight">
+                    {{ t('wizard.selectTemplateDesc') }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- 3 款横向模板卡片 (统一标准 8px 圆角，纯正 UI/UE 彩色矢量图标，统一一致的交互逻辑) -->
+              <div class="space-y-3">
+                <div
+                  v-for="tpl in scenarioTemplates"
+                  :key="tpl.key"
+                  class="group rounded-lg p-3.5 px-4 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:bg-blue-50/20 hover:shadow-2xs cursor-pointer transition-all duration-150 select-none"
+                  @click="handleSelectTemplate(tpl.key)"
+                >
+                  <!-- 左侧：UI/UE 矢量彩色图标方块 + 标题、统计信息与描述 -->
+                  <div class="flex items-start gap-3.5 min-w-0 flex-1">
+                    <!-- UI/UE 矢量彩色图标方块 (标准 8px 圆角方块 + 白色矢量图标) -->
+                    <div
+                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white shadow-2xs group-hover:scale-105 transition-transform duration-150 mt-0.5"
+                      :class="tpl.iconBoxBg"
+                    >
+                      <component :is="tpl.icon" class="w-5.5 h-5.5 stroke-[1.8]" />
+                    </div>
+
+                    <!-- 模板标题与详情 -->
+                    <div class="min-w-0 flex-1 pr-2">
+                      <h5 class="text-[14px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
+                        {{ getFieldText(tpl, 'title') }}
+                      </h5>
+                      
+                      <!-- 统计：页面与字段 (双图标展示) -->
+                      <div class="flex items-center gap-2 text-[12px] text-slate-400 mt-1 m-0 leading-none">
+                        <span class="flex items-center gap-1">
+                          <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{{ getPagesText(tpl) }}</span>
+                        </span>
+                        <span class="text-slate-300">·</span>
+                        <span class="flex items-center gap-1">
+                          <Layers class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{{ getFieldsText(tpl) }}</span>
+                        </span>
+                      </div>
+
+                      <!-- 适用场景描述 -->
+                      <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal line-clamp-1">
+                        {{ t(tpl.descKey) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- 右侧：Arco 业务标签 + 箭头指示 (统一规范：标签 + 箭头居中对齐，消除伪单选与悬浮跳动) -->
+                  <div class="flex items-center gap-2.5 shrink-0 pl-3">
+                    <a-tag
+                      :color="tpl.arcoTagColor"
+                      size="small"
+                      class="rounded font-medium px-2"
+                    >
+                      {{ getFieldText(tpl, 'tag') }}
+                    </a-tag>
+
+                    <div class="text-slate-400 group-hover:text-[#1677ff] group-hover:translate-x-0.5 transition-all">
+                      <ArrowRight class="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </a-modal>
 
-  <!-- 模板覆盖二次确认弹窗 -->
+  <!-- 模板覆盖二次确认弹窗 (仅在画布包含实质性内容时触发) -->
   <a-modal
     v-model:visible="confirmOverwriteVisible"
-    :title="store.currentLocale === 'en' ? 'Confirm Overwrite' : '覆盖确认'"
+    :title="t('wizard.confirmOverwriteTitle')"
     :width="380"
     :title-align="'start'"
     draggable
@@ -194,21 +186,21 @@
     @cancel="confirmOverwriteVisible = false"
   >
     <div class="text-[13px] text-slate-600 leading-normal">
-      <template v-if="store.currentLocale === 'en'">
-        The current canvas already contains <strong>{{ store.pages.length }} artboard page(s)</strong>. Applying <strong>{{ pendingTemplateTitle }}</strong> will overwrite all current canvas contents. Are you sure you want to continue?
-      </template>
-      <template v-else>
-        当前画布已包含 <strong>{{ store.pages.length }} 个画板页面</strong>，载入 <strong>{{ pendingTemplateTitle }}</strong> 将完全覆盖当前画布内容。是否确认继续？
-      </template>
+      {{
+        t('wizard.confirmOverwriteDesc', undefined, {
+          pages: String(store.pages.length),
+          title: pendingTemplateTitle
+        })
+      }}
     </div>
 
     <template #footer>
       <div class="flex items-center justify-end gap-2">
         <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="executeApplyTemplate">
-          {{ store.currentLocale === 'en' ? 'Confirm Overwrite' : '确定覆盖' }}
+          {{ t('wizard.confirmOverwriteBtn') }}
         </a-button>
         <a-button @click="confirmOverwriteVisible = false">
-          {{ store.currentLocale === 'en' ? 'Cancel' : '取消' }}
+          {{ t('common.cancel') }}
         </a-button>
       </div>
     </template>
@@ -221,14 +213,16 @@ import { store, applyTemplateKey } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
-import tplBlankImg from '@/assets/templates/tpl-blank.webp';
-import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
-import tplEntityImg from '@/assets/templates/tpl-entity.webp';
-import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
+import tplBlankHeroImg from '@/assets/templates/tpl-blank-hero.webp';
 import {
+  Landmark,
+  User,
+  Building2,
+  LayoutGrid,
+  FileText,
+  Layers,
   ArrowRight,
-  X,
-  FileText
+  Plus
 } from '@lucide/vue';
 
 const props = withDefaults(
@@ -256,71 +250,57 @@ const modalVisible = computed({
   }
 });
 
-// 分类筛选药丸: 'all' | 'customer' | 'individual' | 'entity'
-const selectedCategory = ref<'all' | 'customer' | 'individual' | 'entity'>('all');
-
-const categoryTabs = computed(() => [
-  { key: 'all' as const, label: t('wizard.filterAll') },
-  { key: 'customer' as const, label: t('wizard.filterCustomer') },
-  { key: 'individual' as const, label: t('wizard.filterIndividual') },
-  { key: 'entity' as const, label: t('wizard.filterEntity') }
-]);
-
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
-    category: 'customer' as const,
+    type: 'customer' as const,
     title: '客户案例 KYC 模板',
-    title_en: 'Customer Registration',
+    title_en: 'Customer KYC Template',
     tag: '客户案例',
     tag_en: 'Customer',
-    stats: '3 页面 · 9 字段',
-    stats_en: '3 Pages · 9 Fields',
-    image: tplCustomerImg,
-    bannerBgClass: 'bg-[#faf5ff]',
-    tagBadgeClass: 'bg-purple-100/95 text-purple-700',
-    cardBorderClass: 'border-purple-200/90 hover:border-purple-400'
+    pages: 3,
+    fields: 9,
+    descKey: 'wizard.tplCustomerDesc',
+    icon: Landmark,
+    iconBoxBg: 'bg-[#722ed1]',
+    arcoTagColor: 'purple'
   },
   {
     key: 'kyc-individual' as const,
-    category: 'individual' as const,
+    type: 'individual' as const,
     title: '个人案例 KYC 模板',
-    title_en: 'Individual KYC',
+    title_en: 'Individual KYC Template',
     tag: '个人成员',
     tag_en: 'Individual',
-    stats: '5 页面 · 15 字段',
-    stats_en: '5 Pages · 15 Fields',
-    image: tplIndividualImg,
-    bannerBgClass: 'bg-[#f0fdf4]',
-    tagBadgeClass: 'bg-emerald-100/95 text-emerald-700',
-    cardBorderClass: 'border-emerald-200/90 hover:border-emerald-400'
+    pages: 5,
+    fields: 15,
+    descKey: 'wizard.tplIndividualDesc',
+    icon: User,
+    iconBoxBg: 'bg-[#00b42a]',
+    arcoTagColor: 'green'
   },
   {
     key: 'kyc-entity' as const,
-    category: 'entity' as const,
+    type: 'entity' as const,
     title: '机构案例 KYC 模板',
-    title_en: 'Entity KYC',
+    title_en: 'Entity KYC Template',
     tag: '机构成员',
     tag_en: 'Entity',
-    stats: '3 页面 · 16 字段',
-    stats_en: '3 Pages · 16 Fields',
-    image: tplEntityImg,
-    bannerBgClass: 'bg-[#eff6ff]',
-    tagBadgeClass: 'bg-blue-100/95 text-blue-700',
-    cardBorderClass: 'border-blue-200/90 hover:border-blue-400'
+    pages: 3,
+    fields: 16,
+    descKey: 'wizard.tplEntityDesc',
+    icon: Building2,
+    iconBoxBg: 'bg-[#1677ff]',
+    arcoTagColor: 'arcoblue'
   }
 ];
 
-const filteredTemplates = computed(() => {
-  if (selectedCategory.value === 'all') {
-    return scenarioTemplates;
-  }
-  return scenarioTemplates.filter(tpl => tpl.category === selectedCategory.value);
-});
+function getPagesText(tpl: (typeof scenarioTemplates)[number]) {
+  return store.currentLocale === 'en' ? `${tpl.pages} Pages` : `${tpl.pages} 页面`;
+}
 
-function handleClose() {
-  modalVisible.value = false;
-  emit('close');
+function getFieldsText(tpl: (typeof scenarioTemplates)[number]) {
+  return store.currentLocale === 'en' ? `${tpl.fields} Fields` : `${tpl.fields} 字段`;
 }
 
 // 点击新建空白画布：关闭向导弹窗并唤起二次弹窗 (CreateFormModal)，供选择业务主体与表单名称
@@ -339,10 +319,20 @@ const pendingTemplateTitle = computed(() => {
   return store.currentLocale === 'en' ? item.title_en : item.title;
 });
 
-// 选择某个场景模板：若画布已有画板则先二次确认，确认后载入并进入画布
+// 检查当前画布是否包含用户实质性编辑的内容 (有字段或多于初始画板数)
+function isCanvasDirty(): boolean {
+  if (store.pages.length === 0) return false;
+  const totalFields = store.pages.reduce((acc, p) => acc + (p.fields?.length || 0), 0);
+  if (totalFields === 0 && store.pages.length <= 2) {
+    return false;
+  }
+  return true;
+}
+
+// 选择某个场景模板：仅在画布已有实质性内容时二次确认，初次进入直接载入开启编排
 function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
   pendingTemplateKey.value = tplKey;
-  if (store.pages.length > 0) {
+  if (isCanvasDirty()) {
     confirmOverwriteVisible.value = true;
     return;
   }
@@ -373,19 +363,5 @@ function executeApplyTemplate() {
   padding: 0 !important;
   overflow: hidden;
   border-radius: 8px;
-}
-
-:deep(.welcome-card-btn) {
-  height: 28px !important;
-  line-height: 1 !important;
-  padding: 0 10px !important;
-}
-
-:deep(.welcome-card-btn .arco-btn-content) {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  line-height: 1 !important;
 }
 </style>

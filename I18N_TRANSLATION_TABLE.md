@@ -304,27 +304,28 @@
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | DIY 表单设计器 | DIY Form Builder | | | |
-| 欢迎使用 AlgoCandy | Welcome to AlgoCandy | | | |
-| 选择创建表单的方式，几秒钟即可开启高效编排。 | Choose how you want to create your form, and get started in seconds. | | | |
+| CREATE NEW | CREATE NEW | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
-| 从零开始，自由搭建属于你的表单 | Start from scratch and build your form freely. | | | |
+| 从零开始，自由设计你的专属表单 | Start from scratch and design your custom form | | | |
 | 立即创建 | Create Now | | | |
-| 选用场景模板 | Use a Template | | | |
-| 精选合规预设场景，开箱即用加速构建。 | Choose from ready-made templates to build faster. | | | |
-| 浏览模板 | Browse Templates | | | |
-| 热门场景模板 | Popular Templates | | | |
-| 查看全部模板 | View All Templates | | | |
-| Build Better Forms, | Build Better Forms, | | | |
-| 先逛逛画布 | Explore Canvas First | | | |
-| 新建表单 | New Form | | | |
-| KYC 模板库 | KYC Templates | | | |
-| 最近使用 | Recent | | | |
-| 精选 KYC 模板 | Featured KYC Templates | | | |
-| 全部 | All | | | |
-| 客户 | Customer | | | |
-| 个人 | Individual | | | |
-| 机构 | Entity | | | |
-| 点击任意卡片即可直接进入画布开启编排 | Click any card to enter the canvas directly | | | |
+| 选择模板 | Select Template | | | |
+| 使用模板快速创建，提升设计效率 | Create quickly with templates to boost design efficiency | | | |
+| 客户案例 KYC 模板 | Customer KYC Template | | | |
+| 个人案例 KYC 模板 | Individual KYC Template | | | |
+| 机构案例 KYC 模板 | Entity KYC Template | | | |
+| 适用于客户身份认证、KYC 相关的业务场景。 | Suitable for customer identification and KYC-related scenarios. | | | |
+| 适用于个人用户信息采集、身份验证等场景。 | Suitable for personal user data collection and identity verification. | | | |
+| 适用于机构客户、企业信息采集等场景。 | Suitable for corporate clients and enterprise information collection. | | | |
+| 客户案例 | Customer | | | |
+| 个人成员 | Individual | | | |
+| 机构成员 | Entity | | | |
+| 3 页面 · 9 字段 | 3 Pages · 9 Fields | | | |
+| 5 页面 · 15 字段 | 5 Pages · 15 Fields | | | |
+| 3 页面 · 16 字段 | 3 Pages · 16 Fields | | | |
+| 覆盖确认 | Confirm Overwrite | | | |
+| 当前画布已包含 {pages} 个画板页面，载入 {title} 将完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Applying {title} will overwrite all current canvas contents. Are you sure you want to continue? | | | |
+| 确定覆盖 | Confirm Overwrite | | | |
+| 取消 | Cancel | | | |
 
 ## 顶部导航栏 (AppHeader)
 

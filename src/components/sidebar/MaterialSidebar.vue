@@ -20,7 +20,7 @@
         <!-- 顶部 Logo 标识与导航分类 (垂直排列) -->
         <div class="flex flex-col items-center gap-3.5 w-full">
           <!-- 品牌标识 -->
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0d99ff] text-white shadow-xs">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1677ff] text-white shadow-xs">
             <Boxes class="h-4 w-4 stroke-[2.4]" />
           </div>
 
@@ -149,7 +149,7 @@
                 <button
                   type="button"
                   class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 cursor-pointer"
-                  :class="{ 'text-blue-600 bg-blue-50': searchOpen }"
+                  :class="{ 'text-[#1677ff] bg-blue-50': searchOpen }"
                   @click="toggleSearch"
                 >
                   <Search class="h-3.5 w-3.5" />
@@ -234,17 +234,17 @@
                 class="group flex flex-col rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs transition-all duration-150 cursor-pointer select-none overflow-hidden"
                 @click="handleSelectTemplate(tpl.key)"
               >
-                <!-- 顶部 3D 插画缩略图横幅 (对齐客户紫色、机构蓝色、个人绿色) -->
+                <!-- 顶部 UI/UE 矢量彩色图标横幅 (对齐客户紫色、机构蓝色、个人绿色) -->
                 <div
-                  class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none bg-slate-50"
+                  class="h-[76px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
                   :class="tpl.bannerBgClass"
                 >
-                  <img
-                    :src="tpl.image"
-                    :alt="getFieldText(tpl, 'title')"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
+                  <div
+                    class="flex h-11 w-11 items-center justify-center rounded-lg text-white shadow-2xs group-hover:scale-105 transition-transform duration-150"
+                    :class="tpl.iconBoxBg"
+                  >
+                    <component :is="tpl.icon" class="w-5.5 h-5.5 stroke-[1.8]" />
+                  </div>
                   <!-- 右上角漂浮徽标 Tag -->
                   <a-tag
                     size="small"
@@ -302,15 +302,15 @@
                 <div
                   v-for="item in filteredBasicComponents"
                   :key="item.type + '_' + store.currentLocale"
-                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-sm active:bg-blue-50/60 active:border-blue-500"
+                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
                   :data-type="item.type"
                   :title="getFieldText(item, 'label')"
                   @click="handleComponentClick(item.type)"
                 >
                   <div class="sidebar-btn-view flex w-full items-center gap-1.5 overflow-hidden">
-                    <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-blue-500 shrink-0" />
+                    <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-[#1677ff] shrink-0" />
                     <span
-                      class="truncate font-medium text-slate-700 transition-colors group-hover:text-blue-700"
+                      class="truncate font-medium text-slate-700 transition-colors group-hover:text-[#1677ff]"
                       :class="store.currentLocale === 'en' ? 'text-[11px] tracking-tight' : 'text-[11.5px]'"
                     >
                       {{ getFieldText(item, 'label') }}
@@ -332,15 +332,15 @@
                 <div
                   v-for="item in filteredBusinessComponents"
                   :key="item.type + '_' + store.currentLocale"
-                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-sm active:bg-blue-50/60 active:border-blue-500"
+                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
                   :data-type="item.type"
                   :title="getFieldText(item, 'label')"
                   @click="handleComponentClick(item.type)"
                 >
                   <div class="sidebar-btn-view flex w-full items-center gap-1.5 overflow-hidden">
-                    <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-blue-500 shrink-0" />
+                    <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-[#1677ff] shrink-0" />
                     <span
-                      class="truncate font-medium text-slate-700 transition-colors group-hover:text-blue-700"
+                      class="truncate font-medium text-slate-700 transition-colors group-hover:text-[#1677ff]"
                       :class="store.currentLocale === 'en' ? 'text-[11px] tracking-tight' : 'text-[11.5px]'"
                     >
                       {{ getFieldText(item, 'label') }}
@@ -462,12 +462,12 @@
     <!-- 右侧拖拽拉伸边框把手 -->
     <div
       v-if="store.leftSidebarVisible"
-      class="sidebar-resize-handle-right absolute right-0 top-0 bottom-0 w-2 -mr-1 cursor-col-resize hover:bg-[#0d99ff]/40 active:bg-[#0d99ff] transition-colors z-40 group select-none flex items-center justify-center"
-      :class="{ 'bg-[#0d99ff]/60': isResizing }"
+      class="sidebar-resize-handle-right absolute right-0 top-0 bottom-0 w-2 -mr-1 cursor-col-resize hover:bg-[#1677ff]/40 active:bg-[#1677ff] transition-colors z-40 group select-none flex items-center justify-center"
+      :class="{ 'bg-[#1677ff]/60': isResizing }"
       title="拖拽调整侧边栏宽度"
       @mousedown.prevent="startResize"
     >
-      <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#0d99ff] transition-colors"></div>
+      <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
     </div>
 
     <!-- 模板覆盖确认轻量弹窗 (对齐新建表单画布的正常规范标准样式) -->
@@ -524,9 +524,6 @@ import SignatureElement from '@/components/canvas/elements/SignatureElement.vue'
 import AlertElement from '@/components/canvas/elements/AlertElement.vue';
 import PhoneElement from '@/components/canvas/elements/PhoneElement.vue';
 import EmailElement from '@/components/canvas/elements/EmailElement.vue';
-import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
-import tplEntityImg from '@/assets/templates/tpl-entity.webp';
-import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
 import {
   Boxes,
   Component,
@@ -539,8 +536,8 @@ import {
   Lock,
   Trash2,
   Building2,
-  UserCheck,
-  ShieldCheck,
+  Landmark,
+  User,
   Settings,
   Sparkles,
   FileText
@@ -575,8 +572,8 @@ const scenarioTemplates = [
     tag: '客户案例',
     tag_en: 'Customer',
     tagColor: 'purple',
-    icon: Building2,
-    image: tplCustomerImg,
+    icon: Landmark,
+    iconBoxBg: 'bg-[#722ed1]',
     desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
     desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
     stats: '3 页面 · 9 字段',
@@ -591,8 +588,8 @@ const scenarioTemplates = [
     tag: '个人案例',
     tag_en: 'Individual',
     tagColor: 'green',
-    icon: UserCheck,
-    image: tplIndividualImg,
+    icon: User,
+    iconBoxBg: 'bg-[#00b42a]',
     desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
     desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     stats: '5 页面 · 15 字段',
@@ -607,8 +604,8 @@ const scenarioTemplates = [
     tag: '机构案例',
     tag_en: 'Entity',
     tagColor: 'arcoblue',
-    icon: ShieldCheck,
-    image: tplEntityImg,
+    icon: Building2,
+    iconBoxBg: 'bg-[#1677ff]',
     desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',
     desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
     stats: '3 页面 · 16 字段',
@@ -926,8 +923,8 @@ function handleComponentClick(type: ComponentType) {
 }
 
 .figma-activity-btn.active {
-  background: #e8f3ff;
-  color: #0d99ff;
+  background: #e6f4ff;
+  color: #1677ff;
   font-weight: 600;
 }
 
@@ -939,7 +936,7 @@ function handleComponentClick(type: ComponentType) {
   line-height: 1;
   padding: 1.5px 4px;
   border-radius: 9999px;
-  background: #0d99ff;
+  background: #1677ff;
   color: white;
   font-weight: bold;
 }
@@ -952,17 +949,17 @@ function handleComponentClick(type: ComponentType) {
 }
 
 .figma-search-input :deep(.arco-input-wrapper:hover) {
-  border-color: #94bfff;
+  border-color: #91caff;
 }
 
 .figma-search-input :deep(.arco-input-wrapper:focus-within) {
-  border-color: #0d99ff;
-  box-shadow: 0 0 0 1px #0d99ff;
+  border-color: #1677ff;
+  box-shadow: 0 0 0 1px #1677ff;
 }
 
 /* 页面行样式 */
 .figma-page-row:hover {
-  border-color: #94bfff;
+  border-color: #91caff;
 }
 
 /* 提示弹窗样式 (对齐新建表单画布的正常标准样式) */
