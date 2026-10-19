@@ -249,9 +249,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 欢迎向导弹窗 (WelcomeWizardModal)
     'wizard.brandSubtitle': 'DIY 表单设计器',
-    'wizard.createNewTag': 'CREATE NEW',
+    'wizard.createNewTag': 'Create NEW',
     'wizard.createBlank': '新建空白画布',
-    'wizard.createBlankDesc': '从零开始，自由设计你的专属表单',
+    'wizard.createBlankDesc': '点击左下方立即创建按钮，开始创建您的第一个定制表单。',
     'wizard.createNowBtn': '立即创建',
     'wizard.selectTemplate': '选择模板',
     'wizard.selectTemplateDesc': '使用模板快速创建，提升设计效率',
@@ -757,9 +757,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // Welcome Wizard Modal (WelcomeWizardModal)
     'wizard.brandSubtitle': 'DIY Form Builder',
-    'wizard.createNewTag': 'CREATE NEW',
+    'wizard.createNewTag': 'Create NEW',
     'wizard.createBlank': 'Create Blank Canvas',
-    'wizard.createBlankDesc': 'Start from scratch and design your custom form',
+    'wizard.createBlankDesc': 'Click the "Create Now" button at the bottom left to start creating your first custom form.',
     'wizard.createNowBtn': 'Create Now',
     'wizard.selectTemplate': 'Select Template',
     'wizard.selectTemplateDesc': 'Create quickly with templates to boost design efficiency',

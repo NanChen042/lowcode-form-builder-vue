@@ -55,7 +55,7 @@
             >
               <!-- 顶部文案区 -->
               <div class="z-10">
-                <span class="text-[11px] font-bold text-[#1677ff] tracking-wider uppercase">
+                <span class="text-[11px] font-bold text-[#1677ff] tracking-wider">
                   {{ t('wizard.createNewTag') }}
                 </span>
                 <h3 class="text-[18px] font-bold text-slate-900 mt-1 leading-tight tracking-tight group-hover:text-[#1677ff] transition-colors">

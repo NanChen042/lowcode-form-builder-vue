@@ -298,7 +298,7 @@
 | DIY 表单设计器 | DIY Form Builder | | | |
 | CREATE NEW | CREATE NEW | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
-| 从零开始，自由设计你的专属表单 | Start from scratch and design your custom form | | | |
+| 点击左下方立即创建按钮，开始创建您的第一个定制表单。 | Click the "Create Now" button at the bottom left to start creating your first custom form. | | | |
 | 立即创建 | Create Now | | | |
 | 选择模板 | Select Template | | | |
 | 使用模板快速创建，提升设计效率 | Create quickly with templates to boost design efficiency | | | |
