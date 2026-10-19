@@ -86,7 +86,7 @@
                       ? 'text-slate-300 hover:text-slate-500 hover:bg-slate-100'
                       : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100')"
                 :title="isMaxDepthReached && getLinkedFieldsForOption(option).length === 0
-                  ? (store.currentLocale === 'en' ? 'Max nesting depth reached (up to 2 levels)' : '已达最大追问层级（最多支持2级嵌套）')
+                  ? t('options.maxDepthReachedShort')
                   : t('options.linkConfigTitle', undefined, { name: getOptionLabel(option, undefined, true) || t('options.thisOption') })"
               >
                 <Link2 class="h-3.5 w-3.5" />
@@ -106,7 +106,7 @@
                     v-if="isMaxDepthReached"
                     class="p-2 rounded bg-amber-50 border border-amber-200/80 text-amber-800 text-[11px] leading-relaxed"
                   >
-                    {{ store.currentLocale === 'en' ? 'Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability.' : '已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。' }}
+                    {{ t('options.maxDepthReached') }}
                   </div>
 
                   <!-- 1. 直接选择想要添加的组件类型（一键生成并联动） -->

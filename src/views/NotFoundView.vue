@@ -153,10 +153,10 @@
 
     <div class="flex flex-col items-center justify-center text-center">
       <p class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mt-10 tracking-tight">
-        Page Not Found
+        {{ t('notFound.title') }}
       </p>
       <p class="md:text-lg lg:text-xl text-gray-600 mt-4 max-w-lg">
-        Sorry, the page you are looking for could not be found.
+        {{ t('notFound.desc') }}
       </p>
 
       <!-- 操作按钮组 (遵循项目规范：标准 4px 微圆角、36px 黄金高度、#186df5 品牌色与白底精细描边次按钮) -->
@@ -164,7 +164,7 @@
         <button
           type="button"
           class="h-9 px-4 rounded bg-[#186df5] hover:bg-[#1660d8] active:bg-[#0f5fdb] text-white text-sm font-medium transition-colors duration-150 inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-          title="返回表单构建器"
+          :title="t('notFound.backToBuilder')"
           @click="goToBuilder"
         >
           <svg
@@ -177,22 +177,22 @@
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span>返回表单构建器</span>
+          <span>{{ t('notFound.backToBuilder') }}</span>
         </button>
 
         <button
           type="button"
           class="h-9 px-4 rounded bg-white hover:bg-[#eef7ff] text-[#334155] hover:text-[#186df5] border border-[#d9d9d9] hover:border-[#186df5] text-sm font-medium transition-colors duration-150 inline-flex items-center justify-center cursor-pointer shadow-2xs"
-          title="返回KYC表单列表"
+          :title="t('notFound.backToKycList')"
           @click="goBackToAlgo"
         >
-          <span>返回KYC表单列表</span>
+          <span>{{ t('notFound.backToKycList') }}</span>
         </button>
       </div>
 
       <!-- 诊断与自动返回倒计时 -->
       <div class="mt-8 text-xs text-slate-400 font-mono">
-        <span>将在 <span class="text-[#186df5] font-semibold">{{ countdown }}s</span> 后自动返回</span>
+        <span>{{ t('notFound.autoRedirect', undefined, { countdown }) }}</span>
       </div>
     </div>
   </div>
@@ -201,6 +201,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { t } from '@/core/i18n';
 
 const router = useRouter();
 

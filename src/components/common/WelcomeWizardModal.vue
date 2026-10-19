@@ -117,12 +117,15 @@
                 >
                   <!-- 左侧：UI/UE 矢量彩色图标方块 + 标题、统计信息与描述 -->
                   <div class="flex items-start gap-3.5 min-w-0 flex-1">
-                    <!-- UI/UE 矢量彩色图标方块 (标准 8px 圆角方块 + 白色矢量图标) -->
+                    <!-- 场景模板图标 (使用 c.png / u.png / e.png，小尺寸精致清晰) -->
                     <div
-                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white shadow-2xs group-hover:scale-105 transition-transform duration-150 mt-0.5"
-                      :class="tpl.iconBoxBg"
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md group-hover:scale-105 transition-transform duration-150 mt-0.5 overflow-hidden"
                     >
-                      <component :is="tpl.icon" class="w-5.5 h-5.5 stroke-[1.8]" />
+                      <img
+                        :src="tpl.image"
+                        :alt="getFieldText(tpl, 'title')"
+                        class="w-full h-full object-contain select-none pointer-events-none"
+                      />
                     </div>
 
                     <!-- 模板标题与详情 -->
@@ -214,10 +217,10 @@ import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
 import tplBlankHeroImg from '@/assets/templates/tpl-blank-hero.webp';
+import iconCustomer from '@/assets/templates/c.png';
+import iconIndividual from '@/assets/templates/u.png';
+import iconEntity from '@/assets/templates/e.png';
 import {
-  Landmark,
-  User,
-  Building2,
   LayoutGrid,
   FileText,
   Layers,
@@ -261,8 +264,7 @@ const scenarioTemplates = [
     pages: 3,
     fields: 9,
     descKey: 'wizard.tplCustomerDesc',
-    icon: Landmark,
-    iconBoxBg: 'bg-[#722ed1]',
+    image: iconCustomer,
     arcoTagColor: 'purple'
   },
   {
@@ -275,8 +277,7 @@ const scenarioTemplates = [
     pages: 5,
     fields: 15,
     descKey: 'wizard.tplIndividualDesc',
-    icon: User,
-    iconBoxBg: 'bg-[#00b42a]',
+    image: iconIndividual,
     arcoTagColor: 'green'
   },
   {
@@ -289,18 +290,17 @@ const scenarioTemplates = [
     pages: 3,
     fields: 16,
     descKey: 'wizard.tplEntityDesc',
-    icon: Building2,
-    iconBoxBg: 'bg-[#1677ff]',
+    image: iconEntity,
     arcoTagColor: 'arcoblue'
   }
 ];
 
 function getPagesText(tpl: (typeof scenarioTemplates)[number]) {
-  return store.currentLocale === 'en' ? `${tpl.pages} Pages` : `${tpl.pages} 页面`;
+  return t('wizard.pagesCount', undefined, { count: tpl.pages });
 }
 
 function getFieldsText(tpl: (typeof scenarioTemplates)[number]) {
-  return store.currentLocale === 'en' ? `${tpl.fields} Fields` : `${tpl.fields} 字段`;
+  return t('wizard.fieldsCount', undefined, { count: tpl.fields });
 }
 
 // 点击新建空白画布：关闭向导弹窗并唤起二次弹窗 (CreateFormModal)，供选择业务主体与表单名称

@@ -188,7 +188,7 @@
           class="flex items-center gap-1 font-medium text-[#1677ff] hover:text-blue-700 transition-colors cursor-pointer text-[12px] px-1 py-0.5 whitespace-nowrap active:scale-95"
           @click="handleJumpToCurrentUntranslated"
         >
-          <span>{{ translationStats.untranslatedCount > 1 ? (store.currentLocale === 'en' ? `Next (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})` : `下一项 (${(currentUntranslatedIndex % translationStats.untranslatedCount) + 1}/${translationStats.untranslatedCount})`) : t('canvas.todoLocate') }}</span>
+          <span>{{ translationStats.untranslatedCount > 1 ? t('canvas.todoNextIndexed', undefined, { current: (currentUntranslatedIndex % translationStats.untranslatedCount) + 1, total: translationStats.untranslatedCount }) : t('canvas.todoLocate') }}</span>
           <ArrowRight class="w-3 h-3" />
         </button>
         <button

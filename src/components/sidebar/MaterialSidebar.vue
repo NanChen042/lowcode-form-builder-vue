@@ -240,10 +240,13 @@
                   :class="tpl.bannerBgClass"
                 >
                   <div
-                    class="flex h-11 w-11 items-center justify-center rounded-lg text-white shadow-2xs group-hover:scale-105 transition-transform duration-150"
-                    :class="tpl.iconBoxBg"
+                    class="flex h-8 w-8 items-center justify-center rounded-md shadow-2xs group-hover:scale-105 transition-transform duration-150 overflow-hidden"
                   >
-                    <component :is="tpl.icon" class="w-5.5 h-5.5 stroke-[1.8]" />
+                    <img
+                      :src="tpl.image"
+                      :alt="getFieldText(tpl, 'title')"
+                      class="w-full h-full object-contain select-none pointer-events-none"
+                    />
                   </div>
                   <!-- 右上角漂浮徽标 Tag -->
                   <a-tag
@@ -274,7 +277,7 @@
                       <span>{{ getFieldText(tpl, 'stats') }}</span>
                     </div>
                     <div class="flex items-center gap-0.5 text-[#1677ff] font-medium opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-150">
-                      <span class="text-[11px]">{{ store.currentLocale === 'en' ? 'Use' : '选用模板' }}</span>
+                      <span class="text-[11px]">{{ t('sidebar.useTemplate') }}</span>
                       <ArrowRight class="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -464,7 +467,7 @@
       v-if="store.leftSidebarVisible"
       class="sidebar-resize-handle-right absolute right-0 top-0 bottom-0 w-2 -mr-1 cursor-col-resize hover:bg-[#1677ff]/40 active:bg-[#1677ff] transition-colors z-40 group select-none flex items-center justify-center"
       :class="{ 'bg-[#1677ff]/60': isResizing }"
-      title="拖拽调整侧边栏宽度"
+      :title="t('sidebar.resizeHandleTip')"
       @mousedown.prevent="startResize"
     >
       <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
@@ -473,7 +476,7 @@
     <!-- 模板覆盖确认轻量弹窗 (对齐新建表单画布的正常规范标准样式) -->
     <a-modal
       v-model:visible="confirmModalVisible"
-      :title="t('sidebar.confirmTitle')"
+      :title="t('sidebar.confirmOverwriteTitle')"
       :width="380"
       :title-align="'start'"
       draggable
@@ -482,18 +485,13 @@
       @cancel="confirmModalVisible = false"
     >
       <div class="text-[13px] text-slate-600 leading-normal">
-        <template v-if="store.currentLocale === 'en'">
-          The current canvas already contains <strong>{{ store.pages.length }} artboard page(s)</strong>. Loading a new template will overwrite current canvas contents. Are you sure you want to continue?
-        </template>
-        <template v-else>
-          当前画布已包含 <strong>{{ store.pages.length }} 个画板页面</strong>，载入新预置模板将会完全覆盖当前画布内容。是否确认继续？
-        </template>
+        {{ t('sidebar.confirmOverwriteDesc', undefined, { pages: store.pages.length }) }}
       </div>
 
       <template #footer>
         <div class="flex items-center justify-end gap-2">
           <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="handleConfirmApplyTemplate">
-            {{ store.currentLocale === 'en' ? 'Confirm Overwrite' : '确定覆盖' }}
+            {{ t('sidebar.confirmOverwriteBtn') }}
           </a-button>
           <a-button @click="confirmModalVisible = false">
             {{ t('modal.cancel') }}
@@ -535,13 +533,13 @@ import {
   ArrowRight,
   Lock,
   Trash2,
-  Building2,
-  Landmark,
-  User,
   Settings,
   Sparkles,
   FileText
 } from '@lucide/vue';
+import iconCustomer from '@/assets/templates/c.png';
+import iconIndividual from '@/assets/templates/u.png';
+import iconEntity from '@/assets/templates/e.png';
 import { Message } from '@arco-design/web-vue';
 import { useSidebarResize } from '@/utils/useSidebarResize';
 import { startAppTour } from '@/utils/useAppTour';
@@ -572,8 +570,7 @@ const scenarioTemplates = [
     tag: '客户案例',
     tag_en: 'Customer',
     tagColor: 'purple',
-    icon: Landmark,
-    iconBoxBg: 'bg-[#722ed1]',
+    image: iconCustomer,
     desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
     desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
     stats: '3 页面 · 9 字段',
@@ -588,8 +585,7 @@ const scenarioTemplates = [
     tag: '个人案例',
     tag_en: 'Individual',
     tagColor: 'green',
-    icon: User,
-    iconBoxBg: 'bg-[#00b42a]',
+    image: iconIndividual,
     desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
     desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     stats: '5 页面 · 15 字段',
@@ -604,8 +600,7 @@ const scenarioTemplates = [
     tag: '机构案例',
     tag_en: 'Entity',
     tagColor: 'arcoblue',
-    icon: Building2,
-    iconBoxBg: 'bg-[#1677ff]',
+    image: iconEntity,
     desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',
     desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
     stats: '3 页面 · 16 字段',

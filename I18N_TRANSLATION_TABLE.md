@@ -75,8 +75,6 @@
 | 副标题 | Subtitle | | | |
 | 副标题 | Subtitle | | | |
 | 请输入副标题或补充说明 | Enter subtitle or explanation | | | |
-| 添加副标题说明 | Add Subtitle / Note | | | |
-| 删除副标题 | Remove Subtitle | | | |
 | 排布方式 | Layout | | | |
 | 排布方式 | Layout | | | |
 | 标题右侧 | Inline | | | |
@@ -189,9 +187,6 @@
 | 未找到匹配的组件 | No matching components found | | | |
 | 基础输入 | Basic Inputs | | | |
 | 业务组件 | Business Components | | | |
-| 组件物料库 | Component Library | | | |
-| 场景模板库 | Scenario Templates | | | |
-| 画布页面列表 | Canvas Pages | | | |
 | 完全收起侧边栏 | Collapse Sidebar | | | |
 | 组件 | Components | | | |
 | 模板 | Templates | | | |
@@ -204,7 +199,9 @@
 | 预置场景模板 | Preset Scenarios | | | |
 | 添加新画板页面 | Add Canvas Page | | | |
 | 提示 | Prompt | | | |
-| 会覆盖当前画布内容，是否继续？ | Loading this template will overwrite current canvas contents. Do you want to continue? | | | |
+| 拖拽拉伸物料库面板宽度 | Drag to resize material sidebar | | | |
+| 选用模板 | Use Template | | | |
+| 当前画布已包含 {pages} 个画板页面，载入新预置模板将会完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Loading a new template will overwrite current canvas contents. Are you sure you want to continue? | | | |
 | 模板已载入 | Template loaded | | | |
 | 已添加新画板页面 | New canvas page added | | | |
 | 画板已删除 | Canvas page deleted | | | |
@@ -269,28 +266,12 @@
 | 已锁定主体： | Locked Profile:  | | | |
 | 业务主体 | Profile Type | | | |
 | 表单名称 | Form Title | | | |
-| 请输入表单名称 | Enter form title | | | |
-| 初始化所选主体的基本资料画板，后续可在画布中自由拖拽编排。 | Initializes basic profile page for the selected entity. You can freely orchestrate components on the canvas afterward. | | | |
-| 立即创建 | Create Canvas | | | |
-| 取消 | Cancel | | | |
-| 确定 | Confirm | | | |
-| 表单画布创建成功 | Form canvas created successfully | | | |
-| 个人案例 (Individual) | Individual Case | | | |
-| 机构案例 (Entity) | Entity Case | | | |
-| 客户案例 (Customer) | Customer Case | | | |
-| 留空默认为：SG_CDD_Individual | Default: SG_CDD_Individual | | | |
-| 留空默认为：SG_CDD_Entity | Default: SG_CDD_Entity | | | |
-| 留空默认为：SG_CDD_Customer | Default: SG_CDD_Customer | | | |
-| 从空白画布创建的自定义表单 | Custom form created from blank canvas | | | |
-| 新建表单画布 | New Form Canvas | | | |
-| 已锁定主体： | Locked Profile:  | | | |
-| 业务主体 | Profile Type | | | |
-| 表单名称 | Form Title | | | |
 | 客户案例 | Customer | | | |
 | 个人案例 | Individual | | | |
 | 机构案例 | Entity | | | |
 | 初始化所选主体的基本资料画板，后续可在画布中自由拖拽编排。 | Initializes basic profile artboard for the selected entity. You can freely orchestrate components on the canvas afterward. | | | |
 | 立即创建 | Create Canvas | | | |
+| 确定 | Confirm | | | |
 | 取消 | Cancel | | | |
 | 覆盖确认 | Confirm Overwrite | | | |
 | 当前画布已包含 {pages} 个画板页面，新建表单将完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Creating a new form will overwrite all current canvas contents. Are you sure you want to continue? | | | |
@@ -298,6 +279,17 @@
 | 表单画布创建成功 | Form canvas created successfully | | | |
 | 从空白画布创建的自定义表单 | Custom form created from blank canvas | | | |
 | 留空默认为：{title} | Default: {title} | | | |
+
+
+## 404 页面 (NotFoundView)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 页面未找到 | Page Not Found | | | |
+| 抱歉，您访问的页面不存在或已被移除。 | Sorry, the page you are looking for could not be found. | | | |
+| 返回表单构建器 | Back to Form Builder | | | |
+| 返回KYC表单列表 | Back to KYC Forms | | | |
+| 将在 {countdown}s 后自动返回 | Auto redirecting in {countdown}s | | | |
 
 ## 欢迎向导弹窗 (WelcomeWizardModal)
 
@@ -325,6 +317,7 @@
 | 覆盖确认 | Confirm Overwrite | | | |
 | 当前画布已包含 {pages} 个画板页面，载入 {title} 将完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Applying {title} will overwrite all current canvas contents. Are you sure you want to continue? | | | |
 | 确定覆盖 | Confirm Overwrite | | | |
+| 确定 | Confirm | | | |
 | 取消 | Cancel | | | |
 
 ## 顶部导航栏 (AppHeader)
@@ -421,6 +414,7 @@
 | 上一步 | Previous | | | |
 | 确认 & 下一步 | Confirm & Next | | | |
 | 下一步 | Next Step | | | |
+| 确定 | Confirm | | | |
 | 取消 | Cancel | | | |
 | 新加坡 | Singapore | | | |
 | 预置核验节点 | Pre-filled Baseline | | | |
@@ -447,7 +441,6 @@
 | 缩放到 100% | Zoom to 100% | | | |
 | 适应画布全貌 | Zoom to Fit | | | |
 | 缩放到选中项 | Zoom to Selection | | | |
-| 操作指南与快捷键 | User Guide & Shortcuts | | | |
 | 操作指南与快捷键 | User Guide & Shortcuts | | | |
 | 画布缩放与视口平移 | Canvas Zoom & Panning | | | |
 | 自由平移画布 | Pan Canvas | | | |
@@ -519,7 +512,6 @@
 | 请输入有效的邮箱地址 | Please enter a valid email | | | |
 | 最多只能选择 {count} 项 | Maximum {count} options allowed | | | |
 | 最多只能选择 {count} 项 | Maximum {count} items allowed | | | |
-| 请输入邮箱 | Please enter email | | | |
 
 ## 国家/国籍清单 (CountryDirectoryModal)
 
@@ -539,13 +531,11 @@
 
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
-| 按住拖拽排序 | Drag to reorder | | | |
 | 按住拖拽排序 (选项 {index}) | Drag to reorder Option {index} | | | |
 | 选项 | Option | | | |
 | 点击切换默认选中项 | Click to toggle default selection | | | |
 | 点击切换默认勾选 | Click to toggle default check | | | |
 | 添加选项 | Add Option | | | |
-| 添加条款 | Add Item | | | |
 | 设置选择【{name}】时展开的表单组件 | Configure fields to reveal when choosing [{name}] | | | |
 | 选择【{name}】时触发显示 | Reveal when selecting [{name}] | | | |
 | 选择想要添加的展开组件： | Add new followup field to reveal: | | | |
@@ -555,18 +545,28 @@
 | 请输入声明条款内容（条款 {index}） | Enter declaration terms (Clause {index}) | | | |
 | 解除关联 | Unlink | | | |
 | 单行输入 | Single-line Input | | | |
+| 已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。 | Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability. | | | |
+| 已达最大追问层级（最多支持2级嵌套） | Max nesting depth reached (up to 2 levels) | | | |
+
 
 ## 属性面板补充 (PropertyPanel)
 
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
+| 中文原文： | Original (ZH):  | | | |
+| 中文原标题： | Original Title (ZH):  | | | |
+| 中文原描述： | Original Description (ZH):  | | | |
+| 原中文： | Original ZH:  | | | |
+| 拖拽拉伸属性面板宽度 | Drag to resize property panel | | | |
+| 编辑语言 | Language | | | |
+| 中文完备率: {percent}% | Chinese completeness: {percent}% | | | |
+| 英文完备率: {percent}% | English completeness: {percent}% | | | |
 | 该节点为系统预置前置核验步骤，内容与逻辑由系统固化，不支持修改属性配置。 | This node is a system-level pre-check step with fixed logic. Property modification is not supported. | | | |
 | 请输入邮箱 | Please enter email | | | |
 | 请选择国家/地区 | Select Country/Region | | | |
 | 请选择国籍 | Select Nationality | | | |
 | 当前正在配置：中文内容 | Configuring: Chinese Content | | | |
 | 当前正在配置：英文内容 | Configuring: English Content | | | |
-| 条件联动从属 | Conditional Dependency | | | |
 | 展开规则 | Display Rule | | | |
 | 生效中 | Active | | | |
 | 当 | When | | | |
@@ -576,8 +576,6 @@
 | 点击定位画布上游组件 | Click to locate upstream component on canvas | | | |
 | 确定解除与该选项的展开联动吗？解除后该组件将恢复为常驻显示。 | Unlink this condition? The field will become permanently visible. | | | |
 | 解除联动 | Unlink | | | |
-| 该组件已被设置为追问项，仅当对应选项被选中时才会在填写时展开。 | This field is set as a follow-up item and will expand only when the specified option is selected. | | | |
-| 仅当【{source}】选择「{option}」时展开 | Expands only when [{source}] selects "{option}" | | | |
 
 ## 画板交互与待办清单 (InfiniteCanvas / CanvasElement)
 
@@ -588,10 +586,12 @@
 | 共 {count} 项 | {count} item(s) in total | | | |
 | 定位补齐 | Locate & Fill | | | |
 | 暂时忽略 | Ignore for now | | | |
+| 下一项 ({current}/{total}) | Next ({current}/{total}) | | | |
+| {count} 页面 | {count} Pages | | | |
+| {count} 字段 | {count} Fields | | | |
+| 中文待补齐清单 | Chinese Completion Checklist | | | |
 | {count} 项中文未填写 | {count} Chinese field(s) empty | | | |
 | {count} 项英文未翻译 | {count} English translation(s) missing | | | |
-| 全部内容均已齐备 | All contents completed | | | |
-| 可拖拽悬浮窗 | Draggable window | | | |
 | 若选「{option}」 | If "{option}" is selected | | | |
 | 是 | Yes | | | |
 | 否 | No | | | |

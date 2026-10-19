@@ -15,7 +15,7 @@
       v-if="store.rightSidebarVisible"
       class="sidebar-resize-handle-left absolute left-0 top-0 bottom-0 w-2 -ml-1 cursor-col-resize hover:bg-[#1677ff]/40 active:bg-[#1677ff] transition-colors z-40 group select-none flex items-center justify-center"
       :class="{ 'bg-[#1677ff]/60': isResizing }"
-      title="拖拽拉伸属性面板宽度"
+      :title="t('prop.resizeHandleTip')"
       @mousedown.prevent="startResize"
     >
       <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
@@ -58,14 +58,14 @@
         >
           <span class="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
             <Globe class="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <span>{{ store.currentLocale === 'en' ? 'Language' : '编辑语言' }}</span>
+            <span>{{ t('prop.editLanguage') }}</span>
           </span>
           <div class="flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 text-[11px] select-none shadow-2xs shrink-0 whitespace-nowrap">
             <button
               type="button"
               class="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all cursor-pointer font-medium leading-none whitespace-nowrap shrink-0"
               :class="store.currentLocale === 'zh' ? 'bg-white text-slate-800 font-semibold shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-              :title="`中文完备率: ${translationStats.zhPercent}%`"
+              :title="t('prop.zhCompleteness', undefined, { percent: translationStats.zhPercent })"
               @click="store.currentLocale = 'zh'"
             >
               <span>中文</span>
@@ -79,7 +79,7 @@
               type="button"
               class="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all cursor-pointer font-medium leading-none whitespace-nowrap shrink-0"
               :class="store.currentLocale === 'en' ? 'bg-white text-slate-800 font-semibold shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-              :title="`英文完备率: ${translationStats.enPercent}%`"
+              :title="t('prop.enCompleteness', undefined, { percent: translationStats.enPercent })"
               @click="store.currentLocale = 'en'"
             >
               <span>EN</span>
