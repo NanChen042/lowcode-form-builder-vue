@@ -196,10 +196,10 @@
         <main class="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
           <!-- ================= 视图 1：场景模板库 (Templates) ================= -->
           <div id="tour-template-panel" v-show="activeTab === 'templates'" class="flex flex-col">
-            <!-- 顶部快捷新建空白画布卡片 (对标高阶 SaaS 快捷卡片规范) -->
+            <!-- 顶部快捷新建空白画布卡片 (标准实线卡片规范) -->
             <button
               type="button"
-              class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-dashed border-slate-300 hover:border-[#1677ff] bg-white hover:bg-blue-50/40 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs"
+              class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-slate-200/90 hover:border-[#1677ff] bg-white hover:bg-blue-50/30 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs hover:shadow-xs"
               @click="$emit('open-create-canvas')"
             >
               <div class="flex items-center gap-2.5 min-w-0">
@@ -234,20 +234,17 @@
                 class="group flex flex-col rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs transition-all duration-150 cursor-pointer select-none overflow-hidden"
                 @click="handleSelectTemplate(tpl.key)"
               >
-                <!-- 顶部 UI/UE 矢量彩色图标横幅 (对齐客户紫色、机构蓝色、个人绿色) -->
+                <!-- 顶部横幅插画 (对齐客户紫色、机构蓝色、个人绿色 3D 插画) -->
                 <div
-                  class="h-[76px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
+                  class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none bg-slate-50"
                   :class="tpl.bannerBgClass"
                 >
-                  <div
-                    class="flex h-8 w-8 items-center justify-center rounded-md shadow-2xs group-hover:scale-105 transition-transform duration-150 overflow-hidden"
-                  >
-                    <img
-                      :src="tpl.image"
-                      :alt="getFieldText(tpl, 'title')"
-                      class="w-full h-full object-contain select-none pointer-events-none"
-                    />
-                  </div>
+                  <img
+                    :src="tpl.image"
+                    :alt="getFieldText(tpl, 'title')"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
+                    loading="lazy"
+                  />
                   <!-- 右上角漂浮徽标 Tag -->
                   <a-tag
                     size="small"
@@ -537,9 +534,9 @@ import {
   Sparkles,
   FileText
 } from '@lucide/vue';
-import iconCustomer from '@/assets/templates/c.png';
-import iconIndividual from '@/assets/templates/u.png';
-import iconEntity from '@/assets/templates/e.png';
+import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
+import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
+import tplEntityImg from '@/assets/templates/tpl-entity.webp';
 import { Message } from '@arco-design/web-vue';
 import { useSidebarResize } from '@/utils/useSidebarResize';
 import { startAppTour } from '@/utils/useAppTour';
@@ -570,7 +567,7 @@ const scenarioTemplates = [
     tag: '客户案例',
     tag_en: 'Customer',
     tagColor: 'purple',
-    image: iconCustomer,
+    image: tplCustomerImg,
     desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
     desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
     stats: '3 页面 · 9 字段',
@@ -585,7 +582,7 @@ const scenarioTemplates = [
     tag: '个人案例',
     tag_en: 'Individual',
     tagColor: 'green',
-    image: iconIndividual,
+    image: tplIndividualImg,
     desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
     desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     stats: '5 页面 · 15 字段',
@@ -600,7 +597,7 @@ const scenarioTemplates = [
     tag: '机构案例',
     tag_en: 'Entity',
     tagColor: 'arcoblue',
-    image: iconEntity,
+    image: tplEntityImg,
     desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',
     desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
     stats: '3 页面 · 16 字段',

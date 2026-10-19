@@ -55,7 +55,7 @@
     <!-- 普通表单组件：采用高精度布局与严谨校验 -->
     <template v-else>
       <!-- 字段标签区 -->
-      <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-medium text-slate-800 leading-5">
+      <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-semibold text-slate-800 leading-5">
         <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span>
         <!-- 标题右侧说明 (默认排布) -->
         <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5 inline">{{ localizedHelp }}</span>

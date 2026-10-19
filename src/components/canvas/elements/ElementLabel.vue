@@ -1,5 +1,5 @@
 <template>
-  <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label text-[13px] text-slate-800 font-medium leading-5 mb-1.5 pr-12">
+  <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label text-[13px] text-slate-800 font-semibold leading-5 mb-1.5 pr-12">
     <span v-if="isRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><EditableText
       v-model="currentLabel"
       :placeholder="t('canvas.unnamed')"
