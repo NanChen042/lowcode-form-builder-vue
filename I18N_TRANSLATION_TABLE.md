@@ -296,7 +296,7 @@
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | DIY 表单设计器 | DIY Form Builder | | | |
-| CREATE NEW | CREATE NEW | | | |
+| Create NEW | Create NEW | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
 | 点击左下方立即创建按钮，开始创建您的第一个定制表单。 | Click the "Create Now" button at the bottom left to start creating your first custom form. | | | |
 | 立即创建 | Create Now | | | |
@@ -330,7 +330,6 @@
 | 点击修改表单名称 | Click to rename form | | | |
 | 修改表单名称 | Rename form | | | |
 | 操作指南 | User Guide | | | |
-| 随时开启表单设计器操作指南 | View the form builder user guide anytime | | | |
 | 表单配置已成功保存！ | Form configuration saved successfully! | | | |
 | 保存失败，请检查网络或重试 | Save failed, please check network or try again | | | |
 | 保存遇到异常，请重试 | Error during save, please try again | | | |
@@ -358,6 +357,7 @@
 
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
+| 请先完成首张画布创建 | Please create a form canvas first. | | | |
 | 下一步 → | Next → | | | |
 | ← 上一步 | ← Back | | | |
 | 开始使用 | Start Now | | | |
@@ -365,6 +365,22 @@
 | 不再提示 | Don't show again | | | |
 | 以后进入页面不再自动弹出操作指南 | Never show user guide automatically on startup | | | |
 | 已关闭操作指南，后续可随时点击顶栏“操作指南”重新开启 | User guide closed. You can restart it anytime from "User Guide" in the top bar. | | | |
+| 1. 侧边导航 | 1. Navigation | | | |
+| 快速切换模板库、组件库与页面大纲。 | Switch between Templates, Components, and Pages. | | | |
+| 2. 场景模板 | 2. Templates | | | |
+| 支持一键载入预设模板，或新建空白画布。 | Load a preset template or create a blank canvas. | | | |
+| 3. 组件物料 | 3. Components | | | |
+| 包含基础与业务表单字段，支持点击或拖拽添加。 | Form fields can be added by clicking or dragging. | | | |
+| 4. 设计画布 | 4. Canvas | | | |
+| 拖拽空白处平移画布，滑动滚轮平滑缩放。 | Drag empty canvas to pan, scroll wheel to zoom. | | | |
+| 5. 预设核验页 | 5. Preset Page | | | |
+| 首页为系统只读核验页，后续页面可自由添加字段。 | First page is read-only; subsequent pages are custom. | | | |
+| 6. 属性配置 | 6. Properties | | | |
+| 配置表单全局设置、字段属性及展开联动规则。 | Configure form settings, field properties, and linkage rules. | | | |
+| 7. 表单预览 | 7. Preview | | | |
+| 在手机模拟器中实时测试填表流程与字段校验。 | Test form flow and field validations in mobile preview. | | | |
+| 8. 发布表单 | 8. Publish | | | |
+| 检查多语言完整度，并将表单正式保存发布。 | Verify translation completeness and publish the form. | | | |
 
 ## 属性面板补充
 
@@ -568,7 +584,6 @@
 | 当前正在配置：中文内容 | Configuring: Chinese Content | | | |
 | 当前正在配置：英文内容 | Configuring: English Content | | | |
 | 展开规则 | Display Rule | | | |
-| 生效中 | Active | | | |
 | 当 | When | | | |
 | 选择 | selects | | | |
 | 时展开 | reveal this field | | | |

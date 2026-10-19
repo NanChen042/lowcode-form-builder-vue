@@ -86,12 +86,12 @@
       <LanguageSwitcher />
 
       <!-- 问号新手引导 / 操作指南快捷入口 (HelpCircle) -->
-      <a-tooltip :content="t('header.tourTooltip')" position="bottom">
+      <a-tooltip :content="t('header.tour')" position="bottom">
         <button
           id="tour-guide-btn"
           type="button"
           class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-[#1677ff] hover:bg-slate-100 transition-colors cursor-pointer"
-          :title="t('header.tourTooltip')"
+          :title="t('header.tour')"
           @click="handleTriggerTour"
         >
           <HelpCircle class="w-4 h-4" />
