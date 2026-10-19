@@ -98,15 +98,28 @@
         </button>
       </a-tooltip>
 
+      <!-- 机构名称展示 (对齐母系统 algo 顶部栏视觉) -->
+      <div v-if="store.org.companyName" class="flex items-center gap-1.5 px-2 py-1 select-none text-slate-700 cursor-default transition-colors" :title="store.org.companyName">
+        <Building2 class="w-4 h-4 text-slate-600 shrink-0" />
+        <span class="text-[13px] font-semibold max-w-[160px] sm:max-w-[220px] truncate leading-none">
+          {{ store.org.companyName }}
+        </span>
+      </div>
+
+      <!-- 分隔线 (当有机构名时展示) -->
+      <div v-if="store.org.companyName" class="h-4 w-px bg-slate-200/90 shrink-0" />
+
       <!-- 最右侧：头像 + 昵称 + 下拉箭头 (对齐母系统 algo 规范，无底色纯净悬浮) -->
       <a-dropdown trigger="hover" position="br" :popup-max-height="false" v-model:popup-visible="isUserDropdownOpen">
-        <div class="flex items-center gap-1.5 px-1 py-1 cursor-pointer transition-colors select-none text-slate-700 hover:text-[#1677ff]" :title="store.user.nickname || 'ceshi'">
-          <a-avatar :size="26" class="header-user-avatar shrink-0">
-            <img v-if="store.user.avatar" :src="store.user.avatar" alt="Avatar" />
-            <IconUser v-else class="text-white text-[13px]" />
-          </a-avatar>
+        <div class="flex items-center gap-1.5 px-1 py-1 cursor-pointer transition-colors select-none text-slate-700 hover:text-[#1677ff]" :title="store.user.nickname">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 overflow-hidden border border-slate-200 shadow-2xs bg-[#EFF6FF] shrink-0">
+            <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display='none'" />
+            <span v-else class="w-full h-full text-[#186DF5] font-bold flex items-center justify-center text-xs">
+              {{ store.user.nickname ? store.user.nickname.charAt(0).toUpperCase() : 'U' }}
+            </span>
+          </div>
           <span class="text-[13px] font-medium max-w-[120px] truncate leading-none transition-colors">
-            {{ store.user.nickname || 'ceshi' }}
+            {{ store.user.nickname }}
           </span>
           <IconDown class="text-[10px] text-slate-400 shrink-0 transition-transform duration-200" :class="{ 'rotate-180 text-[#1677ff]': isUserDropdownOpen }" />
         </div>
@@ -114,7 +127,7 @@
         <template #content>
           <div class="px-3.5 py-2.5 border-b border-slate-100 min-w-[170px]">
             <div class="text-[13px] font-semibold text-slate-800 leading-tight">
-              {{ store.user.nickname || 'ceshi' }}
+              {{ store.user.nickname }}
             </div>
             <div v-if="store.org.companyName" class="text-[11px] font-medium text-blue-600 mt-1 truncate max-w-[180px]">
               {{ store.org.companyName }}
@@ -228,7 +241,8 @@ import {
   AlertCircle,
   Loader2,
   Pencil,
-  HelpCircle
+  HelpCircle,
+  Building2
 } from '@lucide/vue';
 import { startAppTour } from '@/utils/useAppTour';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
@@ -325,13 +339,9 @@ function handleCancelTitle() {
 function handleUserAction(action: string) {
   isUserDropdownOpen.value = false;
   if (action === 'logout') {
-    Message.warning(t('header.loggedOut'));
-  } else if (action === 'profile') {
-    Message.info(t('header.profileOpened'));
-  } else if (action === 'activity') {
-    Message.info(t('header.activityOpened'));
-  } else if (action === 'settings') {
-    Message.info(t('header.settingsOpened'));
+    window.location.href = '/pc/logout';
+  } else if (action === 'profile' || action === 'settings') {
+    window.open('/pc/user/index', '_blank');
   }
 }
 

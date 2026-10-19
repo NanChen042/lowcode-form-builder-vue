@@ -55,170 +55,123 @@
         </button>
       </header>
 
-      <!-- 双栏主体内容区 (1:1 还原用户参考设计) -->
-      <div class="flex flex-col md:flex-row min-h-[410px]">
-        <!-- 左侧栏：现代精密动态矢量插画 + 底部口号 -->
-        <div class="w-full md:w-[310px] shrink-0 border-r border-slate-100 bg-linear-to-b from-blue-50/20 via-slate-50/15 to-white p-5 flex flex-col justify-between relative overflow-hidden">
-          <!-- 插画展示区 (无缝居中展示，支持优雅 3D 悬浮视差) -->
-          <div
-            class="relative w-full flex-1 flex items-center justify-center my-auto py-2 select-none"
-            @mousemove="handleMouseMove"
-            @mouseleave="handleMouseLeave"
-          >
-            <!-- 柔和微光底晕 -->
-            <div class="absolute inset-0 bg-radial from-blue-400/10 via-indigo-400/5 to-transparent blur-xl pointer-events-none" />
-
-            <div
-              class="relative w-full max-w-[270px] flex items-center justify-center transition-transform duration-300 ease-out"
-              :style="{
-                transform: `perspective(600px) rotateX(${tiltY}deg) rotateY(${tiltX}deg)`
-              }"
-            >
-              <img
-                :src="wizardIllustrationImg"
-                alt="AlgoCandy Form Builder"
-                class="w-full h-auto object-contain select-none pointer-events-none drop-shadow-sm animate-gentle-float"
-              />
-            </div>
-          </div>
-
-          <!-- 底部口号文案 -->
-          <div class="pt-2 select-none">
-            <p class="text-[11px] italic font-medium text-slate-400 m-0 tracking-tight leading-snug">
-              {{ t('wizard.slogan1') }}<br />
-              {{ t('wizard.slogan2') }}
-            </p>
-            <svg class="w-20 h-1.5 mt-1 text-blue-300 opacity-60" viewBox="0 0 100 8" fill="none">
-              <path d="M0 6C30 1 70 1 100 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
+      <!-- 主体内容区：用户认可的 4 列横排架构 (1 张空白画布专属卡 + 3 张 3D 模板卡，紧凑无多余空隙) -->
+      <div class="p-6 sm:p-7 select-none">
+        <!-- 欢迎标语 -->
+        <div class="text-center max-w-lg mx-auto mb-5">
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 m-0 tracking-tight leading-tight">
+            {{ t('wizard.title') }}
+          </h2>
+          <p class="text-[12px] text-slate-500 m-0 mt-1 leading-normal">
+            {{ t('wizard.subtitle') }}
+          </p>
         </div>
 
-        <!-- 右侧栏：欢迎语 + 2 大核心操作卡片 + 热门场景模板网格 -->
-        <div class="flex-1 min-w-0 p-5 flex flex-col justify-between bg-white">
-          <div>
-            <!-- 主标题与副标题 -->
-            <div class="mb-3.5">
-              <h2 class="text-base sm:text-lg font-bold text-slate-900 m-0 tracking-tight leading-tight">
-                {{ t('wizard.title') }}
-              </h2>
-              <p class="text-[12px] text-slate-500 m-0 mt-0.5 leading-normal">
-                {{ t('wizard.subtitle') }}
-              </p>
+        <!-- 4 张横排卡片 (彻底拿掉 min-h 强制撑高，消除上下空旷死角) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 mb-2">
+          
+          <!-- 卡片 1：新建空白画布 (专属特殊高亮画板，与 3 款模板有明确的主次区隔) -->
+          <div
+            class="group rounded-lg border border-blue-200/90 hover:border-[#1677ff] bg-gradient-to-b from-blue-50/50 via-white to-white hover:shadow-md flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
+            @click="handleCreateBlank"
+          >
+            <div>
+              <!-- 顶部专属空白画板插画 (无廉价点阵，无虚线，清爽微质感) -->
+              <div class="h-[88px] w-full bg-blue-50/60 border-b border-blue-100/80 flex items-center justify-center relative overflow-hidden select-none">
+                <div class="w-10 h-10 rounded-lg bg-white border border-blue-200/80 shadow-2xs flex items-center justify-center text-[#1677ff] group-hover:scale-110 transition-transform">
+                  <Plus class="w-5 h-5 stroke-[2.4]" />
+                </div>
+                <!-- 右上角专属胶囊 Tag -->
+                <span class="absolute top-2 right-2 text-[9.5px] px-1.5 py-0.5 rounded font-semibold bg-blue-100 text-blue-700 leading-none">
+                  {{ store.currentLocale === 'en' ? 'Blank' : '从零开始' }}
+                </span>
+              </div>
+
+              <!-- 标题与描述 -->
+              <div class="p-3 pb-2">
+                <h4 class="text-[12.5px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
+                  {{ t('wizard.createBlank') }}
+                </h4>
+                <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal flex items-center gap-1 truncate">
+                  <FileText class="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <span>{{ store.currentLocale === 'en' ? '0 Fields · Free Layout' : '0 初始字段 · 自由搭建' }}</span>
+                </p>
+              </div>
             </div>
 
-            <!-- 2 大核心操作卡片 (并排 2 列) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              <!-- 卡片 1：新建空白画布 (点击触发二次弹窗，供选择主体类型与表单名称) -->
-              <div
-                class="group relative rounded-lg border-2 border-[#1677ff] bg-white p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-sm transition-all duration-150 cursor-pointer"
-                @click="handleCreateBlank"
-              >
-                <div>
-                  <!-- 蓝色图标方块 -->
-                  <div class="w-8 h-8 rounded-md bg-[#1677ff] text-white flex items-center justify-center shadow-2xs mb-2.5 group-hover:scale-105 transition-transform">
-                    <FilePlus2 class="w-4.5 h-4.5 stroke-[2.2]" />
-                  </div>
-                  <h3 class="text-[13.5px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 mb-0.5">
-                    {{ t('wizard.createBlank') }}
-                  </h3>
-                  <p class="text-[11px] text-slate-400 leading-normal m-0 mb-3">
-                    {{ t('wizard.createBlankDesc') }}
-                  </p>
-                </div>
-
+            <!-- 底部操作按钮 (专属主色实心按钮，紧贴在信息下方，间距恰到好处) -->
+            <div class="p-3 pt-0">
+              <div class="pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  class="w-full h-7.5 rounded-md bg-[#1677ff] hover:bg-blue-600 active:bg-blue-700 text-white text-[12px] font-medium flex items-center justify-center gap-1 transition-colors shadow-2xs cursor-pointer"
-                  @click.stop="handleCreateBlank"
+                  class="w-full h-7 rounded border border-transparent bg-[#1677ff] hover:bg-blue-600 text-white text-[11.5px] font-medium flex items-center justify-center gap-1 shadow-2xs transition-all duration-150 cursor-pointer"
                 >
                   <span>{{ t('wizard.createNowBtn') }}</span>
                   <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
+            </div>
+          </div>
 
-              <!-- 卡片 2：选用场景模板 (精选合规预设场景，点击引导定位下方模板) -->
+          <!-- 卡片 2~4：客户案例、个人案例、机构案例 (经典 3D 渲染图，白底微边框，次级按钮) -->
+          <div
+            v-for="tpl in scenarioTemplates"
+            :key="tpl.key"
+            class="group rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-md flex flex-col justify-between transition-all duration-200 cursor-pointer overflow-hidden"
+            @click="handleSelectTemplate(tpl.key)"
+          >
+            <div>
+              <!-- 顶部 3D 场景图 -->
               <div
-                class="group relative rounded-lg border border-slate-200 hover:border-slate-300 bg-white p-3.5 flex flex-col justify-between hover:shadow-2xs transition-all duration-150 cursor-pointer"
-                @click="scrollToTemplates"
+                class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
+                :class="tpl.bannerBgClass"
               >
-                <div>
-                  <!-- 靛紫图标方块 -->
-                  <div class="w-8 h-8 rounded-md bg-indigo-500 text-white flex items-center justify-center shadow-2xs mb-2.5 group-hover:scale-105 transition-transform">
-                    <LayoutTemplate class="w-4.5 h-4.5 stroke-[2]" />
-                  </div>
-                  <h3 class="text-[13.5px] font-bold text-slate-900 group-hover:text-[#1677ff] transition-colors m-0 mb-0.5">
-                    {{ t('wizard.useTemplate') }}
-                  </h3>
-                  <p class="text-[11px] text-slate-400 leading-normal m-0 mb-3">
-                    {{ t('wizard.useTemplateDesc') }}
-                  </p>
-                </div>
+                <img
+                  :src="tpl.image"
+                  :alt="getFieldText(tpl, 'title')"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <!-- 右上角胶囊 Tag -->
+                <span
+                  class="absolute top-2 right-2 text-[9.5px] px-2 py-0.5 rounded font-semibold shadow-2xs leading-none"
+                  :class="tpl.tagBadgeClass"
+                >
+                  {{ getFieldText(tpl, 'tag') }}
+                </span>
+              </div>
 
+              <!-- 标题与字段统计 -->
+              <div class="p-3 pb-2">
+                <h4 class="text-[12.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
+                  {{ getFieldText(tpl, 'title') }}
+                </h4>
+                <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal flex items-center gap-1 truncate">
+                  <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>{{ getFieldText(tpl, 'stats') }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- 底部操作按钮 (白底微灰边框次级按钮，紧贴信息下方) -->
+            <div class="p-3 pt-0">
+              <div class="pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  class="w-full h-7.5 rounded-md border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-[12px] font-medium flex items-center justify-center gap-1 transition-colors cursor-pointer group-hover:border-slate-300"
-                  @click.stop="scrollToTemplates"
+                  class="w-full h-7 rounded border border-slate-200/90 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-[11.5px] font-medium flex items-center justify-center gap-1 transition-all duration-150 cursor-pointer"
                 >
-                  <span>从下方选择模板 ↓</span>
+                  <span>{{ store.currentLocale === 'en' ? 'Load Template' : '载入模板' }}</span>
+                  <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- 下方区域：热门场景模板 (共 3 套预设，已彻底移除“查看全部模板”无用跳转) -->
-          <div ref="templatesSectionRef" class="pt-1">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[12.5px] font-bold text-slate-800">
-                业务场景模板 (3)
-              </span>
-              <span class="text-[10.5px] text-slate-400 font-normal">
-                点击卡片直接载入并开启编排
-              </span>
-            </div>
+        </div>
 
-            <!-- 3 大 KYC 模板卡片横排网格 (客户-紫色, 个人-绿色, 机构-蓝色) -->
-            <div class="grid grid-cols-3 gap-2.5">
-              <div
-                v-for="tpl in scenarioTemplates"
-                :key="tpl.key"
-                class="group rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs transition-all duration-150 cursor-pointer overflow-hidden flex flex-col"
-                :class="{ 'ring-2 ring-blue-400/50 border-[#1677ff]': highlightedTemplateKey === tpl.key }"
-                @click="handleSelectTemplate(tpl.key)"
-              >
-                <!-- 顶部 3D 缩略图横幅 -->
-                <div
-                  class="h-[68px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none"
-                  :class="tpl.bannerBgClass"
-                >
-                  <img
-                    :src="tpl.image"
-                    :alt="getFieldText(tpl, 'title')"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <!-- 右上角胶囊 Tag -->
-                  <span
-                    class="absolute top-1.5 right-1.5 text-[9.5px] px-1.5 py-0.2 rounded-full font-semibold shadow-2xs leading-none"
-                    :class="tpl.tagBadgeClass"
-                  >
-                    {{ getFieldText(tpl, 'tag') }}
-                  </span>
-                </div>
-
-                <!-- 底部标题与字段统计 -->
-                <div class="p-2.5 flex flex-col flex-1 justify-center">
-                  <div class="text-[11.5px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate leading-tight">
-                    {{ getFieldText(tpl, 'title') }}
-                  </div>
-                  <div class="text-[10px] text-slate-400 truncate leading-normal mt-1 flex items-center gap-1">
-                    <FileText class="w-3 h-3 text-slate-400 shrink-0" />
-                    <span>{{ getFieldText(tpl, 'stats') }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- 底部轻量指引 -->
+        <div class="text-center text-[11px] text-slate-400 pt-3 select-none">
+          {{ store.currentLocale === 'en' ? 'Click any card to start building directly' : '点击任意卡片即可直接进入画布开启编排' }}
         </div>
       </div>
     </div>
@@ -263,13 +216,11 @@ import { store, applyTemplateKey } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
-import wizardIllustrationImg from '@/assets/templates/wizard-illustration.webp';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
 import tplEntityImg from '@/assets/templates/tpl-entity.webp';
 import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
 import {
-  FilePlus2,
-  LayoutTemplate,
+  Plus,
   ArrowRight,
   X,
   Building2,
@@ -303,9 +254,6 @@ const modalVisible = computed({
   }
 });
 
-const templatesSectionRef = ref<HTMLElement | null>(null);
-const highlightedTemplateKey = ref<string | null>(null);
-
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
@@ -321,7 +269,9 @@ const scenarioTemplates = [
     desc_en: 'Includes business profile, sales turnover, fund sources, listed company stock code linkage and formal declaration.',
     code: 'SG_CDD_Customer',
     bannerBgClass: 'bg-[#faf5ff]',
-    tagBadgeClass: 'bg-purple-100/95 text-purple-700'
+    tagBadgeClass: 'bg-purple-100/95 text-purple-700',
+    iconColorClass: 'text-purple-600',
+    tagColor: 'purple'
   },
   {
     key: 'kyc-individual' as const,
@@ -337,7 +287,9 @@ const scenarioTemplates = [
     desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     code: 'SG_CDD_Individual',
     bannerBgClass: 'bg-[#f0fdf4]',
-    tagBadgeClass: 'bg-emerald-100/95 text-emerald-700'
+    tagBadgeClass: 'bg-emerald-100/95 text-emerald-700',
+    iconColorClass: 'text-emerald-600',
+    tagColor: 'green'
   },
   {
     key: 'kyc-entity' as const,
@@ -353,7 +305,9 @@ const scenarioTemplates = [
     desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
     code: 'SG_CDD_Entity',
     bannerBgClass: 'bg-[#eff6ff]',
-    tagBadgeClass: 'bg-blue-100/95 text-blue-700'
+    tagBadgeClass: 'bg-blue-100/95 text-blue-700',
+    iconColorClass: 'text-blue-600',
+    tagColor: 'blue'
   }
 ];
 
@@ -399,33 +353,6 @@ function executeApplyTemplate() {
   modalVisible.value = false;
 }
 
-// 点击“从下方选择模板 ↓”时微高亮提示下方模板
-function scrollToTemplates() {
-  highlightedTemplateKey.value = 'kyc-customer';
-  templatesSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  setTimeout(() => {
-    highlightedTemplateKey.value = null;
-  }, 1200);
-}
-
-// 鼠标 3D 微视差浮动
-const tiltX = ref(0);
-const tiltY = ref(0);
-
-function handleMouseMove(e: MouseEvent) {
-  const target = e.currentTarget as HTMLElement | null;
-  if (!target) return;
-  const rect = target.getBoundingClientRect();
-  const x = e.clientX - rect.left - rect.width / 2;
-  const y = e.clientY - rect.top - rect.height / 2;
-  tiltX.value = Number((x / 22).toFixed(2));
-  tiltY.value = Number((-y / 22).toFixed(2));
-}
-
-function handleMouseLeave() {
-  tiltX.value = 0;
-  tiltY.value = 0;
-}
 </script>
 
 <style scoped>
@@ -443,16 +370,17 @@ function handleMouseLeave() {
   border-radius: 8px;
 }
 
-@keyframes gentleFloat {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+:deep(.welcome-card-btn) {
+  height: 32px !important;
+  line-height: 1 !important;
+  padding: 0 12px !important;
 }
 
-.animate-gentle-float {
-  animation: gentleFloat 5s ease-in-out infinite;
+:deep(.welcome-card-btn .arco-btn-content) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  line-height: 1 !important;
 }
 </style>

@@ -22,6 +22,11 @@ const router = createRouter({
       path: '/form-builder/caller',
       name: 'CallerSubpath',
       component: () => import('@/views/CallerHostView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('@/views/NotFoundView.vue')
     }
   ]
 });

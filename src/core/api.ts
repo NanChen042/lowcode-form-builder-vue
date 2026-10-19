@@ -126,38 +126,40 @@ export const UserAPI = {
    */
   async getCurrentUser(): Promise<ApiResponse<UserSessionData>> {
     try {
-      const res = await request.get<any, any>('/pc/user/getUserInfo', { silent: true } as any);
-      if (res && (res.code === 0 || res.code === 200 || res.code === 'SYS_SUCCESS') && res.data) {
+      const res = await request.get<any, any>('/pc/user/authInfo', { silent: true } as any);
+      const user = res?.data?.user;
+      if (res?.code === 0 && user) {
         return {
           code: 200,
           success: true,
           data: {
-            uid: res.data.uid || res.data.id || 0,
-            nickname: res.data.nickname || res.data.username || '用户',
-            avatar: res.data.avatar || '',
-            email: res.data.email || '',
-            orgId: res.data.org_id || res.data.sc_org_id || 0,
-            companyName: res.data.company_name || res.data.company || '',
-            language: res.data.language === 2 || res.data.language === 'zh' ? 'zh' : 'en'
+            uid: user.uid,
+            nickname: user.nickname,
+            avatar: user.avatar,
+            email: user.email,
+            orgId: user.org_id,
+            companyName: user.company_name,
+            language: user.language
           }
         };
       }
     } catch (_) {
-      // 本地独立运行、跨域未代理或离线开发时静默容错
+      // 鉴权失败或网络异常
     }
 
     return {
-      code: 200,
-      success: true,
+      code: 401,
+      success: false,
       data: {
-        uid: 1,
-        nickname: 'ceshi',
+        uid: 0,
+        nickname: '',
         avatar: '',
-        email: 'ceshi@algocandy.com',
-        orgId: 1,
+        email: '',
+        orgId: 0,
         companyName: '',
         language: 'zh'
-      }
+      },
+      message: '未获取到登录信息'
     };
   }
 };

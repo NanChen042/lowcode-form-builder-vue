@@ -178,58 +178,25 @@ onMounted(async () => {
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();
   const typeParam = (urlParams.get('type') || urlParams.get('profileType') || '').toLowerCase().trim();
 
-  // 0. 解析外部系统传入的默认语言环境 (?lang=en / ?locale=en / ?language=zh 或母系统缓存)
-  const langParam = (urlParams.get('lang') || urlParams.get('locale') || urlParams.get('language') || '').toLowerCase().trim();
-  if (langParam.startsWith('en')) {
-    store.currentLocale = 'en';
-  } else if (langParam.startsWith('zh')) {
-    store.currentLocale = 'zh';
-  } else {
-    try {
-      const storedLang = (localStorage.getItem('algo_lang') || localStorage.getItem('locale') || localStorage.getItem('lang') || '').toLowerCase();
-      if (storedLang.startsWith('en')) {
-        store.currentLocale = 'en';
-      } else if (storedLang.startsWith('zh')) {
-        store.currentLocale = 'zh';
-      }
-    } catch (_) {}
+  // 0. 解析语言环境
+  const lang = urlParams.get('lang');
+  if (lang === 'en' || lang === 'zh') {
+    store.currentLocale = lang;
   }
 
-  // 1. 解析外部母系统传入的用户信息与机构信息 (通过 URL 参数、Cookie、本地存储或 postMessage)
-  const tokenParam = urlParams.get('token') || urlParams.get('pc_token') || '';
-  const nicknameParam = urlParams.get('nickname') || urlParams.get('name') || urlParams.get('username') || '';
-  const emailParam = urlParams.get('email') || '';
-  const orgIdParam = urlParams.get('org_id') || urlParams.get('sc_org_id') || '';
-  const companyParam = urlParams.get('company') || urlParams.get('company_name') || urlParams.get('org_name') || '';
+  // 1. 解析 URL 传递的参数
+  const nickname = urlParams.get('nickname');
+  const company = urlParams.get('company');
+  if (nickname) store.user.nickname = nickname;
+  if (company) store.org.companyName = company;
 
-  if (tokenParam) store.user.token = tokenParam;
-  if (nicknameParam) store.user.nickname = nicknameParam;
-  if (emailParam) store.user.email = emailParam;
-  if (orgIdParam) store.org.orgId = parseInt(orgIdParam, 10) || 0;
-  if (companyParam) store.org.companyName = companyParam;
-
-  // 尝试从 Cookie / localStorage 读取母系统用户信息兜底
-  try {
-    const cachedUser = localStorage.getItem('algo_user_info');
-    if (cachedUser) {
-      const parsed = JSON.parse(cachedUser);
-      if (parsed.nickname && !nicknameParam) store.user.nickname = parsed.nickname;
-      if (parsed.company_name && !companyParam) store.org.companyName = parsed.company_name;
-      if (parsed.org_id && !orgIdParam) store.org.orgId = parsed.org_id;
-    }
-  } catch (_) {}
-
-  // 异步向母系统发送鉴权请求获取当前登录用户与机构信息 (基于 Axios 自动携带 Cookie 凭证)
+  // 2. 请求后端真实接口拉取当前登录用户与机构信息
   UserAPI.getCurrentUser().then(res => {
     if (res.success && res.data) {
-      if (!nicknameParam && res.data.nickname) store.user.nickname = res.data.nickname;
-      if (!companyParam && res.data.companyName) store.org.companyName = res.data.companyName;
-      if (!orgIdParam && res.data.orgId) store.org.orgId = res.data.orgId;
-      if (res.data.email) store.user.email = res.data.email;
+      if (res.data.nickname) store.user.nickname = res.data.nickname;
+      if (res.data.companyName) store.org.companyName = res.data.companyName;
       if (res.data.avatar) store.user.avatar = res.data.avatar;
-      if (!urlParams.get('lang') && !urlParams.get('locale') && res.data.language) {
-        store.currentLocale = res.data.language;
-      }
+      if (res.data.language && !lang) store.currentLocale = res.data.language;
     }
   }).catch(() => {});
 

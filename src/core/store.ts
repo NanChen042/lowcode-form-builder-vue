@@ -93,7 +93,7 @@ export const store = reactive({
     isLoggedIn: false,
     token: '',
     uid: 0,
-    nickname: 'ceshi',
+    nickname: '',
     avatar: '',
     email: '',
     role: ''
