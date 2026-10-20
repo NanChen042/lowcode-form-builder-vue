@@ -25,11 +25,11 @@
             <div v-if="seg.type === 'spacer'" class="h-1.5"></div>
 
             <!-- 列表项 (圆形圆点 或 数字有序) -->
-            <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-2">
+            <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-1.5">
               <!-- 数字型 (有序) -->
               <span
                 v-if="field.listStyle === 'number'"
-                class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 min-w-[16px] select-none"
+                class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 tabular-nums select-none"
               >
                 {{ seg.orderIndex }}.
               </span>
@@ -299,12 +299,23 @@
               :placeholder="[t('common.startDate'), t('common.endDate')]"
               @change="handleFieldInput"
             />
+            <!-- 单日期：当勾选“长期”时，输入框禁用且优雅显示“长期有效”，避免暴露底层 9999-12-31 -->
+            <a-input
+              v-else-if="isLongTermChecked"
+              :model-value="t('common.longTermValid')"
+              disabled
+              style="width: 100%"
+              class="!bg-slate-50 !text-slate-600 font-medium select-none"
+            >
+              <template #suffix>
+                <Calendar class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              </template>
+            </a-input>
             <a-date-picker
               v-else
               v-model="formData[field.key]"
               style="width: 100%"
               :error="Boolean(error)"
-              :disabled="isLongTermChecked"
               :placeholder="localizedPlaceholder"
               @change="handleFieldInput"
             />
@@ -475,7 +486,7 @@ import type { FormElement } from '@/types/schema';
 import { t, getLocalizedFieldText, getLocalizedOptionLabel } from '@/core/i18n';
 import { store } from '@/core/store';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { Info, Mail, Eraser, PenLine } from '@lucide/vue';
+import { Info, Mail, Eraser, PenLine, Calendar } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
 import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
 import { parseAlertContent } from '@/utils/alertParser';

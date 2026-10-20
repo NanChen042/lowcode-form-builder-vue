@@ -38,7 +38,7 @@
           <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">Mockjs Active</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <!-- 卡片 1: 全新空白表单 (无 ID) -->
           <div class="border border-slate-200 rounded-xl p-4 hover:border-blue-400 hover:shadow-sm transition-all bg-gradient-to-b from-white to-slate-50/50 flex flex-col justify-between">
             <div>
@@ -121,6 +121,28 @@
                 type="button"
                 class="px-2.5 py-1 text-xs font-medium rounded-md bg-amber-600 text-white hover:bg-amber-700 transition-colors cursor-pointer"
                 @click="callBuilder('/?id=cus_tpl_20261013_demo')"
+              >
+                调用打开
+              </button>
+            </div>
+          </div>
+
+          <!-- 卡片 5: 全组件属性全量测试套件 (all_components_demo) -->
+          <div class="border border-blue-200 rounded-xl p-4 hover:border-emerald-500 hover:shadow-sm transition-all bg-gradient-to-b from-white to-blue-50/30 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">全量组件测试</span>
+                <span class="text-[10px] text-slate-400">12页全覆盖</span>
+              </div>
+              <h3 class="text-sm font-bold text-slate-800 mb-1">全组件测试套件</h3>
+              <p class="text-xs text-slate-500 line-clamp-2">涵盖12大类组件、单选多选、日期区间、国籍拼音等全属性对比测试。</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <code class="text-[11px] text-slate-400 font-mono">id=all_components_demo</code>
+              <button
+                type="button"
+                class="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer"
+                @click="callBuilder('/?id=all_components_demo')"
               >
                 调用打开
               </button>

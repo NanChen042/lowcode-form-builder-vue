@@ -164,21 +164,39 @@
 
                 <!-- 手机主视图表单内容 -->
                 <div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (对齐 AlgoCandy 规范，固定不随滚动条滚动) -->
-                  <div class="shrink-0 px-5 pt-1 pb-2.5 border-b border-slate-100 bg-white z-20 flex items-center justify-between">
-                    <div class="flex items-center gap-2 min-w-0 pr-2">
-                      <img :src="logoUrl" alt="AlgoCandy" class="w-6 h-auto shrink-0 object-contain" />
+                  <!-- 手机端顶栏：品牌 Logo + 企业标题 + 嵌入式 [中 | EN] 语言切换 (固定不随滚动条滚动) -->
+                  <div class="shrink-0 px-4 py-2 border-b border-slate-100 bg-white z-20 flex items-center justify-between">
+                    <div class="flex items-center gap-2 min-w-0 flex-1 mr-2.5">
+                      <img :src="logoUrl" alt="Brand Logo" class="w-5 h-5 rounded-full object-contain shrink-0" />
                       <span class="text-xs font-semibold text-slate-800 truncate leading-snug">
                         {{ formBrandTitle }}
                       </span>
                     </div>
 
-                    <!-- 嵌入手机内的双语切换胶囊 -->
-                    <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shrink-0 select-none">
-                      <button type="button" class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer" :class="store.currentLocale === 'zh' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" @click="store.currentLocale = 'zh'">
+                    <!-- 嵌入手机内的双语凹槽分段切换器 (真正凹进去的 Inset Segmented Control) -->
+                    <div
+                      class="relative flex items-center bg-[#eaedf2] p-[2px] rounded-[7px] shrink-0 select-none"
+                      style="box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0.5px 1px rgba(0, 0, 0, 0.08);"
+                    >
+                      <div
+                        class="absolute top-[2px] bottom-[2px] left-[2px] w-[28px] bg-white rounded-[5px] pointer-events-none transition-transform duration-200 ease-out"
+                        style="box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0.5px 1px rgba(0, 0, 0, 0.06);"
+                        :style="{ transform: store.currentLocale === 'zh' ? 'translateX(0px)' : 'translateX(28px)' }"
+                      ></div>
+                      <button
+                        type="button"
+                        class="relative z-10 w-[28px] h-5 flex items-center justify-center text-[11px] font-medium transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none leading-none"
+                        :class="store.currentLocale === 'zh' ? 'text-[#1677ff] font-semibold' : 'text-[#64748b] hover:text-slate-700'"
+                        @click="store.currentLocale = 'zh'"
+                      >
                         中
                       </button>
-                      <button type="button" class="px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer" :class="store.currentLocale === 'en' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" @click="store.currentLocale = 'en'">
+                      <button
+                        type="button"
+                        class="relative z-10 w-[28px] h-5 flex items-center justify-center text-[11px] font-medium transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none font-sans leading-none"
+                        :class="store.currentLocale === 'en' ? 'text-[#1677ff] font-semibold' : 'text-[#64748b] hover:text-slate-700'"
+                        @click="store.currentLocale = 'en'"
+                      >
                         EN
                       </button>
                     </div>
@@ -308,7 +326,7 @@ const props = defineProps<{
   mode?: 'preview' | 'deploy';
 }>();
 
-const logoUrl = `${import.meta.env.BASE_URL}img/algocandy-logo.png`;
+const logoUrl = `${import.meta.env.BASE_URL}img/logo-icon.png`;
 
 const emit = defineEmits(['close']);
 

@@ -27,11 +27,11 @@
           <div v-if="seg.type === 'spacer'" class="h-1.5"></div>
 
           <!-- 列表项 (圆形圆点 或 数字有序) -->
-          <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-2">
+          <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-1.5">
             <!-- 数字型 (有序) -->
             <span
               v-if="element.listStyle === 'number'"
-              class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 min-w-[16px] select-none"
+              class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 tabular-nums select-none"
             >
               {{ seg.orderIndex }}.
             </span>

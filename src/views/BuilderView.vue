@@ -67,7 +67,8 @@ import {
   kycIndividualTemplate,
   kycEntityTemplate,
   blankTemplate,
-  createBlankTemplate
+  createBlankTemplate,
+  allComponentsDemoTemplate
 } from '@/templates/recommend';
 import type { FormSchema, ProfileType } from '@/types/schema';
 import { checkAutoStartTour } from '@/utils/useAppTour';
@@ -179,6 +180,7 @@ onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const rawId = (urlParams.get('id') || '').toLowerCase().trim();
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();
+  const mockParam = (urlParams.get('mock') || '').toLowerCase().trim();
   const typeParam = (urlParams.get('type') || urlParams.get('profileType') || '').toLowerCase().trim();
 
   // 0. 解析语言环境
@@ -220,6 +222,17 @@ onMounted(async () => {
   let targetTemplate: FormSchema = blankTemplate;
   let targetTemplateKey = 'blank';
 
+  const isAllComponentsMock =
+    rawId === 'all_components_demo' ||
+    rawId === 'all_components' ||
+    rawId === 'all' ||
+    tplParam === 'all-components-demo' ||
+    tplParam === 'all_components' ||
+    tplParam === 'all' ||
+    mockParam === 'all' ||
+    mockParam === 'all_components' ||
+    mockParam === 'true';
+
   const resetToBlankState = () => {
     // 方案 A（即开即用模式）：初始化默认空白画板，确保底层画布始终 100% 鲜活可用
     loadSchema(blankTemplate);
@@ -234,8 +247,11 @@ onMounted(async () => {
   };
 
   try {
-    // 2. 如果 URL 带有纯小写 id 参数 (例如 cus_diy_..., ind_diy_..., ent_tpl_...)
-    if (rawId) {
+    if (isAllComponentsMock) {
+      targetTemplate = allComponentsDemoTemplate;
+      targetTemplateKey = 'all-components-demo';
+      store.lockedProfileType = 'customer';
+    } else if (rawId) {
       // 先尝试向后端获取持久化数据
       const res = await FormAPI.getTemplate(rawId);
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
@@ -290,12 +306,13 @@ onMounted(async () => {
       clearTimeout(loadingTimer);
       loadingTimer = null;
     }
-    if (rawId || tplParam) {
+    if (rawId || tplParam || isAllComponentsMock) {
       loadSchema(targetTemplate);
-      if (rawId) {
-        store.meta.formId = rawId;
-        store.meta.serialNo = rawId;
-        syncUrlParams(rawId);
+      const effectiveId = isAllComponentsMock ? (rawId || 'all_components_demo') : rawId;
+      if (effectiveId) {
+        store.meta.formId = effectiveId;
+        store.meta.serialNo = effectiveId;
+        syncUrlParams(effectiveId);
       } else {
         store.meta.formId = '';
         store.meta.serialNo = '';
@@ -307,7 +324,7 @@ onMounted(async () => {
   }
 
   // 首次访问时若未看过引导，则触发一次轻量漫游引导
-  if (rawId || tplParam) {
+  if (rawId || tplParam || isAllComponentsMock) {
     checkAutoStartTour();
   }
 

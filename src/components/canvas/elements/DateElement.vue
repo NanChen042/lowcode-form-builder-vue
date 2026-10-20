@@ -9,12 +9,22 @@
           :placeholder="[t('common.startDate'), t('common.endDate')]"
           :model-value="element.defaultValue && element.endValue ? [element.defaultValue, element.endValue] : undefined"
         />
+        <a-input
+          v-else-if="element.defaultLongTerm"
+          :model-value="t('common.longTermValid')"
+          disabled
+          style="width: 100%"
+          class="!bg-slate-50 !text-slate-600 font-medium select-none"
+        >
+          <template #suffix>
+            <Calendar class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          </template>
+        </a-input>
         <a-date-picker
           v-else
           style="width: 100%"
           :placeholder="displayPlaceholder"
           :model-value="element.defaultValue || undefined"
-          :disabled="Boolean(element.defaultLongTerm)"
         />
       </div>
 
@@ -36,6 +46,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Calendar } from '@lucide/vue';
 import type { FormElement } from '@/types/schema';
 import { markDirty } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';

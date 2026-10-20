@@ -16,6 +16,7 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0',
     port: 5173,
     // 开发环境代理转发，消除本地开发时的跨域问题并自动传递 Cookie
     proxy: {
@@ -49,17 +50,9 @@ export default defineConfig({
             if (id.includes('mockjs')) {
               return 'mock-vendor';
             }
-            if (id.includes('sortablejs')) {
-              return 'sortable-vendor';
-            }
-            if (id.includes('driver.js')) {
-              return 'driver-vendor';
-            }
-            return 'vendor';
           }
         }
       }
     }
   }
 })
-
