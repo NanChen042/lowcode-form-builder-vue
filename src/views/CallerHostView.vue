@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-    <!-- 顶部导航栏 -->
     <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
@@ -23,9 +22,7 @@
       </div>
     </header>
 
-    <!-- 主体内容 -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-      <!-- 场景卡片 1：常用场景一键调用 -->
       <section class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
         <div class="flex items-center justify-between mb-4">
           <div>
@@ -39,7 +36,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <!-- 卡片 1: 全新空白表单 (无 ID) -->
           <div class="border border-slate-200 rounded-xl p-4 hover:border-blue-400 hover:shadow-sm transition-all bg-gradient-to-b from-white to-slate-50/50 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -61,7 +57,6 @@
             </div>
           </div>
 
-          <!-- 卡片 2: 实体成员 KYC 模板 (ent_tpl_20261013_yl63) -->
           <div class="border border-slate-200 rounded-xl p-4 hover:border-indigo-400 hover:shadow-sm transition-all bg-gradient-to-b from-white to-slate-50/50 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -83,7 +78,6 @@
             </div>
           </div>
 
-          <!-- 卡片 3: 个人自建 KYC 问卷 (ind_diy_20261013_mvpr) -->
           <div class="border border-slate-200 rounded-xl p-4 hover:border-purple-400 hover:shadow-sm transition-all bg-gradient-to-b from-white to-slate-50/50 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -105,7 +99,6 @@
             </div>
           </div>
 
-          <!-- 卡片 4: 客户母案例模板 (cus_tpl_20261013_demo) -->
           <div class="border border-slate-200 rounded-xl p-4 hover:border-amber-400 hover:shadow-sm transition-all bg-gradient-to-b from-white to-slate-50/50 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -127,7 +120,6 @@
             </div>
           </div>
 
-          <!-- 卡片 5: 全组件属性全量测试套件 (all_components_demo) -->
           <div class="border border-blue-200 rounded-xl p-4 hover:border-emerald-500 hover:shadow-sm transition-all bg-gradient-to-b from-white to-blue-50/30 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -151,7 +143,6 @@
         </div>
       </section>
 
-      <!-- 场景卡片 2：自定义参数调用控制台 -->
       <section class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
         <h2 class="text-sm font-bold text-slate-800 mb-1">自定义参数调用控制台 (Custom Parameters Invoker)</h2>
         <p class="text-xs text-slate-400 mb-4">模拟外部系统传递的真实业务参数组合</p>
@@ -229,7 +220,6 @@
         </div>
       </section>
 
-      <!-- 场景卡片 3：内嵌 Iframe 容器实时联调 -->
       <section v-if="iframeUrl" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">

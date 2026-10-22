@@ -161,7 +161,6 @@ export function getSmartEdges(
   const dx = centerB.x - centerA.x;
   const dy = centerB.y - centerA.y;
 
-  // 1. 正向流向：目标画板在源画板右侧 (dx >= 0)
   if (dx >= 0) {
     if (Math.abs(dy) > Math.abs(dx) * 1.3) {
       return dy > 0
@@ -171,10 +170,6 @@ export function getSmartEdges(
     return { sourceEdge: 'right', targetEdge: 'left' };
   }
 
-  // 2. 逆向流向：目标画板被拖拽到了源画板左侧 (dx < 0)
-  // 核心约束：
-  // • targetEdge 绝对不能是 'right'（避免箭头插在目标画板加号上被遮挡）
-  // • sourceEdge 绝对不能是 'left'（避免与上一页进入当前画板的连线在左侧碰撞打架）
   if (dy < 0) {
     return { sourceEdge: 'top', targetEdge: 'left' };
   } else {

@@ -1,6 +1,6 @@
 import type { FormSchema, ProfileType } from '@/types/schema';
 
-// 创建空白画布工厂函数 (自带第 1 页系统基础资料，支持指定母案例客户/个人/机构与表单名称、描述)
+// 创建空白画布工厂函数
 export function createBlankTemplate(
   profileType: ProfileType = 'customer',
   title = '',
@@ -10,13 +10,13 @@ export function createBlankTemplate(
 ): FormSchema {
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
   const defaultMetaMap: Record<string, { title: string; desc: string }> = {
-    customer: { title: 'SG_CDD_Customer', desc: '客户母案例专用KYC问卷' },
-    client: { title: 'SG_CDD_Customer', desc: '客户母案例专用KYC问卷' },
-    individual: { title: 'SG_CDD_Individual', desc: '个人成员专用KYC问卷' },
-    entity: { title: 'SG_CDD_Entity', desc: '实体成员专用KYC问卷' }
+    customer: { title: 'SG_CDD_Customer', desc: '' },
+    client: { title: 'SG_CDD_Customer', desc: '' },
+    individual: { title: 'SG_CDD_Individual', desc: '' },
+    entity: { title: 'SG_CDD_Entity', desc: '' }
   };
   const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_Customer';
-  const resolvedDesc = description || defaultMetaMap[normType]?.desc || '客户母案例专用KYC问卷';
+  const resolvedDesc = description || '';
 
   return {
     schemaVersion: '1.0.0',
@@ -24,8 +24,9 @@ export function createBlankTemplate(
       title: resolvedTitle,
       title_en: title_en || resolvedTitle,
       description: resolvedDesc,
-      description_en: description_en || resolvedDesc,
+      description_en: description_en || '',
       profileType: normType,
+      enabledLocales: ['zh', 'en'],
       source: 'diy'
     },
     pages: [
@@ -54,18 +55,19 @@ export function createBlankTemplate(
   };
 }
 
-// 默认空白画布模板 (自带第 1 页系统基础资料，默认客户母案例)
+// 默认空白画布模板
 export const blankTemplate: FormSchema = createBlankTemplate('customer');
 
-// 1. 客户案例 - KYC 表单 (SG_CDD_Customer)
+// 1. 客户案例 KYC 模板
 export const kycCustomerTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
     title: 'SG_CDD_Customer',
     title_en: 'SG_CDD_Customer',
-    description: '客户案例专用KYC问卷',
-    description_en: 'Dedicated KYC questionnaire for customer cases',
+    description: '',
+    description_en: '',
     profileType: 'customer',
+    enabledLocales: ['zh', 'en'],
     source: 'template',
     templateKey: 'kyc-customer'
   },
@@ -111,10 +113,10 @@ export const kycCustomerTemplate: FormSchema = {
           placeholder: '请选择',
           placeholder_en: 'Please select',
           options: [
-            { label: 'SGD 1,000,000 – 5,000,000', label_en: 'SGD 1,000,000 – 5,000,000', value: 'sgd_1m_5m' },
-            { label: 'SGD 100,000 – 1,000,000', label_en: 'SGD 100,000 – 1,000,000', value: 'sgd_100k_1m' },
-            { label: 'SGD 100,000 以下', label_en: 'Below SGD 100,000', value: 'sgd_under_100k' },
-            { label: 'SGD 5,000,000 以上', label_en: 'Above SGD 5,000,000', value: 'sgd_above_5m' }
+            { label: '100万 – 500万', label_en: 'SGD 1,000,000 – 5,000,000', value: 'sgd_1m_5m' },
+            { label: '10万 – 100万', label_en: 'SGD 100,000 – 1,000,000', value: 'sgd_100k_1m' },
+            { label: '10万以下', label_en: 'Below SGD 100,000', value: 'sgd_under_100k' },
+            { label: '500万以上', label_en: 'Above SGD 5,000,000', value: 'sgd_above_5m' }
           ]
         },
         {
@@ -147,8 +149,6 @@ export const kycCustomerTemplate: FormSchema = {
           showLabel: true,
           multiple: true,
           maxSelections: 3,
-          help: '(最多选3项)',
-          help_en: '(Max 3 selections)',
           placeholder: '请选择',
           placeholder_en: 'Please select'
         },
@@ -162,8 +162,6 @@ export const kycCustomerTemplate: FormSchema = {
           showLabel: true,
           multiple: true,
           maxSelections: 3,
-          help: '(最多选3项)',
-          help_en: '(Max 3 selections)',
           placeholder: '请选择',
           placeholder_en: 'Please select'
         },
@@ -251,15 +249,16 @@ export const kycCustomerTemplate: FormSchema = {
 // 向后兼容别名导出
 export const kycClientTemplate: FormSchema = kycCustomerTemplate;
 
-// 2. 个人案例 - KYC 表单 (SG_CDD_Individual)
+// 2. 个人案例 KYC 模板
 export const kycIndividualTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
     title: 'SG_CDD_Individual',
     title_en: 'SG_CDD_Individual',
-    description: '个人成员专用KYC问卷',
-    description_en: 'Dedicated KYC questionnaire for individual members',
+    description: '',
+    description_en: '',
     profileType: 'individual',
+    enabledLocales: ['zh', 'en'],
     source: 'template',
     templateKey: 'kyc-individual'
   },
@@ -540,15 +539,16 @@ export const kycIndividualTemplate: FormSchema = {
   pageConnections: []
 };
 
-// 3. 实体案例 - KYC 表单 (SG_CDD_Entity)
+// 3. 实体案例 KYC 模板
 export const kycEntityTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
     title: 'SG_CDD_Entity',
     title_en: 'SG_CDD_Entity',
-    description: '实体成员专用KYC问卷',
-    description_en: 'Dedicated KYC questionnaire for entity members',
+    description: '',
+    description_en: '',
     profileType: 'entity',
+    enabledLocales: ['zh', 'en'],
     source: 'template',
     templateKey: 'kyc-entity'
   },
@@ -617,15 +617,16 @@ export const kycEntityTemplate: FormSchema = {
 };
 
 
-// 4. 全量低代码组件属性全功能演示模板 (每页一个核心组件，供快速全面测试所有配置属性)
+// 4. 全组件测试模板
 export const allComponentsDemoTemplate: FormSchema = {
   schemaVersion: '1.0.0',
   meta: {
     title: '全组件属性全量测试套件',
     title_en: 'All Components & Attributes Test Suite',
-    description: '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
-    description_en: 'Comprehensive test suite covering all 12 form components and attributes',
+    description: '',
+    description_en: '',
     profileType: 'customer',
+    enabledLocales: ['zh', 'en'],
     source: 'template',
     templateKey: 'all-components-demo'
   },
@@ -634,15 +635,15 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_input',
       pageType: 'form',
-      title: '第 1 页：单行文本 (Input)',
+      title: '第 1 页：单行文本',
       title_en: 'Page 1: Single-line Text (Input)',
-      description: '测试单行文本普通文本、数字输入、前置条件联动(dependsOn)及自定义校验提示',
+      description: '测试单行文本普通文本、数字输入、前置条件联动及自定义校验提示',
       description_en: 'Test text/number input, conditional visibility (dependsOn) and custom error messages',
       fields: [
         {
           id: 'test_input_basic',
           type: 'input',
-          label: '法定全名 (必填文本)',
+          label: '法定全名（必填文本）',
           label_en: 'Legal Full Name (Required Text)',
           key: 'input_legal_name',
           required: true,
@@ -656,7 +657,7 @@ export const allComponentsDemoTemplate: FormSchema = {
           id: 'test_input_num',
           type: 'input',
           inputType: 'number',
-          label: '注册资本金额 (数字格式)',
+          label: '注册资本金额（数字格式）',
           label_en: 'Registered Capital (Number Type)',
           key: 'input_reg_capital',
           required: false,
@@ -669,21 +670,21 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_input_trigger',
           type: 'radio',
-          label: '是否拥有直接母公司？ (联动触发器)',
+          label: '是否拥有直接母公司？（联动触发器）',
           label_en: 'Has Direct Holding Company? (Dependency Trigger)',
           key: 'radio_has_parent',
           required: true,
           showLabel: true,
           layout: 'inline',
           options: [
-            { label: '是 (展开母公司名称输入)', label_en: 'Yes (Reveal parent company field)', value: 'yes' },
-            { label: '否 (保持隐藏)', label_en: 'No (Keep hidden)', value: 'no' }
+            { label: '是（展开母公司名称输入）', label_en: 'Yes (Reveal parent company field)', value: 'yes' },
+            { label: '否（保持隐藏）', label_en: 'No (Keep hidden)', value: 'no' }
           ]
         },
         {
           id: 'test_input_dependent',
           type: 'input',
-          label: '母公司完整法定名称 (联动显示字段)',
+          label: '母公司完整法定名称（联动显示字段）',
           label_en: 'Parent Company Legal Name (Conditional Field)',
           key: 'input_parent_company_name',
           required: true,
@@ -698,7 +699,7 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_input_custom_err',
           type: 'input',
-          label: '特定合规代码 (自定义必填错误提示)',
+          label: '特定合规代码（自定义必填错误提示）',
           label_en: 'Compliance Code (Custom Error Message)',
           key: 'input_compliance_code',
           required: true,
@@ -715,15 +716,16 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_textarea',
       pageType: 'form',
-      title: '第 2 页：多行文本 (Textarea)',
+      title: '第 2 页：多行文本',
       title_en: 'Page 2: Multi-line Text (Textarea)',
-      description: '测试多行文本不同高度行数限制(minRows/maxRows)、字数输入及占位说明',
+      description: '测试多行文本不同高度行数限制、字数输入及占位说明',
       description_en: 'Test multi-line text with minRows/maxRows and layout adaptability',
       fields: [
         {
           id: 'test_textarea_standard',
+          maxLength: 200,
           type: 'textarea',
-          label: '企业主营业务描述 (标准 3-6 行)',
+          label: '企业主营业务描述（标准 3-6 行）',
           label_en: 'Core Business Activities (Standard 3-6 rows)',
           key: 'textarea_biz_scope',
           required: true,
@@ -738,7 +740,7 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_textarea_large',
           type: 'textarea',
-          label: '五年期商业规划与资金用途 (大段落 5-10 行)',
+          label: '五年期商业规划与资金用途（大段落 5-10 行）',
           label_en: 'Five-Year Business Plan (Large 5-10 rows)',
           key: 'textarea_business_plan',
           required: false,
@@ -755,15 +757,15 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_select',
       pageType: 'form',
-      title: '第 3 页：下拉选择 (Select)',
+      title: '第 3 页：下拉选择',
       title_en: 'Page 3: Dropdown Select (Select)',
-      description: '测试下拉单选弹窗选择器与多选药丸标签抽屉(含maxSelections上限)',
+      description: '测试下拉单选弹窗选择器与多选标签抽屉（含最大选择数上限）',
       description_en: 'Test single-select picker popup and multi-select tags drawer with maxSelections',
       fields: [
         {
           id: 'test_select_single',
           type: 'select',
-          label: '年度营业总额区间 (单选)',
+          label: '年度营业总额区间（单选）',
           label_en: 'Annual Turnover Range (Single Select)',
           key: 'select_turnover_tier',
           required: true,
@@ -781,15 +783,13 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_select_multi',
           type: 'select',
-          label: '核心资金来源渠道 (多选，最多3项)',
+          label: '核心资金来源渠道（多选，最多3项）',
           label_en: 'Primary Source of Funds (Multi-select, Max 3)',
           key: 'select_funding_sources',
           required: true,
           showLabel: true,
           multiple: true,
           maxSelections: 3,
-          help: '(最多选3项)',
-          help_en: '(Up to 3 items)',
           placeholder: '请选择资金来源渠道',
           placeholder_en: 'Please select funding source channels',
           options: [
@@ -808,15 +808,15 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_radio',
       pageType: 'form',
-      title: '第 4 页：单选框组 (Radio)',
+      title: '第 4 页：单选框组',
       title_en: 'Page 4: Radio Button Group (Radio)',
-      description: '测试行内水平排布(layout: inline)与垂直卡片堆叠排布(layout: stack)',
+      description: '测试行内水平排布与垂直卡片堆叠排布',
       description_en: 'Test horizontal inline layout and vertical stacked cards layout',
       fields: [
         {
           id: 'test_radio_inline',
           type: 'radio',
-          label: '是否为公开上市公司？ (行内水平排布)',
+          label: '是否为公开上市公司？（行内水平排布）',
           label_en: 'Publicly Listed Company? (Inline Layout)',
           key: 'radio_is_listed',
           required: true,
@@ -831,16 +831,16 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_radio_stack',
           type: 'radio',
-          label: '企业综合风控评级 (垂直堆叠排布)',
+          label: '企业综合风控评级（垂直堆叠排布）',
           label_en: 'Comprehensive Risk Rating (Stack Layout)',
           key: 'radio_risk_tier',
           required: true,
           showLabel: true,
           layout: 'stack',
           options: [
-            { label: '低风险 (Low Risk - 无跨国高风险业务)', label_en: 'Low Risk - No high risk cross-border business', value: 'risk_low' },
-            { label: '中等风险 (Medium Risk - 存在常规跨境进出口)', label_en: 'Medium Risk - Standard cross-border trade', value: 'risk_medium' },
-            { label: '高风险 (High Risk - 涉及特许行业或敏感司法管辖区)', label_en: 'High Risk - Regulated sectors or sensitive jurisdictions', value: 'risk_high' }
+            { label: '低风险（无跨国高风险业务）', label_en: 'Low Risk - No high risk cross-border business', value: 'risk_low' },
+            { label: '中等风险（存在常规跨境进出口）', label_en: 'Medium Risk - Standard cross-border trade', value: 'risk_medium' },
+            { label: '高风险（涉及特许行业或敏感司法管辖区）', label_en: 'High Risk - Regulated sectors or sensitive jurisdictions', value: 'risk_high' }
           ]
         }
       ]
@@ -850,22 +850,22 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_checkbox',
       pageType: 'form',
-      title: '第 5 页：多选框组 (Checkbox)',
+      title: '第 5 页：多选框组',
       title_en: 'Page 5: Checkbox Group (Checkbox)',
-      description: '测试多选框组行内排布、垂直堆叠以及数量上限限制(maxSelections)',
+      description: '测试多选框组行内排布、垂直堆叠以及数量上限限制',
       description_en: 'Test inline/stacked layouts and max selections limit for checkboxes',
       fields: [
         {
           id: 'test_checkbox_inline',
           type: 'checkbox',
-          label: '企业运营涉及牌照类别 (行内排布)',
+          label: '企业运营涉及牌照类别（行内排布）',
           label_en: 'Operating License Categories (Inline Layout)',
           key: 'checkbox_license_types',
           required: true,
           showLabel: true,
           layout: 'inline',
           options: [
-            { label: '支付业务牌照 (MAS)', label_en: 'Payment License (MAS)', value: 'mas_payment' },
+            { label: '支付业务牌照', label_en: 'Payment License (MAS)', value: 'mas_payment' },
             { label: '数字资产交易许可', label_en: 'Digital Asset License', value: 'crypto_license' },
             { label: '进出口贸易通关许可', label_en: 'Import & Export Permit', value: 'trade_permit' }
           ]
@@ -873,20 +873,18 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_checkbox_stack_limit',
           type: 'checkbox',
-          label: '未来十二个月重点发力市场 (垂直堆叠，最多选2项)',
+          label: '未来十二个月重点发力市场（垂直堆叠，最多选2项）',
           label_en: 'Priority Markets in Next 12 Months (Stack, Max 2)',
           key: 'checkbox_target_markets',
           required: true,
           showLabel: true,
           layout: 'stack',
           maxSelections: 2,
-          help: '(最多选2项)',
-          help_en: '(Up to 2 items)',
           options: [
-            { label: '新加坡本地市场 (Singapore Domestic)', label_en: 'Singapore Domestic', value: 'mkt_sg' },
-            { label: '中国大陆及港澳大湾区 (Greater China)', label_en: 'Greater China Region', value: 'mkt_china' },
-            { label: '东南亚新兴经济体 (ASEAN Emerging)', label_en: 'ASEAN Emerging Markets', value: 'mkt_asean' },
-            { label: '欧美发达国家市场 (EU / US)', label_en: 'Europe & North America', value: 'mkt_eu_us' }
+            { label: '新加坡本地市场', label_en: 'Singapore Domestic', value: 'mkt_sg' },
+            { label: '中国大陆及港澳大湾区', label_en: 'Greater China Region', value: 'mkt_china' },
+            { label: '东南亚新兴经济体', label_en: 'ASEAN Emerging Markets', value: 'mkt_asean' },
+            { label: '欧美发达国家市场', label_en: 'Europe & North America', value: 'mkt_eu_us' }
           ]
         }
       ]
@@ -896,7 +894,7 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_date',
       pageType: 'form',
-      title: '第 6 页：日期选择 (Date Picker)',
+      title: '第 6 页：日期选择',
       title_en: 'Page 6: Date Picker (Date)',
       description: '测试单日选择器、支持“长期有效”勾选框以及日期区间范围选择',
       description_en: 'Test single date, long-term validity checkbox and date range picker',
@@ -905,7 +903,7 @@ export const allComponentsDemoTemplate: FormSchema = {
           id: 'test_date_single',
           type: 'date',
           dateMode: 'single',
-          label: '企业注册成立日期 (单日必填)',
+          label: '企业注册成立日期（单日必填）',
           label_en: 'Date of Incorporation (Single Date)',
           key: 'date_incorporation',
           required: true,
@@ -918,7 +916,7 @@ export const allComponentsDemoTemplate: FormSchema = {
           type: 'date',
           dateMode: 'single',
           enableLongTerm: true,
-          label: '特许营业许可证有效截止日 (可勾选长期)',
+          label: '特许营业许可证有效截止日（可勾选长期）',
           label_en: 'Business License Expiry (Long-term Option)',
           key: 'date_license_expiry',
           required: true,
@@ -930,7 +928,7 @@ export const allComponentsDemoTemplate: FormSchema = {
           id: 'test_date_range',
           type: 'date',
           dateMode: 'range',
-          label: '上年度财务审计会计周期 (日期区间范围)',
+          label: '上年度财务审计会计周期（日期区间范围）',
           label_en: 'Fiscal Audit Period (Date Range)',
           key: 'date_audit_range',
           required: true,
@@ -945,7 +943,7 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_country',
       pageType: 'form',
-      title: '第 7 页：国家选择器 (Country)',
+      title: '第 7 页：国家选择器',
       title_en: 'Page 7: Country Selector (Country)',
       description: '测试纯中文/纯英文显示、拼音与字母双向排序、国旗展示、单选与多选',
       description_en: 'Test pure Chinese/English names, Pinyin/Alphabet sorting, flags and single/multi modes',
@@ -954,7 +952,7 @@ export const allComponentsDemoTemplate: FormSchema = {
           id: 'test_country_single',
           type: 'country',
           multiple: false,
-          label: '法定设立国家/地区 (单选)',
+          label: '法定设立国家/地区（单选）',
           label_en: 'Country of Incorporation (Single Select)',
           key: 'country_incorporation',
           required: true,
@@ -967,13 +965,11 @@ export const allComponentsDemoTemplate: FormSchema = {
           type: 'country',
           multiple: true,
           maxSelections: 3,
-          label: '主要供货商所在国家/地区 (多选，最多3项)',
+          label: '主要供货商所在国家/地区（多选，最多3项）',
           label_en: 'Major Supplier Countries (Multi-select, Max 3)',
           key: 'country_major_suppliers',
           required: true,
           showLabel: true,
-          help: '(最多选3项)',
-          help_en: '(Up to 3 items)',
           placeholder: '请选择主要供货商所在国家/地区',
           placeholder_en: 'Please select supplier countries'
         }
@@ -984,16 +980,16 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_nationality',
       pageType: 'form',
-      title: '第 8 页：国籍选择器 (Nationality)',
+      title: '第 8 页：国籍选择器',
       title_en: 'Page 8: Nationality Selector (Nationality)',
-      description: '测试国籍专有名词(如中国籍/Chinese)、拼音首字母分组、单选与多选',
+      description: '测试国籍专有名词（如中国籍）、拼音首字母分组、单选与多选',
       description_en: 'Test nationality terminology (e.g. Chinese), pinyin grouping and single/multi modes',
       fields: [
         {
           id: 'test_nationality_single',
           type: 'nationality',
           multiple: false,
-          label: '法定代表人国籍 (单选)',
+          label: '法定代表人国籍（单选）',
           label_en: 'Legal Representative Nationality (Single)',
           key: 'nationality_representative',
           required: true,
@@ -1006,13 +1002,11 @@ export const allComponentsDemoTemplate: FormSchema = {
           type: 'nationality',
           multiple: true,
           maxSelections: 3,
-          label: '主要受益所有人国籍 (多选，最多3项)',
+          label: '主要受益所有人国籍（多选，最多3项）',
           label_en: 'Beneficial Owner Nationalities (Multi, Max 3)',
           key: 'nationality_beneficial_owners',
           required: false,
           showLabel: true,
-          help: '(最多选3项)',
-          help_en: '(Up to 3 items)',
           placeholder: '请选择主要股东/受益人国籍',
           placeholder_en: 'Please select shareholder nationalities'
         }
@@ -1023,15 +1017,15 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_phone',
       pageType: 'form',
-      title: '第 9 页：手机号码 (Phone)',
+      title: '第 9 页：手机号码',
       title_en: 'Page 9: Mobile Phone Number (Phone)',
-      description: '测试国际电话区号弹窗选择、国家旗帜、严格号码正则校验(+65 8位/+86 11位)',
+      description: '测试国际电话区号弹窗选择、国家旗帜、严格号码规则校验（8位或11位）',
       description_en: 'Test international dial code selection, flags, and strict validation regex rules',
       fields: [
         {
           id: 'test_phone_sg',
           type: 'phone',
-          label: '新加坡本地紧急联络人手机 (预设+65)',
+          label: '新加坡本地紧急联络人手机（预设区号）',
           label_en: 'Local Singapore Contact Mobile (Preset +65)',
           key: 'phone_sg_contact',
           dialCode: '+65',
@@ -1045,7 +1039,7 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_phone_cn',
           type: 'phone',
-          label: '亚太业务代表手机号码 (预设+86严格校验)',
+          label: '亚太业务代表手机号码（预设区号严格校验）',
           label_en: 'APAC Representative Mobile (Preset +86 strict)',
           key: 'phone_cn_rep',
           dialCode: '+86',
@@ -1063,7 +1057,7 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_email',
       pageType: 'form',
-      title: '第 10 页：电子邮箱 (Email)',
+      title: '第 10 页：电子邮箱',
       title_en: 'Page 10: Corporate Email (Email)',
       description: '测试邮箱输入框、电子邮件格式正则校验与自定义错误提示',
       description_en: 'Test email format regex validation and custom error alerts',
@@ -1071,7 +1065,7 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_email_official',
           type: 'email',
-          label: '公司官方商务对接邮箱 (必填)',
+          label: '公司官方商务对接邮箱（必填）',
           label_en: 'Official Corporate Business Email (Required)',
           key: 'email_corporate_official',
           required: true,
@@ -1084,7 +1078,7 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_email_finance',
           type: 'email',
-          label: '财务对账备用联络邮箱 (选填)',
+          label: '财务对账备用联络邮箱（选填）',
           label_en: 'Finance Accounting Backup Email (Optional)',
           key: 'email_finance_backup',
           required: false,
@@ -1099,15 +1093,15 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_alert',
       pageType: 'form',
-      title: '第 11 页：提示说明区块 (Alert)',
+      title: '第 11 页：提示说明区块',
       title_en: 'Page 11: Informational Notice (Alert)',
-      description: '测试圆点列表样式(circle)、数字列表样式(number)、Markdown链接与警示视觉',
+      description: '测试圆点列表样式、数字列表样式、超链接与警示视觉',
       description_en: 'Test bullet lists (circle), numbered lists, markdown links and notice styles',
       fields: [
         {
           id: 'test_alert_circle',
           type: 'alert',
-          label: '合规准入须知 (圆点列表样式)',
+          label: '合规准入须知（圆点列表样式）',
           label_en: 'Compliance Notice (Bullet Style)',
           key: 'alert_compliance_circle',
           required: false,
@@ -1119,13 +1113,13 @@ export const allComponentsDemoTemplate: FormSchema = {
         {
           id: 'test_alert_number',
           type: 'alert',
-          label: '后续审批与流转指引 (数字列表样式)',
+          label: '后续审批与流转指引（数字列表样式）',
           label_en: 'Audit & Workflow Guidance (Numbered Style)',
           key: 'alert_workflow_numbers',
           required: false,
           showLabel: true,
           listStyle: 'number',
-          content: '问卷签署完成后的标准化审核流转步骤：\n1. 系统自动校验证件编码与工商黑名单数据库\n2. 高级合规主管进行人工资料复核并出具尽职调查简报\n3. 最终通过后向法定联络邮箱发放带电子时间戳的完整归档 PDF',
+          content: '问卷签署完成后的标准化审核流转步骤：\n1. 系统自动校验证件编码与工商黑名单数据库\n2. 高级合规主管进行人工资料复核并出具尽职调查简报\n3. 最终通过后向法定联络邮箱发放带电子时间戳的完整归档文件',
           content_en: 'Standard operational steps following form submission:\n1. Automatic background checks against compliance screening lists\n2. Senior compliance officer manual review and risk assessment\n3. Final delivery of timestamped sealed PDF to designated corporate email'
         }
       ]
@@ -1135,7 +1129,7 @@ export const allComponentsDemoTemplate: FormSchema = {
     {
       id: 'page_test_signature',
       pageType: 'form',
-      title: '第 12 页：电子签署 (Signature)',
+      title: '第 12 页：电子签署',
       title_en: 'Page 12: Electronic Signature (Signature)',
       description: '测试法律声明勾选框必选约束、手写画布笔迹交互、清空重签及最终提交',
       description_en: 'Test mandatory legal declaration checkboxes, smooth canvas signing, clear & submit',

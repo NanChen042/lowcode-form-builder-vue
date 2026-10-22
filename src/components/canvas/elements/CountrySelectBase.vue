@@ -2,7 +2,6 @@
   <div class="w-full">
     <ElementLabel :element="element" />
 
-    <!-- 多选模式 -->
     <a-select
       v-if="element.multiple"
       class="w-full pointer-events-none"
@@ -28,7 +27,6 @@
       </template>
     </a-select>
 
-    <!-- 单选模式 -->
     <a-select
       v-else
       class="w-full pointer-events-none"

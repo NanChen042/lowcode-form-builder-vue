@@ -28,7 +28,6 @@
         />
       </div>
 
-      <!-- 启用长期选项 (仅单日期模式生效；起止日期不展示长期选项) -->
       <div v-if="element.enableLongTerm && element.dateMode !== 'range'" class="flex-shrink-0 flex items-center">
         <a-checkbox
           :model-value="Boolean(element.defaultLongTerm)"

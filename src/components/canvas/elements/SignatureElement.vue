@@ -3,7 +3,6 @@
     <ElementLabel :element="element" />
 
     <div class="signature-canvas-mock bg-white rounded-lg p-1">
-      <!-- 声明列表 -->
       <div class="signature-options-container mb-4 flex flex-col gap-2.5">
         <div v-for="(opt, idx) in element.options" :key="idx" class="flex items-start gap-2.5">
           <a-checkbox disabled class="mt-0.5 flex-shrink-0" />
@@ -19,7 +18,6 @@
         </div>
       </div>
 
-      <!-- 签名区域标题 -->
       <div class="signature-pad-label mb-2 flex items-center gap-1">
         <span v-if="element.required" class="signature-pad-required text-red-500 font-bold">*</span>
         <EditableText
@@ -32,7 +30,6 @@
         />
       </div>
 
-      <!-- 模拟签名板 (纯白高保真设计，避免生硬灰底) -->
       <div class="relative h-28 w-full rounded-lg border border-dashed border-slate-300/90 bg-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)] flex items-center justify-center text-slate-400 text-xs select-none">
         <span class="flex items-center gap-1.5 text-slate-400 text-xs font-normal">
           <PenLine class="w-3.5 h-3.5 opacity-60" />

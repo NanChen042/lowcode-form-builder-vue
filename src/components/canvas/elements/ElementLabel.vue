@@ -2,31 +2,29 @@
   <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label text-[13px] text-slate-800 font-semibold leading-5 mb-1.5 pr-12">
     <span v-if="isRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><EditableText
       v-model="currentLabel"
-      :placeholder="t('canvas.unnamed')"
+      :placeholder="t('prop.fieldLabelPlaceholder')"
       :element-id="element.id"
       field="label"
       custom-class="label-text inline break-words"
     />
 
-    <!-- 标题右侧说明 (默认排布) -->
     <EditableText
       v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
       v-model="currentHelp"
-      :placeholder="t('prop.fieldHelp')"
+      :placeholder="t('prop.fieldHelpPlaceholder')"
       :element-id="element.id"
       field="help"
       custom-class="field-help text-[11px] text-slate-400 font-normal leading-4 ml-1.5 inline"
       :allow-empty="true"
     />
 
-    <!-- 标题下方说明 (底部换行排布) -->
     <div
       v-if="element.helpPosition === 'bottom' && Boolean(getFieldText(element, 'help'))"
       class="mt-0.5 leading-4"
     >
       <EditableText
         v-model="currentHelp"
-        :placeholder="t('prop.fieldHelp')"
+        :placeholder="t('prop.fieldHelpPlaceholder')"
         :element-id="element.id"
         field="help"
         custom-class="field-help field-help-bottom text-[11px] text-slate-400 font-normal leading-4"

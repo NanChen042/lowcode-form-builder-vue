@@ -1,8 +1,6 @@
 <template>
   <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4">
-    <!-- 场景 A：系统前置基础资料页 (方案 A：轻量直观的系统锁定态说明，无多余假输入框) -->
     <div v-if="page.pageType === 'system_profile'" id="system-page-prop-editor" class="space-y-4">
-      <!-- 头部标识 -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <div>
           <span class="text-[12px] font-semibold text-slate-700">{{ t('prop.canvasSettings') }}</span>
@@ -13,7 +11,6 @@
         </a-tag>
       </div>
 
-      <!-- 居中直观状态展示 -->
       <div class="py-8 px-4 flex flex-col items-center text-center">
         <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-3">
           <Lock class="h-5 w-5" />
@@ -38,7 +35,6 @@
       </div>
     </div>
 
-    <!-- 场景 B：普通业务表单画布页面配置 -->
     <a-form v-else id="page-prop-editor" :model="page" layout="vertical" size="small">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3.5">
         <div>
@@ -50,7 +46,6 @@
         </a-tag>
       </div>
 
-      <!-- 页面标题 -->
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-[12px] font-medium text-slate-700">
@@ -72,7 +67,6 @@
         />
       </div>
 
-      <!-- 页面描述 -->
       <div class="mb-4">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-[12px] font-medium text-slate-700">
@@ -119,7 +113,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormPage, ProfileType } from '@/types/schema';
-import { store, markDirty, deletePage } from '@/core/store';
+import { store, markDirty, deletePage, isBilingual } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import {
   Building2,
@@ -162,6 +156,7 @@ const pageDescModel = computed({
 });
 
 const isPageTitleMissing = computed(() => {
+  if (!isBilingual.value) return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.page.title && !props.page.title_en);
   }
@@ -169,6 +164,7 @@ const isPageTitleMissing = computed(() => {
 });
 
 const isPageDescMissing = computed(() => {
+  if (!isBilingual.value) return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.page.description && !props.page.description_en);
   }

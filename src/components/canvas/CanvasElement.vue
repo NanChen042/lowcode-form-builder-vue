@@ -12,7 +12,6 @@
     :data-type="element.type"
     @click.stop="handleClick"
   >
-    <!-- 连线：父级组件底部引出主干母线与定位连接点 -->
     <div
       v-if="isBranchParent"
       class="absolute left-[13px] -bottom-[13px] w-[2px] h-[13px] bg-blue-500 z-10 pointer-events-none"
@@ -20,38 +19,32 @@
       <div class="absolute -top-1 -left-[3px] w-2 h-2 rounded-full bg-blue-500 border border-white shadow-xs"></div>
     </div>
 
-    <!-- 祖先贯穿导轨 (仅当 2 级子项后续还有 1 级同辈时在 x=13px 绘制贯穿线) -->
     <div
       v-if="hasGrandparentPassThrough"
       class="absolute -left-[35px] top-[-13px] -bottom-[13px] w-[2px] bg-blue-500 z-10 pointer-events-none"
     ></div>
 
-    <!-- 连线：子级左侧连续树状导轨连线与指向箭头 (将整组组件真正串联) -->
     <div
       v-if="element.dependsOn"
       class="absolute -left-[11px] pointer-events-none z-10"
       :class="isLastBranchChild ? 'top-[-13px] h-[38px] w-[14px]' : 'top-[-13px] -bottom-[13px] w-[14px]'"
     >
-      <!-- 竖向主干连续导轨 -->
       <div
         class="absolute left-0 top-0 w-[2px] bg-blue-500"
         :class="isLastBranchChild ? 'h-[31px]' : 'bottom-0'"
       ></div>
 
-      <!-- 末尾子级：平滑 90 度圆弧拐角 + 箭头收口 -->
       <template v-if="isLastBranchChild">
         <div class="absolute left-0 top-[29px] w-[8px] h-[8px] border-l-2 border-b-2 border-blue-500 rounded-bl-[4px]"></div>
         <div class="absolute left-[7px] top-[33.5px] w-0 h-0 border-y-[3.5px] border-y-transparent border-l-[5px] border-l-blue-500"></div>
       </template>
 
-      <!-- 中间子级：T 型横向分支 + 箭头进入当前卡片 -->
       <template v-else>
         <div class="absolute left-0 top-[36px] w-[8px] h-[2px] bg-blue-500"></div>
         <div class="absolute left-[7px] top-[33.5px] w-0 h-0 border-y-[3.5px] border-y-transparent border-l-[5px] border-l-blue-500"></div>
       </template>
     </div>
 
-    <!-- 悬浮操作按钮区 -->
     <div class="element-actions">
       <button class="action-btn copy-btn" type="button" @click.stop="duplicateElement(element.id)">
         <Copy class="h-3.5 w-3.5" />
@@ -61,22 +54,20 @@
       </button>
     </div>
 
-    <!-- 树状联动分支精炼条件徽标 (含从属锁定标识) -->
     <div
       v-if="element.dependsOn"
       class="inline-flex items-center gap-1.5 mb-2 select-none"
     >
       <span
         class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#1677ff] font-medium text-[11px] border border-blue-200/60 shadow-2xs"
-        title="条件从属项：位置已锁定并跟随父级联动"
+        :title="t('canvas.dependentLockedTitle')"
       >
         <Lock class="w-2.5 h-2.5 text-blue-500 shrink-0" />
         {{ t('canvas.conditionPrefix', undefined, { option: triggerOptName }) }}
-        <span v-if="elementDepth >= 2" class="text-[9.5px] bg-blue-100/90 text-blue-700 px-1 py-0.2 rounded font-semibold ml-0.5">2级</span>
+        <span v-if="elementDepth >= 2" class="text-[9.5px] bg-blue-100/90 text-blue-700 px-1 py-0.2 rounded font-semibold ml-0.5">{{ t('canvas.tier2') }}</span>
       </span>
     </div>
 
-    <!-- 动态组件分发 -->
     <component :is="renderComponent" :element="element" />
   </div>
 </template>
@@ -148,7 +139,6 @@ const elementDepth = computed(() => {
   return depth;
 });
 
-// 是否作为联动分支的父级组件（当紧随其后的组件有依赖当前组件时，向下引出主干母线）
 const isBranchParent = computed(() => {
   if (!currentPage.value || currentFieldIndex.value === -1) return false;
   const fields = currentPage.value.fields;
@@ -156,7 +146,6 @@ const isBranchParent = computed(() => {
   return Boolean(nextField && nextField.dependsOn?.fieldKey === props.element.key);
 });
 
-// 是否在此分支组中后面还有依赖同一父级的兄弟组件
 const hasLaterSibling = computed(() => {
   if (!props.element.dependsOn || !currentPage.value || currentFieldIndex.value === -1) return false;
   const fields = currentPage.value.fields;
@@ -168,13 +157,11 @@ const hasLaterSibling = computed(() => {
   return false;
 });
 
-// 是否是分支序列中的最后一个子组件（如果是最后一个，导轨向下弯折收口；如果后面还有同组子组件，主干导轨继续贯穿向下）
 const isLastBranchChild = computed(() => {
   if (!props.element.dependsOn) return false;
   return !hasLaterSibling.value;
 });
 
-// 如果当前组件是 2 级追问，且祖父组件名下在当前组件后面还有同辈 1 级组件，则在 x=13px 位置绘制贯穿竖线
 const hasGrandparentPassThrough = computed(() => {
   if (elementDepth.value < 2 || !currentPage.value || currentFieldIndex.value === -1) return false;
   const fields = currentPage.value.fields;

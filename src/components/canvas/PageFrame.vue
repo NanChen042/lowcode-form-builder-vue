@@ -4,7 +4,7 @@
     :data-page-id="page.id"
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
-    class="mobile-frame absolute min-h-[720px] w-[390px] bg-[#F7F8FA] rounded-2xl shadow-sm flex flex-col"
+    class="mobile-frame absolute min-h-[720px] w-[390px] bg-white rounded-2xl shadow-sm flex flex-col"
     :class="[
       isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
       isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
@@ -18,7 +18,6 @@
     @mousedown="handleFrameMouseDown"
     @click.stop="selectPage(page.id)"
   >
-    <!-- 左上角序号角标 -->
     <div class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
       <Smartphone class="h-3.5 w-3.5" />
       <template v-if="isSystemProfile">
@@ -43,7 +42,6 @@
       </template>
     </div>
 
-    <!-- 拖拽组件时：右上角动态标识“可放置画布”状态 -->
     <div
       v-if="store.isDraggingComponent && !isSystemProfile"
       class="absolute -top-7 right-0 flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs select-none pointer-events-none animate-pulse"
@@ -52,9 +50,7 @@
       <span>{{ t('canvas.droppable') }}</span>
     </div>
 
-    <!-- 页面主容器 -->
-    <div class="flex-1 overflow-hidden flex flex-col w-full h-full rounded-2xl relative">
-      <!-- 拖拽组件时：系统前置页只读锁定遮罩向导（防止用户误解） -->
+    <div class="flex-1 flex flex-col w-full rounded-2xl relative">
       <div
         v-if="store.isDraggingComponent && isSystemProfile"
         class="absolute inset-0 z-30 rounded-2xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
@@ -70,7 +66,6 @@
         </p>
       </div>
 
-      <!-- 页面头部 -->
       <div class="page-header-area px-5 pt-6 pb-4 shrink-0 bg-white rounded-t-2xl" @click.stop="selectPage(page.id)">
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
@@ -86,7 +81,7 @@
         <template v-else>
           <EditableText
             v-model="displayPageTitle"
-            :placeholder="t('prop.pageTitle')"
+            :placeholder="t('prop.pageTitlePlaceholder')"
             :element-id="page.id"
             field="title"
             tag="h2"
@@ -105,8 +100,7 @@
         </template>
       </div>
 
-      <!-- 系统预设基础资料页：直接自然平铺展开高保真业务资料卡片 -->
-      <div v-if="isSystemProfile" class="flex-1 bg-white p-3" @click="selectPage(page.id)">
+      <div v-if="isSystemProfile" class="flex-1 bg-white p-3 rounded-b-2xl" @click="selectPage(page.id)">
         <SystemProfileView
           :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
@@ -114,9 +108,7 @@
         />
       </div>
 
-      <!-- 常规画布组件容器与拖拽接收区 -->
-      <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col">
-        <!-- 空状态提示：绝对定位浮层，不占据 Sortable DOM 节点流，拖拽组件时透明隐藏 -->
+      <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-b-2xl">
         <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
           <div class="relative mb-6 grid h-20 w-24 grid-cols-2 gap-2">
             <div class="col-span-2 rounded-md border border-slate-200 bg-white shadow-sm"></div>
@@ -132,7 +124,6 @@
           </p>
         </div>
 
-        <!-- 真实组件列表与拖拽投放区：空状态时内部无任何子节点，新拖入组件必然成为第 1 个子元素 -->
         <div
           ref="dropzoneRef"
           class="canvas-dropzone relative z-10 flex-1 min-h-[520px] p-3 transition-colors duration-200"
@@ -160,7 +151,6 @@
       </div>
     </div>
 
-    <!-- 右侧中间添加新页面按钮 (自适应居中对齐边框中点与连线锚点) -->
     <a-tooltip :content="t('canvas.addPageRight')" position="top">
       <div class="add-next-page-btn absolute -right-3 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md border border-slate-200/90 transition hover:scale-110 hover:border-[#1677ff]" @click.stop="addPage(page.id)">
         <Plus class="h-4 w-4" />
@@ -241,7 +231,6 @@ const elementGroups = computed<ElementGroup[]>(() => {
 
   for (let i = 0; i < fields.length; i++) {
     const el = fields[i];
-    // 核心从属判定：若当前元素是条件联动从属子项（含多级嵌套），且依附于当前组内的组件，则吸纳到该组中一同拖拽移动
     if (currentGroup && el.dependsOn && currentGroup.elements.some(m => m.key === el.dependsOn?.fieldKey)) {
       currentGroup.elements.push(el);
     } else {
@@ -300,7 +289,6 @@ onMounted(() => {
           }
         }
 
-        // 同步配置拖拽镜像，修复 Sortable 在缩放画布下的坐标除以 scale 偏移 bug，并杜绝异步 setTimeout 导致的闪烁与抽搐
         const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
         if (fallback && evt.item) {
           const rect = evt.item.getBoundingClientRect();
@@ -318,11 +306,8 @@ onMounted(() => {
           visual.style.boxSizing = 'border-box';
           visual.style.pointerEvents = 'none';
 
-          // 移除拖拽镜像中的操作按钮，保持拖拽预览纯净简洁
           visual.querySelectorAll('.element-actions').forEach(btn => btn.remove());
 
-          // 核心修复：Sortable.js 内部会将 fixed top/left 除以 scale，导致缩放下拖起瞬间大幅向下向右掉落错位；
-          // 同步校准 fallback 的初始坐标与宽高，与当前组件屏幕位置精确对齐
           fallback.style.left = `${rect.left}px`;
           fallback.style.top = `${rect.top}px`;
           fallback.style.width = `${rect.width}px`;
@@ -346,10 +331,8 @@ onMounted(() => {
         const itemEl = evt.item;
         const insertIdx = props.page.fields.length === 0 ? 0 : Math.min(evt.newIndex ?? elementGroups.value.length, elementGroups.value.length);
 
-        // 移除非响应式的克隆节点，由 Vue 响应式数据接管渲染
         itemEl.remove();
 
-        // 场景 1：从左侧物料栏拖入全新组件 (.component-item)
         if (itemEl.classList.contains('component-item')) {
           const type = itemEl.getAttribute('data-type') as ComponentType;
           if (type) {
@@ -363,7 +346,6 @@ onMounted(() => {
           return;
         }
 
-        // 场景 2：跨画板拖拽已存在组件组 (.canvas-element-group)
         if (globalDraggingGroup) {
           const { sourcePageId, group } = globalDraggingGroup;
           const sourcePage = store.pages.find(p => p.id === sourcePageId);
@@ -382,7 +364,6 @@ onMounted(() => {
           return;
         }
 
-        // 兜底机制：通过 DOM data-group-id 全局跨画板查找并迁移
         const fallbackGroupId = itemEl.getAttribute('data-group-id') || itemEl.id;
         if (fallbackGroupId) {
           for (const p of store.pages) {
@@ -420,7 +401,6 @@ onMounted(() => {
           const [movedGroup] = groups.splice(evt.oldIndex, 1);
           groups.splice(evt.newIndex, 0, movedGroup);
 
-          // 平铺回 props.page.fields
           props.page.fields = groups.flatMap(g => g.elements);
           selectElement(movedGroup.elements[0]);
           markDirty();
@@ -439,10 +419,8 @@ onBeforeUnmount(() => {
 });
 
 function handleFrameMouseDown(e: MouseEvent) {
-  // 无论点击画板空白还是内部组件，都优先将当前画板标记为活跃画板提升层级
   store.activePageId = props.page.id;
 
-  // 如果不是右键或中键，优先选中当前页面
   if (e.button === 0 && !store.isSpacePressed) {
     const isClickingElement = (e.target as HTMLElement).closest(
       '.canvas-element, .icon-btn, .add-next-page-btn'
@@ -452,7 +430,6 @@ function handleFrameMouseDown(e: MouseEvent) {
     }
   }
 
-  // 如果点击的是表单组件内的交互输入控件、按钮、或正在编辑划选的文本节点，则不启动画板整体拖拽
   const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
   const isEditingThisText = Boolean(
     activeEl &&

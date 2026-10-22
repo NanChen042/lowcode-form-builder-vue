@@ -7,7 +7,6 @@
       <span :class="titleClass || 'text-[13px] text-slate-700'">{{ title }}</span>
     </template>
     <template #content>
-      <!-- 基础输入 -->
       <a-dsubmenu :value="`${valuePrefix}-basic`" trigger="hover">
         <template #icon>
           <Layers class="h-4 w-4 text-slate-500" />
@@ -33,7 +32,6 @@
         </template>
       </a-dsubmenu>
 
-      <!-- 业务组件 -->
       <a-dsubmenu :value="`${valuePrefix}-biz`" trigger="hover">
         <template #icon>
           <Briefcase class="h-4 w-4 text-slate-500" />

@@ -14,7 +14,6 @@
       @blur="handleBlur"
     />
 
-    <!-- 校验错误提示 (与 algo / Arco 体系保持一致) -->
     <transition
       enter-active-class="transition-all duration-150 ease-out"
       enter-from-class="opacity-0 -translate-y-1"
@@ -135,10 +134,8 @@ function initIntlTel() {
     return;
   }
 
-  // 默认国家二字码 (优先使用指定的国家 ISO2，否则根据区号反查，默认 'sg')
   const defaultIso = props.countryCode?.toLowerCase() || parseIsoFromDialCode(props.dialCode) || 'sg';
 
-  // 严格对齐 algo 系统配置：优先常用国置顶 (新加坡、中国、美国、英国)，其余按英文 A-Z 严格排序
   const options: IntlTelInputOptions = {
     initialCountry: defaultIso,
     countryOrder: getCountryPhoneOrder(),
@@ -153,7 +150,6 @@ function initIntlTel() {
 
   iti = window.intlTelInput(inputRef.value, options);
 
-  // 初始化已有电话号码
   if (props.modelValue) {
     const full = props.modelValue.startsWith('+')
       ? props.modelValue
@@ -163,10 +159,8 @@ function initIntlTel() {
 
   updateInputPlaceholder();
 
-  // 监听国家切换事件
   inputRef.value.addEventListener('countrychange', handleCountryChange);
 
-  // 初始上报国家与校验状态
   validateAndEmit();
 }
 
@@ -178,7 +172,6 @@ function parseIsoFromDialCode(code?: string): string {
 
 function updateInputPlaceholder() {
   if (!inputRef.value) return;
-  // 若设计器有自定义提示语则显示自定义，否则完全遵循 algo / intlTelInput 原生自动占位
   if (props.customPlaceholder) {
     inputRef.value.placeholder = props.customPlaceholder;
   }
@@ -205,7 +198,6 @@ function handleInput() {
   if (!inputRef.value || !iti) return;
 
   const currentCountry = iti.getSelectedCountryData();
-  // 容错处理：若在台湾(+886)模式下输入了本地前导0 (如 0912...)，自动去掉前导0，无缝匹配国际格式并格式化间距
   if (currentCountry.iso2 === 'tw' && inputRef.value.value.startsWith('0')) {
     inputRef.value.value = inputRef.value.value.replace(/^0+/, '');
   }
@@ -242,7 +234,6 @@ function validateAndEmit() {
   } else if (props.strict) {
     valid = iti.isValidNumber();
     if (!valid) {
-      // 严格对齐 algo 系统通用错误提示
       message = props.customErrorMessage || '请输入有效的手机号码';
       message_en = props.customErrorMessage || 'Please enter a valid phone number';
     }
@@ -261,7 +252,6 @@ function validateAndEmit() {
   });
 }
 
-// 监听外部区号或国家变化
 watch(
   () => [props.countryCode, props.dialCode],
   ([newIso, newCode]) => {
@@ -284,7 +274,6 @@ watch(
   }
 );
 
-// 监听全局语言环境切换，动态更新 244 国语言翻译与搜索框文案
 watch(
   () => store.currentLocale,
   () => {
@@ -317,7 +306,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 整体容器布局 (拆解为与 algo 完全一致的独立双矩形框排布) */
 .intl-tel-wrapper .iti {
   display: flex !important;
   align-items: center !important;
@@ -326,7 +314,6 @@ onUnmounted(() => {
   position: relative !important;
 }
 
-/* 左侧独立区号方框容器 */
 .intl-tel-wrapper .iti__country-container {
   position: relative !important;
   top: auto !important;
@@ -338,7 +325,6 @@ onUnmounted(() => {
   height: 32px !important;
 }
 
-/* 左侧独立按钮 (标准 32px 高度，自带边框与交互态，彻底消除右偏与灰块) */
 .intl-tel-wrapper .iti__selected-country {
   height: 32px !important;
   min-width: 92px !important;
@@ -368,7 +354,6 @@ onUnmounted(() => {
   outline: none !important;
 }
 
-/* 核心修复：消除 primary 内部背景与边距，消除左侧多余灰块 */
 .intl-tel-wrapper .iti__selected-country-primary {
   display: flex !important;
   align-items: center !important;
@@ -386,18 +371,15 @@ onUnmounted(() => {
   background-color: transparent !important;
 }
 
-/* 隐藏 primary 内部硬编码三角，改用优雅的末端 after 箭头 */
 .intl-tel-wrapper .iti__selected-country-primary .iti__arrow {
   display: none !important;
 }
 
-/* 国旗居中 */
 .intl-tel-wrapper .iti__selected-country-primary .iti__flag {
   margin-right: 0 !important;
   flex-shrink: 0 !important;
 }
 
-/* 国家区号紧随国旗排列于左侧，不发生向右偏移 */
 .intl-tel-wrapper .iti__selected-dial-code {
   order: 2 !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
@@ -408,7 +390,6 @@ onUnmounted(() => {
   white-space: nowrap !important;
 }
 
-/* 自定义下拉箭头：居于最右侧，比例精致 */
 .intl-tel-wrapper .iti__selected-country::after {
   content: "" !important;
   order: 3 !important;
@@ -427,7 +408,6 @@ onUnmounted(() => {
   transform: rotate(180deg) !important;
 }
 
-/* 下拉菜单位置与搜索面板 (对齐属性面板 Flag + Code + Name 精致排布规范) */
 .intl-tel-wrapper .iti__dropdown-content {
   position: absolute !important;
   top: 100% !important;
@@ -475,7 +455,6 @@ onUnmounted(() => {
   margin: 0 !important;
 }
 
-/* 统一单项排版：国旗(左) + 国家名称(中) + 国际区号(右侧对齐，消除空白断层) */
 .intl-tel-wrapper .iti__country {
   padding: 0 12px !important;
   height: 36px !important;
@@ -534,7 +513,6 @@ onUnmounted(() => {
   color: #1677ff !important;
 }
 
-/* 右侧独立号码输入方框 (标准 32px 高度，重置 iti 原生左侧 padding) */
 .intl-tel-wrapper input.iti__tel-input {
   flex: 1 1 0% !important;
   min-width: 0 !important;

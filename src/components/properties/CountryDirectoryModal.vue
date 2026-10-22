@@ -1,5 +1,4 @@
 <template>
-  <!-- 全球国家/国籍/区号统一预设清单弹窗 (单一弹窗：分别是国籍、国家、代码、国际区号) -->
   <a-modal
     :visible="visible"
     :title="countryModalTitle"
@@ -10,7 +9,6 @@
     @cancel="handleClose"
   >
     <div class="w-[600px] max-w-[92vw] space-y-3">
-      <!-- 搜索输入框与条数统计 -->
       <div class="flex items-center gap-2">
         <a-input
           v-model="countrySearchKeyword"
@@ -27,9 +25,7 @@
         </div>
       </div>
 
-      <!-- 企业级标准规整数据表格：4列（国籍、国家、代码、国际区号），中文显示中文，英文显示英文 -->
       <div class="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
-        <!-- 表头：国家、国籍、代码、国际区号 -->
         <div
           class="flex items-center px-3.5 py-2 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 tracking-wider select-none"
         >
@@ -47,14 +43,12 @@
           </div>
         </div>
 
-        <!-- 表体滚动列表 -->
         <div class="max-h-[360px] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
           <div
             v-for="item in filteredUnifiedList"
             :key="item.iso2"
             class="flex items-center px-3.5 py-2 text-xs transition-colors hover:bg-blue-50/40 select-none group"
           >
-            <!-- 列 1: 国家 (带国旗) -->
             <div class="flex items-center gap-2 min-w-0 pr-2" style="width: 32%;">
               <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
               <span
@@ -64,7 +58,6 @@
                 {{ getCountryName(item) }}
               </span>
             </div>
-            <!-- 列 2: 国籍 -->
             <div
               class="text-slate-600 truncate min-w-0 pr-2"
               style="width: 30%;"
@@ -72,13 +65,11 @@
             >
               {{ getNatName(item) }}
             </div>
-            <!-- 列 3: 代码 (ISO-2) -->
             <div class="min-w-0" style="width: 18%;">
               <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px] text-slate-600 font-medium uppercase">
                 {{ item.iso2 }}
               </span>
             </div>
-            <!-- 列 4: 国际区号 -->
             <div class="text-right min-w-0" style="width: 20%;">
               <span class="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-mono text-[11px] font-semibold">
                 {{ item.code }}
@@ -86,14 +77,12 @@
             </div>
           </div>
 
-          <!-- 空态提示 -->
           <div v-if="filteredUnifiedList.length === 0" class="py-12 text-center text-xs text-slate-400">
             {{ t('dir.noMatching') }}
           </div>
         </div>
       </div>
 
-      <!-- 底部提示 -->
       <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
         <span>
           {{ t('dir.totalCountPrefix') }} 244 {{ t('dir.totalCountSuffix') }}

@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-3.5">
-    <!-- 头部类别指示 -->
     <div class="flex items-center justify-between border-b border-slate-100 pb-2">
       <div>
         <span class="text-[12px] font-semibold text-slate-700">{{ t('prop.basicInfo') }}</span>
@@ -9,7 +8,6 @@
       <a-tag size="small" class="text-[11px] font-normal">{{ componentLabel }}</a-tag>
     </div>
 
-    <!-- 字段标题与显示标题开关 -->
     <div class="mb-3">
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
@@ -30,7 +28,7 @@
         v-model="fieldLabelModel"
         :auto-size="{ minRows: 1, maxRows: 4 }"
         allow-clear
-        :placeholder="t('prop.fieldLabelPlaceholder')"
+        :placeholder="element.type === 'alert' ? t('common.notice') : t('prop.fieldLabelPlaceholder')"
         class="w-full"
         :class="{ 'prop-field-focused': isFieldFocused('label') }"
         @focus="setFocus('label')"
@@ -39,7 +37,6 @@
       />
     </div>
 
-    <!-- 字段副标题与排布方式分段器 -->
     <div v-if="element.type !== 'alert'" class="mb-3">
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
@@ -64,7 +61,6 @@
         @input="markDirty"
       />
 
-      <!-- 排布方式切换分段器：可选 标题右侧显示或下方换行显示 -->
       <div class="mt-2 flex items-center justify-between py-1 pl-1">
         <div class="flex items-center gap-1.5">
           <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -106,7 +102,6 @@
       </div>
     </div>
 
-    <!-- 字段占位提示 -->
     <div v-if="hasPlaceholder" class="mb-3">
       <div class="flex items-center justify-between mb-1">
         <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
@@ -127,7 +122,6 @@
       />
     </div>
 
-    <!-- 必填校验开关 -->
     <div v-if="element.type !== 'alert'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">
@@ -140,7 +134,6 @@
       <a-switch v-model="isElementRequired" size="small" />
     </div>
 
-    <!-- 必填校验提示展开项 -->
     <CollapseTransition
       v-if="element.type !== 'alert'"
       :key="`${element.id}-req`"
@@ -178,7 +171,7 @@
           class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
           :title="rawDefaultErrorMessage"
         >
-          <span class="text-slate-400">{{ store.currentLocale === 'en' ? 'Default: ' : '默认：' }}</span>“{{ rawDefaultErrorMessage }}”
+          <span class="text-slate-400">{{ t('common.defaultColon') }}</span>“{{ rawDefaultErrorMessage }}”
         </div>
 
         <div v-else class="mt-1">
@@ -195,7 +188,6 @@
       </div>
     </CollapseTransition>
 
-    <!-- 签名声明必填开关 -->
     <div v-if="element.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
@@ -206,7 +198,6 @@
       <a-switch v-model="isDeclarationRequired" size="small" />
     </div>
 
-    <!-- 签名声明校验提示展开项 -->
     <CollapseTransition
       v-if="element.type === 'signature'"
       :key="`${element.id}-decl`"
@@ -244,7 +235,7 @@
           class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
           :title="rawDeclarationErrorMessage"
         >
-          <span class="text-slate-400">{{ store.currentLocale === 'en' ? 'Default: ' : '默认：' }}</span>“{{ rawDeclarationErrorMessage }}”
+          <span class="text-slate-400">{{ t('common.defaultColon') }}</span>“{{ rawDeclarationErrorMessage }}”
         </div>
 
         <div v-else class="mt-1">
@@ -261,7 +252,6 @@
       </div>
     </CollapseTransition>
 
-    <!-- 允许多选开关 -->
     <div v-if="['select', 'country', 'nationality'].includes(element.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.allowMultiple') }}</span>
@@ -272,7 +262,6 @@
       <a-switch v-model="isSelectMultiple" size="small" />
     </div>
 
-    <!-- 最大允许选择数 -->
     <CollapseTransition
       v-if="['select', 'country', 'nationality', 'checkbox'].includes(element.type)"
       :key="`${element.id}-max`"
@@ -283,8 +272,8 @@
           <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxSelections') }}</span>
           <a-tooltip
             :content="['country', 'nationality'].includes(element.type)
-              ? (store.currentLocale === 'en' ? 'Max 3 selections for country/nationality' : '国家/国籍组件最多允许选择 3 项')
-              : (store.currentLocale === 'en' ? `Max ${maxAllowedLimit} selections (up to options count)` : `最多允许选择 ${maxAllowedLimit} 项（不超过配置选项数）`)"
+              ? t('prop.maxSelectionsCountryTip')
+              : t('prop.maxSelectionsOptionsTip', undefined, { count: maxAllowedLimit })"
             position="top"
           >
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
@@ -305,7 +294,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
+import { store, markDirty, isBilingual } from '@/core/store';
 import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
@@ -341,6 +330,7 @@ const fieldLabelModel = computed({
 });
 
 const isFieldLabelMissing = computed(() => {
+  if (!isBilingual.value) return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.element.label && !props.element.label_en);
   }
@@ -357,6 +347,7 @@ const fieldHelpModel = computed({
 });
 
 const isFieldHelpMissing = computed(() => {
+  if (!isBilingual.value) return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.element.help && !props.element.help_en);
   }
@@ -390,6 +381,14 @@ const placeholderInputDefault = computed(() => {
   if (props.element.type === 'email') {
     return t('prop.emailPlaceholder');
   }
+  if (props.element.type === 'signature') {
+    return t('common.clickToSign');
+  }
+  const defaultData = componentRegistry[props.element.type]?.defaultData();
+  if (defaultData) {
+    const defaultPlaceholder = store.currentLocale === 'en' ? defaultData.placeholder_en : defaultData.placeholder;
+    if (defaultPlaceholder) return defaultPlaceholder;
+  }
   return placeholderFieldLabel.value;
 });
 
@@ -403,6 +402,7 @@ const fieldPlaceholderModel = computed({
 });
 
 const isFieldPlaceholderMissing = computed(() => {
+  if (!isBilingual.value) return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.element.placeholder && !props.element.placeholder_en);
   }

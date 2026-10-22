@@ -2,8 +2,8 @@ import { createApp } from 'vue';
 import ArcoVue from '@arco-design/web-vue';
 import '@arco-design/web-vue/dist/arco.css';
 import './style.css';
-// 仅在开发环境或显式开启时动态加载 Mock 拦截，避免生产构建引入 eval 与冗余体积
-if (import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true') {
+// 仅在显式配置 VITE_USE_MOCK === 'true' 时加载 Mock 拦截，默认发起真实网络请求
+if (import.meta.env.VITE_USE_MOCK === 'true') {
   await import('./mock');
 }
 import router from './router';

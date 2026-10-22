@@ -13,9 +13,7 @@ export interface ApiResponse<T = any> {
 }
 
 export const FormAPI = {
-  /**
-   * 保存表单模板到服务器（向后端发送持久化请求，并返回后端持久化后的数据结构）
-   */
+  /** 保存表单模板 */
   async saveTemplate(schema: FormSchema): Promise<ApiResponse<{ id: string; updatedAt: string; schema?: FormSchema }>> {
     const res = await request.post<any, any>('/pc/form/saveTemplate', { schema });
     if (res && (res.code === 0 || res.code === 200 || res.code === 'SYS_SUCCESS')) {
@@ -37,9 +35,7 @@ export const FormAPI = {
     };
   },
 
-  /**
-   * 获取已保存的表单模板（按指定的真实 ID 请求后端，不读本地 localStorage）
-   */
+  /** 获取表单模板 */
   async getTemplate(id: string): Promise<ApiResponse<{ id: string; schema: FormSchema | null }>> {
     if (!id || id === 'default') {
       return {
@@ -78,30 +74,43 @@ export const FormAPI = {
     }
   },
 
-  /**
-   * 正式发布表单
-   */
+  /** 发布表单 */
   async publishForm(schema: FormSchema): Promise<ApiResponse<{ url: string }>> {
     try {
       const res = await request.post<any, any>('/pc/form/publish', { schema });
-      if (res && (res.code === 0 || res.code === 200) && res.data?.url) {
+      if (res && (res.code === 0 || res.code === 200 || res.success) && res.data?.url) {
         return {
           code: 200,
           success: true,
           data: { url: res.data.url },
-          message: '发布成功'
+          message: res.msg || '发布成功'
         };
       }
-    } catch (_) {
-      // 降级模拟
+      if (res && (res.code !== 0 && res.code !== 200)) {
+        return {
+          code: res.code || 400,
+          success: false,
+          data: null as any,
+          message: res.msg || res.message || '发布失败'
+        };
+      }
+    } catch (e: any) {
+      if (e?.response?.data?.msg) {
+        return {
+          code: e.response.status || 400,
+          success: false,
+          data: null as any,
+          message: e.response.data.msg
+        };
+      }
     }
 
-    await delay(600);
+    await delay(500);
     return {
       code: 200,
       success: true,
       data: {
-        url: `https://app.algocandy.com/forms/published_${Date.now()}`
+        url: `https://app.algocandy.com/forms/published_${schema.meta?.formId || Date.now()}`
       },
       message: '发布成功'
     };
@@ -120,10 +129,7 @@ export interface UserSessionData {
 }
 
 export const UserAPI = {
-  /**
-   * 获取当前母系统 algo 登录态、昵称与机构信息
-   * 基于封装的 Axios 自动携带 Cookie: pc_token 和 sc_org_id
-   */
+  /** 获取当前登录态与机构信息 */
   async getCurrentUser(): Promise<ApiResponse<UserSessionData>> {
     try {
       const res = await request.get<any, any>('/pc/user/authInfo', { silent: true } as any);

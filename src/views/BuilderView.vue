@@ -1,13 +1,11 @@
 <template>
   <a-config-provider :locale="currentArcoLocale">
     <div class="relative flex h-full w-full flex-col overflow-hidden">
-      <!-- 顶部导航栏 (Stitch 通栏流光毛玻璃) -->
       <AppHeader
         @open-preview="openPreview('preview')"
-        @open-deploy="openPreview('deploy')"
+        @open-deploy="handleOpenPublish"
       />
 
-      <!-- 主工作区：左侧组件库 + 中间无限画布 + 右侧属性面板 -->
       <div class="app-main relative flex min-h-0 flex-1 overflow-hidden">
         <MaterialSidebar
           @open-template-gallery="handleOpenTemplateModal"
@@ -24,7 +22,6 @@
         <PropertyPanel />
       </div>
 
-      <!-- 二次弹窗：新建空白表单画布 (选择业务类型：客户案例/个人案例/实体案例及设置表单名称) -->
       <CreateFormModal
         v-model:visible="createCanvasModalVisible"
         @created="handleFormCreated"
@@ -32,7 +29,6 @@
         @close="handleCreateCanvasClose"
       />
 
-      <!-- 欢迎向导弹窗 (空 URL 时首次进入引导，可点击新建空白唤起二次弹窗，或直接选用模板) -->
       <WelcomeWizardModal
         v-model:visible="welcomeWizardVisible"
         :mandatory="isInitialWizardMandatory"
@@ -41,12 +37,17 @@
         @close="handleWelcomeWizardClosed"
       />
 
-      <!-- 仿真 iPhone 手机模型表单预览弹窗 -->
       <PreviewModal
         :visible="previewModalVisible"
         :schema="currentPreviewSchema"
         :mode="previewMode"
         @close="previewModalVisible = false"
+        @open-publish="handleOpenPublish"
+      />
+
+      <PublishModal
+        v-model:visible="publishModalVisible"
+        @close="publishModalVisible = false"
       />
     </div>
   </a-config-provider>
@@ -80,34 +81,36 @@ import PropertyPanel from '@/components/properties/PropertyPanel.vue';
 import CreateFormModal from '@/components/sidebar/CreateFormModal.vue';
 import WelcomeWizardModal from '@/components/common/WelcomeWizardModal.vue';
 import PreviewModal from '@/components/preview/PreviewModal.vue';
+import PublishModal from '@/components/preview/PublishModal.vue';
 
 const createCanvasModalVisible = ref(false);
 const welcomeWizardVisible = ref(false);
 const isInitialWizardMandatory = ref(false);
 const previewModalVisible = ref(false);
+const publishModalVisible = ref(false);
 const previewMode = ref<'preview' | 'deploy'>('preview');
 const openedFromWizard = ref(false);
 
-// 从侧边栏或画布打开新建空白表单二次弹窗 (支持选择业务类型：客户案例/个人案例/实体案例及设置表单名称)
+function handleOpenPublish() {
+  publishModalVisible.value = true;
+}
+
 function handleOpenCreateCanvas() {
   openedFromWizard.value = store.pages.length === 0;
   createCanvasModalVisible.value = true;
 }
 
-// 打开场景模板选择
 function handleOpenTemplateModal() {
   isInitialWizardMandatory.value = false;
   welcomeWizardVisible.value = true;
 }
 
-// 从向导弹窗点击“新建空白画布”唤起二次弹窗
 function handleWizardOpenBlank() {
   openedFromWizard.value = true;
   welcomeWizardVisible.value = false;
   createCanvasModalVisible.value = true;
 }
 
-// 首次向导或二次弹窗创建表单后，自动切至组件物料库并按需触发漫游引导
 function handleTemplateSelected(_tplKey: string) {
   welcomeWizardVisible.value = false;
   openedFromWizard.value = false;
@@ -128,7 +131,6 @@ function handleFormCreated() {
 
 function handleCreateCanvasCancel() {
   createCanvasModalVisible.value = false;
-  // 若从向导弹窗唤起，或者当前画布无画板页面（首次空画布状态），点击取消时必须返回上一个向导弹窗，避免用户停留在空白画板导致第一页系统资料表无法初始化
   if (openedFromWizard.value || store.pages.length === 0) {
     welcomeWizardVisible.value = true;
   }
@@ -170,45 +172,48 @@ watch(
   { immediate: true }
 );
 
-// 初始化加载模板
 onMounted(async () => {
-  // 150ms 防抖静默加载：若初始化在 150ms 内极速就绪（本地/新建），彻底杜绝微进度条闪烁
-  let loadingTimer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
-    store.isCanvasLoading = true;
-  }, 150);
-
   const urlParams = new URLSearchParams(window.location.search);
   const rawId = (urlParams.get('id') || '').toLowerCase().trim();
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();
   const mockParam = (urlParams.get('mock') || '').toLowerCase().trim();
   const typeParam = (urlParams.get('type') || urlParams.get('profileType') || '').toLowerCase().trim();
 
-  // 0. 解析语言环境
+  if (rawId) {
+    store.isCanvasLoading = true;
+  }
+  let loadingTimer: ReturnType<typeof setTimeout> | null = !rawId
+    ? setTimeout(() => {
+        store.isCanvasLoading = true;
+      }, 150)
+    : null;
+
   const lang = urlParams.get('lang');
   if (lang === 'en' || lang === 'zh') {
     store.currentLocale = lang;
   }
 
-  // 1. 解析 URL 传递的参数
   const nickname = urlParams.get('nickname');
   const company = urlParams.get('company');
   if (nickname) store.user.nickname = nickname;
   if (company) store.org.companyName = company;
 
-  // 2. 请求后端真实接口拉取当前登录用户与机构信息
-  UserAPI.getCurrentUser().then(res => {
-    if (res.success && res.data) {
-      if (res.data.nickname) store.user.nickname = res.data.nickname;
-      if (res.data.companyName) store.org.companyName = res.data.companyName;
-      if (res.data.avatar) store.user.avatar = res.data.avatar;
-      if (res.data.language && !lang) store.currentLocale = res.data.language;
-    }
-  }).catch(() => {});
+  if (!store.user.isLoggedIn) {
+    UserAPI.getCurrentUser().then(res => {
+      if (res.success && res.data && res.data.uid > 0) {
+        store.user.isLoggedIn = true;
+        store.user.uid = res.data.uid;
+        if (res.data.nickname) store.user.nickname = res.data.nickname;
+        if (res.data.companyName) store.org.companyName = res.data.companyName;
+        if (res.data.avatar) store.user.avatar = res.data.avatar;
+        const cachedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('builder_current_locale') : null;
+        if (res.data.language && !lang && !cachedLang) store.currentLocale = res.data.language;
+      }
+    }).catch(() => {});
+  }
 
-  // 监听来自父级母系统 (iframe postMessage) 的动态同步
   window.addEventListener('message', handleWindowMessage);
 
-  // 2. 解析并锁定外部业务主体类型 (customer/client, individual, entity)
   if (typeParam === 'individual') {
     store.lockedProfileType = 'individual';
   } else if (typeParam === 'entity') {
@@ -234,8 +239,7 @@ onMounted(async () => {
     mockParam === 'true';
 
   const resetToBlankState = () => {
-    // 方案 A（即开即用模式）：初始化默认空白画板，确保底层画布始终 100% 鲜活可用
-    loadSchema(blankTemplate);
+    loadSchema(blankTemplate, { duration: 0 });
     store.selectedType = null;
     store.selectedId = null;
     store.meta.formId = '';
@@ -252,13 +256,11 @@ onMounted(async () => {
       targetTemplateKey = 'all-components-demo';
       store.lockedProfileType = 'customer';
     } else if (rawId) {
-      // 先尝试向后端获取持久化数据
       const res = await FormAPI.getTemplate(rawId);
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
         targetTemplate = res.data.schema;
         targetTemplateKey = 'saved';
       } else {
-        // 本地/纯前端模式：直接从 id 标识自解析 (cus/cli=母案例, ind=个人案例, ent=实体案例; diy=自建, tpl=模板)
         const isCus = rawId.startsWith('cus_') || rawId.startsWith('cli_');
         const isEntity = rawId.startsWith('ent_');
         const isTpl = rawId.includes('_tpl_');
@@ -294,12 +296,10 @@ onMounted(async () => {
       targetTemplate = kycEntityTemplate;
       targetTemplateKey = 'kyc-entity';
     } else {
-      // 默认 URL 为空（无任何 id 与预设模板参数）：画布完全置空，必须通过向导弹窗选择模板或自建空白
       resetToBlankState();
       targetTemplateKey = 'blank';
     }
   } catch {
-    // 异常兜底：保证画布干净并唤起强制向导
     resetToBlankState();
   } finally {
     if (loadingTimer) {
@@ -307,7 +307,7 @@ onMounted(async () => {
       loadingTimer = null;
     }
     if (rawId || tplParam || isAllComponentsMock) {
-      loadSchema(targetTemplate);
+      loadSchema(targetTemplate, { duration: 0 });
       const effectiveId = isAllComponentsMock ? (rawId || 'all_components_demo') : rawId;
       if (effectiveId) {
         store.meta.formId = effectiveId;
@@ -323,12 +323,16 @@ onMounted(async () => {
     store.isCanvasLoading = false;
   }
 
-  // 首次访问时若未看过引导，则触发一次轻量漫游引导
   if (rawId || tplParam || isAllComponentsMock) {
     checkAutoStartTour();
   }
 
-  // 离开页面时未保存拦截
+  setTimeout(() => {
+    if (typeof (window as any).__dismissAppLoader === 'function') {
+      (window as any).__dismissAppLoader();
+    }
+  }, 220);
+
   window.addEventListener('beforeunload', handleBeforeUnload);
 });
 

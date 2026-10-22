@@ -9,30 +9,24 @@ import {
 } from '@/templates/recommend';
 import { generateFormId } from '@/core/store';
 
-// 规范内存数据库，绝不向客户端 localStorage 写入 Schema
 export const mockDatabase = new Map<string, FormSchema>();
 
-// 初始化 Mock 数据库预设模板
 function initMockDatabase() {
-  // 1. 实体成员专用KYC模板
   const entTpl: FormSchema = JSON.parse(JSON.stringify(kycEntityTemplate));
   entTpl.meta.formId = 'ent_tpl_20261013_yl63';
   entTpl.meta.serialNo = 'ent_tpl_20261013_yl63';
   mockDatabase.set('ent_tpl_20261013_yl63', entTpl);
 
-  // 2. 个人自建表单
   const indDiy: FormSchema = JSON.parse(JSON.stringify(kycIndividualTemplate));
   indDiy.meta.formId = 'ind_diy_20261013_mvpr';
   indDiy.meta.serialNo = 'ind_diy_20261013_mvpr';
   mockDatabase.set('ind_diy_20261013_mvpr', indDiy);
 
-  // 3. 客户母案例模板
   const cusTpl: FormSchema = JSON.parse(JSON.stringify(kycCustomerTemplate));
   cusTpl.meta.formId = 'cus_tpl_20261013_demo';
   cusTpl.meta.serialNo = 'cus_tpl_20261013_demo';
   mockDatabase.set('cus_tpl_20261013_demo', cusTpl);
 
-  // 4. 全组件属性全量测试套件模板 (涵盖全部12类组件属性与多页)
   const allTpl: FormSchema = JSON.parse(JSON.stringify(allComponentsDemoTemplate));
   allTpl.meta.formId = 'all_components_demo';
   allTpl.meta.serialNo = 'all_components_demo';
@@ -43,14 +37,10 @@ function initMockDatabase() {
 
 initMockDatabase();
 
-// 设置 Mock 响应延时，模拟真实服务器网络环境
 Mock.setup({
   timeout: '150-300'
 });
 
-/**
- * 1. Mock 保存表单接口: POST /pc/form/saveTemplate
- */
 Mock.mock(/\/pc\/form\/saveTemplate/, 'post', (options: any) => {
   let body: any = options.body;
   if (typeof body === 'string') {
@@ -93,9 +83,6 @@ Mock.mock(/\/pc\/form\/saveTemplate/, 'post', (options: any) => {
   };
 });
 
-/**
- * 2. Mock 查询表单接口: GET /pc/form/getTemplate?id=xxx
- */
 Mock.mock(/\/pc\/form\/getTemplate.*/, 'get', (options: any) => {
   const url = options.url || '';
   let id = '';
@@ -173,9 +160,6 @@ Mock.mock(/\/pc\/form\/getTemplate.*/, 'get', (options: any) => {
   };
 });
 
-/**
- * 3. Mock 发布表单接口: POST /pc/form/publish
- */
 Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
   let body: any = options.body;
   if (typeof body === 'string') {
@@ -184,6 +168,17 @@ Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
     } catch (_) {}
   }
   const formId = body?.schema?.meta?.formId || 'form_' + Date.now();
+  const formTitle = (body?.schema?.meta?.title || '').trim();
+
+  if (formTitle.includes('重名') || formTitle.includes('已存在') || formTitle.toLowerCase().includes('duplicate')) {
+    return {
+      code: 409,
+      success: false,
+      msg: '该表单名称已存在，请换一个名称',
+      data: null
+    };
+  }
+
   return {
     code: 200,
     success: true,
@@ -194,9 +189,6 @@ Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
   };
 });
 
-/**
- * 4. Mock 母系统当前用户信息: GET /pc/user/authInfo
- */
 Mock.mock(/\/pc\/user\/authInfo.*/, 'get', () => {
   return {
     code: 0,

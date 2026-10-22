@@ -5,7 +5,10 @@
     class="outline-none cursor-text hover:text-[#1677ff] editable-text-node"
     :class="[
       customClass,
-      { 'canvas-text-focus': isFocused }
+      {
+        'canvas-text-focus': isFocused,
+        'is-placeholder': isShowingPlaceholder
+      }
     ]"
     :data-placeholder="placeholder"
     contenteditable="plaintext-only"
@@ -58,6 +61,12 @@ const emit = defineEmits<{
 const textRef = ref<HTMLElement | null>(null);
 const isEditing = ref(false);
 
+const isShowingPlaceholder = computed(() => {
+  if (isEditing.value) return false;
+  const val = props.modelValue;
+  return val === undefined || val === null || val === '';
+});
+
 const isFocused = computed(() => {
   if (!store.focusedTarget || !props.elementId) return false;
   if (store.focusedTarget.elementId !== props.elementId) return false;
@@ -78,7 +87,8 @@ function getElementText(): string {
 
 function syncTextToDOM(val: string | undefined) {
   if (!textRef.value) return;
-  const targetText = val !== undefined && val !== null && val !== '' ? val : (!props.allowEmpty ? (props.placeholder || '') : '');
+  const hasVal = val !== undefined && val !== null && val !== '';
+  const targetText = hasVal ? val : (props.allowEmpty ? '' : (props.placeholder || ''));
   if (getElementText() !== targetText) {
     textRef.value.textContent = targetText;
   }
@@ -91,7 +101,6 @@ onMounted(() => {
 watch(
   () => [props.modelValue, props.placeholder, store.currentLocale],
   () => {
-    // 当自身正在编辑或为当前活动聚焦元素时，绝对不同步，避免破坏用户正在输入的光标选区
     if (isEditing.value || (typeof document !== 'undefined' && document.activeElement === textRef.value)) {
       return;
     }
@@ -100,11 +109,9 @@ watch(
 );
 
 function handleMouseDown(e: MouseEvent) {
-  // 如果处于空格抓手模式、中键拖拽、或 Ctrl/Cmd 组合键，允许冒泡让 InfiniteCanvas 正常平移画布！
   if (store.isSpacePressed || e.button === 1 || e.ctrlKey || e.metaKey) {
     return;
   }
-  // 如果当前文本元素已经聚焦处于编辑划选中，阻止冒泡，避免划选文本时意外带动底层画板
   if (typeof document !== 'undefined' && document.activeElement === textRef.value) {
     e.stopPropagation();
   }
@@ -112,6 +119,10 @@ function handleMouseDown(e: MouseEvent) {
 
 function handleFocus(e: FocusEvent) {
   isEditing.value = true;
+  if ((!props.modelValue || props.modelValue === '') && textRef.value) {
+    textRef.value.textContent = '';
+  }
+
   if (props.autoSelect && props.elementId) {
     if (props.field === 'title' || props.field === 'description') {
       selectPage(props.elementId);
@@ -133,19 +144,20 @@ function handleFocus(e: FocusEvent) {
 
 function handleBlur(e: FocusEvent) {
   isEditing.value = false;
-  const currentText = (getElementText() || '').trim();
-  let finalVal = currentText;
-
-  if (!finalVal && !props.allowEmpty) {
-    finalVal = props.placeholder || '';
-    if (textRef.value) {
-      textRef.value.textContent = finalVal;
-    }
-  }
+  const rawText = getElementText() || '';
+  const finalVal = (props.multiline || props.field === 'content' || props.field === 'description')
+    ? rawText.replace(/\r\n/g, '\n').replace(/\n+$/, '')
+    : rawText.trim();
 
   emit('update:modelValue', finalVal);
   emit('change', finalVal);
   markDirty();
+
+  if (!finalVal) {
+    if (textRef.value) {
+      textRef.value.textContent = props.allowEmpty ? '' : (props.placeholder || '');
+    }
+  }
 
   if (
     store.focusedTarget?.elementId === props.elementId &&
@@ -160,6 +172,9 @@ function handleBlur(e: FocusEvent) {
 
 function handleInput() {
   const currentText = getElementText();
+  if (!currentText.trim() && textRef.value && textRef.value.innerHTML === '<br>') {
+    textRef.value.innerHTML = '';
+  }
   emit('update:modelValue', currentText);
   emit('change', currentText);
   markDirty();
@@ -172,12 +187,38 @@ function handleEnter(e: KeyboardEvent) {
   e.preventDefault();
   textRef.value?.blur();
 }
+
+function focus() {
+  if (!textRef.value) return;
+  textRef.value.focus();
+  try {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || (sel.anchorNode === textRef.value && sel.anchorOffset === 0)) {
+      const range = document.createRange();
+      range.selectNodeContents(textRef.value);
+      range.collapse(false);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+  } catch {}
+}
+
+defineExpose({
+  focus,
+  textRef
+});
 </script>
 
 <style scoped>
+.editable-text-node.is-placeholder {
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+  font-style: normal;
+}
 .editable-text-node:empty::before {
   content: attr(data-placeholder);
   color: #94a3b8;
+  font-weight: 400;
   pointer-events: none;
 }
 </style>

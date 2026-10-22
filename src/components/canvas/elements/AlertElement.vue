@@ -3,7 +3,6 @@
     <div
       class="relative overflow-hidden rounded-xl border border-[#bae0ff] bg-[#f0f7ff]/90 p-4 shadow-[0_1px_3px_rgba(22,119,255,0.06)] border-t-[3.5px] border-t-[#1677ff]"
     >
-      <!-- 标题行 -->
       <div v-if="element.showLabel !== false" class="flex items-center gap-2 mb-2.5">
         <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
         <EditableText
@@ -16,39 +15,32 @@
         />
       </div>
 
-      <!-- 1. 解析视图态 (未就地编辑时：高保真呈现蓝色超链接、列表圆点/序号，支持鼠标自由划选文字) -->
       <div
         v-if="!isEditing && segments.length > 0"
         class="alert-canvas-parsed space-y-2 text-[13px] leading-5 text-slate-700 cursor-text select-text"
         @click.stop="startEditContent"
       >
         <template v-for="seg in segments" :key="seg.id">
-          <!-- 间距行 -->
           <div v-if="seg.type === 'spacer'" class="h-1.5"></div>
 
-          <!-- 列表项 (圆形圆点 或 数字有序) -->
           <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-1.5">
-            <!-- 数字型 (有序) -->
             <span
-              v-if="element.listStyle === 'number'"
+              v-if="seg.listType === 'number' || (!seg.listType && element.listStyle === 'number')"
               class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 tabular-nums select-none"
             >
-              {{ seg.orderIndex }}.
+              {{ seg.orderIndex || 1 }}.
             </span>
-            <!-- 圆形 (无序) -->
             <span
               v-else
               class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1677ff]"
             ></span>
-            <span class="flex-1 break-words leading-relaxed" v-html="seg.html"></span>
+            <span class="flex-1 break-words leading-relaxed" v-html="seg.html || '&nbsp;'"></span>
           </p>
 
-          <!-- 普通文本段落 -->
           <p v-else class="m-0 break-words leading-relaxed" v-html="seg.html"></p>
         </template>
       </div>
 
-      <!-- 2. 就地编辑态 (点击后进入：同标题一致，下划线蓝色聚焦、光标划选打字、双向同步属性栏) -->
       <EditableText
         v-else
         ref="editableTextRef"
@@ -59,8 +51,9 @@
         tag="div"
         :allow-empty="true"
         multiline
-        custom-class="alert-content-text w-full text-[13px] leading-relaxed text-slate-700 block border-b-2 border-transparent pb-0.5 cursor-text whitespace-pre-wrap font-sans select-text"
+        custom-class="alert-content-text w-full text-[13px] leading-relaxed text-slate-700 block border-b-2 border-transparent pb-0.5 cursor-text whitespace-pre-wrap font-sans select-text min-h-[22px]"
         @update:model-value="(val) => setFieldText(element, 'content', val)"
+        @focus="handleContentFocus"
         @blur="handleContentBlur"
       />
     </div>
@@ -89,7 +82,19 @@ const segments = computed(() => {
   return parseAlertContent(rawContent.value, props.element.listStyle);
 });
 
-// 点击解析视图态，立即切换为与标题一致的就地编辑态并激活聚焦
+function focusEditableText() {
+  const comp = editableTextRef.value;
+  if (!comp) return;
+  if (typeof comp.focus === 'function') {
+    comp.focus();
+  } else {
+    const el = (comp.$el || comp) as HTMLElement;
+    if (el && typeof el.focus === 'function') {
+      el.focus();
+    }
+  }
+}
+
 function startEditContent(e?: MouseEvent) {
   if (e) {
     const target = e.target as HTMLElement;
@@ -105,27 +110,27 @@ function startEditContent(e?: MouseEvent) {
   highlightPropertyField('content');
 
   nextTick(() => {
-    const el = editableTextRef.value?.$el as HTMLElement | null;
-    if (el) {
-      el.focus();
-    }
+    focusEditableText();
   });
+}
+
+function handleContentFocus() {
+  isEditing.value = true;
+  store.focusedTarget = { elementId: props.element.id, field: 'content' };
 }
 
 function handleContentBlur() {
   isEditing.value = false;
 }
 
-// 点击卡片空白处：选中当前组件并高亮右侧属性栏
 function handleCardClick(e: MouseEvent) {
   const target = e.target as HTMLElement;
-  const isEditableLabel = Boolean(target.closest('[contenteditable]'));
+  const isLabelClick = Boolean(target.closest('.label-text'));
 
   selectElement(props.element);
 
-  if (!isEditableLabel && !isEditing.value) {
-    store.focusedTarget = { elementId: props.element.id, field: 'content' };
-    highlightPropertyField('content');
+  if (!isLabelClick) {
+    startEditContent();
   }
 }
 </script>

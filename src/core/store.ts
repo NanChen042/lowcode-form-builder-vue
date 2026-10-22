@@ -1,4 +1,4 @@
-import { reactive, computed, toRaw } from 'vue';
+import { reactive, computed, toRaw, watch } from 'vue';
 import type {
   FormSchema,
   FormPage,
@@ -27,18 +27,33 @@ export interface FocusedTarget {
   optionIndex?: number;
 }
 
-// 全局响应式状态单例
+function getInitialLocale(): 'zh' | 'en' {
+  if (typeof window !== 'undefined') {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const langParam = urlParams.get('lang')?.toLowerCase();
+      if (langParam === 'en' || langParam === 'zh') {
+        return langParam;
+      }
+      const cached = localStorage.getItem('builder_current_locale') || localStorage.getItem('lowcode_current_locale');
+      if (cached === 'en' || cached === 'zh') {
+        return cached;
+      }
+    } catch (_) {}
+  }
+  return 'zh';
+}
+
 export const store = reactive({
-  // 唯一 ID 计数器
   uniqueIdCounter: 1,
 
-  // 元数据
   meta: {
     title: '未命名表单',
     title_en: '',
     description: '',
     description_en: '',
     profileType: 'customer' as ProfileType,
+    enabledLocales: undefined as ('zh' | 'en')[] | undefined,
     source: 'diy' as 'template' | 'diy',
     templateKey: '' as string,
     formId: '' as string,
@@ -46,22 +61,18 @@ export const store = reactive({
     createdAt: 0 as number
   },
 
-  // 页面列表
   pages: [] as FormPage[],
 
-  // 当前激活选中的目标
   selectedType: null as 'element' | 'page' | null,
   selectedId: null as string | null,
   activePageId: null as string | null,
 
-  // 画布视口状态
   canvasState: {
     x: 320,
     y: 160,
     scale: 1
   } as CanvasState,
 
-  // 交互状态
   isPanning: false,
   isSpacePressed: false,
   isDraggingComponent: false,
@@ -70,25 +81,20 @@ export const store = reactive({
   isCanvasAnimating: false,
   isCanvasLoading: false,
 
-  // 虚拟焦点高亮目标
   focusedTarget: null as FocusedTarget | null,
 
-  // 模板与脏状态
   activeTemplateKey: 'blank',
   isDirty: false,
   lastSavedHash: '',
 
-  // 侧边栏布局展示与尺寸拉伸
   leftSidebarVisible: true,
   rightSidebarVisible: true,
   leftSidebarWidth: 320,
   rightSidebarWidth: 300,
   sidebarTab: 'components' as 'templates' | 'components' | 'pages',
 
-  // 国际化语言环境
-  currentLocale: 'zh' as 'zh' | 'en',
+  currentLocale: getInitialLocale() as 'zh' | 'en',
 
-  // 母系统 algo 用户登录态与机构信息
   user: {
     isLoggedIn: false,
     token: '',
@@ -103,11 +109,9 @@ export const store = reactive({
     companyName: ''
   },
 
-  // 外部 URL 锁定的业务主体类型 (若有则锁定不能切换，若无则为 null 允许自由选择)
   lockedProfileType: null as ProfileType | null
 });
 
-// 计算属性：当前选中的元素或画板页面
 export function findElementById(elements: FormElement[], id: string): FormElement | null {
   for (const el of elements) {
     if (el.id === id) return el;
@@ -141,7 +145,6 @@ export const selectedPage = computed<FormPage | null>(() => {
   return store.pages.find(p => p.id === store.selectedId) || null;
 });
 
-// 生成唯一 ID
 export function getUniqueId(): number {
   return store.uniqueIdCounter++;
 }
@@ -150,7 +153,6 @@ export function makeFieldKey(type: ComponentType, id: string): string {
   return `${type}_${String(id).replace('cmp_', '')}`;
 }
 
-// 选中控制
 export function selectElement(el: FormElement | string | null) {
   if (!el) {
     clearSelection();
@@ -188,7 +190,6 @@ export function clearSelection() {
   store.focusedTarget = null;
 }
 
-// 元素操作方法
 export function createElement(type: ComponentType): FormElement {
   const meta = componentRegistry[type];
   const id = `cmp_${getUniqueId()}`;
@@ -198,12 +199,12 @@ export function createElement(type: ComponentType): FormElement {
     id,
     type,
     key: makeFieldKey(type, id),
-    label: '未命名字段',
-    label_en: '',
     required: true,
     showLabel: true,
     helpPosition: 'right',
     ...defaultData,
+    label: '',
+    label_en: '',
     options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
   };
 }
@@ -213,9 +214,6 @@ export function addElement(type: ComponentType, targetPageId?: string) {
     addPage();
   }
 
-  // 1. 优先使用显式指定的 targetPageId
-  // 2. 否则如果当前选中了画板（selectedType === 'page'），使用选中的画板 ID
-  // 3. 否则如果当前有激活画板（activePageId），使用激活画板
   let resolvedPageId = targetPageId;
   if (!resolvedPageId) {
     if (store.selectedType === 'page' && store.selectedId) {
@@ -227,12 +225,9 @@ export function addElement(type: ComponentType, targetPageId?: string) {
 
   let page = resolvedPageId ? store.pages.find(p => p.id === resolvedPageId) : null;
 
-  // 核心约束：第 1 个画布（基础资料核验页，pageType === 'system_profile'）不允许添加任何表单组件
   if (!page || page.pageType === 'system_profile' || store.pages[0]?.id === page.id) {
-    // 自动定向到首个可用的常规表单页
     let formPage = store.pages.find(p => p.pageType !== 'system_profile' && p.id !== store.pages[0]?.id);
     if (!formPage) {
-      // 若当前只有第 1 页系统资料页，自动创建第 2 页常规表单页
       addPage(undefined, { focus: false });
       formPage = store.pages.find(p => p.pageType !== 'system_profile' && p.id !== store.pages[0]?.id)
         || store.pages[store.pages.length - 1];
@@ -244,7 +239,6 @@ export function addElement(type: ComponentType, targetPageId?: string) {
 
   const newEl = createElement(type);
 
-  // 如果当前在目标页面内已选中了某个元素，在其正下方插入（若选中的是父组件，自动顺延到整个联动组下方，杜绝插断树状链路）
   if (selectedElement.value && store.selectedType === 'element') {
     for (const p of store.pages) {
       if (p.pageType === 'system_profile') continue;
@@ -358,7 +352,6 @@ export function deleteElement(elementId: string) {
   }
 }
 
-// 中文数字转换函数（1 -> '一', 2 -> '二', 10 -> '十', 12 -> '十二'）
 export function toChineseNum(num: number): string {
   const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
   if (num <= 10) return cnNums[num] || String(num);
@@ -374,7 +367,6 @@ export function toChineseNum(num: number): string {
   return String(num);
 }
 
-// 页面操作方法
 export function addPage(afterPageId?: string | null, options: { focus?: boolean } = {}) {
   const isFirst = store.pages.length === 0;
   const newId = `page_${Date.now()}_${getUniqueId()}`;
@@ -454,7 +446,6 @@ export function deletePage(pageId: string) {
   markDirty();
 }
 
-// 画布视口缩放与平移方法
 export function clampScale(scale: number): number {
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
 }
@@ -510,61 +501,55 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
     store.isCanvasAnimating = false;
   }
 
-  // 纯 JavaScript 高性能几何计算，零 DOM 查询，杜绝强制同步重排 (Reflow)
   const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
   const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
   const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
   const viewportHeight = Math.max(320, window.innerHeight - 56);
-  const headerHeight = 56; // AppHeader 占位高度（InfiniteCanvas 采用了 -mt-14）
+  const headerHeight = 56;
 
-  // 获取画板真实物理高度：普通画板基准 720px；系统预设基础资料页随卡片自然展开，动态获取实际或预设展开高度
+  const pType = page.profileType || store.meta.profileType;
+  const presetExpectedHeight = pType === 'individual' ? 620 : 1080;
+
   let realHeight = PAGE_HEIGHT;
   if (typeof document !== 'undefined') {
     const frameEl = document.getElementById(page.id === store.pages[0]?.id ? 'tour-first-page-frame' : `frame_${page.id}`);
-    if (frameEl && frameEl.offsetHeight > 0) {
+    if (page.pageType === 'system_profile') {
+      realHeight = Math.max(frameEl?.offsetHeight || 0, presetExpectedHeight);
+    } else if (frameEl && frameEl.offsetHeight > 0) {
       realHeight = frameEl.offsetHeight;
-    } else if (page.pageType === 'system_profile') {
-      realHeight = store.meta.profileType === 'individual' ? 620 : 1220;
     }
   } else if (page.pageType === 'system_profile') {
-    realHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+    realHeight = presetExpectedHeight;
   }
   const realWidth = PAGE_WIDTH;
 
-  // 上方序号标签占用 28px 高度，预留 32px
   const badgeOffset = 32;
   const totalContentHeight = realHeight + badgeOffset;
 
-  // 垂直方向：保证完整画板卡片（包括顶部标签和底部卡片）在视口内具备舒适的呼吸留白
-  const paddingY = options?.forTour ? 100 : 80;
+  const paddingY = options?.forTour ? 120 : 80;
   const safeHeight = Math.max(240, viewportHeight - paddingY);
   const targetScaleY = safeHeight / totalContentHeight;
 
   if (options?.forTour) {
-    // 操作指南高亮模式：为右侧解说气泡预留独立展示空间（气泡宽约 360px，间距 24px）
     const popoverWidth = options.popoverWidth || 360;
     const gap = 24;
     const paddingX = 70;
     const safeWidth = Math.max(300, viewportWidth - popoverWidth - gap - paddingX);
     const targetScaleX = safeWidth / realWidth;
 
-    // 智能自适应缩放：长画板自适应缩放（~0.55），常规画板（~0.82），完整展示全貌绝不切边
     const finalScale = clampScale(Math.min(targetScaleX, targetScaleY, 0.85));
     store.canvasState.scale = finalScale;
 
-    // 水平方向：将 [画板 + 气泡] 复合取景整体居中在视口内
     const cardRenderedWidth = realWidth * finalScale;
     const totalGroupWidth = cardRenderedWidth + gap + popoverWidth;
     const leftMargin = Math.max(28, (viewportWidth - totalGroupWidth) / 2);
 
     store.canvasState.x = leftMargin - page.x * finalScale;
 
-    // 垂直方向：将画板内容垂直居中在可视视口中，上下均保留充足呼吸留白
     const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
     const viewportCenterY = headerHeight + viewportHeight / 2;
     store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
   } else {
-    // 常规聚焦模式（如新建/删除画板、聚焦到选中）：将画板居中
     const paddingX = 80;
     const safeWidth = Math.max(200, viewportWidth - paddingX);
     const targetScaleX = safeWidth / realWidth;
@@ -609,15 +594,17 @@ export function resetCanvasView(options?: { duration?: number }) {
 
   store.pages.forEach(p => {
     let pHeight = PAGE_HEIGHT;
+    const pType = p.profileType || store.meta.profileType;
+    const presetExpectedHeight = pType === 'individual' ? 620 : 1080;
     if (typeof document !== 'undefined') {
       const frameEl = document.getElementById(p.id === store.pages[0]?.id ? 'tour-first-page-frame' : `frame_${p.id}`);
-      if (frameEl && frameEl.offsetHeight > 0) {
+      if (p.pageType === 'system_profile') {
+        pHeight = Math.max(frameEl?.offsetHeight || 0, presetExpectedHeight);
+      } else if (frameEl && frameEl.offsetHeight > 0) {
         pHeight = frameEl.offsetHeight;
-      } else if (p.pageType === 'system_profile') {
-        pHeight = store.meta.profileType === 'individual' ? 620 : 1220;
       }
     } else if (p.pageType === 'system_profile') {
-      pHeight = store.meta.profileType === 'individual' ? 620 : 1220;
+      pHeight = presetExpectedHeight;
     }
     const pWidth = PAGE_WIDTH;
 
@@ -666,47 +653,75 @@ export function generateSerialNo(
   return generateFormId(profileType, source);
 }
 
-// Schema 转换与导出
 export function buildSchema(): FormSchema {
-  return {
-    schemaVersion: '1.0.0',
-    meta: {
-      title: store.meta.title || store.pages[0]?.title || '未命名表单',
-      title_en: store.meta.title_en || store.pages[0]?.title_en || '',
-      description: store.meta.description || store.pages[0]?.description || '',
-      description_en: store.meta.description_en || store.pages[0]?.description_en || '',
-      profileType: store.meta.profileType || 'individual',
-      source: store.meta.source || 'diy',
-      templateKey: store.meta.templateKey,
-      formId: store.meta.formId,
-      serialNo: store.meta.serialNo,
-      createdAt: store.meta.createdAt
-    },
-    pages: store.pages.map(p => ({
+  const isBilingualMode = Boolean(store.meta.enabledLocales?.includes('zh') && store.meta.enabledLocales?.includes('en'));
+  const activeLocale = store.currentLocale || 'zh';
+
+  const metaCopy: any = {
+    title: store.meta.title || '未命名表单',
+    description: store.meta.description || '',
+    profileType: store.meta.profileType || 'individual',
+    enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
+    source: store.meta.source || 'diy',
+    templateKey: store.meta.templateKey,
+    formId: store.meta.formId,
+    serialNo: store.meta.serialNo,
+    createdAt: store.meta.createdAt
+  };
+
+  if (isBilingualMode) {
+    metaCopy.title_en = store.meta.title_en || '';
+    metaCopy.description_en = store.meta.description_en || '';
+  }
+
+  const pagesCopy = store.pages.map(p => {
+    const pageCopy: any = {
       id: p.id,
       pageType: p.pageType || 'form',
       profileType: p.pageType === 'system_profile' ? (store.meta.profileType || p.profileType || 'individual') : p.profileType,
       showSkeleton: p.showSkeleton,
       title: p.title,
-      title_en: p.title_en,
       description: p.description,
-      description_en: p.description_en,
       fields: p.fields.map(f => {
-        const fieldCopy = JSON.parse(JSON.stringify(f));
+        const fieldCopy: any = JSON.parse(JSON.stringify(f));
         // 国家和国籍组件是系统内建预设字典，无需在 Schema JSON 中冗余序列化全部244个国家选项
         if (['country', 'nationality'].includes(fieldCopy.type)) {
           if (!fieldCopy.options || fieldCopy.options.length === 0 || fieldCopy.options.length >= 200) {
             delete fieldCopy.options;
           }
         }
+        if (!isBilingualMode) {
+          // 纯净单语言模式：彻底剥离英文副语言键，绝不向后端提交未开启的第二语言脏数据
+          delete fieldCopy.label_en;
+          delete fieldCopy.placeholder_en;
+          delete fieldCopy.help_en;
+          delete fieldCopy.customErrorMessage_en;
+          if (fieldCopy.options && Array.isArray(fieldCopy.options)) {
+            fieldCopy.options.forEach((opt: any) => {
+              delete opt.label_en;
+            });
+          }
+        }
         return fieldCopy;
       })
-    })),
+    };
+
+    if (isBilingualMode) {
+      pageCopy.title_en = p.title_en;
+      pageCopy.description_en = p.description_en;
+    }
+
+    return pageCopy;
+  });
+
+  return {
+    schemaVersion: '1.0.0',
+    meta: metaCopy,
+    pages: pagesCopy,
     pageConnections: []
   };
 }
 
-// URL 同步：仅使用纯小写 ID，不泄露多余长参数
 export function syncUrlParams(id?: string) {
   if (typeof window === 'undefined') return;
   try {
@@ -723,10 +738,35 @@ export function syncUrlParams(id?: string) {
     } else {
       url.searchParams.delete('id');
     }
+    if (store.currentLocale) {
+      url.searchParams.set('lang', store.currentLocale);
+    }
     window.history.replaceState({}, '', url.toString());
   } catch (e) {
     console.error('Failed to sync URL params', e);
   }
+}
+
+if (typeof window !== 'undefined') {
+  watch(
+    () => store.currentLocale,
+    loc => {
+      try {
+        localStorage.setItem('builder_current_locale', loc);
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('lang') !== loc) {
+          url.searchParams.set('lang', loc);
+          window.history.replaceState(null, '', url.toString());
+        }
+        if (typeof document !== 'undefined') {
+          document.documentElement.setAttribute('data-locale', loc);
+        }
+      } catch (e) {
+        console.warn('Failed to persist locale', e);
+      }
+    },
+    { immediate: true }
+  );
 }
 
 export function createNewCanvas(options: {
@@ -734,7 +774,7 @@ export function createNewCanvas(options: {
   description?: string;
   profileType?: ProfileType;
 }) {
-  const profileType = options.profileType || store.lockedProfileType || 'customer';
+  const profileType = options.profileType || store.meta.profileType || 'customer';
   const schema = createBlankTemplate(profileType, options.title, '', options.description || '');
   const formId = generateFormId(profileType, 'diy');
   const now = Date.now();
@@ -801,12 +841,34 @@ export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'ky
   syncUrlParams(formId);
 }
 
-export function loadSchema(schema: FormSchema) {
+export function loadSchema(schema: FormSchema, options?: { duration?: number }) {
   clearSelection();
   store.meta.title = schema.meta?.title || '未命名表单';
   store.meta.title_en = schema.meta?.title_en || '';
   store.meta.description = schema.meta?.description || '';
   store.meta.description_en = schema.meta?.description_en || '';
+  if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
+    store.meta.enabledLocales = [...schema.meta.enabledLocales];
+  } else {
+    const hasExplicitEn = Boolean(
+      schema.meta?.title_en ||
+      schema.pages?.some(p => p.title_en || p.fields?.some(f => Boolean(f.label_en && f.label_en !== f.label)))
+    );
+    const hasExplicitZh = Boolean(
+      schema.meta?.title ||
+      schema.pages?.some(p => p.title || p.fields?.some(f => Boolean(f.label)))
+    );
+
+    if (hasExplicitEn && hasExplicitZh) {
+      store.meta.enabledLocales = ['zh', 'en'];
+    } else if (hasExplicitEn && !hasExplicitZh) {
+      store.meta.enabledLocales = ['en'];
+    } else if (hasExplicitZh && !hasExplicitEn) {
+      store.meta.enabledLocales = ['zh'];
+    } else {
+      store.meta.enabledLocales = [store.currentLocale || 'zh'];
+    }
+  }
   const rawProfileType = schema.meta?.profileType
     || (schema.pages?.[0]?.profileType)
     || 'customer';
@@ -884,7 +946,7 @@ export function loadSchema(schema: FormSchema) {
     });
     store.activePageId = store.pages.length > 0 ? store.pages[0].id : null;
     setTimeout(() => {
-      resetCanvasView();
+      resetCanvasView({ duration: options?.duration });
     }, 50);
   } else {
     store.pages = [];
@@ -965,4 +1027,44 @@ export function highlightPropertyField(
       triggerHighlight(targetInput);
     }
   }, 40);
+}
+
+export const isBilingual = computed<boolean>(() => {
+  return Boolean(store.meta.enabledLocales?.includes('zh') && store.meta.enabledLocales?.includes('en'));
+});
+
+export const primaryLocale = computed<'zh' | 'en'>(() => {
+  if (store.meta.enabledLocales && store.meta.enabledLocales.length === 1) {
+    return store.meta.enabledLocales[0];
+  }
+  return store.currentLocale || 'zh';
+});
+
+export const secondaryLocale = computed<'zh' | 'en'>(() => {
+  return primaryLocale.value === 'zh' ? 'en' : 'zh';
+});
+
+export function enableBilingual() {
+  if (!store.meta.enabledLocales) {
+    store.meta.enabledLocales = [store.currentLocale || 'zh'];
+  }
+  if (!store.meta.enabledLocales.includes('zh')) store.meta.enabledLocales.push('zh');
+  if (!store.meta.enabledLocales.includes('en')) store.meta.enabledLocales.push('en');
+
+  // 对于系统预设页面（基本资料），确保系统标准双语标题完备
+  store.pages.forEach(p => {
+    if (p.pageType === 'system_profile') {
+      if (!p.title) p.title = '基本资料';
+      if (!p.title_en) p.title_en = 'Basic Information';
+    }
+  });
+
+  // 保持用户当前的语言模式，不随意篡改 store.currentLocale
+  markDirty();
+}
+
+export function disableMultiLanguage() {
+  const current = store.currentLocale || 'zh';
+  store.meta.enabledLocales = [current];
+  markDirty();
 }

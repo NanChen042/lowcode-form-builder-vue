@@ -1,5 +1,6 @@
 import { computed } from 'vue';
 import { store, selectPage, selectElement, focusOnPage } from '@/core/store';
+import { componentRegistry } from '@/registry/components';
 
 export type TranslationFieldType =
   | 'page_title'
@@ -49,7 +50,23 @@ export interface TranslationStats {
 }
 
 /**
- * 计算表单中所有可翻译文案的双向翻译进度及缺失清单 (中英双向完整覆盖)
+ * 获取字段用于展示的可读标签
+ */
+function getFieldDisplayLabel(element: any, locale: 'zh' | 'en'): string {
+  const isEn = locale === 'en';
+  const primary = isEn ? element.label_en?.trim() : element.label?.trim();
+  const secondary = isEn ? element.label?.trim() : element.label_en?.trim();
+  if (primary) return primary;
+  if (secondary) return secondary;
+  const meta = componentRegistry[element.type as keyof typeof componentRegistry];
+  if (meta) {
+    return isEn ? meta.label_en : meta.label;
+  }
+  return isEn ? 'Field' : '表单字段';
+}
+
+/**
+ * 计算表单中所有可翻译文案的双向翻译进度及缺失清单
  */
 export function calculateTranslationStats(): TranslationStats {
   const enMissingItems: UntranslatedItem[] = [];
@@ -153,7 +170,7 @@ export function calculateTranslationStats(): TranslationStats {
 
     // 3. 页面内的各个字段
     page.fields?.forEach(element => {
-      const elLabel = (store.currentLocale === 'en' ? (element.label_en || element.label) : element.label) || '未命名字段';
+      const elLabel = getFieldDisplayLabel(element, store.currentLocale || 'zh');
 
       // 字段标签 (如果展示标签)
       if (element.showLabel !== false) {
@@ -166,7 +183,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_label',
-          fieldName: `字段标签: ${elLabel}`,
+          fieldName: elLabel,
           zhText: element.label,
           enText: element.label_en
         });
@@ -183,7 +200,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_content',
-          fieldName: `提示内容: ${elLabel}`,
+          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Content' : '提示说明'}`,
           zhText: element.content,
           enText: element.content_en
         });
@@ -200,7 +217,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_placeholder',
-          fieldName: `字段提示: ${elLabel}`,
+          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Placeholder' : '输入提示'}`,
           zhText: element.placeholder,
           enText: element.placeholder_en
         });
@@ -217,7 +234,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_help',
-          fieldName: `副标题: ${elLabel}`,
+          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Help Text' : '副标题'}`,
           zhText: element.help,
           enText: element.help_en
         });
@@ -226,7 +243,7 @@ export function calculateTranslationStats(): TranslationStats {
       // 选项列表 (单选、多选、下拉、声明条款等)
       if (element.options && Array.isArray(element.options)) {
         element.options.forEach((opt, optIdx) => {
-          const optName = (store.currentLocale === 'en' ? (opt.label_en || opt.label) : opt.label) || `选项 ${optIdx + 1}`;
+          const optName = (store.currentLocale === 'en' ? (opt.label_en || opt.label) : (opt.label || opt.label_en)) || `${store.currentLocale === 'en' ? 'Option' : '选项'} ${optIdx + 1}`;
           let zhText = opt.label;
           let enText = opt.label_en;
           // 若中文已被修改为具体业务词（非默认“选项一/选项1”），而英文仍然是默认虚拟占位符“Option N”，则英文判定为未翻译
@@ -247,7 +264,7 @@ export function calculateTranslationStats(): TranslationStats {
             elementLabel: elLabel,
             componentType: element.type,
             fieldType: 'field_option',
-            fieldName: `选项 [${optName}]`,
+            fieldName: `${elLabel} · ${optName}`,
             zhText,
             enText,
             optionIndex: optIdx

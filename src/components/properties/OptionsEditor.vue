@@ -1,18 +1,15 @@
 <template>
   <div id="options-editor" class="options-editor space-y-1.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
-    <!-- 提示与声明条款模式 (多行文本域) -->
     <template v-if="isDisplayOnly">
       <div
         v-for="(option, idx) in options"
         :key="idx"
         class="notice-row group flex items-start gap-1.5 py-1 transition-all"
       >
-        <!-- 序号徽标 -->
         <div class="mt-1 flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium shrink-0 select-none">
           {{ idx + 1 }}
         </div>
 
-        <!-- 统一单源输入 (自动适配当前激活语言) -->
         <div class="flex-1 relative">
           <a-textarea
             :model-value="getOptionLabel(option)"
@@ -27,7 +24,6 @@
           />
         </div>
 
-        <!-- 删除按钮 -->
         <button
           type="button"
           class="mt-0.5 option-del-btn flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
@@ -40,7 +36,6 @@
       </div>
     </template>
 
-    <!-- 常规选项模式 (单行输入) -->
     <template v-else>
       <div ref="sortableListRef" class="space-y-1.5">
         <div
@@ -49,7 +44,6 @@
           class="option-row group flex flex-col gap-1 py-0.5"
         >
           <div class="flex items-center gap-1.5 w-full">
-            <!-- 拖拽/排序手柄图标 -->
             <div
               class="drag-handle flex items-center justify-center w-4 h-6 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
               :title="t('options.dragToReorderIndexed', undefined, { index: idx + 1 })"
@@ -57,11 +51,10 @@
               <GripVertical class="h-3.5 w-3.5" />
             </div>
 
-            <!-- 统一单源输入框 -->
             <a-input
               :model-value="getOptionLabel(option)"
               size="mini"
-              :placeholder="formatOptionLabel(idx + 1, store.currentLocale)"
+              :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : formatOptionLabel(idx + 1, store.currentLocale)"
               class="flex-1"
               :class="{ 'prop-field-focused': isOptionFocused(idx) }"
               @focus="onFocus(idx)"
@@ -70,7 +63,6 @@
               @keydown.enter.prevent="addOptionAt(idx + 1)"
             />
 
-            <!-- 选项级联动展开组件按钮 (仅 radio / select / checkbox 选项生效) -->
             <a-popover
               v-if="['radio', 'select', 'checkbox'].includes(props.element.type)"
               trigger="click"
@@ -101,7 +93,6 @@
                     </div>
                   </div>
 
-                  <!-- 达到最大嵌套层级友好警告 -->
                   <div
                     v-if="isMaxDepthReached"
                     class="p-2 rounded bg-amber-50 border border-amber-200/80 text-amber-800 text-[11px] leading-relaxed"
@@ -109,7 +100,6 @@
                     {{ t('options.maxDepthReached') }}
                   </div>
 
-                  <!-- 1. 直接选择想要添加的组件类型（一键生成并联动） -->
                   <div v-if="!isMaxDepthReached">
                     <div class="text-[11px] font-medium text-slate-500 mb-1.5">
                       {{ t('options.chooseFollowupField') }}
@@ -128,7 +118,6 @@
                     </div>
                   </div>
 
-                  <!-- 2. 或关联已有下游组件 (若有) -->
                   <div v-if="downstreamFields.length > 0" class="pt-2 border-t border-slate-100">
                     <div class="text-[11px] font-medium text-slate-500 mb-1">
                       {{ t('options.orLinkExisting') }}
@@ -154,7 +143,6 @@
               </template>
             </a-popover>
 
-            <!-- 现代精致删除按钮 (不受全局 Arco 样式污染) -->
             <button
               type="button"
               class="option-del-btn flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 active:bg-red-100 disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-slate-400 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
@@ -166,7 +154,6 @@
             </button>
           </div>
 
-          <!-- 已绑定的展开组件标签 (一目了然) -->
           <div
             v-if="['radio', 'select', 'checkbox'].includes(props.element.type) && getLinkedFieldsForOption(option).length > 0"
             class="flex flex-wrap items-center gap-1 pl-6 pt-0.5"
@@ -194,7 +181,6 @@
       </div>
     </template>
 
-    <!-- 底部快捷添加按钮 (原生 Arco 标准虚线按钮，size="mini") -->
     <a-button
       type="dashed"
       long
@@ -370,13 +356,11 @@ function addOptionAt(targetIndex: number) {
   });
 }
 
-// 当前画板与下方可用组件
 const currentPage = computed(() => {
   if (!props.element) return null;
   return store.pages.find(p => p.fields?.some(f => f.id === props.element.id)) || null;
 });
 
-// 最大支持 2 级追问嵌套（行业公认最佳体验，避免移动端狭窄排版与过度嵌套）
 const MAX_NESTING_DEPTH = 2;
 
 const currentElementDepth = computed(() => {

@@ -12,6 +12,7 @@
 export interface AlertSegment {
   id: string;
   type: 'bullet' | 'paragraph' | 'spacer';
+  listType?: 'circle' | 'number';
   text: string;
   html: string;
   orderIndex?: number;
@@ -103,21 +104,31 @@ export function parseAlertContent(content?: string, _listStyle: 'circle' | 'numb
     }
 
     // 检查是否为列表项：以 "- ", "* ", "• " 开头，或以 "1. ", "1、" 数字编号开头
-    const bulletMatch = line.match(/^\s*[-*•]\s+(.*)$/);
-    const numberMatch = line.match(/^\s*(\d+)[\.、]\s*(.*)$/);
+    const bulletMatch = line.match(/^\s*[-*•](?:\s+(.*)|\s*$)/);
+    const numberMatch = line.match(/^\s*(\d+)[\.、](?:\s+(.*)|\s*$)/);
 
-    if (bulletMatch || numberMatch) {
+    if (numberMatch) {
       orderCounter++;
-      const itemText = bulletMatch ? bulletMatch[1] : numberMatch![2];
+      const itemText = numberMatch[2] || '';
       segments.push({
         id: `bullet_${idx}`,
         type: 'bullet',
+        listType: 'number',
         text: itemText,
         html: formatInlineText(itemText),
         orderIndex: orderCounter
       });
+    } else if (bulletMatch) {
+      const itemText = bulletMatch[1] || '';
+      segments.push({
+        id: `bullet_${idx}`,
+        type: 'bullet',
+        listType: 'circle',
+        text: itemText,
+        html: formatInlineText(itemText)
+      });
     } else {
-      // 普通文本段落
+      // 普通文本段落：重置编号计数器
       orderCounter = 0;
       segments.push({
         id: `para_${idx}`,

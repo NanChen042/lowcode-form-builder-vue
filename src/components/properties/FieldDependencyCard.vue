@@ -1,17 +1,14 @@
 <template>
-  <!-- 条件联动从属信息：纯净无背景扁平设计 -->
   <div
     v-if="element.dependsOn && dependencyInfo"
     class="pt-3.5 border-t border-slate-100 space-y-2"
   >
-    <!-- 顶栏：标题 + 解除联动操作 -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-1.5">
         <Link2 class="h-3.5 w-3.5 text-slate-400" />
         <span class="text-[12px] font-medium text-slate-700">{{ t('prop.linkageRuleTitle') }}</span>
       </div>
 
-      <!-- 解除联动按钮 (带气泡防误触) -->
       <a-popconfirm
         :content="t('prop.unlinkRuleConfirm')"
         type="warning"
@@ -29,11 +26,9 @@
       </a-popconfirm>
     </div>
 
-    <!-- 规则内容直接平铺展示：无任何外框、无背景、纯自然行内流 -->
     <div class="text-[12px] text-slate-600 leading-normal flex items-center gap-1.5 flex-wrap py-0.5 select-none">
       <span class="text-slate-400">{{ t('prop.linkageWhen') }}</span>
 
-      <!-- 父级组件名称 (可点击定位高亮) -->
       <button
         type="button"
         class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#1677ff] hover:bg-blue-100 hover:text-blue-700 font-medium border border-blue-200/80 transition-colors cursor-pointer max-w-[140px] truncate group"
@@ -46,7 +41,6 @@
 
       <span class="text-slate-400">{{ t('prop.linkageEquals') }}</span>
 
-      <!-- 触发选项值 -->
       <span class="font-medium text-slate-800">
         “{{ dependencyInfo.optLabel }}”
       </span>
@@ -54,7 +48,6 @@
       <span class="text-slate-500">{{ t('prop.linkageThenShow') }}</span>
     </div>
 
-    <!-- 底部辅助说明 -->
     <div class="flex items-center gap-1 text-[11px] text-slate-400 leading-tight">
       <Info class="w-3 h-3 text-slate-400 shrink-0" />
       <span>{{ t('prop.linkageTipSimple') }}</span>

@@ -10,7 +10,6 @@
       'pl-5 border-l-2 border-blue-400 rounded-l': fieldDepth >= 2
     }"
   >
-    <!-- 提示区块 (仅展示无校验) -->
     <template v-if="field.type === 'alert'">
       <div
         class="w-full overflow-hidden rounded-xl border border-[#bae0ff] bg-[#f0f7ff]/90 p-4 shadow-[0_1px_3px_rgba(22,119,255,0.06)] border-t-[3.5px] border-t-[#1677ff] mb-4"
@@ -21,52 +20,41 @@
         </div>
         <div v-if="alertSegments.length > 0" class="space-y-2 text-[13px] leading-5 text-slate-700">
           <template v-for="seg in alertSegments" :key="seg.id">
-            <!-- 间距行 -->
             <div v-if="seg.type === 'spacer'" class="h-1.5"></div>
 
-            <!-- 列表项 (圆形圆点 或 数字有序) -->
             <p v-else-if="seg.type === 'bullet'" class="m-0 flex items-start gap-1.5">
-              <!-- 数字型 (有序) -->
               <span
-                v-if="field.listStyle === 'number'"
+                v-if="seg.listType === 'number' || (!seg.listType && field.listStyle === 'number')"
                 class="shrink-0 font-semibold text-[#1677ff] text-[13px] leading-5 tabular-nums select-none"
               >
-                {{ seg.orderIndex }}.
+                {{ seg.orderIndex || 1 }}.
               </span>
-              <!-- 圆形 (无序) -->
               <span
                 v-else
                 class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1677ff]"
               ></span>
-              <span class="flex-1 break-words leading-relaxed" v-html="seg.html"></span>
+              <span class="flex-1 break-words leading-relaxed" v-html="seg.html || '&nbsp;'"></span>
             </p>
 
-            <!-- 普通文本段落 -->
             <p v-else class="m-0 break-words leading-relaxed" v-html="seg.html"></p>
           </template>
         </div>
-        <!-- 空白占位提示 (未输入内容时) -->
         <div v-else class="text-[12px] text-slate-400 italic py-1">
           {{ t('prop.alertEmptyContentPlaceholder') }}
         </div>
       </div>
     </template>
 
-    <!-- 普通表单组件：采用高精度布局与严谨校验 -->
     <template v-else>
-      <!-- 字段标签区 -->
       <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-semibold text-slate-800 leading-5">
         <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span>
-        <!-- 标题右侧说明 (默认排布) -->
         <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5 inline">{{ localizedHelp }}</span>
 
-        <!-- 标题下方说明 (底部换行排布) -->
         <div v-if="field.helpPosition === 'bottom' && localizedHelp" class="field-help-bottom text-[11px] text-slate-400 font-normal mt-0.5 leading-4">
           {{ localizedHelp }}
         </div>
       </div>
 
-      <!-- 单行文本 (普通文本或数字) -->
       <a-input-number
         v-if="field.type === 'input' && field.inputType === 'number'"
         v-model="formData[field.key]"
@@ -86,7 +74,6 @@
         @input="handleFieldInput"
       />
 
-      <!-- 电子邮箱 -->
       <a-input
         v-else-if="field.type === 'email'"
         v-model="formData[field.key]"
@@ -101,7 +88,6 @@
         </template>
       </a-input>
 
-      <!-- 手机号码 (直接复用 algo 同款 intlTelInput 库，默认新加坡 +65) -->
       <IntlTelInput
         v-else-if="field.type === 'phone'"
         v-model="formData[field.key]"
@@ -116,18 +102,19 @@
         @change="handlePhoneChange"
       />
 
-      <!-- 多行文本 -->
       <a-textarea
         v-else-if="field.type === 'textarea'"
+        :key="`${field.id}-${field.minRows || 3}-${field.maxRows || 6}-${field.maxLength ?? 800}`"
         v-model="formData[field.key]"
         class="w-full"
         :error="Boolean(error)"
         :placeholder="localizedPlaceholder"
         :auto-size="{ minRows: field.minRows || 3, maxRows: field.maxRows || 6 }"
+        :max-length="field.maxLength ?? 800"
+        :show-word-limit="true"
         @input="handleFieldInput"
       />
 
-      <!-- 下拉选择 (多选) -->
       <a-select
         v-else-if="field.type === 'select' && field.multiple"
         v-model="selectedTags"
@@ -150,7 +137,6 @@
         </a-option>
       </a-select>
 
-      <!-- 下拉选择 (单选) -->
       <a-select
         v-else-if="field.type === 'select'"
         v-model="formData[field.key]"
@@ -170,7 +156,6 @@
         </a-option>
       </a-select>
 
-      <!-- 国家 / 国籍标签选择器 (多选模式，虚拟滚动极速渲染) -->
       <a-select
         v-else-if="(field.type === 'country' || field.type === 'nationality') && field.multiple"
         v-model="selectedTags"
@@ -201,7 +186,6 @@
         </template>
       </a-select>
 
-      <!-- 国家 / 国籍选择器 (单选模式，虚拟滚动极速渲染) -->
       <a-select
         v-else-if="field.type === 'country' || field.type === 'nationality'"
         v-model="formData[field.key]"
@@ -229,7 +213,6 @@
         </template>
       </a-select>
 
-      <!-- 单选框组 (天然统一排版，与画布一致，杜绝 Arco 内部样式冲突与调换顺序间距塌陷) -->
       <div
         v-else-if="field.type === 'radio'"
         class="w-full py-0.5"
@@ -257,7 +240,6 @@
         </div>
       </div>
 
-      <!-- 多选框组 (天然统一排版，与画布一致) -->
       <div
         v-else-if="field.type === 'checkbox'"
         class="w-full py-0.5"
@@ -287,7 +269,6 @@
         </div>
       </div>
 
-      <!-- 日期选择 -->
       <div v-else-if="field.type === 'date'" class="w-full">
         <div class="flex items-center gap-2.5">
           <div class="flex-1 min-w-0">
@@ -299,7 +280,6 @@
               :placeholder="[t('common.startDate'), t('common.endDate')]"
               @change="handleFieldInput"
             />
-            <!-- 单日期：当勾选“长期”时，输入框禁用且优雅显示“长期有效”，避免暴露底层 9999-12-31 -->
             <a-input
               v-else-if="isLongTermChecked"
               :model-value="t('common.longTermValid')"
@@ -321,7 +301,6 @@
             />
           </div>
 
-          <!-- 启用长期选项 (仅单日期模式生效；起止日期不展示长期选项) -->
           <div v-if="field.enableLongTerm && field.dateMode !== 'range'" class="flex-shrink-0 flex items-center">
             <a-checkbox
               v-model="isLongTermChecked"
@@ -336,12 +315,10 @@
         </div>
       </div>
 
-      <!-- 电子签名 (拼多选声明事项 + 手写签名板，各自下方独立展示校验错误) -->
       <div
         v-else-if="field.type === 'signature'"
         class="w-full space-y-3"
       >
-        <!-- 声明事项复选 -->
         <div v-if="field.options && field.options.length" class="space-y-1.5">
           <div class="space-y-2">
             <label
@@ -366,7 +343,6 @@
             </label>
           </div>
 
-          <!-- 声明事项独立校验错误提示 (直接显示在多选条款下方) -->
           <transition
             enter-active-class="transition-all duration-150 ease-out"
             enter-from-class="opacity-0 -translate-y-1"
@@ -389,15 +365,12 @@
           </transition>
         </div>
 
-        <!-- 签名画板区 -->
         <div class="space-y-1.5">
-          <!-- 签名画板提示/副标签 -->
           <div v-if="localizedPlaceholder || field.required" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
             <span>{{ localizedPlaceholder || (store.currentLocale === 'en' ? 'Signature Area' : '签名区域') }}</span>
           </div>
 
-          <!-- 模拟签名绘制区 (高保真纯白设计，与画布一致，杜绝生硬灰底) -->
           <div
             class="relative h-28 w-full rounded-lg border border-dashed flex items-center justify-center text-xs select-none cursor-pointer transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
             :class="formData[field.key]
@@ -431,7 +404,6 @@
             </template>
           </div>
 
-          <!-- 手写签名板独立校验错误提示 (直接显示在签名画板下方) -->
           <transition
             enter-active-class="transition-all duration-150 ease-out"
             enter-from-class="opacity-0 -translate-y-1"
@@ -455,7 +427,6 @@
         </div>
       </div>
 
-      <!-- 统一字段校验错误提示 (除已就近展示的 phone 和 signature 以外) -->
       <transition
         enter-active-class="transition-all duration-150 ease-out"
         enter-from-class="opacity-0 -translate-y-1"
@@ -625,7 +596,6 @@ function toggleCheckbox(val: string) {
   handleFieldInput();
 }
 
-// 电话组件交互：双向绑定 formData，保持区号与国家代码响应式同步
 const phoneDialCode = computed({
   get() {
     return props.formData[`${props.field.key}_areacode`] || props.field.dialCode || '+65';
@@ -657,7 +627,6 @@ function handlePhoneChange(data: any) {
   emit('clear-error', props.field.key);
 }
 
-// 长期有效选项 (仅单日期模式生效)
 const isLongTermChecked = ref(
   props.field.dateMode !== 'range' && (
     props.formData[props.field.key] === '9999-12-31' ||
@@ -689,7 +658,6 @@ function onLongTermChange(val: boolean | (string | number | boolean)[]) {
   emit('clear-error', props.field.key);
 }
 
-// 声明事项复选勾选状态 (持久化存入 formData，避免切换页面时状态丢失)
 function onDeclarationChange() {
   const checks = props.formData[`${props.field.key}_checks`] || {};
   const allChecked = (props.field.options || []).every((_, idx) => Boolean(checks[idx]));

@@ -5,14 +5,12 @@
     :popup-max-height="false"
     @popup-visible-change="handleVisibleChange"
   >
-    <!-- 虚拟锚点定位在鼠标坐标 (x, y) 处，不占空间且不可见 -->
     <div
       class="fixed pointer-events-none w-px h-px opacity-0"
       :style="{ left: `${x}px`, top: `${y}px` }"
     />
 
     <template #content>
-      <!-- 组件操作右键菜单 -->
       <template v-if="targetType === 'element' && targetElementId">
         <a-doption @click="handleDuplicateElement">
           <template #icon>
@@ -24,7 +22,6 @@
           </template>
         </a-doption>
 
-        <!-- 快捷多级子菜单：在下方插入组件（复用级联组件菜单） -->
         <ComponentCascadeMenu
           :title="t('context.insertBelow')"
           value-prefix="elem-insert"
@@ -41,9 +38,7 @@
         </a-doption>
       </template>
 
-      <!-- 场景 2：在画板页面内右键（targetType === 'page' && targetPageId） -->
       <template v-else-if="targetType === 'page' && targetPageId">
-        <!-- 系统预设画板标识（只读锁定，不可添加组件或删除） -->
         <div
           v-if="isTargetSystemProfilePage"
           class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-slate-500 border-b border-slate-100 select-none"
@@ -52,7 +47,6 @@
           <span>{{ t('context.presetReadOnly') }}</span>
         </div>
 
-        <!-- 快捷多级子菜单：添加表单组件 (系统基础资料画板不允许添加表单组件) -->
         <template v-if="!isTargetSystemProfilePage">
           <ComponentCascadeMenu
             :title="t('context.addComponent')"
@@ -78,7 +72,6 @@
           <span>{{ t('context.resetView') }}</span>
         </a-doption>
 
-        <!-- 删除当前画布 (系统预设画板不可删除，彻底隐藏) -->
         <template v-if="!isTargetSystemProfilePage">
           <a-divider style="margin: 4px 0" />
 
@@ -91,7 +84,6 @@
         </template>
       </template>
 
-      <!-- 场景 3：在空白画布背景上右键（不在任何画板中，不显示“添加表单组件”） -->
       <template v-else>
         <a-doption @click="handleAddPage">
           <template #icon>

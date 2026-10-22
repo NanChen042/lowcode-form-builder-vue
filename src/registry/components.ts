@@ -77,7 +77,8 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
       required: true,
       showLabel: true,
       minRows: 3,
-      maxRows: 6
+      maxRows: 6,
+      maxLength: 800
     })
   },
   select: {

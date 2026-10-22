@@ -28,7 +28,6 @@
     }"
   >
     <div class="flex flex-col bg-white rounded-lg overflow-hidden select-none">
-      <!-- 顶栏：Logo | DIY 表单设计器 (无关闭按钮，强制完成创建引导) -->
       <header class="flex h-13 shrink-0 items-center justify-between border-b border-slate-100 px-6 bg-white select-none">
         <div class="flex items-center gap-2.5">
           <img
@@ -43,17 +42,14 @@
         </div>
       </header>
 
-      <!-- 主体内容区：纯粹现代的「左1（新建空白画布）+ 右3（KYC模板）」1-3 架构 -->
       <div class="p-6 select-none">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           
-          <!-- 左侧 1：新建空白画布卡片 (统一 8px 标准圆角，紧凑现代排版) -->
           <div class="md:col-span-5 flex">
             <div
               class="group flex flex-1 flex-col justify-between items-start rounded-lg bg-gradient-to-b from-[#edf5fe] via-[#e5f0fe] to-[#d8ebfe] hover:from-[#e6f2fe] hover:to-[#d2e6fe] p-5 cursor-pointer transition-all duration-150 select-none text-left relative overflow-hidden"
               @click="handleCreateBlank"
             >
-              <!-- 顶部文案区 -->
               <div class="z-10">
                 <span class="text-[11px] font-bold text-[#1677ff] tracking-wider">
                   {{ t('wizard.createNewTag') }}
@@ -66,7 +62,6 @@
                 </p>
               </div>
 
-              <!-- 中间透明插画 (悬浮画板微缩图) -->
               <div class="w-full flex items-center justify-center my-auto py-2 z-10">
                 <img
                   :src="tplBlankHeroImg"
@@ -76,7 +71,6 @@
                 />
               </div>
 
-              <!-- 底部操作按钮 (左对齐药丸按钮，Arco Primary 风格) -->
               <div class="z-10 mt-1">
                 <a-button
                   type="primary"
@@ -91,10 +85,8 @@
             </div>
           </div>
 
-          <!-- 右侧 3：选择模板 (统一 8px 标准圆角，统一一致的「标签 + 箭头」卡片交互) -->
           <div class="md:col-span-7 flex flex-col justify-between">
             <div>
-              <!-- 顶部标题区：图标 + 标题 + 说明 (无任何多余 Tab 栏) -->
               <div class="flex items-start gap-2.5 mb-3.5">
                 <LayoutGrid class="w-5 h-5 text-[#1677ff] shrink-0 mt-0.5" />
                 <div>
@@ -107,7 +99,6 @@
                 </div>
               </div>
 
-              <!-- 3 款横向模板卡片 (统一标准 8px 圆角，纯正 UI/UE 彩色矢量图标，统一一致的交互逻辑) -->
               <div class="space-y-3">
                 <div
                   v-for="tpl in scenarioTemplates"
@@ -115,9 +106,7 @@
                   class="group rounded-lg p-3.5 px-4 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:bg-blue-50/20 hover:shadow-2xs cursor-pointer transition-all duration-150 select-none"
                   @click="handleSelectTemplate(tpl.key)"
                 >
-                  <!-- 左侧：UI/UE 矢量彩色图标方块 + 标题、统计信息与描述 -->
                   <div class="flex items-start gap-3.5 min-w-0 flex-1">
-                    <!-- 场景模板图标 (使用 c.png / u.png / e.png，小尺寸精致清晰) -->
                     <div
                       class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md group-hover:scale-105 transition-transform duration-150 mt-0.5 overflow-hidden"
                     >
@@ -128,13 +117,11 @@
                       />
                     </div>
 
-                    <!-- 模板标题与详情 -->
                     <div class="min-w-0 flex-1 pr-2">
                       <h5 class="text-[14px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
                         {{ getFieldText(tpl, 'title') }}
                       </h5>
                       
-                      <!-- 统计：页面与字段 (双图标展示) -->
                       <div class="flex items-center gap-2 text-[12px] text-slate-400 mt-1 m-0 leading-none">
                         <span class="flex items-center gap-1">
                           <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -147,14 +134,12 @@
                         </span>
                       </div>
 
-                      <!-- 适用场景描述 -->
                       <p class="text-[11px] text-slate-400 mt-1.5 m-0 leading-normal line-clamp-1">
                         {{ t(tpl.descKey) }}
                       </p>
                     </div>
                   </div>
 
-                  <!-- 右侧：Arco 业务标签 + 箭头指示 (统一规范：标签 + 箭头居中对齐，消除伪单选与悬浮跳动) -->
                   <div class="flex items-center gap-2.5 shrink-0 pl-3">
                     <a-tag
                       :color="tpl.arcoTagColor"
@@ -177,7 +162,6 @@
     </div>
   </a-modal>
 
-  <!-- 模板覆盖二次确认弹窗 (仅在画布包含实质性内容时触发) -->
   <a-modal
     v-model:visible="confirmOverwriteVisible"
     :title="t('wizard.confirmOverwriteTitle')"
@@ -303,7 +287,6 @@ function getFieldsText(tpl: (typeof scenarioTemplates)[number]) {
   return t('wizard.fieldsCount', undefined, { count: tpl.fields });
 }
 
-// 点击新建空白画布：关闭向导弹窗并唤起二次弹窗 (CreateFormModal)，供选择业务主体与表单名称
 function handleCreateBlank() {
   modalVisible.value = false;
   emit('open-blank');
@@ -319,7 +302,6 @@ const pendingTemplateTitle = computed(() => {
   return store.currentLocale === 'en' ? item.title_en : item.title;
 });
 
-// 检查当前画布是否包含用户实质性编辑的内容 (有字段或多于初始画板数)
 function isCanvasDirty(): boolean {
   if (store.pages.length === 0) return false;
   const totalFields = store.pages.reduce((acc, p) => acc + (p.fields?.length || 0), 0);
@@ -329,7 +311,6 @@ function isCanvasDirty(): boolean {
   return true;
 }
 
-// 选择某个场景模板：仅在画布已有实质性内容时二次确认，初次进入直接载入开启编排
 function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
   pendingTemplateKey.value = tplKey;
   if (isCanvasDirty()) {

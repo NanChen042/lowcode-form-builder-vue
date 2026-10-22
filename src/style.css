@@ -25,7 +25,7 @@ body {
     background-color: #f5f5f5;
     color: rgba(0, 0, 0, 0.85);
 
-    /* Arco Design 品牌主色定制：统一经典科技蓝 #1677ff (RGB 三元组格式) */
+    /* 主色定义 */
     --arcoblue-1: 230, 244, 255;
     --arcoblue-2: 186, 224, 255;
     --arcoblue-3: 145, 202, 255;
@@ -49,7 +49,7 @@ body {
     --primary-10: 0, 29, 102;
 }
 
-/* 开关 Switch 明确蓝底与纯白滑块 */
+/* Switch */
 .arco-switch {
     background-color: #cbd5e1;
     transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -64,7 +64,7 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* 复选框 Checkbox 明确未选与选中状态 */
+/* Checkbox */
 .arco-checkbox .arco-checkbox-icon {
     border: 1px solid #d9d9d9;
     border-radius: 4px;
@@ -87,7 +87,7 @@ body {
     stroke: none;
 }
 
-/* 现代精致输入控件系统 (统一浅灰边框、优雅圆角、柔蓝聚焦光晕，统一精美 13px 字体规范) */
+/* 输入控件 */
 .arco-input-wrapper,
 .arco-select-view,
 .arco-textarea-wrapper,
@@ -130,7 +130,7 @@ body {
     background-color: #ffffff;
 }
 
-/* 对齐 algo 规范的表单控件错误高亮态 (精准作用于控件自身，柔和微红边框与微光晕) */
+/* 错误状态 */
 .arco-input-wrapper.arco-input-error,
 .arco-textarea-wrapper.arco-textarea-error,
 .arco-select-view.arco-select-view-error,
@@ -163,7 +163,7 @@ body {
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
 }
 
-/* 统一输入框与下拉框内部文字与占位符均为 13px 细腻排版 */
+
 .arco-input,
 .arco-textarea,
 .arco-select-view-value,
@@ -176,7 +176,7 @@ body {
     color: #1e293b;
 }
 
-/* 彻底清除输入控件内部 input/textarea 元素的任何浏览器原生 outline 与边框，杜绝聚焦时出现内层方框 (double focus outline) */
+
 .arco-input,
 .arco-textarea,
 .arco-input-wrapper input,
@@ -204,7 +204,7 @@ body {
     color: #94a3b8;
 }
 
-/* 画布内的输入框高度规范 (统一遵循 Arco Design 官方标准 medium: 32px) */
+
 .canvas-element .arco-input-wrapper,
 .canvas-element .arco-picker,
 .canvas-element .component-placeholder,
@@ -219,7 +219,7 @@ body {
     min-height: 32px;
 }
 
-/* 多选下拉框支持标签自适应高度，避免标签重叠或被截断 */
+
 .canvas-element .arco-select-view,
 .canvas-ghost-skeleton .arco-select-view,
 .preview-card .arco-select-view,
@@ -236,7 +236,7 @@ body {
     height: auto;
 }
 
-/* 统一侧边栏与属性面板一级输入框高度与标签字体大小规范 (Arco medium 32px 高度，13px 输入文字) */
+
 #prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)),
 #prop-editor .arco-picker,
 #page-prop-editor .arco-input-wrapper,
@@ -267,7 +267,7 @@ body {
     color: #94a3b8;
 }
 
-/* 属性面板自适应 textarea 垂直居中规范：修复 13px 字体下因 Arco 默认 min-height 导致的文字偏上问题 */
+
 #prop-editor .arco-textarea,
 #page-prop-editor .arco-textarea {
     min-height: 30px;
@@ -282,7 +282,7 @@ body {
     min-height: 32px;
 }
 
-/* 遵循 Arco 官方标准四档尺寸之 mini: 24px 高度，12px 紧凑文字 */
+
 #prop-editor .arco-input-wrapper:has(.arco-input-size-mini),
 .arco-input-wrapper:has(.arco-input-size-mini) {
     height: 24px !important;
@@ -322,7 +322,7 @@ body {
     font-size: 12px;
 }
 
-/* 确保全局所有原生操作按钮字号与行高严格生效，不被组件库默认的 button 样式 (font-size: 100%, line-height: 1.15) 干扰 */
+
 button:not(.arco-btn) {
     font-family: inherit;
     line-height: normal;
@@ -374,7 +374,7 @@ button:not(.arco-btn)[class*="text-sm"] {
     font-size: 13px;
 }
 
-/* 下拉菜单弹出层 (优化整体留白、圆角柔和阴影，防止顶部/底部项被截断) */
+/* 下拉菜单弹出层 */
 .arco-select-dropdown {
     padding: 6px 0;
     border-radius: 8px;
@@ -461,7 +461,7 @@ body.is-panning * {
     -webkit-user-select: none !important;
 }
 
-/* 现代化通用按钮系统 (克制的主题色与标准微圆角，完全复用 Arco 原生尺寸体系) */
+/* 按钮 */
 .arco-btn {
     border-radius: 4px;
     font-weight: 500;
@@ -483,34 +483,25 @@ body.is-panning * {
     border-color: #0958d9;
 }
 
-.arco-btn-secondary:not(.arco-btn-status-danger),
-.arco-btn-outline {
+.arco-btn-secondary:not(.arco-btn-status-danger):not(.arco-btn-disabled),
+.arco-btn-outline:not(.arco-btn-disabled) {
     border-color: #d9d9d9;
     background-color: #ffffff;
     color: #1f2937;
 }
 
-.arco-btn-secondary:not(.arco-btn-status-danger):hover,
-.arco-btn-outline:hover {
+.arco-btn-secondary:not(.arco-btn-status-danger):not(.arco-btn-disabled):hover,
+.arco-btn-outline:not(.arco-btn-disabled):hover {
     border-color: #4096ff;
     color: #1677ff;
     background-color: #f8fafc;
 }
 
-.arco-btn-secondary:not(.arco-btn-status-danger):active,
-.arco-btn-outline:active {
+.arco-btn-secondary:not(.arco-btn-status-danger):not(.arco-btn-disabled):active,
+.arco-btn-outline:not(.arco-btn-disabled):active {
     border-color: #0958d9;
     color: #0958d9;
     background-color: #eff6ff;
-}
-
-.arco-btn-secondary:not(.arco-btn-status-danger):focus-visible,
-.arco-btn-secondary:not(.arco-btn-status-danger):focus,
-.arco-btn-outline:focus-visible,
-.arco-btn-outline:focus {
-    border-color: #1677ff;
-    color: #1677ff;
-    background-color: #ffffff;
 }
 
 .arco-btn-status-danger {
@@ -555,7 +546,7 @@ body.is-panning * {
     background: #fff;
 }
 
-/* 顶部导航栏标准按钮高度与对齐规范 */
+
 .header-glass-btn {
     height: 32px;
     padding: 0 12px;
@@ -611,7 +602,7 @@ body.is-panning * {
     line-height: 20px;
 }
 
-/* 画布专属手势指针 (高保真 Figma / Stitch 风格蓝色微倾斜矢量箭头，统领无限画布与页面画板) */
+/* 画布光标 */
 :root {
     --canvas-cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%23000000' fill-opacity='0.28' transform='translate(1, 1)'/><path d='M1 1 L15 11 L8.5 11 L5.4 17.5 Z' fill='%231677ff' stroke='%23ffffff' stroke-width='1.8' stroke-linejoin='round' stroke-linecap='round'/></svg>") 1 1,
         -webkit-image-set(
@@ -626,7 +617,7 @@ body.is-panning * {
         default;
 }
 
-/* 谷歌 Bento / Material 极简纯净微点阵画幅 (精确复刻原版设计规范) */
+/* 网格点阵 */
 .canvas-grid {
     background-color: #f1f3f4;
     position: relative;
@@ -635,7 +626,7 @@ body.is-panning * {
     overflow: hidden;
 }
 
-/* 全画幅基础浅灰微点阵 (Ambient Micro-dots: 14px 黄金微点阵间距，精准对齐 Google Stitch 测定值) */
+
 .canvas-grid::before {
     content: '';
     position: absolute;
@@ -652,7 +643,7 @@ body.is-panning * {
     z-index: 0;
 }
 
-/* 核心精髓：鼠标交互聚光灯柔和微点阵 (聚焦深点采样值 RGB 58，半径 65px 平滑二次衰减，静止 1.2s 自动淡出) */
+
 .canvas-grid::after {
     content: '';
     position: absolute;
@@ -1093,11 +1084,7 @@ body.is-dragging-component .canvas-element .field-help {
 }
 
 
-/* ========================================================
-   拖拽占位符 (Sortable Ghost) 视觉规范
-   无论是从左侧物料栏拖入，还是在画布内部移动已有组件，
-   画布中的虚拟占位槽均展示完整、逼真的选择器/输入控件外观
-   ======================================================== */
+/* 拖拽占位符 */
 
 .canvas-dropzone .canvas-element-group.sortable-ghost {
     display: block !important;
@@ -1151,7 +1138,7 @@ body.is-dragging-component .canvas-element .field-help {
     transition: none !important;
 }
 
-/* 提示区块（Alert）拖拽占位：外层容器零边距，虚线框贴合 Alert 卡片自身边缘，消除多余内边距与双重边框 */
+
 .canvas-dropzone .canvas-element.sortable-ghost[data-type="alert"],
 .canvas-dropzone .component-item.sortable-ghost[data-type="alert"] {
     background: transparent !important;
@@ -1183,7 +1170,7 @@ body.is-dragging-component .canvas-element .field-help {
     display: none !important;
 }
 
-/* 从左侧物料栏拖入全新组件时，在画布中展示该组件的选择器骨架预览 */
+
 .canvas-dropzone .component-item.sortable-ghost {
     display: block !important;
     width: 100% !important;
@@ -1247,7 +1234,7 @@ body.is-dragging-component .canvas-element .field-help {
     margin-bottom: 0;
 }
 
-/* 左侧物料栏内部拖拽时的占位效果（恢复紧凑高度与虚线框） */
+
 #components-basic .sortable-ghost,
 #components-business .sortable-ghost,
 .sidebar-drag-group .sortable-ghost {
@@ -1317,8 +1304,7 @@ body.is-dragging-component .canvas-element .field-help {
     pointer-events: none !important;
 }
 
-/* 核心优化：当拖拽已有组件组（.canvas-element-group）时，外层组容器纯透明、无边框、无阴影，
-   由内部具体的组件卡片独立渲染高质量悬浮卡片外观，彻底消除外层大框嵌套与多重边框问题 */
+
 .canvas-element-group.drag-fallback-visual {
     background: transparent !important;
     border: none !important;
@@ -1367,7 +1353,7 @@ body.is-dragging-component .canvas-element .field-help {
     }
 }
 
-/* 属性输入框聚焦联动样式 (与全站输入框聚焦样式保持 100% 完全一致：纯白背景、1px 品牌蓝边框、柔和 2px 聚焦光晕) */
+/* 属性输入框聚焦样式 */
 .prop-field-focused,
 .pulse-highlight,
 .arco-input-wrapper.prop-field-focused,
@@ -1391,11 +1377,11 @@ body.is-dragging-component .canvas-element .field-help {
     box-shadow: none !important;
 }
 
-/* 画布页面标题规范：默认 text-xl (20px / 28px) 字体排版 */
+
 .page-title-input,
 .page-title-input.text-xl {
-    font-size: 1.25rem; /* 20px */
-    line-height: 1.75rem; /* 28px */
+    font-size: 1.25rem; 
+    line-height: 1.75rem; 
 }
 
 .canvas-element[data-type="alert"] {
@@ -1415,7 +1401,7 @@ body.is-dragging-component .canvas-element .field-help {
     box-shadow: 0 0 0 1.5px #1677ff !important;
 }
 
-/* 顶部微拟物/毛玻璃浮动工具图标微动画 */
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1427,7 +1413,7 @@ body.is-dragging-component .canvas-element .field-help {
     transform: scale(0.9);
 }
 
-/* 缩放下拉菜单微弹动效 */
+
 .menu-pop-enter-active,
 .menu-pop-leave-active {
     transition: opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1), transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1446,7 +1432,7 @@ body.is-dragging-component .canvas-element .field-help {
     transform: translateY(0) scale(1);
 }
 
-/* 对标 Google Stitch 原生设计的高质感深黑气泡提示 Tooltip */
+/* Tooltip */
 .arco-tooltip-content {
     background-color: #111827;
     color: #ffffff;
@@ -1464,7 +1450,7 @@ body.is-dragging-component .canvas-element .field-help {
     background-color: #111827;
 }
 
-/* 级联多级子菜单无缝贴合（彻底消除 4px 物理空隙，并杜绝产生任何横向滚动条） */
+
 .arco-dropdown,
 .arco-dropdown-submenu,
 .arco-dropdown-list-wrapper {
@@ -1475,7 +1461,7 @@ body.is-dragging-component .canvas-element .field-help {
     display: none !important;
 }
 
-/* 下拉菜单整体容器：现代圆角、精致微阴影与紧凑内边距 */
+
 .arco-dropdown {
     border-radius: 8px;
     box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
@@ -1488,24 +1474,24 @@ body.is-dragging-component .canvas-element .field-help {
     padding: 0;
 }
 
-/* 下拉菜单内的分割线重置：彻底消除 Arco 默认 20px 巨大外边距留白 */
+
 .arco-dropdown .arco-divider-horizontal,
 .arco-dropdown .arco-divider {
     margin: 4px 0 !important;
     border-bottom-color: #f1f5f9 !important;
 }
 
-/* 当子菜单在右侧弹出 (rt) 时，向左微调 5px，完全抵消 Arco 默认的 4px 偏移，使两级菜单无缝贴合 */
+
 .arco-trigger-popup.arco-trigger-position-rt .arco-dropdown-submenu {
     margin-left: -5px;
 }
 
-/* 当子菜单贴近屏幕右边缘向左翻转 (lt) 时，向右微调 5px，无缝贴合 */
+
 .arco-trigger-popup.arco-trigger-position-lt .arco-dropdown-submenu {
     margin-right: -5px;
 }
 
-/* 下拉菜单项统一样式：精致圆角、过渡自然、有底色、悬停文字变色 */
+
 .arco-dropdown-option {
     display: flex;
     align-items: center;
@@ -1522,7 +1508,7 @@ body.is-dragging-component .canvas-element .field-help {
     cursor: pointer;
 }
 
-/* 鼠标悬停态：有浅色底色 + 文字悬停高亮品牌蓝 */
+
 .arco-dropdown-option:not(.arco-dropdown-option-disabled):hover,
 .arco-dropdown-option:not(.arco-dropdown-option-disabled).arco-dropdown-option-hover {
     background-color: #f0f7ff !important;
@@ -1536,7 +1522,7 @@ body.is-dragging-component .canvas-element .field-help {
     color: #1677ff !important;
 }
 
-/* 菜单项激活/选中态：自带淡蓝底色 + 品牌蓝文字与图标 */
+
 .arco-dropdown-option.arco-dropdown-option-active,
 .arco-dropdown-option-active {
     background-color: #eff6ff !important;
@@ -1551,7 +1537,7 @@ body.is-dragging-component .canvas-element .field-help {
     color: #1677ff !important;
 }
 
-/* 危险操作项（如退出登录）悬停浅红底色与红字 */
+
 .arco-dropdown-option.text-red-500:hover,
 .arco-dropdown-option.text-red-500.arco-dropdown-option-hover {
     background-color: #fef2f2 !important;
@@ -1590,9 +1576,7 @@ body.is-dragging-component .canvas-element .field-help {
     flex-shrink: 0;
 }
 
-/* ========================================================
-   Arco Modal 经典标准对话框视觉规范 (普通标准圆角与克制排版)
-   ======================================================== */
+/* Modal */
 .arco-modal {
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -1651,7 +1635,7 @@ body.is-dragging-component .canvas-element .field-help {
     padding: 0 16px;
 }
 
-/* 兼容处理 simple 模式弹窗，确认按钮在取消左边 */
+
 .arco-modal-simple {
     padding: 20px;
     text-align: left;
@@ -1678,7 +1662,7 @@ body.is-dragging-component .canvas-element .field-help {
     border-top: none;
 }
 
-/* 气泡确认框按钮顺序规范：严格遵循【确定在左，取消在右】且右对齐 */
+
 .arco-popconfirm-footer {
     display: flex;
     flex-direction: row-reverse;
@@ -1695,7 +1679,7 @@ body.is-dragging-component .canvas-element .field-help {
 
 
 
-/* 选项配置拖拽排序行外边框与焦点抑制 */
+
 .option-row,
 .option-row:focus,
 .option-row:focus-visible,
@@ -1706,10 +1690,8 @@ body.is-dragging-component .canvas-element .field-help {
     outline: none !important;
 }
 
-/* ==========================================================================
-   Driver.js 操作指南 - Arco Design 极简科技蓝主题定制
-   ========================================================================== */
-/* 引导进行期间全局锁定背景交互，防止用户误触或污染表单；引导关闭后立即恢复全部交互 */
+/* Driver.js */
+
 body.tour-active.driver-active .app-main,
 body.tour-active.driver-active header {
     pointer-events: none !important;

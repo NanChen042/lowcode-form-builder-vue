@@ -10,24 +10,13 @@
       width: store.leftSidebarVisible ? `${store.leftSidebarWidth}px` : '0px'
     }"
   >
-    <!-- 内部固定宽度包装容器：保证整体折叠/展开动画时内部不挤压变形 -->
     <div
       class="flex h-full min-h-0 flex-row shrink-0"
       :style="{ width: `${store.leftSidebarWidth}px` }"
     >
-      <!-- 1. 64px 侧边垂直导航列 (Activity Bar) - 纵向排列在侧边，严格使用框架图标，杜绝 emoji -->
-      <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3 z-20">
-        <!-- 顶部 Logo 标识与导航分类 (垂直排列) -->
-        <div class="flex flex-col items-center gap-3.5 w-full">
-          <!-- 品牌标识 -->
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1677ff] text-white shadow-xs">
-            <Boxes class="h-4 w-4 stroke-[2.4]" />
-          </div>
-
-          <!-- 3 个垂直分类图标按钮 (新手引导仅聚焦这 3 个主功能图标) -->
-          <div id="tour-activity-bar" class="flex flex-col items-center gap-1.5 w-full px-1">
-            <!-- 分类 1：场景模板 (Templates) -->
-            <button
+      <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
+        <div id="tour-activity-bar" class="flex flex-col items-center gap-2 w-full px-1">
+          <button
               type="button"
               class="figma-activity-btn"
               :class="{ active: activeTab === 'templates' }"
@@ -42,7 +31,6 @@
               </span>
             </button>
 
-            <!-- 分类 2：组件物料 (Components) -->
             <button
               type="button"
               class="figma-activity-btn"
@@ -58,7 +46,6 @@
               </span>
             </button>
 
-            <!-- 分类 3：页面大纲 (Pages) -->
             <button
               type="button"
               class="figma-activity-btn relative"
@@ -77,16 +64,25 @@
               </span>
             </button>
           </div>
-        </div>
 
-        <!-- 底部区域：设置快捷菜单与收起按钮 (对标 VS Code / Figma 左下角规范) -->
-        <div class="flex flex-col items-center gap-1.5 w-full px-1">
-          <!-- 设置快捷菜单 -->
+        <div class="flex flex-col items-center gap-1 w-full px-1">
+          <a-tooltip :content="t('header.tour')" position="right">
+            <button
+              id="tour-guide-btn"
+              type="button"
+              class="figma-activity-btn is-icon-only text-slate-400 hover:text-slate-700 cursor-pointer"
+              :title="t('header.tour')"
+              @click="handleTriggerTour"
+            >
+              <HelpCircle class="h-4 w-4" />
+            </button>
+          </a-tooltip>
+
           <a-dropdown trigger="click" position="tr" :popup-max-height="false" v-model:popup-visible="isSettingsDropdownOpen">
             <a-tooltip :content="t('app.settings')" position="right">
               <button
                 type="button"
-                class="figma-activity-btn text-slate-400 hover:text-slate-700 cursor-pointer"
+                class="figma-activity-btn is-icon-only text-slate-400 hover:text-slate-700 cursor-pointer"
                 :title="t('app.settings')"
               >
                 <Settings class="h-4 w-4" />
@@ -103,24 +99,14 @@
                   <span class="text-[13px] text-slate-700">{{ t('app.rightSidebar') }}</span>
                   <a-switch v-model="store.rightSidebarVisible" size="small" />
                 </div>
-                <a-divider style="margin: 4px 0" />
-                <button
-                  type="button"
-                  class="w-full flex items-center justify-between px-1.5 py-1 text-left hover:bg-blue-50 text-[#1677ff] rounded transition-colors text-[13px] font-medium cursor-pointer"
-                  @click="handleTriggerTour"
-                >
-                  <span>{{ t('header.tour') }}</span>
-                  <Sparkles class="h-3.5 w-3.5" />
-                </button>
               </div>
             </template>
           </a-dropdown>
 
-          <!-- 底部完全收起按钮 (对标 Figma ◨ 图标，点击后整个侧边栏完全收起到 0px) -->
           <a-tooltip :content="t('sidebar.tooltipCollapse')" position="right">
             <button
               type="button"
-              class="figma-activity-btn text-slate-400 hover:text-slate-700 cursor-pointer"
+              class="figma-activity-btn is-icon-only text-slate-400 hover:text-slate-700 cursor-pointer"
               @click="store.leftSidebarVisible = false"
             >
               <PanelLeft class="h-4 w-4" />
@@ -129,9 +115,7 @@
         </div>
       </div>
 
-      <!-- 2. 二级抽屉内容区 (Drawer Content) -->
       <div id="tour-material-drawer" class="flex h-full min-h-0 flex-col flex-1 shrink-0 bg-[#FAFAFA] overflow-hidden">
-        <!-- 面板顶栏 Header -->
         <header class="flex-none border-b border-slate-200/90 bg-[#FAFAFA] px-3.5 pb-2.5 pt-3">
           <div class="flex items-start justify-between mb-2">
             <div class="flex flex-col min-w-0 pr-2">
@@ -144,7 +128,6 @@
             </div>
 
             <div class="flex items-center gap-1 shrink-0 pt-0.5">
-              <!-- 搜索按钮 -->
               <a-tooltip v-if="activeTab !== 'pages'" :content="t('sidebar.searchTooltip')" position="bottom">
                 <button
                   type="button"
@@ -156,7 +139,6 @@
                 </button>
               </a-tooltip>
 
-              <!-- 完全收起按钮 -->
               <a-tooltip :content="t('sidebar.collapseBtn')" position="bottom">
                 <button
                   type="button"
@@ -169,7 +151,6 @@
             </div>
           </div>
 
-          <!-- 搜索输入框 -->
           <div v-if="searchOpen || activeTab === 'templates'" class="mt-1.5">
             <a-input
               ref="searchInputRef"
@@ -192,11 +173,8 @@
           </div>
         </header>
 
-        <!-- 面板主体内容区 -->
         <main class="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
-          <!-- ================= 视图 1：场景模板库 (Templates) ================= -->
           <div id="tour-template-panel" v-show="activeTab === 'templates'" class="flex flex-col">
-            <!-- 顶部快捷新建空白画布卡片 (标准实线卡片规范) -->
             <button
               type="button"
               class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-slate-200/90 hover:border-[#1677ff] bg-white hover:bg-blue-50/30 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs hover:shadow-xs"
@@ -218,7 +196,6 @@
               <ArrowRight class="w-3.5 h-3.5 text-slate-300 group-hover:text-[#1677ff] group-hover:translate-x-0.5 transition-all shrink-0 ml-1.5" />
             </button>
 
-            <!-- 模板列表分区提示 (上拉开 15px 独立呼吸间隙，下紧贴 8px 列表卡片) -->
             <div class="mt-3.5 mb-2 flex items-center justify-between px-0.5 text-[11px] font-medium text-slate-400 select-none">
               <span>{{ t('sidebar.presetScenarios') }}</span>
               <span class="font-mono text-[10.5px] text-slate-500 bg-slate-100/90 px-1.5 py-0.5 rounded-full">
@@ -226,7 +203,6 @@
               </span>
             </div>
 
-            <!-- 图文列表：卡片间距拉大至 12px (gap-3)，内部统一高度与规整底栏 -->
             <div class="flex flex-col gap-3 pb-3">
               <div
                 v-for="tpl in filteredTemplates"
@@ -234,7 +210,6 @@
                 class="group flex flex-col rounded-lg border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs transition-all duration-150 cursor-pointer select-none overflow-hidden"
                 @click="handleSelectTemplate(tpl.key)"
               >
-                <!-- 顶部横幅插画 (对齐客户紫色、机构蓝色、个人绿色 3D 插画) -->
                 <div
                   class="h-[88px] w-full border-b border-slate-100 flex items-center justify-center relative overflow-hidden select-none bg-slate-50"
                   :class="tpl.bannerBgClass"
@@ -245,7 +220,6 @@
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
                     loading="lazy"
                   />
-                  <!-- 右上角漂浮徽标 Tag -->
                   <a-tag
                     size="small"
                     :color="tpl.tagColor"
@@ -255,7 +229,6 @@
                   </a-tag>
                 </div>
 
-                <!-- 下方图文说明 (高度统一定高，彻底消除底栏高低抖动) -->
                 <div class="p-3 flex flex-col flex-1 justify-between">
                   <div>
                     <div class="mb-1 text-[13px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate">
@@ -267,7 +240,6 @@
                     </p>
                   </div>
 
-                  <!-- 底部元信息与操作指示 -->
                   <div class="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100">
                     <div class="flex items-center gap-1.5 text-slate-400 font-medium">
                       <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -282,7 +254,6 @@
               </div>
             </div>
 
-            <!-- 搜索无结果提示 -->
             <div
               v-if="filteredTemplates.length === 0"
               class="rounded-lg border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-[12px] leading-5 text-slate-400"
@@ -291,9 +262,7 @@
             </div>
           </div>
 
-          <!-- ================= 视图 2：组件物料库 (Components) ================= -->
           <div id="tour-component-panel" v-show="activeTab === 'components'" class="space-y-4">
-            <!-- 基础输入分类 -->
             <section v-if="filteredBasicComponents.length > 0">
               <h3 class="mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
                 {{ t('sidebar.catBasic') }}
@@ -323,7 +292,6 @@
               </div>
             </section>
 
-            <!-- 业务组件分类 -->
             <section v-if="filteredBusinessComponents.length > 0">
               <h3 class="mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
                 {{ t('sidebar.catBusiness') }}
@@ -353,13 +321,11 @@
               </div>
             </section>
 
-            <!-- 搜索无结果 -->
             <div v-if="noSearchResult" class="rounded-lg border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-[12px] leading-5 text-slate-400">
               {{ t('sidebar.searchEmpty') }}
             </div>
           </div>
 
-          <!-- ================= 视图 3：页面大纲 (Pages) ================= -->
           <div v-show="activeTab === 'pages'" class="space-y-2">
             <div
               v-for="(page, idx) in store.pages"
@@ -374,9 +340,7 @@
               ]"
               @click="focusPage(page.id)"
             >
-              <!-- 序号 + 标题/描述 (带 min-w-0 flex-1 pr-2 防止文字与右侧操作按钮挤压撞车) -->
               <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
-                <!-- 精炼微型序号徽标 (20px × 20px，自然数 1/2/3，4px 圆角，极简轻量) -->
                 <span
                   class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
                   :class="[
@@ -391,7 +355,6 @@
                 </span>
 
                 <div class="min-w-0 flex-1">
-                  <!-- 标题行：锁图标放在标题后面，无只读核验文字 -->
                   <div class="flex items-center gap-1.5 min-w-0">
                     <span
                       class="text-[12px] truncate leading-snug transition-colors"
@@ -408,16 +371,13 @@
                     </span>
                     <Lock v-if="page.pageType === 'system_profile'" class="w-3 h-3 text-slate-400 shrink-0" />
                   </div>
-                  <!-- 副标行：展示分节及字段数，或系统预置 -->
                   <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
                     {{ getPageDisplayInfo(page, idx).subtitle }}
                   </div>
                 </div>
               </div>
 
-              <!-- 右侧快捷操作区：移除多余十字瞄准定位图标，仅保留删除气泡 -->
               <div class="flex items-center gap-0.5 shrink-0">
-                <!-- 快捷删除画板 (仅非第一页支持，标准 Arco Popconfirm) -->
                 <a-popconfirm
                   v-if="idx > 0"
                   :content="t('sidebar.deletePagePrompt')"
@@ -441,7 +401,6 @@
               </div>
             </div>
 
-            <!-- 添加新画板按钮 (精炼 6px 圆角，与卡片和输入框标准对齐) -->
             <div class="pt-1.5">
               <button
                 type="button"
@@ -470,7 +429,6 @@
       <div class="w-0.5 h-6 rounded-full bg-slate-300 group-hover:bg-[#1677ff] transition-colors"></div>
     </div>
 
-    <!-- 模板覆盖确认轻量弹窗 (对齐新建表单画布的正常规范标准样式) -->
     <a-modal
       v-model:visible="confirmModalVisible"
       :title="t('sidebar.confirmOverwriteTitle')"
@@ -520,7 +478,6 @@ import AlertElement from '@/components/canvas/elements/AlertElement.vue';
 import PhoneElement from '@/components/canvas/elements/PhoneElement.vue';
 import EmailElement from '@/components/canvas/elements/EmailElement.vue';
 import {
-  Boxes,
   Component,
   LayoutTemplate,
   Files,
@@ -531,7 +488,7 @@ import {
   Lock,
   Trash2,
   Settings,
-  Sparkles,
+  HelpCircle,
   FileText
 } from '@lucide/vue';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
@@ -550,7 +507,6 @@ function handleTriggerTour() {
   startAppTour();
 }
 
-// 当前选中的侧边垂直分类：'templates' 模板 | 'components' 物料 | 'pages' 页面大纲
 const activeTab = computed({
   get: () => store.sidebarTab,
   set: (val: 'templates' | 'components' | 'pages') => {
@@ -558,7 +514,6 @@ const activeTab = computed({
   }
 });
 
-// 场景模板数据源（纯净数据驱动，无冗余 DOM，无假画布）
 const scenarioTemplates = [
   {
     key: 'kyc-customer' as const,
@@ -607,7 +562,6 @@ const scenarioTemplates = [
   }
 ];
 
-// 侧边栏拖拽拉伸 (默认 320px = 56px 垂直栏 + 264px 抽屉)
 const { isResizing, startResize } = useSidebarResize({
   getWidth: () => store.leftSidebarWidth,
   setWidth: (newWidth) => {
@@ -827,12 +781,12 @@ function createGhostElement(type: ComponentType): FormElement {
     id: `ghost_${type}`,
     type,
     key: `ghost_${type}`,
-    label: defaultData.label || '未命名字段',
-    label_en: defaultData.label_en || '',
     required: defaultData.required !== undefined ? defaultData.required : true,
     showLabel: defaultData.showLabel !== false,
     helpPosition: 'right',
     ...defaultData,
+    label: '',
+    label_en: '',
     options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
   };
 }
@@ -890,7 +844,6 @@ function handleComponentClick(type: ComponentType) {
 </script>
 
 <style scoped>
-/* 64px 侧边垂直导航栏按钮 (Figma 风格) */
 .figma-activity-btn {
   display: flex;
   flex-direction: column;
@@ -914,6 +867,14 @@ function handleComponentClick(type: ComponentType) {
   color: #1e293b;
 }
 
+.figma-activity-btn.is-icon-only {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 7px;
+}
+
 .figma-activity-btn.active {
   background: #e6f4ff;
   color: #1677ff;
@@ -933,7 +894,6 @@ function handleComponentClick(type: ComponentType) {
   font-weight: bold;
 }
 
-/* 搜索框 */
 .figma-search-input :deep(.arco-input-wrapper) {
   border-radius: 7px;
   background-color: #ffffff;
@@ -949,12 +909,10 @@ function handleComponentClick(type: ComponentType) {
   box-shadow: 0 0 0 1px #1677ff;
 }
 
-/* 页面行样式 */
 .figma-page-row:hover {
   border-color: #91caff;
 }
 
-/* 提示弹窗样式 (对齐新建表单画布的正常标准样式) */
 .clean-confirm-modal :deep(.arco-modal) {
   border-radius: 6px;
 }

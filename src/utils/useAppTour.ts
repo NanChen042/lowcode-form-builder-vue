@@ -90,7 +90,6 @@ export function getTourSteps(localeOrIsEn?: Locale | boolean): DriveStep[] {
 export function cleanupTour() {
   if (typeof document !== 'undefined') {
     document.body.classList.remove('tour-active', 'driver-active', 'driver-fade', 'driver-simple', 'driver-no-scroll');
-    // 彻底清除页面上所有残留的 driver 遮罩与气泡节点，防止残留遮挡画布交互
     document.querySelectorAll('.driver-overlay, .driver-popover, #driver-dummy-element').forEach(el => el.remove());
   }
   sessionStorage.setItem('diy_form_tour_shown_session', 'true');
@@ -112,7 +111,6 @@ export function startAppTour(initialIndex = 0) {
     return;
   }
 
-  // If sidebars are hidden, ensure they are visible during tour
   if (!store.leftSidebarVisible) {
     store.leftSidebarVisible = true;
   }
@@ -128,6 +126,8 @@ export function startAppTour(initialIndex = 0) {
     showProgress: true,
     animate: true,
     allowClose: true,
+    allowScroll: false,
+    smoothScroll: false,
     disableActiveInteraction: false,
     overlayColor: 'rgba(15, 23, 42, 0.65)',
     stageRadius: 8,
@@ -147,6 +147,25 @@ export function startAppTour(initialIndex = 0) {
         resetCanvasView({ duration: 0 });
       } else if (idx === 4 && store.pages.length > 0) {
         focusOnPage(store.pages[0].id, { forTour: true, duration: 0 });
+        const canvasContainer = document.getElementById('tour-canvas-area');
+        if (canvasContainer) {
+          canvasContainer.scrollTop = 0;
+          canvasContainer.scrollLeft = 0;
+        }
+        requestAnimationFrame(() => {
+          driverInstance?.refresh();
+        });
+      }
+    },
+    onHighlighted: (_el, _step, opts) => {
+      const idx = opts.state.activeIndex;
+      if (idx === 4) {
+        const canvasContainer = document.getElementById('tour-canvas-area');
+        if (canvasContainer) {
+          canvasContainer.scrollTop = 0;
+          canvasContainer.scrollLeft = 0;
+        }
+        driverInstance?.refresh();
       }
     },
     onPopoverRender: (popoverDOM) => {

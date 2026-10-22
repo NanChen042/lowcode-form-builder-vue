@@ -13,19 +13,6 @@
     @cancel="handleCancel"
   >
     <div class="space-y-4 py-1">
-      <!-- 外部业务主体锁定提示 (若锁定则提示) -->
-      <a-alert
-        v-if="store.lockedProfileType"
-        type="info"
-        class="rounded border border-blue-100 bg-blue-50/70 py-1 px-2.5 text-xs"
-      >
-        <template #icon>
-          <Lock class="h-3.5 w-3.5 text-[#1677ff]" />
-        </template>
-        <span>{{ t('modal.createForm.lockedProfile') }}{{ lockedTypeName }}</span>
-      </a-alert>
-
-      <!-- 1. 业务主体选择 (平铺标准微圆角卡片) -->
       <div>
         <div class="text-xs font-semibold text-slate-700 mb-1.5">
           {{ t('modal.createForm.profileType') }}
@@ -35,13 +22,11 @@
             v-for="item in profileOptions"
             :key="item.value"
             type="button"
-            :disabled="Boolean(store.lockedProfileType && store.lockedProfileType !== item.value)"
             class="flex flex-col items-center justify-center py-2.5 px-2 rounded border transition-colors cursor-pointer select-none text-center"
             :class="[
               selectedProfile === item.value
                 ? 'border-[#1677ff] bg-blue-50/40 text-[#1677ff] font-medium'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50',
-              store.lockedProfileType && store.lockedProfileType !== item.value ? 'opacity-40 cursor-not-allowed' : ''
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50'
             ]"
             @click="selectedProfile = item.value"
           >
@@ -51,7 +36,6 @@
         </div>
       </div>
 
-      <!-- 2. 表单名称设置 -->
       <div>
         <div class="text-xs font-semibold text-slate-700 mb-1.5">
           {{ t('modal.createForm.formTitle') }}
@@ -71,7 +55,6 @@
       </p>
     </div>
 
-    <!-- 弹窗底部操作栏 -->
     <template #footer>
       <div class="flex items-center justify-end gap-2">
         <a-button type="primary" class="bg-[#1677ff]" @click="handleConfirm">
@@ -84,7 +67,6 @@
     </template>
   </a-modal>
 
-  <!-- 画布覆盖二次确认弹窗 -->
   <a-modal
     v-model:visible="confirmOverwriteVisible"
     :title="t('modal.createForm.confirmOverwriteTitle')"
@@ -123,8 +105,7 @@ import { t } from '@/core/i18n';
 import {
   Building2,
   UserCheck,
-  ShieldCheck,
-  Lock
+  ShieldCheck
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 
@@ -151,13 +132,6 @@ const profileOptions = computed(() => [
   { value: 'entity' as const, label: t('modal.createForm.entity'), icon: ShieldCheck }
 ]);
 
-const lockedTypeName = computed(() => {
-  const profile = store.lockedProfileType;
-  if (profile === 'individual') return t('modal.createForm.individual');
-  if (profile === 'entity') return t('modal.createForm.entity');
-  return t('modal.createForm.customer');
-});
-
 const defaultTitleForProfile = computed(() => {
   if (selectedProfile.value === 'individual') return 'SG_CDD_Individual';
   if (selectedProfile.value === 'entity') return 'SG_CDD_Entity';
@@ -173,11 +147,7 @@ watch(
   val => {
     if (val) {
       customTitle.value = '';
-      if (store.lockedProfileType) {
-        selectedProfile.value = store.lockedProfileType;
-      } else {
-        selectedProfile.value = 'customer';
-      }
+      selectedProfile.value = store.meta.profileType || 'customer';
       nextTick(() => {
         titleInputRef.value?.focus();
       });
@@ -216,7 +186,7 @@ function executeCreateCanvas() {
 
   createNewCanvas({
     title,
-    description: t('modal.createForm.defaultDesc'),
+    description: '',
     profileType: pType
   });
 

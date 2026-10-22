@@ -18,7 +18,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    // 开发环境代理转发，消除本地开发时的跨域问题并自动传递 Cookie
     proxy: {
       '/pc': {
         target: 'http://localhost:8080',

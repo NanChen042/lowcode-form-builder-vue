@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-3.5">
-    <!-- 单行文本格式类型 (文本 / 数字) -->
     <div v-if="element.type === 'input'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.inputType') }}</span>
@@ -31,42 +30,61 @@
       </div>
     </div>
 
-    <!-- 多行文本自适应行数配置 (最小行数 / 最大行数) -->
     <div v-if="element.type === 'textarea'" class="space-y-0.5">
+      <!-- 行数范围 (最小 ~ 最大行数自适应联动) -->
       <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
-          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.minRows') }}</span>
-          <a-tooltip :content="t('prop.minRowsTip')" position="top">
+          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.rowRange') }}</span>
+          <a-tooltip :content="t('prop.rowRangeTip')" position="top">
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
-        <a-input-number
-          v-model="textareaMinRows"
-          :min="1"
-          :max="10"
-          size="small"
-          style="width: 100px"
-        />
+        <div class="flex items-center gap-1.5 select-none">
+          <a-input-number
+            v-model="textareaMinRows"
+            :min="1"
+            :max="10"
+            size="small"
+            style="width: 66px"
+          />
+          <span class="text-slate-400 text-xs font-mono">~</span>
+          <a-input-number
+            v-model="textareaMaxRows"
+            :min="textareaMinRows || 1"
+            :max="20"
+            size="small"
+            style="width: 66px"
+          />
+          <span class="text-slate-500 text-[11px] min-w-[14px]">{{ t('prop.rowUnit') }}</span>
+        </div>
       </div>
 
+      <!-- 最大字数字符上限 -->
       <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
-          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxRows') }}</span>
-          <a-tooltip :content="t('prop.maxRowsTip')" position="top">
+          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxLength') }}</span>
+          <a-tooltip :content="t('prop.maxLengthTip')" position="top">
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
-        <a-input-number
-          v-model="textareaMaxRows"
-          :min="textareaMinRows"
-          :max="20"
-          size="small"
-          style="width: 100px"
-        />
+        <div class="flex items-center gap-1.5 select-none">
+          <a-input-number
+            v-model="textareaMaxLength"
+            :min="1"
+            :max="5000"
+            :placeholder="t('prop.defaultMaxLengthPlaceholder')"
+            size="small"
+            allow-clear
+            style="width: 148px"
+          >
+            <template #suffix>
+              <span class="text-slate-400 text-[11px] select-none">{{ t('prop.charUnit') }}</span>
+            </template>
+          </a-input-number>
+        </div>
       </div>
     </div>
 
-    <!-- 电话组件专属：默认国际区号设置 -->
     <div v-if="element.type === 'phone'" class="space-y-2.5 pt-3.5 border-t border-slate-100">
       <a-form-item :label="t('prop.defaultDialCode')" class="mb-0">
         <a-select
@@ -111,7 +129,6 @@
       </a-form-item>
     </div>
 
-    <!-- 国家 / 国籍专属：预设国家 -->
     <div v-if="['country', 'nationality'].includes(element.type)" class="pt-3.5 border-t border-slate-100">
       <div class="flex items-center justify-between py-1">
         <span class="text-[12px] font-medium text-slate-600">
@@ -132,7 +149,6 @@
       </div>
     </div>
 
-    <!-- 提示区块专属：提示内容多行编辑 -->
     <div v-if="element.type === 'alert'" class="space-y-2 pt-3.5 border-t border-slate-100">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5 min-w-0">
@@ -150,7 +166,6 @@
           </a-tooltip>
         </div>
 
-        <!-- 快捷插入辅助条 -->
         <div class="flex items-center gap-1.5 shrink-0">
           <a-dropdown position="bl" @select="handleListDropdownSelect">
             <a-button
@@ -165,8 +180,8 @@
               <ChevronDown class="w-3 h-3 ml-1 text-slate-400" />
             </a-button>
             <template #content>
-              <a-doption value="circle">圆点列表 (无序)</a-doption>
-              <a-doption value="number">数字列表 (有序)</a-doption>
+              <a-doption value="circle">{{ t('prop.alertListCircleFull') }}</a-doption>
+              <a-doption value="number">{{ t('prop.alertListNumberFull') }}</a-doption>
             </template>
           </a-dropdown>
 
@@ -186,14 +201,15 @@
 
       <a-textarea
         id="prop-alert-content-input"
+        ref="alertTextareaRef"
         v-model="alertContentModel"
         :auto-size="{ minRows: 6, maxRows: 14 }"
         :placeholder="t('prop.alertContentPlaceholder')"
         class="w-full !text-[12px] font-sans"
+        @keydown="handleAlertTextareaKeydown"
       />
     </div>
 
-    <!-- 选项配置 (单选、多选、下拉、签名声明条款) -->
     <div v-if="hasOptionsConfig" class="space-y-2.5 pt-3.5 border-t border-slate-100">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
@@ -219,7 +235,6 @@
 
       <OptionsEditor :element="element" />
 
-      <!-- 选项排布方式 -->
       <div
         v-if="canStackChoices"
         class="mt-2 flex items-center justify-between py-1 pl-1"
@@ -261,7 +276,6 @@
       </div>
     </div>
 
-    <!-- 日期选择器专属配置 -->
     <div v-if="element.type === 'date'" class="space-y-0.5 pt-1.5 border-t border-slate-100">
       <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
@@ -293,7 +307,6 @@
         </div>
       </div>
 
-      <!-- 启用长期选项 (仅单日期模式生效) -->
       <div v-if="element.dateMode !== 'range'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
           <span class="text-[12px] font-medium text-slate-600">{{ t('prop.enableLongTerm') }}</span>
@@ -308,12 +321,25 @@
         />
       </div>
 
-      <!-- 默认勾选长期 -->
       <CollapseTransition
         v-if="element.type === 'date' && element.dateMode !== 'range'"
         :key="`${element.id}-longterm`"
         :show="Boolean(element.enableLongTerm)"
       >
+        <div class="flex items-center justify-between py-1 pl-1">
+          <div class="flex items-center gap-1.5">
+            <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span class="text-[12px] font-medium text-slate-600">{{ t('prop.defaultLongTerm') }}</span>
+            <a-tooltip :content="t('prop.defaultLongTermTip')" position="top">
+              <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+            </a-tooltip>
+          </div>
+          <a-switch
+            v-model="element.defaultLongTerm"
+            size="small"
+            @change="markDirty"
+          />
+        </div>
         <div class="flex items-center justify-between py-1 pl-1">
           <div class="flex items-center gap-1.5">
             <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -334,9 +360,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, markDirty } from '@/core/store';
+import { store, markDirty, isBilingual } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
 import OptionsEditor from './OptionsEditor.vue';
@@ -380,6 +406,16 @@ const textareaMaxRows = computed<number>({
     const min = props.element.minRows || 1;
     const num = Number(val) || min;
     props.element.maxRows = Math.max(num, min);
+    markDirty();
+  }
+});
+
+const textareaMaxLength = computed<number | undefined>({
+  get() {
+    return props.element.maxLength;
+  },
+  set(val: number | undefined) {
+    props.element.maxLength = val ? Number(val) : undefined;
     markDirty();
   }
 });
@@ -428,42 +464,188 @@ const alertContentModel = computed({
 });
 
 const isAlertContentMissing = computed(() => {
-  if (props.element.type !== 'alert') return false;
+  if (!isBilingual.value || props.element.type !== 'alert') return false;
   if (store.currentLocale === 'en') {
     return Boolean(props.element.content && !props.element.content_en);
   }
   return Boolean(props.element.content_en && !props.element.content);
 });
 
+const alertTextareaRef = ref<any>(null);
+
+function getAlertNativeTextarea(): HTMLTextAreaElement | null {
+  if (alertTextareaRef.value?.$el) {
+    const el = alertTextareaRef.value.$el.tagName === 'TEXTAREA'
+      ? alertTextareaRef.value.$el
+      : alertTextareaRef.value.$el.querySelector('textarea');
+    if (el) return el;
+  }
+  return document.getElementById('prop-alert-content-input') as HTMLTextAreaElement | null;
+}
+
 function handleListDropdownSelect(value: any) {
-  if (value === 'number') {
-    props.element.listStyle = 'number';
-    const current = alertContentModel.value || '';
+  props.element.listStyle = value === 'number' ? 'number' : 'circle';
+  const textarea = getAlertNativeTextarea();
+  const current = alertContentModel.value || '';
+
+  if (!textarea) {
     const prefix = current && !current.endsWith('\n') ? '\n' : '';
-    const lines = current.split('\n');
-    let maxNum = 0;
-    for (const line of lines) {
-      const match = line.trim().match(/^(\d+)[\.、]/);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (num > maxNum) maxNum = num;
+    const marker = value === 'number' ? '1. ' : '- ';
+    alertContentModel.value = `${current}${prefix}${marker}`;
+    markDirty();
+    return;
+  }
+
+  const start = textarea.selectionStart ?? current.length;
+  const end = textarea.selectionEnd ?? current.length;
+
+  const lineStart = current.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = current.indexOf('\n', end);
+  if (lineEnd === -1) lineEnd = current.length;
+  const currentLine = current.slice(lineStart, lineEnd);
+
+  let marker = '- ';
+  if (value === 'number') {
+    let nextNum = 1;
+    if (lineStart > 0) {
+      const prevLineStart = current.lastIndexOf('\n', lineStart - 2) + 1;
+      const prevLine = current.slice(prevLineStart, lineStart - 1).trim();
+      const prevMatch = prevLine.match(/^(\d+)[\.、]\s*/);
+      if (prevMatch) {
+        nextNum = parseInt(prevMatch[1], 10) + 1;
       }
     }
-    const nextNum = maxNum + 1;
-    alertContentModel.value = `${current}${prefix}${nextNum}. `;
-  } else {
-    props.element.listStyle = 'circle';
-    const current = alertContentModel.value || '';
-    const prefix = current && !current.endsWith('\n') ? '\n' : '';
-    alertContentModel.value = `${current}${prefix}- `;
+    marker = `${nextNum}. `;
   }
+
+  const existingListMatch = currentLine.match(/^(\s*)(?:[-*•]|\d+[\.、])\s*/);
+  let newText = '';
+  let newCursorPos = start;
+
+  if (existingListMatch) {
+    const indent = existingListMatch[1];
+    const replacedLine = indent + marker + currentLine.slice(existingListMatch[0].length);
+    newText = current.slice(0, lineStart) + replacedLine + current.slice(lineEnd);
+    newCursorPos = lineStart + indent.length + marker.length;
+  } else if (!currentLine.trim()) {
+    newText = current.slice(0, lineStart) + marker + current.slice(lineEnd);
+    newCursorPos = lineStart + marker.length;
+  } else {
+    newText = current.slice(0, lineStart) + marker + currentLine + current.slice(lineEnd);
+    newCursorPos = start + marker.length;
+  }
+
+  alertContentModel.value = newText;
   markDirty();
+
+  nextTick(() => {
+    textarea.focus();
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+  });
 }
 
 function insertAlertLink() {
+  const textarea = getAlertNativeTextarea();
   const current = alertContentModel.value || '';
-  const prefix = current && !current.endsWith('\n') && !current.endsWith(' ') ? ' ' : '';
-  alertContentModel.value = `${current}${prefix}[提示文字](xxx.com)`;
+  const defaultText = t('prop.alertLinkTextSample');
+
+  if (!textarea) {
+    const prefix = current && !current.endsWith('\n') && !current.endsWith(' ') ? ' ' : '';
+    alertContentModel.value = `${current}${prefix}[${defaultText}](xxx.com)`;
+    markDirty();
+    return;
+  }
+
+  const start = textarea.selectionStart ?? current.length;
+  const end = textarea.selectionEnd ?? current.length;
+  const selectedText = current.slice(start, end);
+  const linkText = selectedText || defaultText;
+  const urlPlaceholder = 'xxx.com';
+  const insertion = `[${linkText}](${urlPlaceholder})`;
+
+  const before = current.slice(0, start);
+  const after = current.slice(end);
+  alertContentModel.value = `${before}${insertion}${after}`;
+  markDirty();
+
+  nextTick(() => {
+    textarea.focus();
+    const urlStart = start + linkText.length + 3;
+    const urlEnd = urlStart + urlPlaceholder.length;
+    textarea.setSelectionRange(urlStart, urlEnd);
+  });
+}
+
+function handleAlertTextareaKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.metaKey || e.isComposing) {
+    return;
+  }
+
+  const textarea = getAlertNativeTextarea();
+  if (!textarea) return;
+
+  const cursorPos = textarea.selectionStart;
+  const current = alertContentModel.value || '';
+  const textBefore = current.slice(0, cursorPos);
+  const textAfter = current.slice(cursorPos);
+
+  const lineStart = textBefore.lastIndexOf('\n') + 1;
+  const currentLine = textBefore.slice(lineStart);
+
+  const bulletMatch = currentLine.match(/^(\s*[-*•])\s*(.*)$/);
+  if (bulletMatch) {
+    e.preventDefault();
+    const prefix = bulletMatch[1];
+    const content = bulletMatch[2];
+    if (!content.trim()) {
+      const newText = current.slice(0, lineStart) + textAfter;
+      alertContentModel.value = newText;
+      markDirty();
+      nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(lineStart, lineStart);
+      });
+    } else {
+      const insertion = `\n${prefix} `;
+      const newText = textBefore + insertion + textAfter;
+      alertContentModel.value = newText;
+      markDirty();
+      nextTick(() => {
+        textarea.focus();
+        const newPos = cursorPos + insertion.length;
+        textarea.setSelectionRange(newPos, newPos);
+      });
+    }
+    return;
+  }
+
+  const numberMatch = currentLine.match(/^(\s*)(\d+)[\.、]\s*(.*)$/);
+  if (numberMatch) {
+    e.preventDefault();
+    const indent = numberMatch[1];
+    const num = parseInt(numberMatch[2], 10);
+    const content = numberMatch[3];
+    if (!content.trim()) {
+      const newText = current.slice(0, lineStart) + textAfter;
+      alertContentModel.value = newText;
+      markDirty();
+      nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(lineStart, lineStart);
+      });
+    } else {
+      const insertion = `\n${indent}${num + 1}. `;
+      const newText = textBefore + insertion + textAfter;
+      alertContentModel.value = newText;
+      markDirty();
+      nextTick(() => {
+        textarea.focus();
+        const newPos = cursorPos + insertion.length;
+        textarea.setSelectionRange(newPos, newPos);
+      });
+    }
+    return;
+  }
 }
 
 const hasOptionsConfig = computed(() => {

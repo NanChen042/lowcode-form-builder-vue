@@ -1,8 +1,8 @@
 import axios, { type AxiosInstance } from 'axios';
 import { Message } from '@arco-design/web-vue';
 import { store } from '@/core/store';
+import { t } from '@/core/i18n';
 
-// 统一标准 API 响应结构 (对齐 algo 规范: { code, msg, data })
 export interface ApiResponse<T = any> {
   code: number | string;
   msg?: string;
@@ -11,34 +11,29 @@ export interface ApiResponse<T = any> {
   success?: boolean;
 }
 
-// 创建统一 Axios 单例
 const service: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 15000,
   adapter: 'xhr',
-  // 必须开启跨域携带凭证，确保 Cookie 中的 pc_token 与 sc_org_id 自动传递给 algo 后端
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
-    'X-Requested-With': 'XMLHttpRequest' // 告知 algo 后端当前为 AJAX 请求
+    'X-Requested-With': 'XMLHttpRequest'
   }
 });
 
 // 请求拦截器
 service.interceptors.request.use(
   (config: any) => {
-    // 1. 如果 store 中有外部注入的 token，附加到 Header 作为兜底鉴权
     if (store.user.token) {
       config.headers['token'] = store.user.token;
       config.headers['Authorization'] = `Bearer ${store.user.token}`;
     }
 
-    // 2. 携带当前机构 ID (如果已识别)
     if (store.org.orgId) {
       config.headers['X-Org-Id'] = String(store.org.orgId);
     }
 
-    // 3. 携带当前界面语言
     config.headers['Accept-Language'] = store.currentLocale === 'en' ? 'en-US,en;q=0.9' : 'zh-CN,zh;q=0.9';
 
     return config;
@@ -48,6 +43,40 @@ service.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+function getNetworkErrorMessage(error: any): string {
+  if (error.response) {
+    const status = error.response.status;
+    switch (status) {
+      case 400:
+        return t('api.error400');
+      case 401:
+        return t('api.error401');
+      case 403:
+        return t('api.error403');
+      case 404:
+        return t('api.error404');
+      case 500:
+        return t('api.error500');
+      case 502:
+      case 503:
+      case 504:
+        return t('api.error502');
+      default:
+        return t('api.errorFailed', undefined, { status });
+    }
+  }
+
+  if (error.code === 'ECONNABORTED' || (error.message && error.message.includes('timeout'))) {
+    return t('api.errorTimeout');
+  }
+
+  if (error.message && error.message.includes('Network Error')) {
+    return t('api.errorNetwork');
+  }
+
+  return t('api.errorDefault');
+}
 
 // 响应拦截器
 service.interceptors.response.use(
@@ -74,7 +103,7 @@ service.interceptors.response.use(
     if (res.code === 2008 || res.code === 'ACCOUNT_BANNING' || res.code === 401) {
       if (!response.config?.silent) {
         Message.warning({
-          content: res.msg || '登录已过期，请重新登录',
+          content: res.msg || t('api.error401'),
           duration: 2500
         });
       }
@@ -87,7 +116,7 @@ service.interceptors.response.use(
     }
 
     // 业务错误统一轻量提示
-    const errMsg = res.msg || res.message || '操作失败';
+    const errMsg = res.msg || res.message || t('api.operationFailed');
     console.warn('[API Business Warning]', res.code, errMsg);
 
     return res;
@@ -100,39 +129,7 @@ service.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    let errorMsg = '网络连接异常，请检查网络';
-    if (error.response) {
-      const status = error.response.status;
-      switch (status) {
-        case 400:
-          errorMsg = '请求参数错误 (400)';
-          break;
-        case 401:
-          errorMsg = '登录已失效，请重新登录 (401)';
-          break;
-        case 403:
-          errorMsg = '拒绝访问，没有权限 (403)';
-          break;
-        case 404:
-          errorMsg = '请求的资源不存在 (404)';
-          break;
-        case 500:
-          errorMsg = '服务器内部错误 (500)';
-          break;
-        case 502:
-        case 503:
-        case 504:
-          errorMsg = '服务器响应超时或服务暂时不可用 (502/503)';
-          break;
-        default:
-          errorMsg = `请求失败 (${status})`;
-          break;
-      }
-    } else if (error.code === 'ECONNABORTED' || (error.message && error.message.includes('timeout'))) {
-      errorMsg = '请求超时，请检查网络后重试';
-    } else if (error.message && error.message.includes('Network Error')) {
-      errorMsg = '网络连接失败，请检查网络连接';
-    }
+    const errorMsg = getNetworkErrorMessage(error);
 
     Message.error({
       content: errorMsg,

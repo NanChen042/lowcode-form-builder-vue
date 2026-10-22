@@ -34,11 +34,13 @@ export interface FormElement {
   defaultValue?: string;
   options?: FormElementOption[];
   multiple?: boolean;
+  showSearch?: boolean;
   // 单行文本格式
   inputType?: 'text' | 'number';
-  // 多行文本自适应行数
+  // 多行文本自适应行数与字数限制
   minRows?: number;
   maxRows?: number;
+  maxLength?: number;
   // 电话特有属性
   dialCode?: string;
   countryCode?: string;
@@ -99,6 +101,7 @@ export interface FormMeta {
   description: string;
   description_en?: string;
   profileType?: ProfileType;
+  enabledLocales?: ('zh' | 'en')[];
   // 内部创建模式：仅内部业务与后端识别，不在 URL 暴露明文
   source?: 'template' | 'diy';
   templateKey?: string;
