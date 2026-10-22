@@ -142,7 +142,7 @@ export function calculateTranslationStats(): TranslationStats {
     // 排除系统固定预设核验页
     if (page.pageType === 'system_profile') return;
 
-    const pageTitle = (store.currentLocale === 'en' ? (page.title_en || page.title) : page.title) || `第 ${pageIdx + 1} 页`;
+    const pageTitle = (store.currentLocale === 'en' ? (page.title_en || page.title) : page.title) || (store.currentLocale === 'en' ? `Page ${pageIdx + 1}` : `第 ${pageIdx + 1} 页`);
 
     // 1. 页面标题
     registerItem({
@@ -151,7 +151,7 @@ export function calculateTranslationStats(): TranslationStats {
       pageIndex: pageIdx,
       pageTitle,
       fieldType: 'page_title',
-      fieldName: '页面标题',
+      fieldName: store.currentLocale === 'en' ? 'Page Title' : '页面标题',
       zhText: page.title,
       enText: page.title_en
     });
@@ -163,7 +163,7 @@ export function calculateTranslationStats(): TranslationStats {
       pageIndex: pageIdx,
       pageTitle,
       fieldType: 'page_desc',
-      fieldName: '描述说明',
+      fieldName: store.currentLocale === 'en' ? 'Page Description' : '描述说明',
       zhText: page.description,
       enText: page.description_en
     });

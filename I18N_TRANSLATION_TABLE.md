@@ -583,6 +583,7 @@
 | 已复制 | Copied | | | |
 | 链接已复制到剪贴板 | Link copied to clipboard | | | |
 | 新窗口打开 | Open in New Tab | | | |
+| 点击在新窗口打开预览表单 | Click to open preview form in a new window | | | |
 | 完成 | Done | | | |
 
 ## Schema 源码侧边栏 (SchemaSidebar)

@@ -552,6 +552,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'publish.copied': '已复制',
     'publish.copySuccess': '链接已复制到剪贴板',
     'publish.openPreview': '新窗口打开',
+    'publish.openPreviewTip': '点击在新窗口打开预览表单',
     'publish.done': '完成',
 
     // Schema 源码侧边栏 (SchemaSidebar)
@@ -1144,6 +1145,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'publish.copied': 'Copied',
     'publish.copySuccess': 'Link copied to clipboard',
     'publish.openPreview': 'Open in New Tab',
+    'publish.openPreviewTip': 'Click to open preview form in a new window',
     'publish.done': 'Done',
 
     // Schema 源码侧边栏 (SchemaSidebar)

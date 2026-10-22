@@ -73,6 +73,27 @@ export interface FormElement {
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
 
+export interface ProfileFieldItem {
+  label: string;
+  label_en?: string;
+  value: string;
+}
+
+export interface ProfileRelation {
+  motherName?: string;
+  relationships?: string[];
+  relationships_en?: string[];
+}
+
+export interface ProfileCapitalItem {
+  currency?: string;
+  shareType?: string;
+  shareType_en?: string;
+  sharesHeld: string | number;
+  shareRatio?: string | number;
+  paidUpAmount: string;
+}
+
 export interface FormPageSchema {
   id: string;
   title: string;
@@ -83,6 +104,9 @@ export interface FormPageSchema {
   pageType?: 'form' | 'system_profile';
   profileType?: ProfileType;
   showSkeleton?: boolean;
+  profileFields?: ProfileFieldItem[];
+  relation?: ProfileRelation;
+  capitalList?: ProfileCapitalItem[];
 }
 
 export interface FormPage extends FormPageSchema {

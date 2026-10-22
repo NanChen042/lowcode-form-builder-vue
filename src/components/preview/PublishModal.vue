@@ -32,7 +32,7 @@
           :href="publishedUrl"
           target="_blank"
           class="group flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 transition-all text-left no-underline cursor-pointer"
-          title="点击在新窗口打开预览表单"
+          :title="t('publish.openPreviewTip')"
         >
           <div class="flex items-center gap-2 min-w-0 flex-1 pr-3">
             <Link2 class="w-4 h-4 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />

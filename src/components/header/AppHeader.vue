@@ -102,11 +102,11 @@
         <Loader2 class="h-3.5 w-3.5 animate-spin shrink-0 text-blue-500" />
         <span>{{ t('app.saving') }}</span>
       </div>
-      <div v-else-if="store.isDirty" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none" title="当前有未保存变更">
+      <div v-else-if="store.isDirty" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none" :title="t('app.dirty')">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
         <span>{{ t('app.dirty') }}</span>
       </div>
-      <div v-else-if="lastSavedTime" class="flex items-center gap-1.5 text-[11.5px] font-medium text-slate-400 select-none" title="表单已保存">
+      <div v-else-if="lastSavedTime" class="flex items-center gap-1.5 text-[11.5px] font-medium text-slate-400 select-none" :title="t('app.saved')">
         <Check class="w-3.5 h-3.5 text-slate-400 stroke-[2.2]" />
         <span>{{ store.currentLocale === 'en' ? `Saved ${lastSavedTime}` : `已保存 ${lastSavedTime}` }}</span>
       </div>
@@ -310,7 +310,7 @@
         <div class="mt-3 px-1 flex items-center justify-between text-xs text-slate-500">
           <span>{{ t('header.bilingualVideoTip') }}</span>
           <a-button size="small" type="primary" class="bg-[#1677ff]" @click="handleCloseVideoModal">
-            {{ store.currentLocale === 'en' ? 'Close' : '关闭' }}
+            {{ t('common.close') }}
           </a-button>
         </div>
       </div>
@@ -518,12 +518,7 @@ function handleUserAction(action: string) {
 }
 
 async function handleSave() {
-  if (isSaving.value) return;
-
-  if (!store.isDirty) {
-    Message.info(store.currentLocale === 'en' ? 'Already up to date' : '当前内容已是最新，无需重复保存');
-    return;
-  }
+  if (isSaving.value || !store.isDirty) return;
 
   isSaving.value = true;
 

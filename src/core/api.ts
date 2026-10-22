@@ -79,10 +79,14 @@ export const FormAPI = {
     try {
       const res = await request.post<any, any>('/pc/form/publish', { schema });
       if (res && (res.code === 0 || res.code === 200 || res.success) && res.data?.url) {
+        let finalUrl = res.data.url;
+        if (typeof window !== 'undefined' && finalUrl.startsWith('/')) {
+          finalUrl = `${window.location.origin}${finalUrl}`;
+        }
         return {
           code: 200,
           success: true,
-          data: { url: res.data.url },
+          data: { url: finalUrl },
           message: res.msg || '发布成功'
         };
       }
@@ -105,12 +109,19 @@ export const FormAPI = {
       }
     }
 
-    await delay(500);
+    await delay(300);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://jzw.qingmob.com';
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const formId = schema.meta?.formId || schema.meta?.serialNo || `form_${Date.now()}`;
+    const dynamicUrl = isLocal
+      ? `http://localhost:5174/?id=${encodeURIComponent(formId)}`
+      : `${origin}/form-mobile/?id=${encodeURIComponent(formId)}`;
+
     return {
       code: 200,
       success: true,
       data: {
-        url: `https://app.algocandy.com/forms/published_${schema.meta?.formId || Date.now()}`
+        url: dynamicUrl
       },
       message: '发布成功'
     };
