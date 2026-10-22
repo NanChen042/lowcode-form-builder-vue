@@ -633,7 +633,7 @@ export function resetCanvasView(options?: { duration?: number }) {
 }
 
 // 统一生成纯小写规范表单业务 ID (例如: cli_diy_20261012_7x8k / ind_diy_... / ent_tpl_...)
-// 结构: [cli客户/ind个人/ent机构]_[diy自建/tpl模板]_[日期]_[纯小写防重随机码]
+// 结构: [cli客户/ind个人/ent实体]_[diy自建/tpl模板]_[日期]_[纯小写防重随机码]
 export function generateFormId(
   profileType: ProfileType = 'customer',
   source: 'diy' | 'template' = 'diy'

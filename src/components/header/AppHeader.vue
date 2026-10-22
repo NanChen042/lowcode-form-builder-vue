@@ -144,7 +144,7 @@
       <LanguageSwitcher />
 
       <div v-if="store.org.companyName" class="flex items-center gap-1.5 px-2 py-1 select-none text-slate-700 cursor-default transition-colors" :title="store.org.companyName">
-        <Building2 class="w-4 h-4 text-slate-600 shrink-0" />
+        <img :src="companyIcon" alt="Company" class="w-4 h-4 object-contain shrink-0" />
         <span class="text-[13px] font-semibold max-w-[160px] sm:max-w-[220px] truncate leading-none">
           {{ store.org.companyName }}
         </span>
@@ -354,7 +354,6 @@ import {
   Check,
   Loader2,
   Pencil,
-  Building2,
   HelpCircle,
   Languages,
   Play
@@ -366,6 +365,7 @@ import {
 } from '@/utils/translationHelper';
 
 import logoUrl from '@/assets/logo.png';
+import companyIcon from '@/assets/gs.png';
 import helpVideoUrl from '@/help.mp4';
 import guideCoverZh from '@/assets/guide-cover-zh.webp';
 import guideCoverEn from '@/assets/guide-cover-en.webp';

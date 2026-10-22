@@ -547,9 +547,9 @@ const scenarioTemplates = [
   },
   {
     key: 'kyc-entity' as const,
-    title: '机构案例 KYC 模板',
+    title: '实体案例 KYC 模板',
     title_en: 'Entity KYC Template',
-    tag: '机构案例',
+    tag: '实体案例',
     tag_en: 'Entity',
     tagColor: 'arcoblue',
     image: tplEntityImg,
