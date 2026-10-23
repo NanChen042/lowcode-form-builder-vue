@@ -94,10 +94,9 @@ router.beforeEach(async (to, _from, next) => {
     return next();
   }
 
-  // 7. 仅在正式服务器环境：验真不通过 (未登录或 Token 失效) 时坚决阻断进入，重定向到 Algo 登录页
+  // 7. 仅在正式服务器环境：验真不通过 (未登录或 Token 失效) 时坚决阻断进入，直接跳转到 Algo 登录页
   if (typeof window !== 'undefined') {
-    const currentUrl = encodeURIComponent(window.location.href);
-    window.location.href = `/pc/login/?redirect=${currentUrl}`;
+    window.location.href = '/pc/login/';
   }
 });
 

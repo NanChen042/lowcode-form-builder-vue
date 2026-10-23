@@ -77,9 +77,16 @@ export interface ProfileFieldItem {
   label: string;
   label_en?: string;
   value: string;
+  skeletonWidth?: string;
 }
 
 export interface ProfileRelation {
+  title?: string;
+  title_en?: string;
+  entityLabel?: string;
+  entityLabel_en?: string;
+  typeLabel?: string;
+  typeLabel_en?: string;
   motherName?: string;
   relationships?: string[];
   relationships_en?: string[];
@@ -89,9 +96,15 @@ export interface ProfileCapitalItem {
   currency?: string;
   shareType?: string;
   shareType_en?: string;
+  shareClassLabel?: string;
+  shareClassLabel_en?: string;
   sharesHeld: string | number;
+  sharesHeldLabel?: string;
+  sharesHeldLabel_en?: string;
   shareRatio?: string | number;
   paidUpAmount: string;
+  paidUpAmountLabel?: string;
+  paidUpAmountLabel_en?: string;
 }
 
 export interface FormPageSchema {
@@ -106,6 +119,8 @@ export interface FormPageSchema {
   showSkeleton?: boolean;
   profileFields?: ProfileFieldItem[];
   relation?: ProfileRelation;
+  capitalTitle?: string;
+  capitalTitle_en?: string;
   capitalList?: ProfileCapitalItem[];
 }
 

@@ -185,12 +185,6 @@
               </template>
               {{ t('user.profile') }}
             </a-doption>
-            <a-doption @click="handleUserAction('activity')">
-              <template #icon>
-                <IconHistory class="text-[14px]" />
-              </template>
-              {{ t('user.activity') }}
-            </a-doption>
             <a-doption @click="handleUserAction('settings')">
               <template #icon>
                 <IconSettings class="text-[14px]" />
@@ -343,7 +337,6 @@ import { Message } from '@arco-design/web-vue';
 import {
   IconUser,
   IconSettings,
-  IconHistory,
   IconExport,
   IconDown
 } from '@arco-design/web-vue/es/icon';

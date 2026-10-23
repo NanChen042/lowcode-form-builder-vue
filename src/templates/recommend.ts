@@ -1,4 +1,39 @@
-import type { FormSchema, ProfileType } from '@/types/schema';
+import type { FormSchema, ProfileType, ProfileFieldItem } from '@/types/schema';
+
+export const presetCustomerProfileFields: ProfileFieldItem[] = [
+  { label: '企业注册全称', label_en: 'Company Name', value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '65%' },
+  { label: '统一机构识别码 (UEN)', label_en: 'UEN', value: '202319827K', skeletonWidth: '40%' },
+  { label: '注册设立国家', label_en: 'Country of Incorporation', value: '新加坡 / Singapore', skeletonWidth: '30%' },
+  { label: '法律实体形式', label_en: 'Entity Type', value: '私人豁免有限公司 / Private Limited Company', skeletonWidth: '45%' },
+  { label: '授权代表姓名', label_en: 'Authorized Representative', value: 'Alexander Tan (陈建国)', skeletonWidth: '35%' },
+  { label: '官方联络邮箱', label_en: 'Contact Email', value: 'compliance@algocandy.com', skeletonWidth: '55%' },
+  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+];
+
+export const presetIndividualProfileFields: ProfileFieldItem[] = [
+  { label: '姓名', label_en: 'Name', value: '陈建国 (Alexander Tan)', skeletonWidth: '40%' },
+  { label: '国籍语言姓名', label_en: 'Native Name', value: '陈建国', skeletonWidth: '30%' },
+  { label: '国籍', label_en: 'Nationality', value: '新加坡 / Singapore', skeletonWidth: '25%' },
+  { label: '新加坡身份类型', label_en: 'Singapore Identity Status', value: '公民 / Citizen', skeletonWidth: '30%' },
+  { label: 'NRIC/FIN(如适用)', label_en: 'NRIC/FIN', value: 'S****123A', skeletonWidth: '35%' },
+  { label: '证件类型', label_en: 'ID Type', value: '护照 / Passport', skeletonWidth: '25%' },
+  { label: '证件号码', label_en: 'ID Number', value: 'E98765432', skeletonWidth: '40%' },
+  { label: '出生日期', label_en: 'Date of Birth', value: '1985-06-15', skeletonWidth: '35%' },
+  { label: '性别', label_en: 'Gender', value: '男 / Male', skeletonWidth: '20%' },
+  { label: '手机号码', label_en: 'Mobile Phone', value: '+65 91234567', skeletonWidth: '45%' },
+  { label: '电子邮箱', label_en: 'Email', value: 'alex.tan@example.com', skeletonWidth: '50%' },
+  { label: '居住地址', label_en: 'Residential Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+];
+
+export const presetEntityProfileFields: ProfileFieldItem[] = [
+  { label: '企业注册全称', label_en: 'Company Name', value: 'Algo Global Holdings Ltd.', skeletonWidth: '65%' },
+  { label: '统一机构识别码 (UEN)', label_en: 'UEN', value: '202100888E', skeletonWidth: '40%' },
+  { label: '注册设立国家', label_en: 'Country of Incorporation', value: '新加坡 / Singapore', skeletonWidth: '30%' },
+  { label: '法律实体形式', label_en: 'Entity Type', value: '私人豁免有限公司 / Private Limited Company', skeletonWidth: '45%' },
+  { label: '授权代表姓名', label_en: 'Authorized Representative', value: 'Alexander Tan (陈建国)', skeletonWidth: '35%' },
+  { label: '官方联络邮箱', label_en: 'Contact Email', value: 'contact@algoholdings.com', skeletonWidth: '55%' },
+  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+];
 
 // 创建空白画布工厂函数
 export function createBlankTemplate(
@@ -17,6 +52,10 @@ export function createBlankTemplate(
   };
   const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_Customer';
   const resolvedDesc = description || '';
+
+  const defaultFields = normType === 'individual'
+    ? presetIndividualProfileFields
+    : (normType === 'entity' ? presetEntityProfileFields : presetCustomerProfileFields);
 
   return {
     schemaVersion: '1.0.0',
@@ -39,7 +78,8 @@ export function createBlankTemplate(
         title_en: 'Basic Information',
         description: '',
         description_en: '',
-        fields: []
+        fields: [],
+        profileFields: defaultFields
       },
       {
         id: 'page_form_1',
@@ -81,7 +121,8 @@ export const kycCustomerTemplate: FormSchema = {
       title_en: 'Basic Information',
       description: '',
       description_en: '',
-      fields: []
+      fields: [],
+      profileFields: presetCustomerProfileFields
     },
     {
       id: 'page_kyc_cus_biz',
@@ -272,7 +313,37 @@ export const kycIndividualTemplate: FormSchema = {
       title_en: 'Basic Information',
       description: '',
       description_en: '',
-      fields: []
+      fields: [],
+      profileFields: presetIndividualProfileFields,
+      relation: {
+        title: '关联信息',
+        title_en: 'Relationship Information',
+        entityLabel: '关联实体',
+        entityLabel_en: 'Associated Entity',
+        typeLabel: '关联类型',
+        typeLabel_en: 'Relationship Type',
+        motherName: 'Algo Global Trading Pte. Ltd.',
+        relationships: ['董事', '股东', '最终受益人'],
+        relationships_en: ['Director', 'Shareholder', 'Ultimate Beneficial Owner']
+      },
+      capitalTitle: '股份与出资信息',
+      capitalTitle_en: 'Shareholding & Capital Info',
+      capitalList: [
+        {
+          currency: 'SGD',
+          shareType: '普通股',
+          shareType_en: 'Ordinary Shares',
+          shareClassLabel: '股份类别',
+          shareClassLabel_en: 'Share Class',
+          sharesHeld: '10,000',
+          sharesHeldLabel: '持有股份数',
+          sharesHeldLabel_en: 'Shares Held',
+          shareRatio: '25.00%',
+          paidUpAmount: '10,000.00 SGD',
+          paidUpAmountLabel: '对应已缴股本金额',
+          paidUpAmountLabel_en: 'Allocated Paid-up Capital'
+        }
+      ]
     },
     {
       id: 'page_kyc_ind_ubo',
@@ -562,7 +633,37 @@ export const kycEntityTemplate: FormSchema = {
       title_en: 'Basic Information',
       description: '',
       description_en: '',
-      fields: []
+      fields: [],
+      profileFields: presetEntityProfileFields,
+      relation: {
+        title: '关联信息',
+        title_en: 'Relationship Information',
+        entityLabel: '关联实体',
+        entityLabel_en: 'Associated Entity',
+        typeLabel: '关联类型',
+        typeLabel_en: 'Relationship Type',
+        motherName: 'Algo Global Holdings Ltd.',
+        relationships: ['子公司', '机构股东'],
+        relationships_en: ['Subsidiary', 'Corporate Shareholder']
+      },
+      capitalTitle: '股份与出资信息',
+      capitalTitle_en: 'Shareholding & Capital Info',
+      capitalList: [
+        {
+          currency: 'USD',
+          shareType: '普通股',
+          shareType_en: 'Ordinary Shares',
+          shareClassLabel: '股份类别',
+          shareClassLabel_en: 'Share Class',
+          sharesHeld: '1,000,000',
+          sharesHeldLabel: '持有股份数',
+          sharesHeldLabel_en: 'Shares Held',
+          shareRatio: '100.00%',
+          paidUpAmount: '1,000,000.00 USD',
+          paidUpAmountLabel: '对应已缴股本金额',
+          paidUpAmountLabel_en: 'Allocated Paid-up Capital'
+        }
+      ]
     },
     {
       id: 'page_kyc_ent_1',

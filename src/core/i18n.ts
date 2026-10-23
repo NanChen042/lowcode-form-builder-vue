@@ -117,7 +117,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 用户下拉菜单 (User Menu)
     'user.profile': '个人中心',
     'user.settings': '账号设置',
-    'user.activity': '操作日志',
     'user.logout': '退出登录',
     'user.role': '系统管理员',
 
@@ -710,7 +709,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 用户下拉菜单 (User Menu)
     'user.profile': 'Profile',
     'user.settings': 'Settings',
-    'user.activity': 'Activity Log',
     'user.logout': 'Sign Out',
     'user.role': 'System Administrator',
 
