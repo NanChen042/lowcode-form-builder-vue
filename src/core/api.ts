@@ -112,7 +112,7 @@ export const FormAPI = {
     await delay(300);
     const origin = typeof window !== 'undefined' ? window.location.origin : 'http://jzw.qingmob.com';
     const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const formId = schema.meta?.formId || schema.meta?.serialNo || `form_${Date.now()}`;
+    const formId = (schema.meta?.formId || schema.meta?.serialNo || `form_${Date.now()}`).toLowerCase().trim();
     const dynamicUrl = isLocal
       ? `http://localhost:5174/?id=${encodeURIComponent(formId)}`
       : `${origin}/form-mobile/?id=${encodeURIComponent(formId)}`;
