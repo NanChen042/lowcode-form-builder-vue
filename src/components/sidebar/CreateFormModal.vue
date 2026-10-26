@@ -43,9 +43,11 @@
         <a-input
           ref="titleInputRef"
           v-model="customTitle"
+          :error="nameError"
           :placeholder="computedTitlePlaceholder"
           allow-clear
           class="rounded h-9"
+          @input="nameError = false"
           @keydown.enter="handleConfirm"
         />
       </div>
@@ -57,10 +59,10 @@
 
     <template #footer>
       <div class="flex items-center justify-end gap-2">
-        <a-button type="primary" class="bg-[#1677ff]" @click="handleConfirm">
+        <a-button type="primary" class="bg-[#1677ff]" :loading="isSubmitting" @click="handleConfirm">
           {{ t('modal.createForm.create') }}
         </a-button>
-        <a-button @click="handleCancel">
+        <a-button :disabled="isSubmitting" @click="handleCancel">
           {{ t('modal.createForm.cancel') }}
         </a-button>
       </div>
@@ -83,10 +85,10 @@
 
     <template #footer>
       <div class="flex items-center justify-end gap-2">
-        <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" @click="executeCreateCanvas">
+        <a-button type="primary" status="warning" class="bg-amber-600 hover:bg-amber-700" :loading="isSubmitting" @click="executeCreateCanvas">
           {{ t('modal.createForm.confirmOverwriteBtn') }}
         </a-button>
-        <a-button @click="confirmOverwriteVisible = false">
+        <a-button :disabled="isSubmitting" @click="confirmOverwriteVisible = false">
           {{ t('modal.createForm.cancel') }}
         </a-button>
       </div>
@@ -99,8 +101,14 @@ import { ref, computed, watch, nextTick } from 'vue';
 import type { ProfileType } from '@/types/schema';
 import {
   store,
-  createNewCanvas
+  isRisk,
+  createNewCanvas,
+  syncUrlParams,
+  establishBaseline,
+  generateFormId
 } from '@/core/store';
+import { createBlankTemplate, createRiskAssessmentTemplate } from '@/templates/recommend';
+import { FormAPI } from '@/core/api';
 import { t } from '@/core/i18n';
 import {
   Building2,
@@ -124,6 +132,8 @@ const modalVisible = computed({
 
 const selectedProfile = ref<ProfileType>('customer');
 const customTitle = ref('');
+const nameError = ref(false);
+const isSubmitting = ref(false);
 const titleInputRef = ref<any>(null);
 
 const profileOptions = computed(() => [
@@ -133,6 +143,11 @@ const profileOptions = computed(() => [
 ]);
 
 const defaultTitleForProfile = computed(() => {
+  if (isRisk.value) {
+    if (selectedProfile.value === 'individual') return 'SG_Risk_Individual';
+    if (selectedProfile.value === 'entity') return 'SG_Risk_Entity';
+    return 'SG_Risk_Customer';
+  }
   if (selectedProfile.value === 'individual') return 'SG_CDD_Individual';
   if (selectedProfile.value === 'entity') return 'SG_CDD_Entity';
   return 'SG_CDD_Customer';
@@ -147,6 +162,7 @@ watch(
   val => {
     if (val) {
       customTitle.value = '';
+      nameError.value = false;
       selectedProfile.value = store.meta.profileType || 'customer';
       nextTick(() => {
         titleInputRef.value?.focus();
@@ -173,6 +189,8 @@ function isCanvasDirty(): boolean {
 }
 
 function handleConfirm() {
+  if (isSubmitting.value) return;
+  nameError.value = false;
   if (isCanvasDirty()) {
     confirmOverwriteVisible.value = true;
     return;
@@ -180,20 +198,53 @@ function handleConfirm() {
   executeCreateCanvas();
 }
 
-function executeCreateCanvas() {
+async function executeCreateCanvas() {
+  if (isSubmitting.value) return;
   const pType = selectedProfile.value;
   const title = customTitle.value.trim() || defaultTitleForProfile.value;
+  const candidateId = generateFormId(pType, 'diy');
+  const candidateSchema = isRisk.value
+    ? createRiskAssessmentTemplate(pType, title, '', '')
+    : createBlankTemplate(pType, title, '', '');
+  candidateSchema.meta.source = 'diy';
+  candidateSchema.meta.serialNo = candidateId;
+  candidateSchema.meta.formId = candidateId;
+  candidateSchema.meta.createdAt = Date.now();
 
-  createNewCanvas({
-    title,
-    description: '',
-    profileType: pType
-  });
+  isSubmitting.value = true;
+  try {
+    const res = await FormAPI.saveTemplate(candidateSchema);
+    if (res.success) {
+      createNewCanvas({
+        title,
+        description: '',
+        profileType: pType
+      });
+      const savedId = res.data?.id || candidateId;
+      store.meta.formId = savedId;
+      store.meta.serialNo = savedId;
+      syncUrlParams(savedId);
+      establishBaseline();
+      const now = new Date();
+      store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-  Message.success(t('modal.createForm.createdSuccess'));
-  confirmOverwriteVisible.value = false;
-  emit('created');
-  modalVisible.value = false;
+      Message.success(t('modal.createForm.createdSuccess'));
+      confirmOverwriteVisible.value = false;
+      emit('created');
+      modalVisible.value = false;
+    } else if (res.code == 409) {
+      confirmOverwriteVisible.value = false;
+      nameError.value = true;
+      Message.error(t('publish.nameDuplicate'));
+      nextTick(() => {
+        titleInputRef.value?.focus?.();
+      });
+    } else {
+      Message.error(res.message || t('header.saveFailed'));
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
 

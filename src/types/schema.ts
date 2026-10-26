@@ -69,6 +69,8 @@ export interface FormElement {
     fieldKey: string;
     value: string;
   };
+  // 风险评估问题权重 (1-10，默认 1)
+  weight?: number;
 }
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
@@ -140,6 +142,7 @@ export interface FormMeta {
   description: string;
   description_en?: string;
   profileType?: ProfileType;
+  formType?: 'kyc' | 'risk';
   enabledLocales?: ('zh' | 'en')[];
   // 内部创建模式：仅内部业务与后端识别，不在 URL 暴露明文
   source?: 'template' | 'diy';

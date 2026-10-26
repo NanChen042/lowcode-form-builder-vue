@@ -26,7 +26,7 @@
       <a-textarea
         id="prop-label-input"
         v-model="fieldLabelModel"
-        :auto-size="{ minRows: 1, maxRows: 4 }"
+        :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 5 }"
         allow-clear
         :placeholder="element.type === 'alert' ? t('common.notice') : t('prop.fieldLabelPlaceholder')"
         class="w-full"
@@ -37,7 +37,44 @@
       />
     </div>
 
-    <div v-if="element.type !== 'alert'" class="mb-3">
+    <template v-if="isRisk">
+      <div class="mb-3 pt-1">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[12px] font-medium text-slate-700">
+            {{ store.currentLocale === 'en' ? 'Weight (1-10)' : '权重 (1-10)' }}
+          </label>
+        </div>
+        <a-input-number
+          v-model="questionWeightModel"
+          :min="1"
+          :max="10"
+          :step="1"
+          :precision="0"
+          mode="button"
+          class="w-full"
+        />
+        <p class="mt-2 text-[11.5px] leading-relaxed text-slate-500 m-0">
+          {{
+            store.currentLocale === 'en'
+              ? 'New questions default to weight 1. Selecting "Yes" indicates a risk hit and deducts the weight from the risk score. Phrase questions so that "Yes" clearly indicates risk.'
+              : '新问题默认权重为 1。选择 “Yes” 表示命中风险项，系统将按该问题的权重扣减风险评分。请将问题表述为：回答 “Yes” 时明确代表存在风险。'
+          }}
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-slate-200/90 bg-slate-50/80 p-3 flex items-start gap-2.5">
+        <Lock class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+        <div class="text-[11.5px] leading-relaxed text-slate-600">
+          {{
+            store.currentLocale === 'en'
+              ? 'Answer options are fixed as Yes / No / Not Applicable, where Yes is the risk answer and deducts points by the configured weight.'
+              : '回答选项固定为 Yes / No / Not Applicable，其中 Yes 为风险回答，并按所设权重扣分。'
+          }}
+        </div>
+      </div>
+    </template>
+
+    <div v-if="!isRisk && element.type !== 'alert'" class="mb-3">
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
           <label for="prop-help-input" class="text-[12px] font-medium text-slate-700">
@@ -122,7 +159,7 @@
       />
     </div>
 
-    <div v-if="element.type !== 'alert'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
+    <div v-if="!isRisk && element.type !== 'alert'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">
           {{ element.type === 'signature' ? t('prop.signatureRequired') : t('prop.required') }}
@@ -135,7 +172,7 @@
     </div>
 
     <CollapseTransition
-      v-if="element.type !== 'alert'"
+      v-if="!isRisk && element.type !== 'alert'"
       :key="`${element.id}-req`"
       :show="Boolean(isElementRequired)"
     >
@@ -294,15 +331,28 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, markDirty, isBilingual } from '@/core/store';
+import { store, isRisk, markDirty, isBilingual } from '@/core/store';
 import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
-import { HelpCircle, CornerDownRight, MessageSquare, Pencil, RotateCcw } from '@lucide/vue';
+import { HelpCircle, CornerDownRight, MessageSquare, Pencil, RotateCcw, Lock } from '@lucide/vue';
 
 const props = defineProps<{
   element: FormElement;
 }>();
+
+const questionWeightModel = computed<number>({
+  get() {
+    const w = Number(props.element.weight);
+    if (!w || isNaN(w)) return 1;
+    return Math.min(10, Math.max(1, Math.round(w)));
+  },
+  set(val: number) {
+    const num = Number(val);
+    props.element.weight = !num || isNaN(num) ? 1 : Math.min(10, Math.max(1, Math.round(num)));
+    markDirty();
+  }
+});
 
 const componentLabel = computed(() => {
   const meta = componentRegistry[props.element.type];
@@ -552,6 +602,7 @@ watch(
 );
 
 const canHaveMaxSelections = computed(() => {
+  if (isRisk.value) return false;
   if (props.element.type === 'checkbox') return true;
   if (['select', 'country', 'nationality'].includes(props.element.type) && props.element.multiple) return true;
   return false;

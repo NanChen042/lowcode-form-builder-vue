@@ -3,7 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>自定义表单构建器</title>
+    <script>
+      // 捕获旧版缓存 HTML 请求已更新的带 Hash JS/CSS 404 错误，自动刷新拉取最新入口
+      window.addEventListener(
+        'error',
+        function (e) {
+          var target = e.target || e.srcElement;
+          if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+            var src = target.src || target.href || '';
+            if (src.indexOf('/assets/') !== -1) {
+              var reloadKey = '__fb_asset_reload__';
+              var lastReload = Number(sessionStorage.getItem(reloadKey) || 0);
+              if (Date.now() - lastReload > 10000) {
+                sessionStorage.setItem(reloadKey, String(Date.now()));
+                var url = new URL(window.location.href);
+                url.searchParams.set('_v', String(Date.now()));
+                window.location.replace(url.toString());
+              }
+            }
+          }
+        },
+        true
+      );
+    </script>
     <link rel="stylesheet" href="/libs/intlTelInput.min.css" />
     <script src="/libs/intlTelInputWithUtils.min.js"></script>
     <style>

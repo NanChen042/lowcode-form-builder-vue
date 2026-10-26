@@ -10,7 +10,11 @@
         >
           <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none" />
         </span>
+        <span v-if="isRisk" class="option-text text-sm text-slate-700">
+          {{ getOptionLabel(opt) }}
+        </span>
         <EditableText
+          v-else
           :model-value="getOptionLabel(opt)"
           :placeholder="formatOptionLabel(idx + 1)"
           :element-id="element.id"
@@ -27,7 +31,7 @@
 <script setup lang="ts">
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { markDirty } from '@/core/store';
+import { isRisk, markDirty } from '@/core/store';
 import { t, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -40,6 +44,11 @@ function isChecked(val: string) {
 }
 
 function toggleDefaultCheckbox(optValue: string) {
+  if (isRisk.value) {
+    props.element.defaultValue = isChecked(optValue) ? '' : optValue;
+    markDirty();
+    return;
+  }
   const current = parseMultiValue(props.element.defaultValue);
   const idx = current.indexOf(optValue);
   if (idx !== -1) {

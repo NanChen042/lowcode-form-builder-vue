@@ -153,10 +153,10 @@
 
     <div class="flex flex-col items-center justify-center text-center">
       <p class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mt-10 tracking-tight">
-        {{ t('notFound.title') }}
+        {{ isFormNotFound ? t('notFound.formTitle') : t('notFound.title') }}
       </p>
       <p class="md:text-lg lg:text-xl text-gray-600 mt-4 max-w-lg">
-        {{ t('notFound.desc') }}
+        {{ isFormNotFound ? t('notFound.formDesc') : t('notFound.desc') }}
       </p>
 
       <!-- 操作按钮组 (遵循项目规范：标准 4px 微圆角、36px 黄金高度、#186df5 品牌色与白底精细描边次按钮) -->
@@ -164,10 +164,22 @@
         <button
           type="button"
           class="h-9 px-4 rounded bg-[#186df5] hover:bg-[#1660d8] active:bg-[#0f5fdb] text-white text-sm font-medium transition-colors duration-150 inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-          :title="t('notFound.backToBuilder')"
+          :title="primaryBtnText"
           @click="goToBuilder"
         >
           <svg
+            v-if="isFormNotFound"
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <svg
+            v-else
             xmlns="http://www.w3.org/2000/svg"
             class="w-4 h-4"
             fill="none"
@@ -177,7 +189,7 @@
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span>{{ t('notFound.backToBuilder') }}</span>
+          <span>{{ primaryBtnText }}</span>
         </button>
 
         <button
@@ -199,11 +211,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { store } from '@/core/store';
 import { t } from '@/core/i18n';
 
+const route = useRoute();
 const router = useRouter();
+
+const isFormNotFound = computed(() => {
+  return route.query.reason === 'form' || Boolean(route.query.id);
+});
+
+const primaryBtnText = computed(() => {
+  return isFormNotFound.value ? t('notFound.createNewForm') : t('notFound.backToBuilder');
+});
 
 // 自动倒计时
 const countdown = ref(15);
@@ -242,6 +264,13 @@ function goBackToAlgo() {
 }
 
 onMounted(() => {
+  const lang = route.query.lang;
+  if (lang === 'en' || lang === 'zh') {
+    store.currentLocale = lang;
+  }
+  if (typeof (window as any).__dismissAppLoader === 'function') {
+    (window as any).__dismissAppLoader();
+  }
   startCountdown();
 });
 

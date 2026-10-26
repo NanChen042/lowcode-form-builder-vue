@@ -55,11 +55,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   store,
+  isRisk,
+  selectElement,
   buildSchema,
   loadSchema,
-  syncUrlParams
+  syncUrlParams,
+  generateFormId,
+  establishBaseline
 } from '@/core/store';
 import { currentArcoLocale } from '@/core/i18n';
 import { FormAPI, UserAPI } from '@/core/api';
@@ -68,10 +73,10 @@ import {
   kycIndividualTemplate,
   kycEntityTemplate,
   blankTemplate,
-  createBlankTemplate,
+  createRiskAssessmentTemplate,
   allComponentsDemoTemplate
 } from '@/templates/recommend';
-import type { FormSchema, ProfileType } from '@/types/schema';
+import type { FormSchema } from '@/types/schema';
 import { checkAutoStartTour } from '@/utils/useAppTour';
 
 import AppHeader from '@/components/header/AppHeader.vue';
@@ -83,6 +88,7 @@ import WelcomeWizardModal from '@/components/common/WelcomeWizardModal.vue';
 import PreviewModal from '@/components/preview/PreviewModal.vue';
 import PublishModal from '@/components/preview/PublishModal.vue';
 
+const router = useRouter();
 const createCanvasModalVisible = ref(false);
 const welcomeWizardVisible = ref(false);
 const isInitialWizardMandatory = ref(false);
@@ -131,14 +137,14 @@ function handleFormCreated() {
 
 function handleCreateCanvasCancel() {
   createCanvasModalVisible.value = false;
-  if (openedFromWizard.value || store.pages.length === 0) {
+  if (!isRisk.value && (openedFromWizard.value || store.pages.length === 0)) {
     welcomeWizardVisible.value = true;
   }
 }
 
 function handleCreateCanvasClose() {
   createCanvasModalVisible.value = false;
-  if (store.pages.length === 0) {
+  if (!isRisk.value && store.pages.length === 0) {
     welcomeWizardVisible.value = true;
   }
 }
@@ -148,6 +154,9 @@ function handleWelcomeWizardClosed() {
   store.sidebarTab = 'components';
   if (store.pages.length === 0) {
     loadSchema(blankTemplate);
+    store.lastSavedHash = '';
+    store.isDirty = true;
+    store.lastSavedTime = '';
   }
 }
 const currentPreviewSchema = ref<FormSchema>({
@@ -175,9 +184,12 @@ watch(
 onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const rawId = (urlParams.get('id') || '').toLowerCase().trim();
+  const isCopyMode = urlParams.get('copy') === '1' || urlParams.get('copy') === 'true';
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();
   const mockParam = (urlParams.get('mock') || '').toLowerCase().trim();
   const typeParam = (urlParams.get('type') || urlParams.get('profileType') || '').toLowerCase().trim();
+  const isRiskRoute = window.location.pathname.includes('/risk') || urlParams.get('mode') === 'risk';
+  store.editorMode = isRiskRoute ? 'risk' : 'standard';
 
   if (rawId) {
     store.isCanvasLoading = true;
@@ -239,6 +251,19 @@ onMounted(async () => {
     mockParam === 'true';
 
   const resetToBlankState = () => {
+    if (isRisk.value) {
+      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer');
+      loadSchema(riskSchema, { duration: 0 });
+      store.meta.formId = '';
+      store.meta.serialNo = '';
+      syncUrlParams('');
+      store.activeTemplateKey = 'blank';
+      store.sidebarTab = 'components';
+      if (store.pages[0]?.fields?.[0]) {
+        selectElement(store.pages[0].fields[0]);
+      }
+      return;
+    }
     loadSchema(blankTemplate, { duration: 0 });
     store.selectedType = null;
     store.selectedId = null;
@@ -250,6 +275,8 @@ onMounted(async () => {
     welcomeWizardVisible.value = true;
   };
 
+  let notFound = false;
+
   try {
     if (isAllComponentsMock) {
       targetTemplate = allComponentsDemoTemplate;
@@ -260,32 +287,23 @@ onMounted(async () => {
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
         targetTemplate = res.data.schema;
         targetTemplateKey = 'saved';
-      } else {
-        const isCus = rawId.startsWith('cus_') || rawId.startsWith('cli_');
-        const isEntity = rawId.startsWith('ent_');
-        const isTpl = rawId.includes('_tpl_');
-        const resolvedType: ProfileType = isCus ? 'customer' : (isEntity ? 'entity' : 'individual');
-
-        if (!typeParam) {
-          store.lockedProfileType = resolvedType;
-        }
-
-        if (isTpl) {
-          if (resolvedType === 'customer') {
-            targetTemplate = kycCustomerTemplate;
-            targetTemplateKey = 'kyc-customer';
-          } else if (resolvedType === 'entity') {
-            targetTemplate = kycEntityTemplate;
-            targetTemplateKey = 'kyc-entity';
-          } else {
-            targetTemplate = kycIndividualTemplate;
-            targetTemplateKey = 'kyc-individual';
-          }
+      } else if (rawId.startsWith('preset-cdd-')) {
+        if (rawId.includes('individual')) {
+          targetTemplate = kycIndividualTemplate;
+          targetTemplateKey = 'kyc-individual';
+        } else if (rawId.includes('entity')) {
+          targetTemplate = kycEntityTemplate;
+          targetTemplateKey = 'kyc-entity';
         } else {
-          targetTemplate = createBlankTemplate(resolvedType);
-          targetTemplateKey = 'blank';
+          targetTemplate = kycCustomerTemplate;
+          targetTemplateKey = 'kyc-customer';
         }
+      } else {
+        notFound = true;
       }
+    } else if (isRisk.value) {
+      resetToBlankState();
+      targetTemplateKey = 'blank';
     } else if (tplParam === 'kyc-customer' || tplParam === 'kyc-client' || typeParam === 'customer' || typeParam === 'client') {
       targetTemplate = kycCustomerTemplate;
       targetTemplateKey = 'kyc-customer';
@@ -300,27 +318,90 @@ onMounted(async () => {
       targetTemplateKey = 'blank';
     }
   } catch {
-    resetToBlankState();
+    if (rawId && !rawId.startsWith('preset-cdd-')) {
+      notFound = true;
+    } else {
+      resetToBlankState();
+    }
   } finally {
     if (loadingTimer) {
       clearTimeout(loadingTimer);
       loadingTimer = null;
     }
-    if (rawId || tplParam || isAllComponentsMock) {
-      loadSchema(targetTemplate, { duration: 0 });
-      const effectiveId = isAllComponentsMock ? (rawId || 'all_components_demo') : rawId;
-      if (effectiveId) {
-        store.meta.formId = effectiveId;
-        store.meta.serialNo = effectiveId;
-        syncUrlParams(effectiveId);
-      } else {
-        store.meta.formId = '';
-        store.meta.serialNo = '';
-        syncUrlParams('');
-      }
-      store.activeTemplateKey = targetTemplateKey;
-    }
     store.isCanvasLoading = false;
+  }
+
+  if (notFound) {
+    if (typeof (window as any).__dismissAppLoader === 'function') {
+      (window as any).__dismissAppLoader();
+    }
+    const notFoundPath = window.location.pathname.includes('/form-builder') ? '/form-builder/404' : '/404';
+    router.replace({
+      path: notFoundPath,
+      query: {
+        reason: 'form',
+        id: rawId,
+        lang: store.currentLocale
+      }
+    });
+    return;
+  }
+
+  if (rawId || tplParam || isAllComponentsMock) {
+    loadSchema(targetTemplate, { duration: 0 });
+    if (isCopyMode) {
+      const newCopiedId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
+      store.meta.formId = newCopiedId;
+      store.meta.serialNo = newCopiedId;
+      if (store.meta.title && !store.meta.title.endsWith('_副本')) {
+        store.meta.title = `${store.meta.title}_副本`;
+      }
+      if (store.meta.title_en && !store.meta.title_en.endsWith('_Copy')) {
+        store.meta.title_en = `${store.meta.title_en}_Copy`;
+      }
+      let saveRes = await FormAPI.saveTemplate(buildSchema());
+      if (!saveRes.success && saveRes.code == 409) {
+        const suffix = newCopiedId.split('_').pop() || String(Date.now()).slice(-4);
+        store.meta.title = `${store.meta.title}_${suffix}`;
+        if (store.meta.title_en) {
+          store.meta.title_en = `${store.meta.title_en}_${suffix}`;
+        }
+        saveRes = await FormAPI.saveTemplate(buildSchema());
+      }
+      if (saveRes.success) {
+        const savedId = saveRes.data?.id || newCopiedId;
+        store.meta.formId = savedId;
+        store.meta.serialNo = savedId;
+        syncUrlParams(savedId);
+        establishBaseline();
+        const now = new Date();
+        store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      } else {
+        syncUrlParams('');
+        store.lastSavedHash = '';
+        store.isDirty = true;
+        store.lastSavedTime = '';
+      }
+    } else if (targetTemplateKey === 'saved' || isAllComponentsMock) {
+      const effectiveId = isAllComponentsMock ? (rawId || 'all_components_demo') : rawId;
+      store.meta.formId = effectiveId;
+      store.meta.serialNo = effectiveId;
+      syncUrlParams(effectiveId);
+      if (targetTemplateKey !== 'saved') {
+        store.lastSavedHash = '';
+        store.isDirty = true;
+        store.lastSavedTime = '';
+      }
+    } else {
+      const newFormId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'template');
+      store.meta.formId = newFormId;
+      store.meta.serialNo = newFormId;
+      syncUrlParams('');
+      store.lastSavedHash = '';
+      store.isDirty = true;
+      store.lastSavedTime = '';
+    }
+    store.activeTemplateKey = targetTemplateKey;
   }
 
   if (rawId || tplParam || isAllComponentsMock) {

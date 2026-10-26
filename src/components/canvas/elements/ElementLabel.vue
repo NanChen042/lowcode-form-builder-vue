@@ -6,7 +6,10 @@
       :element-id="element.id"
       field="label"
       custom-class="label-text inline break-words"
-    />
+    /><span
+      v-if="isRisk"
+      class="ml-1.5 inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-1.5 py-0.5 text-[11px] font-semibold text-[#1677ff] leading-none align-middle select-none"
+    >{{ store.currentLocale === 'en' ? `Weight ${element.weight ?? 1}` : `权重 ${element.weight ?? 1}` }}</span>
 
     <EditableText
       v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
@@ -37,6 +40,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
+import { store, isRisk } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 

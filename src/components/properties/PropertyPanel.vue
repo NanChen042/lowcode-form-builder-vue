@@ -27,7 +27,9 @@
       <section class="flex flex-1 min-h-0 flex-col w-full">
         <div class="flex items-center justify-between border-b border-[#f0f0f0] px-4 py-3 shrink-0">
           <div>
-            <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800">{{ t('prop.title') }}</h2>
+            <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800">
+              {{ isRisk && selectedElement ? (store.currentLocale === 'en' ? 'Question Settings' : '问题设置') : t('prop.title') }}
+            </h2>
             <p class="m-0 text-[11px] leading-4 text-slate-400">
               {{ store.selectedType === 'page' ? t('prop.pageSubtitle') : (selectedElement ? t('prop.elementSubtitle') : t('prop.emptyTitle')) }}
             </p>
@@ -110,11 +112,12 @@
             <FieldBasicProps :element="selectedElement" />
 
             <FieldSpecificProps
+              v-if="!isRisk"
               :element="selectedElement"
               @open-country-modal="openCountryListModal"
             />
 
-            <FieldDependencyCard :element="selectedElement" />
+            <FieldDependencyCard v-if="!isRisk" :element="selectedElement" />
 
             <div class="pt-5 border-t border-slate-100 flex gap-2">
               <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
@@ -144,6 +147,7 @@
 import { computed, ref, watch, nextTick } from 'vue';
 import {
   store,
+  isRisk,
   selectedElement,
   selectedPage,
   duplicateElement,
@@ -185,7 +189,15 @@ const { isResizing, startResize } = useSidebarResize({
 
 const headerBadgeText = computed(() => {
   if (store.selectedType === 'page') return store.selectedId || t('prop.page');
-  if (store.selectedType === 'element') return store.selectedId || t('prop.unselected');
+  if (store.selectedType === 'element') {
+    if (isRisk.value && store.selectedId) {
+      const idx = store.pages[0]?.fields?.findIndex(f => f.id === store.selectedId) ?? -1;
+      if (idx !== -1) {
+        return `Question ${String(idx + 1).padStart(2, '0')}`;
+      }
+    }
+    return store.selectedId || t('prop.unselected');
+  }
   return t('prop.unselected');
 });
 

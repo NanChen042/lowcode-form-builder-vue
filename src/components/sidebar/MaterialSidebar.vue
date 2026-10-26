@@ -14,7 +14,7 @@
       class="flex h-full min-h-0 flex-row shrink-0"
       :style="{ width: `${store.leftSidebarWidth}px` }"
     >
-      <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
+      <div v-if="!isRisk" class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
         <div id="tour-activity-bar" class="flex flex-col items-center gap-2 w-full px-1">
           <button
               type="button"
@@ -263,6 +263,28 @@
           </div>
 
           <div id="tour-component-panel" v-show="activeTab === 'components'" class="space-y-4">
+            <button
+              v-if="isRisk"
+              type="button"
+              class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-slate-200/90 hover:border-[#1677ff] bg-white hover:bg-blue-50/30 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs hover:shadow-xs"
+              @click="$emit('open-create-canvas')"
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 group-hover:bg-[#1677ff] text-[#1677ff] group-hover:text-white transition-colors shrink-0">
+                  <Plus class="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div class="flex flex-col text-left min-w-0">
+                  <span class="text-[12.5px] font-semibold text-slate-800 group-hover:text-[#1677ff] leading-tight">
+                    {{ store.currentLocale === 'en' ? 'New Risk Form' : '新建风险评估表单' }}
+                  </span>
+                  <span class="text-[10.5px] text-slate-400 leading-tight mt-0.5 truncate">
+                    {{ store.currentLocale === 'en' ? 'Select Client / Individual / Entity' : '选择客户 / 个人 / 实体主体创建' }}
+                  </span>
+                </div>
+              </div>
+              <ArrowRight class="w-3.5 h-3.5 text-slate-300 group-hover:text-[#1677ff] group-hover:translate-x-0.5 transition-all shrink-0 ml-1.5" />
+            </button>
+
             <section v-if="filteredBasicComponents.length > 0">
               <h3 class="mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
                 {{ t('sidebar.catBasic') }}
@@ -459,7 +481,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { store, addElement, focusOnPage, addPage, applyTemplateKey, selectPage, deletePage } from '@/core/store';
+import { store, isRisk, addElement, focusOnPage, addPage, applyTemplateKey, selectPage, deletePage } from '@/core/store';
+import { RISK_FIXED_OPTIONS } from '@/templates/recommend';
 import { t, getPageText, getFieldText } from '@/core/i18n';
 import { componentRegistry, getComponentIcon } from '@/registry/components';
 import { syncDragPlaceholderHeight } from '@/utils/helpers';
@@ -508,9 +531,9 @@ function handleTriggerTour() {
 }
 
 const activeTab = computed({
-  get: () => store.sidebarTab,
+  get: () => (isRisk.value ? 'components' : store.sidebarTab),
   set: (val: 'templates' | 'components' | 'pages') => {
-    store.sidebarTab = val;
+    store.sidebarTab = isRisk.value ? 'components' : val;
   }
 });
 
@@ -777,6 +800,21 @@ function getGhostComponent(type: ComponentType) {
 function createGhostElement(type: ComponentType): FormElement {
   const meta = componentRegistry[type];
   const defaultData = meta ? meta.defaultData() : {};
+  if (isRisk.value) {
+    return {
+      id: `ghost_${type}`,
+      type: 'checkbox',
+      key: `ghost_${type}`,
+      required: true,
+      showLabel: true,
+      layout: 'inline',
+      maxSelections: 1,
+      weight: 1,
+      label: '',
+      label_en: '',
+      options: RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+    };
+  }
   return {
     id: `ghost_${type}`,
     type,
@@ -804,7 +842,9 @@ function getGhostElement(type: ComponentType) {
 }
 
 const filteredBasicComponents = computed(() => {
-  const all = Object.values(componentRegistry).filter(c => c.category === 'basic');
+  const all = Object.values(componentRegistry).filter(c =>
+    isRisk.value ? c.type === 'checkbox' : c.category === 'basic'
+  );
   if (!searchQuery.value.trim()) return all;
   const q = searchQuery.value.trim().toLowerCase();
   return all.filter(
@@ -816,6 +856,7 @@ const filteredBasicComponents = computed(() => {
 });
 
 const filteredBusinessComponents = computed(() => {
+  if (isRisk.value) return [];
   const all = Object.values(componentRegistry).filter(c => c.category === 'business');
   if (!searchQuery.value.trim()) return all;
   const q = searchQuery.value.trim().toLowerCase();

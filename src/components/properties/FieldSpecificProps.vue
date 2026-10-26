@@ -9,22 +9,10 @@
       </div>
 
       <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs select-none">
-        <div
-          role="button"
-          tabindex="0"
-          class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-          :class="(!element.inputType || element.inputType === 'text') ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-          @click="element.inputType = 'text'; markDirty();"
-        >
+        <div role="button" tabindex="0" class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="(!element.inputType || element.inputType === 'text') ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="element.inputType = 'text'; markDirty();">
           {{ t('prop.inputTypeText') }}
         </div>
-        <div
-          role="button"
-          tabindex="0"
-          class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-          :class="element.inputType === 'number' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-          @click="element.inputType = 'number'; markDirty();"
-        >
+        <div role="button" tabindex="0" class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="element.inputType === 'number' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="element.inputType = 'number'; markDirty();">
           {{ t('prop.inputTypeNumber') }}
         </div>
       </div>
@@ -40,21 +28,9 @@
           </a-tooltip>
         </div>
         <div class="flex items-center gap-1.5 select-none">
-          <a-input-number
-            v-model="textareaMinRows"
-            :min="1"
-            :max="10"
-            size="small"
-            style="width: 66px"
-          />
+          <a-input-number v-model="textareaMinRows" :min="1" :max="10" size="small" style="width: 66px" />
           <span class="text-slate-400 text-xs font-mono">~</span>
-          <a-input-number
-            v-model="textareaMaxRows"
-            :min="textareaMinRows || 1"
-            :max="20"
-            size="small"
-            style="width: 66px"
-          />
+          <a-input-number v-model="textareaMaxRows" :min="textareaMinRows || 1" :max="20" size="small" style="width: 66px" />
           <span class="text-slate-500 text-[11px] min-w-[14px]">{{ t('prop.rowUnit') }}</span>
         </div>
       </div>
@@ -68,15 +44,7 @@
           </a-tooltip>
         </div>
         <div class="flex items-center gap-1.5 select-none">
-          <a-input-number
-            v-model="textareaMaxLength"
-            :min="1"
-            :max="5000"
-            :placeholder="t('prop.defaultMaxLengthPlaceholder')"
-            size="small"
-            allow-clear
-            style="width: 148px"
-          >
+          <a-input-number v-model="textareaMaxLength" :min="1" :max="5000" :placeholder="t('prop.defaultMaxLengthPlaceholder')" size="small" allow-clear style="width: 148px">
             <template #suffix>
               <span class="text-slate-400 text-[11px] select-none">{{ t('prop.charUnit') }}</span>
             </template>
@@ -87,19 +55,12 @@
 
     <div v-if="element.type === 'phone'" class="space-y-2.5 pt-3.5 border-t border-slate-100">
       <a-form-item :label="t('prop.defaultDialCode')" class="mb-0">
-        <a-select
-          :model-value="selectedCountryIso"
-          class="w-full"
-          size="small"
-          allow-search
-          :trigger-props="{
-            position: 'br',
-            autoFitPopupWidth: false,
-            autoFitPopupMinWidth: true,
-            contentClass: 'dial-code-dropdown-popup'
-          }"
-          @change="onCountryIsoChange"
-        >
+        <a-select :model-value="selectedCountryIso" class="w-full" size="small" allow-search :trigger-props="{
+          position: 'br',
+          autoFitPopupWidth: false,
+          autoFitPopupMinWidth: true,
+          contentClass: 'dial-code-dropdown-popup'
+        }" @change="onCountryIsoChange">
           <template #label="{ data }">
             <div v-if="data" class="flex items-center gap-2 text-xs font-sans">
               <span class="iti__flag shrink-0" :class="'iti__' + (data.value || 'sg')"></span>
@@ -109,12 +70,7 @@
               </span>
             </div>
           </template>
-          <a-option
-            v-for="item in countryPhoneRules"
-            :key="item.iso2"
-            :value="item.iso2"
-            :label="`${item.code} ${getCountryRuleName(item)}`"
-          >
+          <a-option v-for="item in countryPhoneRules" :key="item.iso2" :value="item.iso2" :label="`${item.code} ${getCountryRuleName(item)}`">
             <div class="flex items-center justify-between w-full text-xs font-sans py-0.5">
               <div class="flex items-center gap-2 min-w-0 flex-1 mr-2.5">
                 <span class="iti__flag shrink-0" :class="'iti__' + item.iso2"></span>
@@ -137,12 +93,7 @@
             : t('prop.presetCountries')
           }}
         </span>
-        <a-button
-          size="mini"
-          type="secondary"
-          class="!text-[12px] !h-6 !px-2 !rounded-md"
-          @click="emit('open-country-modal')"
-        >
+        <a-button size="mini" type="secondary" class="!text-[12px] !h-6 !px-2 !rounded-md" @click="emit('open-country-modal')">
           <span>{{ t('prop.viewDirectory') }}</span>
           <ChevronRight class="w-3 h-3 ml-0.5 text-slate-400" />
         </a-button>
@@ -155,10 +106,7 @@
           <span class="text-[12px] font-semibold text-slate-700 whitespace-nowrap">
             {{ t('prop.alertContentTitle') }}
           </span>
-          <span
-            v-if="isAlertContentMissing"
-            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-200/60 shrink-0"
-          >
+          <span v-if="isAlertContentMissing" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-200/60 shrink-0">
             {{ t('prop.untranslated') }}
           </span>
           <a-tooltip :content="t('prop.alertContentTip')" position="top">
@@ -168,11 +116,7 @@
 
         <div class="flex items-center gap-1.5 shrink-0">
           <a-dropdown position="bl" @select="handleListDropdownSelect">
-            <a-button
-              size="mini"
-              type="secondary"
-              class="!text-[12px] !h-6 !px-2 !rounded"
-            >
+            <a-button size="mini" type="secondary" class="!text-[12px] !h-6 !px-2 !rounded">
               <template #icon>
                 <List class="w-3.5 h-3.5 text-slate-500" />
               </template>
@@ -185,12 +129,7 @@
             </template>
           </a-dropdown>
 
-          <a-button
-            size="mini"
-            type="secondary"
-            class="!text-[12px] !h-6 !px-2 !rounded"
-            @click="insertAlertLink"
-          >
+          <a-button size="mini" type="secondary" class="!text-[12px] !h-6 !px-2 !rounded" @click="insertAlertLink">
             <template #icon>
               <Link2 class="w-3.5 h-3.5 text-slate-500" />
             </template>
@@ -199,15 +138,7 @@
         </div>
       </div>
 
-      <a-textarea
-        id="prop-alert-content-input"
-        ref="alertTextareaRef"
-        v-model="alertContentModel"
-        :auto-size="{ minRows: 6, maxRows: 14 }"
-        :placeholder="t('prop.alertContentPlaceholder')"
-        class="w-full !text-[12px] font-sans"
-        @keydown="handleAlertTextareaKeydown"
-      />
+      <a-textarea id="prop-alert-content-input" ref="alertTextareaRef" v-model="alertContentModel" :auto-size="{ minRows: 6, maxRows: 14 }" :placeholder="t('prop.alertContentPlaceholder')" class="w-full !text-[12px] font-sans" @keydown="handleAlertTextareaKeydown" />
     </div>
 
     <div v-if="hasOptionsConfig" class="space-y-2.5 pt-3.5 border-t border-slate-100">
@@ -216,18 +147,15 @@
           <span class="text-[12px] font-semibold text-slate-700">
             {{ element.type === 'signature' ? t('prop.clauseConfig') : t('prop.optionsConfig') }}
           </span>
-          <a-tooltip
-            :content="element.type === 'signature' ? t('prop.clauseConfigTip') : t('prop.optionsConfigTip')"
-            position="top"
-          >
+          <a-tooltip :content="element.type === 'signature' ? t('prop.clauseConfigTip') : t('prop.optionsConfigTip')" position="top">
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
         <span class="text-[11px] text-slate-400">
           {{ element.type === 'signature'
             ? (store.currentLocale === 'en'
-                ? `${element.options?.length || 0} items`
-                : `共 ${element.options?.length || 0} 条`)
+              ? `${element.options?.length || 0} items`
+              : `共 ${element.options?.length || 0} 条`)
             : t('common.totalOptions', undefined, { count: element.options?.length || 0 })
           }}
         </span>
@@ -235,23 +163,14 @@
 
       <OptionsEditor :element="element" />
 
-      <div
-        v-if="canStackChoices"
-        class="mt-2 flex items-center justify-between py-1 pl-1"
-      >
+      <div v-if="canStackChoices" class="mt-2 flex items-center justify-between py-1 pl-1">
         <div class="flex items-center gap-1.5 shrink-0">
           <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span class="text-[12px] font-medium text-slate-600 whitespace-nowrap">{{ t('prop.optionLayout') }}</span>
         </div>
 
         <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
-          <div
-            role="button"
-            tabindex="0"
-            class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="element.layout !== 'stack' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            @click="element.layout = 'inline'; markDirty();"
-          >
+          <div role="button" tabindex="0" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="element.layout !== 'stack' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="element.layout = 'inline'; markDirty();">
             <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
               <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
               <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="element.layout !== 'stack' ? 0.7 : 0.45" />
@@ -259,13 +178,7 @@
             <span>{{ t('prop.layoutInline') }}</span>
           </div>
 
-          <div
-            role="button"
-            tabindex="0"
-            class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="element.layout === 'stack' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            @click="element.layout = 'stack'; markDirty();"
-          >
+          <div role="button" tabindex="0" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="element.layout === 'stack' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="element.layout = 'stack'; markDirty();">
             <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
               <rect x="2" y="3" width="12" height="4" rx="1.2" />
               <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="element.layout === 'stack' ? 0.7 : 0.45" />
@@ -286,22 +199,10 @@
         </div>
 
         <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs select-none">
-          <div
-            role="button"
-            tabindex="0"
-            class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="(!element.dateMode || element.dateMode === 'single') ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            @click="setDateMode('single')"
-          >
+          <div role="button" tabindex="0" class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="(!element.dateMode || element.dateMode === 'single') ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="setDateMode('single')">
             {{ t('prop.dateModeSingle') }}
           </div>
-          <div
-            role="button"
-            tabindex="0"
-            class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="element.dateMode === 'range' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            @click="setDateMode('range')"
-          >
+          <div role="button" tabindex="0" class="px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap" :class="element.dateMode === 'range' ? 'bg-[#1677ff] text-white shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-800'" @click="setDateMode('range')">
             {{ t('prop.dateModeRange') }}
           </div>
         </div>
@@ -314,18 +215,10 @@
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
-        <a-switch
-          v-model="element.enableLongTerm"
-          size="small"
-          @change="onEnableLongTermChange"
-        />
+        <a-switch v-model="element.enableLongTerm" size="small" @change="onEnableLongTermChange" />
       </div>
 
-      <CollapseTransition
-        v-if="element.type === 'date' && element.dateMode !== 'range'"
-        :key="`${element.id}-longterm`"
-        :show="Boolean(element.enableLongTerm)"
-      >
+      <CollapseTransition v-if="element.type === 'date' && element.dateMode !== 'range'" :key="`${element.id}-longterm`" :show="Boolean(element.enableLongTerm)">
         <div class="flex items-center justify-between py-1 pl-1">
           <div class="flex items-center gap-1.5">
             <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -334,11 +227,7 @@
               <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
             </a-tooltip>
           </div>
-          <a-switch
-            v-model="element.defaultLongTerm"
-            size="small"
-            @change="markDirty"
-          />
+          <a-switch v-model="element.defaultLongTerm" size="small" @change="markDirty" />
         </div>
         <div class="flex items-center justify-between py-1 pl-1">
           <div class="flex items-center gap-1.5">
@@ -348,11 +237,7 @@
               <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
             </a-tooltip>
           </div>
-          <a-switch
-            v-model="element.defaultLongTerm"
-            size="small"
-            @change="markDirty"
-          />
+          <a-switch v-model="element.defaultLongTerm" size="small" @change="markDirty" />
         </div>
       </CollapseTransition>
     </div>

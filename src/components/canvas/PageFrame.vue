@@ -148,10 +148,21 @@
             />
           </div>
         </div>
+
+        <div v-if="isRisk" class="px-3 pb-4 pt-1 bg-white rounded-b-2xl">
+          <button
+            type="button"
+            class="group flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/40 py-2.5 px-3 text-[12.5px] font-semibold text-[#1677ff] transition-all hover:border-[#1677ff] hover:bg-blue-50/50 active:scale-[0.99] cursor-pointer"
+            @click.stop="addElement('checkbox', page.id)"
+          >
+            <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+            <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <a-tooltip :content="t('canvas.addPageRight')" position="top">
+    <a-tooltip v-if="!isRisk" :content="t('canvas.addPageRight')" position="top">
       <div class="add-next-page-btn absolute -right-3 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md border border-slate-200/90 transition hover:scale-110 hover:border-[#1677ff]" @click.stop="addPage(page.id)">
         <Plus class="h-4 w-4" />
       </div>
@@ -162,7 +173,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import type { FormPage, FormElement, ComponentType } from '@/types/schema';
-import { store, selectPage, addPage, createElement, selectElement, markDirty } from '@/core/store';
+import { store, isRisk, addElement, selectPage, addPage, createElement, selectElement, markDirty } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';

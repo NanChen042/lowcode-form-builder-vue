@@ -35,8 +35,24 @@
         </div>
       </div>
 
-      <!-- 表单业务属性：双语问卷能力开关 (纯净无背景无边框，多语言支持与引导指引) -->
-      <div class="flex items-center gap-1.5 ml-2 select-none shrink-0" :title="t('header.bilingualTooltip')">
+      <!-- 文档保存状态指示器 (紧随表单名称右侧，符合飞书/Figma/宜搭工作台规范) -->
+      <div v-if="isSaving" class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-50/70 text-[11.5px] font-medium text-blue-600 select-none shrink-0">
+        <Loader2 class="h-3 w-3 animate-spin shrink-0 text-blue-500" />
+        <span>{{ t('app.saving') }}</span>
+      </div>
+      <div v-else-if="store.isDirty && store.lastSavedHash" class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50/80 text-[11.5px] font-medium text-amber-600 select-none shrink-0" :title="t('app.dirty')">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+        <span>{{ t('app.dirty') }}</span>
+      </div>
+      <div v-else-if="!store.isDirty && store.lastSavedTime" class="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100/80 text-[11.5px] font-medium text-slate-500 select-none shrink-0" :title="t('app.saved')">
+        <Check class="w-3 h-3 text-emerald-500 stroke-[2.4] shrink-0" />
+        <span>{{ store.currentLocale === 'en' ? `Draft saved ${store.lastSavedTime}` : `已保存至草稿 ${store.lastSavedTime}` }}</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <!-- 表单业务属性：双语问卷能力开关 -->
+      <div class="flex items-center gap-1.5 select-none shrink-0" :title="t('header.bilingualTooltip')">
         <span class="text-slate-600 font-medium text-[12px] leading-none">{{ t('header.bilingualSwitch') }}</span>
         <a-switch
           size="small"
@@ -67,12 +83,11 @@
                 {{ t('header.bilingualGuideDesc') }}
               </p>
 
-              <!-- 视频演示封面入口 (以真实操作截图为背景，仅保留中央播放按钮图标，纯净无冗余文字) -->
+              <!-- 视频演示封面入口 -->
               <div
                 class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900"
                 @click="handleOpenVideoModal"
               >
-                <!-- 真实视频截帧中英双语自适应封面图 (高质感压缩仅 ~40KB，瞬间呈现) -->
                 <img
                   :src="currentGuideCover"
                   alt="Video Guide Cover"
@@ -80,11 +95,7 @@
                   height="576"
                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block"
                 />
-
-                <!-- 遮罩：轻微暗化，突出中央播放图标 -->
                 <div class="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors pointer-events-none"></div>
-
-                <!-- 中央纯粹的视频播放按钮图标 -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div class="w-11 h-11 rounded-full bg-white/95 text-[#1677ff] flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all duration-200">
                     <Play class="w-4 h-4 fill-current ml-0.5" />
@@ -95,21 +106,8 @@
           </template>
         </a-popover>
       </div>
-    </div>
 
-    <div class="flex items-center gap-2.5">
-      <div v-if="isSaving" class="flex items-center gap-1.5 text-[11.5px] font-medium text-blue-600 select-none">
-        <Loader2 class="h-3.5 w-3.5 animate-spin shrink-0 text-blue-500" />
-        <span>{{ t('app.saving') }}</span>
-      </div>
-      <div v-else-if="store.isDirty" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none" :title="t('app.dirty')">
-        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
-        <span>{{ t('app.dirty') }}</span>
-      </div>
-      <div v-else-if="lastSavedTime" class="flex items-center gap-1.5 text-[11.5px] font-medium text-slate-400 select-none" :title="t('app.saved')">
-        <Check class="w-3.5 h-3.5 text-slate-400 stroke-[2.2]" />
-        <span>{{ store.currentLocale === 'en' ? `Saved ${lastSavedTime}` : `已保存 ${lastSavedTime}` }}</span>
-      </div>
+      <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
       <a-space size="small">
         <a-button
@@ -143,61 +141,54 @@
 
       <LanguageSwitcher />
 
-      <div v-if="store.org.companyName" class="flex items-center gap-1.5 px-2 py-1 select-none text-slate-700 cursor-default transition-colors" :title="store.org.companyName">
-        <img :src="companyIcon" alt="Company" class="w-4 h-4 object-contain shrink-0" />
-        <span class="text-[13px] font-semibold max-w-[160px] sm:max-w-[220px] truncate leading-none">
-          {{ store.org.companyName }}
-        </span>
-      </div>
-
-      <div v-if="store.org.companyName" class="h-4 w-px bg-slate-200/90 shrink-0" />
-
       <a-dropdown trigger="hover" position="br" :popup-max-height="false" v-model:popup-visible="isUserDropdownOpen">
-        <div class="flex items-center gap-1.5 px-1 py-1 cursor-pointer transition-colors select-none text-slate-700 hover:text-[#1677ff]" :title="store.user.nickname">
+        <div
+          class="flex items-center justify-center p-0.5 rounded-full cursor-pointer transition-all select-none ring-2"
+          :class="isUserDropdownOpen ? 'ring-blue-400/70' : 'ring-transparent hover:ring-slate-200'"
+        >
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 overflow-hidden border border-slate-200 shadow-2xs bg-[#EFF6FF] shrink-0">
             <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display='none'" />
             <span v-else class="w-full h-full text-[#186DF5] font-bold flex items-center justify-center text-xs">
               {{ store.user.nickname ? store.user.nickname.charAt(0).toUpperCase() : 'U' }}
             </span>
           </div>
-          <span class="text-[13px] font-medium max-w-[120px] truncate leading-none transition-colors">
-            {{ store.user.nickname }}
-          </span>
-          <IconDown class="text-[10px] text-slate-400 shrink-0 transition-transform duration-200" :class="{ 'rotate-180 text-[#1677ff]': isUserDropdownOpen }" />
         </div>
 
         <template #content>
-          <div class="px-3.5 py-2.5 border-b border-slate-100 min-w-[170px]">
-            <div class="text-[13px] font-semibold text-slate-800 leading-tight">
-              {{ store.user.nickname }}
+          <div class="w-[260px] px-3.5 py-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 overflow-hidden border border-slate-200 bg-[#EFF6FF] shrink-0">
+                <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display='none'" />
+                <span v-else class="w-full h-full text-[#186DF5] font-bold flex items-center justify-center text-sm">
+                  {{ store.user.nickname ? store.user.nickname.charAt(0).toUpperCase() : 'U' }}
+                </span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] font-semibold text-slate-900 leading-snug truncate">
+                  {{ store.user.nickname }}
+                </div>
+                <div class="text-[11.5px] text-slate-400 mt-0.5 truncate leading-normal">
+                  {{ store.user.email || t('user.role') }}
+                </div>
+              </div>
+              <a-tooltip :content="t('user.logout')" position="bottom">
+                <button
+                  type="button"
+                  class="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
+                  @click="handleUserAction('logout')"
+                >
+                  <IconExport class="text-[15px]" />
+                </button>
+              </a-tooltip>
             </div>
-            <div v-if="store.org.companyName" class="text-[11px] font-medium text-blue-600 mt-1 truncate max-w-[180px]">
-              {{ store.org.companyName }}
+
+            <div
+              v-if="store.org.companyName"
+              class="mt-2.5 px-2.5 py-1.5 rounded-md bg-slate-50 border border-slate-100 flex items-start gap-1.5 text-[11.5px] text-slate-600 font-medium"
+            >
+              <img :src="companyIcon" alt="Company" class="w-3.5 h-3.5 object-contain opacity-65 shrink-0 mt-0.5" />
+              <span class="line-clamp-2 leading-snug break-words">{{ store.org.companyName }}</span>
             </div>
-            <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[180px]">
-              {{ store.user.email || t('user.role') }}
-            </div>
-          </div>
-          <div class="p-1">
-            <a-doption @click="handleUserAction('profile')">
-              <template #icon>
-                <IconUser class="text-[14px]" />
-              </template>
-              {{ t('user.profile') }}
-            </a-doption>
-            <a-doption @click="handleUserAction('settings')">
-              <template #icon>
-                <IconSettings class="text-[14px]" />
-              </template>
-              {{ t('user.settings') }}
-            </a-doption>
-            <div class="h-px bg-slate-100 my-1 mx-1"></div>
-            <a-doption class="logout-option" @click="handleUserAction('logout')">
-              <template #icon>
-                <IconExport class="text-[14px]" />
-              </template>
-              {{ t('user.logout') }}
-            </a-doption>
           </div>
         </template>
       </a-dropdown>
@@ -328,17 +319,17 @@ import {
   syncUrlParams,
   isBilingual,
   enableBilingual,
-  disableMultiLanguage
+  disableMultiLanguage,
+  selectPage,
+  selectElement,
+  focusOnPage
 } from '@/core/store';
 import { FormAPI } from '@/core/api';
 import { t } from '@/core/i18n';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 import { Message } from '@arco-design/web-vue';
 import {
-  IconUser,
-  IconSettings,
-  IconExport,
-  IconDown
+  IconExport
 } from '@arco-design/web-vue/es/icon';
 import {
   Save,
@@ -370,7 +361,6 @@ const currentGuideCover = computed(() => {
 const emit = defineEmits(['open-preview', 'open-deploy']);
 
 const isSaving = ref(false);
-const lastSavedTime = ref('');
 
 function formatTime(d: Date = new Date()) {
   const h = String(d.getHours()).padStart(2, '0');
@@ -381,10 +371,56 @@ function formatTime(d: Date = new Date()) {
 const isUserDropdownOpen = ref(false);
 const publishCheckModalVisible = ref(false);
 
+function validateFormBeforePublish(): boolean {
+  const isEn = store.currentLocale === 'en';
+  const formPages = store.pages.filter(p => p.pageType !== 'system_profile');
+  if (formPages.length === 0) {
+    Message.warning(isEn ? 'Please add at least one form page before publishing' : '请至少添加一个表单页面后再发布');
+    return false;
+  }
 
+  for (let i = 0; i < store.pages.length; i++) {
+    const page = store.pages[i];
+    if (page.pageType === 'system_profile') continue;
+    const pageNum = i + 1;
 
+    const pageTitle = (isEn ? (page.title_en || page.title) : (page.title || page.title_en))?.trim();
+    if (!pageTitle) {
+      Message.warning(isEn ? `Please enter the page title for Page ${pageNum}` : `请填写第 ${pageNum} 页的页面标题`);
+      focusOnPage(page.id, { duration: 350 });
+      selectPage(page.id);
+      store.focusedTarget = { elementId: page.id, field: 'label' };
+      if (!store.rightSidebarVisible) store.rightSidebarVisible = true;
+      return false;
+    }
+
+    if (!page.fields || page.fields.length === 0) {
+      Message.warning(isEn ? `Page ${pageNum} has no components. Please add components or remove the empty page.` : `第 ${pageNum} 页暂无表单组件，请添加组件或删除空页面`);
+      focusOnPage(page.id, { duration: 350 });
+      selectPage(page.id);
+      return false;
+    }
+
+    for (const field of page.fields) {
+      if (field.showLabel !== false) {
+        const fieldLabel = (isEn ? (field.label_en || field.label) : (field.label || field.label_en))?.trim();
+        if (!fieldLabel) {
+          Message.warning(isEn ? `Please enter the label for the untitled field on Page ${pageNum}` : `请填写第 ${pageNum} 页中未命名组件的标题`);
+          focusOnPage(page.id, { duration: 350 });
+          selectElement(field);
+          store.focusedTarget = { elementId: field.id, field: 'label' };
+          if (!store.rightSidebarVisible) store.rightSidebarVisible = true;
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
 
 function handleDeployClick() {
+  if (!validateFormBeforePublish()) return;
   if (isBilingual.value && translationStats.value.untranslatedCount > 0) {
     publishCheckModalVisible.value = true;
   } else {
@@ -519,13 +555,17 @@ async function handleSave() {
     const schema = buildSchema();
     const res = await FormAPI.saveTemplate(schema);
     if (res.success) {
-      if (res.data?.id) {
-        store.meta.formId = res.data.id;
-        syncUrlParams(res.data.id);
+      const savedId = res.data?.id || store.meta.formId || store.meta.serialNo;
+      if (savedId) {
+        store.meta.formId = savedId;
+        store.meta.serialNo = savedId;
+        syncUrlParams(savedId);
       }
       establishBaseline();
-      lastSavedTime.value = formatTime();
+      store.lastSavedTime = formatTime();
       Message.success(t('header.saveSuccess'));
+    } else if (res.code == 409) {
+      Message.error(t('publish.nameDuplicate'));
     } else {
       Message.error(t('header.saveFailed'));
     }
@@ -547,9 +587,6 @@ function handleGlobalKeyDown(e: KeyboardEvent) {
 
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalKeyDown, true);
-  if (!store.isDirty) {
-    lastSavedTime.value = formatTime();
-  }
 });
 
 onUnmounted(() => {
@@ -574,21 +611,6 @@ onUnmounted(() => {
 
 .header-user-avatar:hover {
   transform: scale(1.05);
-}
-
-:deep(.logout-option),
-:deep(.logout-option .arco-dropdown-option-icon),
-:deep(.logout-option .arco-dropdown-option-content) {
-  color: #ef4444 !important;
-}
-
-:deep(.logout-option:hover) {
-  background-color: #fef2f2 !important;
-}
-
-:deep(.logout-option:hover .arco-dropdown-option-icon),
-:deep(.logout-option:hover .arco-dropdown-option-content) {
-  color: #dc2626 !important;
 }
 
 .nano-stream-bar {

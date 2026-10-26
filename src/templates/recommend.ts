@@ -98,6 +98,198 @@ export function createBlankTemplate(
 // 默认空白画布模板
 export const blankTemplate: FormSchema = createBlankTemplate('customer');
 
+// 风险评估固定回答选项：Yes 为命中风险项
+export const RISK_FIXED_OPTIONS = [
+  { label: 'Yes', label_en: 'Yes', value: 'yes' },
+  { label: 'No', label_en: 'No', value: 'no' },
+  { label: 'Not Applicable', label_en: 'Not Applicable', value: 'na' }
+];
+
+// 创建风险评估表单工厂函数（单页形式，分客户/个人/实体，带权重 1-10）
+export function createRiskAssessmentTemplate(
+  profileType: ProfileType = 'customer',
+  title = '',
+  title_en = '',
+  description = '',
+  description_en = ''
+): FormSchema {
+  const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
+  const defaultMetaMap: Record<string, { title: string; pageTitle: string; pageTitleEn: string; pageDesc: string; pageDescEn: string }> = {
+    customer: {
+      title: 'SG_Risk_Customer',
+      pageTitle: '客户与主体风险因素',
+      pageTitleEn: 'Client / Principal Risk Factors',
+      pageDesc: '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
+      pageDescEn: 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
+    },
+    individual: {
+      title: 'SG_Risk_Individual',
+      pageTitle: '个人成员风险因素',
+      pageTitleEn: 'Individual Member Risk Factors',
+      pageDesc: '设置个人成员的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
+      pageDescEn: 'Configure individual risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
+    },
+    entity: {
+      title: 'SG_Risk_Entity',
+      pageTitle: '实体机构风险因素',
+      pageTitleEn: 'Corporate Entity Risk Factors',
+      pageDesc: '设置实体机构的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
+      pageDescEn: 'Configure corporate entity risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
+    }
+  };
+
+  const metaPreset = defaultMetaMap[normType] || defaultMetaMap.customer;
+  const resolvedTitle = title || metaPreset.title;
+  const cloneRiskOpts = () => RISK_FIXED_OPTIONS.map(o => ({ ...o }));
+
+  const questionsMap: Record<string, Array<{ id: string; key: string; label: string; label_en: string; weight: number }>> = {
+    customer: [
+      {
+        id: 'risk_q_1',
+        key: 'risk_is_new_client',
+        label: '该客户是否为新建立业务关系的客户？',
+        label_en: 'Is the client a new client?',
+        weight: 1
+      },
+      {
+        id: 'risk_q_2',
+        key: 'risk_nominee_directors_shareholders',
+        label: '客户是否使用挂名董事或挂名股东？',
+        label_en: 'Does the client use nominee directors or shareholders?',
+        weight: 1
+      },
+      {
+        id: 'risk_q_3',
+        key: 'risk_complex_ownership_structure',
+        label: '结合客户业务性质，其股权或控制权结构是否显得异常或过度复杂？',
+        label_en: "Does the ownership structure appear unusual or overly complex given the nature of the client's business?",
+        weight: 2
+      },
+      {
+        id: 'risk_q_4',
+        key: 'risk_cash_intensive_business',
+        label: '客户业务是否属于现金密集型行业？',
+        label_en: "Is the client's business cash intensive?",
+        weight: 1
+      },
+      {
+        id: 'risk_q_5',
+        key: 'risk_high_risk_jurisdiction',
+        label: '客户注册地、主要运营地或资金来源是否涉及高风险或受制裁国家/地区？',
+        label_en: 'Does the client have operations or source of funds connected to high-risk or sanctioned jurisdictions?',
+        weight: 3
+      },
+      {
+        id: 'risk_q_6',
+        key: 'risk_non_face_to_face',
+        label: '与客户的业务关系是否在完全非面对面（无可靠电子身份核验）的情况下建立？',
+        label_en: 'Was the business relationship established on a non-face-to-face basis without reliable electronic verification?',
+        weight: 1
+      }
+    ],
+    individual: [
+      {
+        id: 'risk_ind_1',
+        key: 'risk_ind_pep_status',
+        label: '该个人是否为政要人物（PEP）或其直系亲属、密切关联人？',
+        label_en: 'Is the individual a Politically Exposed Person (PEP), or a family member or close associate of a PEP?',
+        weight: 3
+      },
+      {
+        id: 'risk_ind_2',
+        key: 'risk_ind_adverse_media',
+        label: '该个人是否存在任何洗钱、恐怖融资、欺诈或金融犯罪相关的负面新闻或制裁记录？',
+        label_en: 'Is there any adverse media, sanctions, or enforcement record related to AML/CFT or financial crime against this individual?',
+        weight: 3
+      },
+      {
+        id: 'risk_ind_3',
+        key: 'risk_ind_high_risk_country',
+        label: '该个人的国籍或常住国家/地区是否属于高风险司法管辖区（如 FATF 灰/黑名单）？',
+        label_en: 'Is the individual a national or resident of a high-risk jurisdiction (e.g., FATF grey/black list)?',
+        weight: 2
+      },
+      {
+        id: 'risk_ind_4',
+        key: 'risk_ind_unverified_wealth',
+        label: '该个人的财富来源或资金来源是否难以合理解释或缺乏证明文件？',
+        label_en: "Is the individual's source of wealth or source of funds unclear or difficult to corroborate?",
+        weight: 2
+      }
+    ],
+    entity: [
+      {
+        id: 'risk_ent_1',
+        key: 'risk_ent_shell_or_bearer_shares',
+        label: '该实体是否可发行不记名股票（Bearer Shares）或属于无实质经营的空壳公司？',
+        label_en: 'Is the entity capable of issuing bearer shares or operating as a shell company without substantive business?',
+        weight: 2
+      },
+      {
+        id: 'risk_ent_2',
+        key: 'risk_ent_nominee_arrangement',
+        label: '该实体是否存在代持安排、家族信托或多层离岸架构导致最终受益人（UBO）难以穿透识别？',
+        label_en: 'Does the entity involve nominee arrangements, trusts, or multi-layered offshore structures that obscure the UBO?',
+        weight: 2
+      },
+      {
+        id: 'risk_ent_3',
+        key: 'risk_ent_sanctioned_country',
+        label: '该实体的注册国家/地区或母公司所在地是否位于高风险或受监管重点关注司法管辖区？',
+        label_en: 'Is the entity incorporated or controlled from a high-risk or monitored jurisdiction?',
+        weight: 2
+      },
+      {
+        id: 'risk_ent_4',
+        key: 'risk_ent_adverse_screening',
+        label: '该实体或其关联控制人是否命中监管处罚、诉讼或反洗钱负面筛查记录？',
+        label_en: 'Has the entity or its controllers matched any regulatory enforcement, litigation, or AML screening records?',
+        weight: 3
+      }
+    ]
+  };
+
+  const presetQuestions = questionsMap[normType] || questionsMap.customer;
+
+  return {
+    schemaVersion: '1.0.0',
+    meta: {
+      title: resolvedTitle,
+      title_en: title_en || resolvedTitle,
+      description: description || '',
+      description_en: description_en || '',
+      profileType: normType,
+      formType: 'risk',
+      enabledLocales: ['zh', 'en'],
+      source: 'diy'
+    },
+    pages: [
+      {
+        id: 'page_risk_0',
+        pageType: 'form',
+        title: metaPreset.pageTitle,
+        title_en: metaPreset.pageTitleEn,
+        description: metaPreset.pageDesc,
+        description_en: metaPreset.pageDescEn,
+        fields: presetQuestions.map(q => ({
+          id: q.id,
+          type: 'checkbox',
+          label: q.label,
+          label_en: q.label_en,
+          key: q.key,
+          required: true,
+          showLabel: true,
+          layout: 'inline',
+          maxSelections: 1,
+          weight: q.weight,
+          options: cloneRiskOpts()
+        }))
+      }
+    ],
+    pageConnections: []
+  };
+}
+
 // 1. 客户案例 KYC 模板
 export const kycCustomerTemplate: FormSchema = {
   schemaVersion: '1.0.0',

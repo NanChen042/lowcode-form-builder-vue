@@ -10,6 +10,8 @@ import type {
 import { componentRegistry } from '../registry/components';
 import {
   createBlankTemplate,
+  createRiskAssessmentTemplate,
+  RISK_FIXED_OPTIONS,
   kycCustomerTemplate,
   kycIndividualTemplate,
   kycEntityTemplate
@@ -86,6 +88,7 @@ export const store = reactive({
   activeTemplateKey: 'blank',
   isDirty: false,
   lastSavedHash: '',
+  lastSavedTime: '',
 
   leftSidebarVisible: true,
   rightSidebarVisible: true,
@@ -109,8 +112,11 @@ export const store = reactive({
     companyName: ''
   },
 
-  lockedProfileType: null as ProfileType | null
+  lockedProfileType: null as ProfileType | null,
+  editorMode: 'standard' as 'standard' | 'risk'
 });
+
+export const isRisk = computed<boolean>(() => store.editorMode === 'risk');
 
 export function findElementById(elements: FormElement[], id: string): FormElement | null {
   for (const el of elements) {
@@ -195,6 +201,22 @@ export function createElement(type: ComponentType): FormElement {
   const id = `cmp_${getUniqueId()}`;
   const defaultData = meta ? meta.defaultData() : {};
 
+  if (isRisk.value) {
+    return {
+      id,
+      type: 'checkbox',
+      key: makeFieldKey('checkbox', id),
+      required: true,
+      showLabel: true,
+      layout: 'inline',
+      maxSelections: 1,
+      weight: 1,
+      label: '',
+      label_en: '',
+      options: RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+    };
+  }
+
   return {
     id,
     type,
@@ -212,6 +234,27 @@ export function createElement(type: ComponentType): FormElement {
 export function addElement(type: ComponentType, targetPageId?: string) {
   if (store.pages.length === 0) {
     addPage();
+  }
+
+  if (isRisk.value) {
+    const page = store.pages[0];
+    if (!page) return;
+    const newEl = createElement(type);
+    if (selectedElement.value && store.selectedType === 'element') {
+      const searchRes = findElementParentAndIndex(page.fields, selectedElement.value.id);
+      if (searchRes) {
+        searchRes.parentArray.splice(searchRes.index + 1, 0, newEl);
+        store.activePageId = page.id;
+        selectElement(newEl);
+        markDirty();
+        return;
+      }
+    }
+    page.fields.push(newEl);
+    store.activePageId = page.id;
+    selectElement(newEl);
+    markDirty();
+    return;
   }
 
   let resolvedPageId = targetPageId;
@@ -657,22 +700,24 @@ export function buildSchema(): FormSchema {
   const isBilingualMode = Boolean(store.meta.enabledLocales?.includes('zh') && store.meta.enabledLocales?.includes('en'));
   const activeLocale = store.currentLocale || 'zh';
 
+  const ensuredId = store.meta.formId || store.meta.serialNo || generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
+  if (!store.meta.formId) store.meta.formId = ensuredId;
+  if (!store.meta.serialNo) store.meta.serialNo = ensuredId;
+
   const metaCopy: any = {
     title: store.meta.title || '未命名表单',
+    title_en: isBilingualMode ? (store.meta.title_en || '') : '',
     description: store.meta.description || '',
+    description_en: isBilingualMode ? (store.meta.description_en || '') : '',
     profileType: store.meta.profileType || 'individual',
+    formType: isRisk.value ? 'risk' : 'kyc',
     enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
     source: store.meta.source || 'diy',
     templateKey: store.meta.templateKey,
-    formId: store.meta.formId,
-    serialNo: store.meta.serialNo,
+    formId: ensuredId,
+    serialNo: ensuredId,
     createdAt: store.meta.createdAt
   };
-
-  if (isBilingualMode) {
-    metaCopy.title_en = store.meta.title_en || '';
-    metaCopy.description_en = store.meta.description_en || '';
-  }
 
   const pagesCopy = store.pages.map(p => {
     const pageCopy: any = {
@@ -731,8 +776,10 @@ export function syncUrlParams(id?: string) {
     url.searchParams.delete('mode');
     url.searchParams.delete('source');
     url.searchParams.delete('tpl');
+    url.searchParams.delete('copy');
+    url.searchParams.delete('_v');
 
-    const formId = (id || store.meta.formId || store.meta.serialNo || '').toLowerCase();
+    const formId = (id !== undefined ? id : (store.meta.formId || store.meta.serialNo || '')).toLowerCase();
     if (formId) {
       url.searchParams.set('id', formId);
     } else {
@@ -775,7 +822,9 @@ export function createNewCanvas(options: {
   profileType?: ProfileType;
 }) {
   const profileType = options.profileType || store.meta.profileType || 'customer';
-  const schema = createBlankTemplate(profileType, options.title, '', options.description || '');
+  const schema = isRisk.value
+    ? createRiskAssessmentTemplate(profileType, options.title, '', options.description || '')
+    : createBlankTemplate(profileType, options.title, '', options.description || '');
   const formId = generateFormId(profileType, 'diy');
   const now = Date.now();
 
@@ -794,8 +843,14 @@ export function createNewCanvas(options: {
   store.meta.createdAt = now;
   store.activeTemplateKey = 'blank';
   store.sidebarTab = 'components';
-  establishBaseline();
-  syncUrlParams(formId);
+  if (isRisk.value && store.pages[0]?.fields?.[0]) {
+    selectElement(store.pages[0].fields[0]);
+  }
+  if (dirtyTimer) clearTimeout(dirtyTimer);
+  store.lastSavedHash = '';
+  store.isDirty = true;
+  store.lastSavedTime = '';
+  syncUrlParams('');
 }
 
 export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity', customTitle?: string) {
@@ -837,12 +892,18 @@ export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'ky
   store.activeTemplateKey = tplKey;
   store.sidebarTab = 'components';
 
-  establishBaseline();
-  syncUrlParams(formId);
+  if (dirtyTimer) clearTimeout(dirtyTimer);
+  store.lastSavedHash = '';
+  store.isDirty = true;
+  store.lastSavedTime = '';
+  syncUrlParams('');
 }
 
 export function loadSchema(schema: FormSchema, options?: { duration?: number }) {
   clearSelection();
+  if (schema.meta?.formType === 'risk') {
+    store.editorMode = 'risk';
+  }
   store.meta.title = schema.meta?.title || '未命名表单';
   store.meta.title_en = schema.meta?.title_en || '';
   store.meta.description = schema.meta?.description || '';
@@ -882,8 +943,6 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   store.meta.formId = formId;
   store.meta.serialNo = formId;
   store.meta.createdAt = schema.meta?.createdAt || Date.now();
-
-  syncUrlParams(formId);
 
   // 重新计算并扫描最大组件 ID，防止编号冲突
   let maxId = 0;

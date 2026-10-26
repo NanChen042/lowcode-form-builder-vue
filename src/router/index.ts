@@ -17,6 +17,16 @@ const router = createRouter({
       component: BuilderView
     },
     {
+      path: '/risk',
+      name: 'RiskBuilder',
+      component: BuilderView
+    },
+    {
+      path: '/form-builder/risk',
+      name: 'RiskBuilderSubpath',
+      component: BuilderView
+    },
+    {
       path: '/caller',
       name: 'Caller',
       component: () => import('@/views/CallerHostView.vue')

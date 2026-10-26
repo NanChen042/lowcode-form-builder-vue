@@ -196,7 +196,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { store, applyTemplateKey } from '@/core/store';
+import { store, applyTemplateKey, buildSchema, syncUrlParams, establishBaseline } from '@/core/store';
+import { FormAPI } from '@/core/api';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
@@ -320,11 +321,35 @@ function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-e
   executeApplyTemplate();
 }
 
-function executeApplyTemplate() {
+async function executeApplyTemplate() {
   if (!pendingTemplateKey.value) return;
-  applyTemplateKey(pendingTemplateKey.value);
+  const tplKey = pendingTemplateKey.value;
+  applyTemplateKey(tplKey);
+
+  let res = await FormAPI.saveTemplate(buildSchema());
+  if (!res.success && res.code == 409) {
+    const suffix = (store.meta.formId || '').split('_').pop() || String(Date.now()).slice(-4);
+    store.meta.title = `${store.meta.title}_${suffix}`;
+    if (store.meta.title_en) {
+      store.meta.title_en = `${store.meta.title_en}_${suffix}`;
+    }
+    res = await FormAPI.saveTemplate(buildSchema());
+  }
+
+  if (res.success) {
+    const savedId = res.data?.id || store.meta.formId || store.meta.serialNo;
+    if (savedId) {
+      store.meta.formId = savedId;
+      store.meta.serialNo = savedId;
+      syncUrlParams(savedId);
+    }
+    establishBaseline();
+    const now = new Date();
+    store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
   Message.success(t('sidebar.templateLoaded') || '场景模板已成功载入');
-  emit('selected-template', pendingTemplateKey.value);
+  emit('selected-template', tplKey);
   pendingTemplateKey.value = null;
   confirmOverwriteVisible.value = false;
   modalVisible.value = false;

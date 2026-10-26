@@ -2,7 +2,7 @@
   <a-modal
     :visible="visible"
     :title="t('publish.modalTitle')"
-    :width="500"
+    :width="540"
     :title-align="'start'"
     :footer="!isSuccess"
     draggable
@@ -36,7 +36,7 @@
         >
           <div class="flex items-center gap-2 min-w-0 flex-1 pr-3">
             <Link2 class="w-4 h-4 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
-            <span class="text-xs text-slate-600 group-hover:text-blue-600 font-mono truncate transition-colors">
+            <span class="text-xs text-slate-600 group-hover:text-blue-600 font-mono break-all select-all leading-relaxed transition-colors">
               {{ publishedUrl }}
             </span>
           </div>
@@ -78,8 +78,6 @@
         <a-form-item
           :label="activeLocale === 'zh' ? t('publish.formName') : t('publish.formNameEn')"
           required
-          :validate-status="nameError ? 'error' : undefined"
-          :help="nameError"
           class="mb-3"
         >
           <a-input
@@ -88,9 +86,10 @@
             v-model="formModel.titleZh"
             :placeholder="t('publish.formNamePlaceholder')"
             :max-length="50"
+            :error="nameError"
             show-word-limit
             allow-clear
-            @input="nameError = ''"
+            @input="nameError = false"
             @keydown.enter="handleConfirmPublish"
           />
           <a-input
@@ -99,9 +98,10 @@
             v-model="formModel.titleEn"
             :placeholder="t('publish.formNameEnPlaceholder')"
             :max-length="50"
+            :error="nameError"
             show-word-limit
             allow-clear
-            @input="nameError = ''"
+            @input="nameError = false"
             @keydown.enter="handleConfirmPublish"
           />
         </a-form-item>
@@ -148,7 +148,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
-import { store, buildSchema, isBilingual, primaryLocale, establishBaseline } from '@/core/store';
+import { store, buildSchema, isBilingual, primaryLocale, establishBaseline, syncUrlParams } from '@/core/store';
 import { t } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
@@ -177,7 +177,7 @@ const formModel = reactive({
   descEn: ''
 });
 
-const nameError = ref('');
+const nameError = ref(false);
 const isSubmitting = ref(false);
 const isSuccess = ref(false);
 const publishedUrl = ref('');
@@ -196,7 +196,7 @@ watch(
   (val) => {
     if (val) {
       isSuccess.value = false;
-      nameError.value = '';
+      nameError.value = false;
       isCopied.value = false;
 
       formModel.titleZh = store.meta.title || '';
@@ -240,13 +240,13 @@ watch(
 );
 
 async function handleConfirmPublish() {
-  nameError.value = '';
-
+  nameError.value = false;
   const activeTitle = activeLocale.value === 'zh' ? formModel.titleZh.trim() : formModel.titleEn.trim();
   const fallbackTitle = formModel.titleZh.trim() || formModel.titleEn.trim();
 
   if (!activeTitle && !fallbackTitle) {
-    nameError.value = t('publish.nameRequired');
+    nameError.value = true;
+    Message.warning(t('publish.nameRequired'));
     if (activeLocale.value === 'zh') {
       titleInputZhRef.value?.focus?.();
     } else {
@@ -268,12 +268,19 @@ async function handleConfirmPublish() {
     if (res.success && res.data?.url) {
       publishedUrl.value = res.data.url;
       isSuccess.value = true;
+      const savedId = store.meta.formId || store.meta.serialNo;
+      if (savedId) {
+        syncUrlParams(savedId);
+      }
       establishBaseline();
+      const now = new Date();
+      store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       emit('published', { url: res.data.url });
     } else {
-      const errMsg = res.message || res.msg || '发布失败';
-      if (errMsg.includes('重名') || errMsg.includes('名称已存在') || errMsg.includes('already exists') || res.code === 409) {
-        nameError.value = errMsg;
+      const rawMsg = res.message || res.msg || '';
+      if (res.code == 409 || rawMsg.includes('重名') || rawMsg.includes('名称已存在') || rawMsg.includes('already exists')) {
+        nameError.value = true;
+        Message.error(t('publish.nameDuplicate'));
         nextTick(() => {
           if (activeLocale.value === 'zh') {
             titleInputZhRef.value?.focus?.();
@@ -282,11 +289,11 @@ async function handleConfirmPublish() {
           }
         });
       } else {
-        Message.error(errMsg);
+        Message.error((rawMsg && rawMsg !== 'ERROE') ? rawMsg : t('preview.publishFailed'));
       }
     }
   } catch (err: any) {
-    const errMsg = err?.message || '发布请求异常，请稍后重试';
+    const errMsg = err?.message || t('preview.publishFailed');
     Message.error(errMsg);
   } finally {
     isSubmitting.value = false;

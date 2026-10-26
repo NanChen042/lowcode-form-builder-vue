@@ -47,7 +47,10 @@
 
     <template v-else>
       <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-semibold text-slate-800 leading-5">
-        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span>
+        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span><span
+          v-if="field.weight"
+          class="ml-1.5 inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-1.5 py-0.5 text-[11px] font-semibold text-[#1677ff] leading-none align-middle select-none"
+        >{{ store.currentLocale === 'en' ? `Weight ${field.weight}` : `权重 ${field.weight}` }}</span>
         <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5 inline">{{ localizedHelp }}</span>
 
         <div v-if="field.helpPosition === 'bottom' && localizedHelp" class="field-help-bottom text-[11px] text-slate-400 font-normal mt-0.5 leading-4">
@@ -587,6 +590,11 @@ function toggleCheckbox(val: string) {
   if (idx > -1) {
     current.splice(idx, 1);
   } else {
+    if (props.field.maxSelections === 1) {
+      selectedTags.value = [val];
+      handleFieldInput();
+      return;
+    }
     if (props.field.maxSelections && current.length >= props.field.maxSelections) {
       return;
     }
