@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- 文档保存状态指示器 (紧随表单名称右侧，符合飞书/Figma/宜搭工作台规范) -->
+
       <div v-if="isSaving" class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-50/70 text-[11.5px] font-medium text-blue-600 select-none shrink-0">
         <Loader2 class="h-3 w-3 animate-spin shrink-0 text-blue-500" />
         <span>{{ t('app.saving') }}</span>
@@ -51,7 +51,7 @@
     </div>
 
     <div class="flex items-center gap-2.5">
-      <!-- 表单业务属性：双语问卷能力开关 -->
+
       <div class="flex items-center gap-1.5 select-none shrink-0" :title="t('header.bilingualTooltip')">
         <span class="text-slate-600 font-medium text-[12px] leading-none">{{ t('header.bilingualSwitch') }}</span>
         <a-switch
@@ -60,7 +60,7 @@
           @change="handleToggleBilingual"
         />
 
-        <!-- 引导与使用说明 Popover (包含视频演示卡片入口) -->
+
         <a-popover
           position="bottom"
           trigger="hover"
@@ -83,7 +83,7 @@
                 {{ t('header.bilingualGuideDesc') }}
               </p>
 
-              <!-- 视频演示封面入口 -->
+
               <div
                 class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900"
                 @click="handleOpenVideoModal"
@@ -122,7 +122,7 @@
           {{ t('app.save') }}
         </a-button>
 
-        <a-button id="tour-preview-btn" type="secondary" @click="$emit('open-preview')">
+        <a-button v-if="!isRisk" id="tour-preview-btn" type="secondary" @click="$emit('open-preview')">
           <template #icon>
             <Eye class="h-4 w-4" />
           </template>
@@ -203,7 +203,7 @@
       unmount-on-close
     >
       <div class="py-1 space-y-3">
-        <!-- 标准 Arco Warning 警示条 -->
+
         <a-alert type="warning" class="rounded">
           <template #title>
             <span class="font-medium text-xs">
@@ -215,7 +215,7 @@
           </div>
         </a-alert>
 
-        <!-- 待完善字段项列表 -->
+
         <div class="max-h-[160px] overflow-y-auto space-y-1.5 custom-scrollbar">
           <div
             v-for="item in translationStats.untranslatedItems.slice(0, 10)"
@@ -247,7 +247,7 @@
       </template>
     </a-modal>
 
-    <!-- 停用中英文模式确认弹窗 -->
+
     <a-modal
       v-model:visible="isDisableBilingualModalVisible"
       :title="t('header.bilingualDisableTitle')"
@@ -271,7 +271,7 @@
       </template>
     </a-modal>
 
-    <!-- 双语问卷操作演示视频弹窗 (720px 高清播放，按需懒加载，无页面抖动) -->
+
     <a-modal
       v-model:visible="isVideoModalVisible"
       :title="t('header.bilingualVideoTitle')"
@@ -313,6 +313,7 @@
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import {
   store,
+  isRisk,
   buildSchema,
   establishBaseline,
   markDirty,
@@ -322,6 +323,7 @@ import {
   disableMultiLanguage,
   selectPage,
   selectElement,
+  selectGroup,
   focusOnPage
 } from '@/core/store';
 import { FormAPI } from '@/core/api';
@@ -401,6 +403,20 @@ function validateFormBeforePublish(): boolean {
       return false;
     }
 
+    if (isRisk.value && page.groups && page.groups.length > 0) {
+      for (let gIdx = 0; gIdx < page.groups.length; gIdx++) {
+        const grp = page.groups[gIdx];
+        const grpTitle = (grp.title_en || grp.title)?.trim();
+        if (!grpTitle) {
+          Message.warning(isEn ? `Please enter the English title for Group ${String(gIdx + 1).padStart(2, '0')}` : `请填写分组 ${String(gIdx + 1).padStart(2, '0')} 的英文分组名称`);
+          focusOnPage(page.id, { duration: 350 });
+          selectGroup(grp.id);
+          if (!store.rightSidebarVisible) store.rightSidebarVisible = true;
+          return false;
+        }
+      }
+    }
+
     for (const field of page.fields) {
       if (field.showLabel !== false) {
         const fieldLabel = (isEn ? (field.label_en || field.label) : (field.label || field.label_en))?.trim();
@@ -421,6 +437,14 @@ function validateFormBeforePublish(): boolean {
 
 function handleDeployClick() {
   if (!validateFormBeforePublish()) return;
+  if (isRisk.value) {
+    if (isBilingual.value && translationStats.value.enMissingCount > 0) {
+      publishCheckModalVisible.value = true;
+    } else {
+      emit('open-deploy');
+    }
+    return;
+  }
   if (isBilingual.value && translationStats.value.untranslatedCount > 0) {
     publishCheckModalVisible.value = true;
   } else {
@@ -445,7 +469,7 @@ function handleJumpFromPublishCheck(item: UntranslatedItem) {
   navigateToUntranslatedItem(item);
 }
 
-// 表单名称实时重命名与编辑控制
+
 const isEditingTitle = ref(false);
 const editTitleValue = ref('');
 const titleInputRef = ref<HTMLInputElement | null>(null);
@@ -489,10 +513,10 @@ function handleConfirmTitle() {
   isEditingTitle.value = false;
 }
 
-// 顶部中英文双语模式开关控制与引导提示
+
 const isDisableBilingualModalVisible = ref(false);
 
-// 双语操作演示视频弹窗控制
+
 const isVideoModalVisible = ref(false);
 const videoPlayerRef = ref<HTMLVideoElement | null>(null);
 

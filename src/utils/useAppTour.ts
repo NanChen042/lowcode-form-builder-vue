@@ -1,15 +1,79 @@
 import { driver, type Driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { store, focusOnPage, resetCanvasView } from '@/core/store';
+import { store, isRisk, focusOnPage, resetCanvasView } from '@/core/store';
 import { t, type Locale } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 
 let driverInstance: Driver | null = null;
 
+export function getRiskTourSteps(locale?: Locale): DriveStep[] {
+  const steps: DriveStep[] = [
+    {
+      element: '#components-basic',
+      popover: {
+        title: t('tour.risk.step1Title', locale),
+        description: t('tour.risk.step1Desc', locale),
+        side: 'right',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-risk-groups',
+      popover: {
+        title: t('tour.risk.step2Title', locale),
+        description: t('tour.risk.step2Desc', locale),
+        side: 'right',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-first-page-frame',
+      popover: {
+        title: t('tour.risk.step3Title', locale),
+        description: t('tour.risk.step3Desc', locale),
+        side: 'right',
+        align: 'center'
+      }
+    },
+    {
+      element: '.risk-weight-selector',
+      popover: {
+        title: t('tour.risk.step4Title', locale),
+        description: t('tour.risk.step4Desc', locale),
+        side: 'top',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-property-panel',
+      popover: {
+        title: t('tour.risk.step5Title', locale),
+        description: t('tour.risk.step5Desc', locale),
+        side: 'left',
+        align: 'start'
+      }
+    },
+    {
+      element: '#tour-deploy-btn',
+      popover: {
+        title: t('tour.risk.step6Title', locale),
+        description: t('tour.risk.step6Desc', locale),
+        side: 'bottom',
+        align: 'end'
+      }
+    }
+  ];
+  return steps.filter(step => typeof step.element !== 'string' || document.querySelector(step.element));
+}
+
 export function getTourSteps(localeOrIsEn?: Locale | boolean): DriveStep[] {
   const locale: Locale | undefined = typeof localeOrIsEn === 'boolean'
     ? (localeOrIsEn ? 'en' : 'zh')
     : localeOrIsEn;
+
+  if (isRisk.value) {
+    return getRiskTourSteps(locale);
+  }
 
   return [
     {
@@ -138,6 +202,18 @@ export function startAppTour(initialIndex = 0) {
     progressText: t('tour.progressText'),
     steps: getTourSteps(),
     onHighlightStarted: (_el, _step, opts) => {
+      if (isRisk.value) {
+        const stepEl = _step?.element;
+        if (stepEl === '#tour-risk-groups') {
+          store.sidebarTab = 'pages';
+        } else if (stepEl === '#components-basic') {
+          store.sidebarTab = 'components';
+        }
+        requestAnimationFrame(() => {
+          driverInstance?.refresh();
+        });
+        return;
+      }
       const idx = opts.state.activeIndex;
       if (idx === 1) {
         store.sidebarTab = 'templates';
@@ -158,6 +234,7 @@ export function startAppTour(initialIndex = 0) {
       }
     },
     onHighlighted: (_el, _step, opts) => {
+      if (isRisk.value) return;
       const idx = opts.state.activeIndex;
       if (idx === 4) {
         const canvasContainer = document.getElementById('tour-canvas-area');

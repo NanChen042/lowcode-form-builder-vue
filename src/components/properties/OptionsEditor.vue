@@ -389,7 +389,7 @@ const downstreamFields = computed(() => {
   const fields = currentPage.value.fields || [];
   const currentIndex = fields.findIndex(f => f.id === props.element.id);
   if (currentIndex < 0) return [];
-  // 排除掉所有祖先字段，避免形成死循环依赖
+
   const ancestorKeys = new Set<string>();
   let cur: FormElement | undefined = props.element;
   while (cur?.dependsOn?.fieldKey) {
@@ -447,7 +447,7 @@ function quickInsertFollowupField(option: FormElementOption, type: ComponentType
   const fields = currentPage.value.fields || [];
   const currentIdx = fields.findIndex(f => f.id === props.element.id);
 
-  // 寻找到当前组件及其名下所有层级从属子组件的末尾进行插入
+
   const descendantKeys = new Set<string>([props.element.key]);
   let insertIdx = currentIdx + 1;
   while (insertIdx < fields.length) {
@@ -479,7 +479,7 @@ function removeOption(idx: number) {
       props.element.defaultValue = stringifyMultiValue(vals);
     }
   }
-  // 清除所有关联到该被删选项的下游组件联动
+
   if (removed && props.element.key) {
     for (const page of store.pages) {
       for (const f of (page.fields || [])) {
@@ -489,7 +489,7 @@ function removeOption(idx: number) {
       }
     }
   }
-  // 如果删减后选项数量小于 maxSelections，自动同步收缩
+
   if (props.element.maxSelections && props.element.maxSelections > props.element.options.length) {
     props.element.maxSelections = props.element.options.length;
   }

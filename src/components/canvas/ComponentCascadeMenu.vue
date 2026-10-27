@@ -18,7 +18,7 @@
         </template>
         <template #content>
           <a-doption
-            v-for="item in basicComponents"
+            v-for="item in displayedBasicComponents"
             :key="`${valuePrefix}_${item.type}`"
             @click="emit('select', item.type)"
           >
@@ -32,7 +32,7 @@
         </template>
       </a-dsubmenu>
 
-      <a-dsubmenu :value="`${valuePrefix}-biz`" trigger="hover">
+      <a-dsubmenu v-if="!isRisk" :value="`${valuePrefix}-biz`" trigger="hover">
         <template #icon>
           <Briefcase class="h-4 w-4 text-slate-500" />
         </template>
@@ -61,10 +61,16 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ComponentType } from '@/types/schema';
+import { isRisk } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { basicComponents, businessComponents, getComponentIcon } from '@/registry/components';
 import { PlusCircle, Layers, Briefcase } from '@lucide/vue';
+
+const displayedBasicComponents = computed(() => {
+  return isRisk.value ? basicComponents.filter(c => c.type === 'radio') : basicComponents;
+});
 
 defineProps<{
   title: string;

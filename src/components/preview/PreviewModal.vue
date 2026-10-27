@@ -85,14 +85,31 @@
             </div>
           </div>
 
-          <div class="relative flex h-full max-h-[780px] w-[375px] shrink-0 flex-col select-none transition-all duration-200 min-h-0">
-            <div class="relative flex flex-1 flex-col min-h-0 rounded-[32px] bg-slate-900 p-[7px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35),0_0_0_1px_rgba(15,23,42,0.12)] ring-1 ring-black/40">
-              <div class="relative flex flex-1 flex-col min-h-0 overflow-hidden rounded-[26px] bg-white">
-                <div class="pointer-events-none absolute left-1/2 top-[8px] z-30 flex h-[22px] w-[90px] -translate-x-1/2 items-center justify-center rounded-full bg-black shadow-xs">
+          <div
+            class="relative flex h-full max-h-[780px] shrink-0 flex-col select-none transition-all duration-200 min-h-0"
+            :class="isRiskPreview ? 'w-[750px] max-w-[92vw]' : 'w-[375px]'"
+          >
+            <div
+              class="relative flex flex-1 flex-col min-h-0"
+              :class="isRiskPreview
+                ? 'rounded-xl border border-slate-200/90 bg-white shadow-[0_12px_36px_-8px_rgba(15,23,42,0.12)] overflow-hidden'
+                : 'rounded-[32px] bg-slate-900 p-[7px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35),0_0_0_1px_rgba(15,23,42,0.12)] ring-1 ring-black/40'"
+            >
+              <div
+                class="relative flex flex-1 flex-col min-h-0 overflow-hidden bg-white"
+                :class="isRiskPreview ? 'rounded-xl' : 'rounded-[26px]'"
+              >
+                <div
+                  v-if="!isRiskPreview"
+                  class="pointer-events-none absolute left-1/2 top-[8px] z-30 flex h-[22px] w-[90px] -translate-x-1/2 items-center justify-center rounded-full bg-black shadow-xs"
+                >
                   <div class="h-[7px] w-[7px] rounded-full bg-[#1c1c1e] ring-1 ring-[#2c2c2e]"></div>
                 </div>
 
-                <div class="flex h-10 shrink-0 items-center justify-between px-6 text-black z-20 select-none">
+                <div
+                  v-if="!isRiskPreview"
+                  class="flex h-10 shrink-0 items-center justify-between px-6 text-black z-20 select-none"
+                >
                   <span class="font-semibold text-[13px] tracking-tight leading-none" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;">{{ currentTime }}</span>
                   
                   <div class="flex items-center gap-[6px]">
@@ -119,7 +136,7 @@
                 </div>
 
                 <div v-if="isSubmitted" class="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center p-6 text-center animate-fade-in custom-scrollbar">
-                  <!-- 右上角双语切换胶囊 (仅在双语问卷模式下显示，单语言模式下自动隐藏) -->
+
                   <div v-if="isBilingual" class="w-full flex justify-end mb-4 -mt-2">
                     <div
                       class="relative flex items-center bg-[#ebedf2] p-[2px] rounded-[7px] w-[64px] h-[26px] box-border shrink-0 select-none"
@@ -149,7 +166,7 @@
                     </div>
                   </div>
 
-                  <!-- 成功徽标容器 (对齐移动端标准渐变圆环) -->
+
                   <div class="relative flex items-center justify-center mb-4">
                     <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
                       <CheckCircle class="w-8 h-8 text-white stroke-[2.2]" />
@@ -163,7 +180,7 @@
                     {{ store.currentLocale === 'en' ? 'Thank you! Your information has been received successfully.' : '感谢您的填写！您的表单信息已成功提交。' }}
                   </p>
 
-                  <!-- 提交明细卡片 (对齐移动端凭证清单) -->
+
                   <div class="w-full bg-slate-50/80 rounded-xl p-3.5 mb-5 text-left border border-slate-200/80 space-y-2 text-xs">
                     <div class="flex items-center justify-between">
                       <span class="text-slate-400 text-[11px]">{{ store.currentLocale === 'en' ? 'Status' : '处理状态' }}</span>
@@ -243,7 +260,7 @@
                     </div>
                   </div>
 
-                  <div ref="phoneContentRef" class="flex-1 min-h-0 overflow-y-auto px-5 pb-14 pt-2 custom-scrollbar">
+                  <div ref="phoneContentRef" class="flex-1 min-h-0 overflow-y-auto pb-14 pt-2 custom-scrollbar" :class="isRiskPreview ? 'px-7' : 'px-5'">
                     <h3 class="m-0 mt-2 text-base font-bold text-slate-900 tracking-tight mb-1 w-full break-words">
                       {{ currentLocalizedTitle }}
                     </h3>
@@ -277,7 +294,45 @@
                       </div>
 
                       <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep && page.pageType !== 'system_profile'" class="w-full flex flex-col">
-                        <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :all-fields="page.fields" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
+                        <template v-if="isRiskPreview && page.groups && page.groups.length > 0">
+                          <div class="space-y-4 mt-1">
+                            <div
+                              v-for="(grp, gIdx) in page.groups"
+                              :key="grp.id"
+                              class="rounded-xl border border-slate-200/90 bg-slate-50/40 overflow-hidden"
+                            >
+                              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-100/80 border-b border-slate-200/70">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                  <span class="inline-flex items-center justify-center h-5 px-1.5 rounded bg-blue-600 text-white text-[11px] font-mono font-bold shrink-0">
+                                    {{ String(gIdx + 1).padStart(2, '0') }}
+                                  </span>
+                                  <span class="text-[13.5px] font-bold text-slate-800 truncate">
+                                    {{ getGroupTitleDisplay(grp) }}
+                                  </span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 font-medium shrink-0">
+                                  {{ getGroupFields(page, grp.id).length }} {{ store.currentLocale === 'en' ? 'Questions' : '道问题' }}
+                                </span>
+                              </div>
+                              <div class="p-3.5 space-y-2.5">
+                                <PreviewField
+                                  v-for="field in getGroupFields(page, grp.id)"
+                                  :key="field.id"
+                                  :field="field"
+                                  :all-fields="page.fields"
+                                  :form-data="formData"
+                                  :error="errors[field.key]"
+                                  :errors="errors"
+                                  class="!mb-0"
+                                  @clear-error="clearFieldError"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <PreviewField v-for="field in page.fields" :key="field.id" :field="field" :all-fields="page.fields" :form-data="formData" :error="errors[field.key]" :errors="errors" @clear-error="clearFieldError" />
+                        </template>
                       </div>
 
                       <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
@@ -298,7 +353,7 @@
                   </div>
                 </div>
 
-                <div class="pointer-events-none absolute bottom-[6px] left-1/2 -translate-x-1/2 h-[4px] w-[110px] rounded-full bg-black/75 z-30"></div>
+                <div v-if="!isRiskPreview" class="pointer-events-none absolute bottom-[6px] left-1/2 -translate-x-1/2 h-[4px] w-[110px] rounded-full bg-black/75 z-30"></div>
               </div>
             </div>
           </div>
@@ -330,8 +385,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
-import type { FormSchema, FormElement } from '@/types/schema';
-import { store, isBilingual } from '@/core/store';
+import type { FormSchema, FormElement, FormPageSchema, FormQuestionGroup } from '@/types/schema';
+import { store, isRisk, isBilingual } from '@/core/store';
 import { t, getLocalizedPageText, getFieldValidationMessage } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -352,6 +407,27 @@ const props = defineProps<{
   schema: FormSchema;
   mode?: 'preview' | 'deploy';
 }>();
+
+const isRiskPreview = computed(() => {
+  return isRisk.value || props.schema?.meta?.formType === 'risk';
+});
+
+function getGroupTitleDisplay(group: FormQuestionGroup): string {
+  if (store.currentLocale === 'en') {
+    return group.title_en?.trim() || group.title?.trim() || 'Untitled Group';
+  }
+  return group.title?.trim() || group.title_en?.trim() || '未命名分组';
+}
+
+function getGroupFields(page: FormPageSchema, groupId: string): FormElement[] {
+  const groups = page.groups || [];
+  const firstGroupId = groups[0]?.id;
+  return (page.fields || []).filter(f => {
+    if (f.groupId === groupId) return true;
+    if (!f.groupId && groupId === firstGroupId) return true;
+    return false;
+  });
+}
 
 const logoUrl = `${import.meta.env.BASE_URL}img/logo-icon.png`;
 

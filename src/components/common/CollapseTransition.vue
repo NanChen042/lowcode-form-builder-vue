@@ -57,7 +57,7 @@ watch(
     clearTimers();
     if (newVal) {
       isVisible.value = true;
-      // Use double rAF to guarantee the browser flushes the initial 0fr grid state before animating to 1fr
+
       openRaf1 = requestAnimationFrame(() => {
         openRaf2 = requestAnimationFrame(() => {
           isExpanded.value = true;
@@ -67,7 +67,7 @@ watch(
       });
     } else {
       isExpanded.value = false;
-      // Fallback timer in case transitionend does not fire
+
       closeTimer = setTimeout(() => {
         if (!props.show) {
           isVisible.value = false;

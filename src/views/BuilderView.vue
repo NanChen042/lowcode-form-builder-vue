@@ -59,7 +59,6 @@ import { useRouter } from 'vue-router';
 import {
   store,
   isRisk,
-  selectElement,
   buildSchema,
   loadSchema,
   syncUrlParams,
@@ -137,14 +136,20 @@ function handleFormCreated() {
 
 function handleCreateCanvasCancel() {
   createCanvasModalVisible.value = false;
-  if (!isRisk.value && (openedFromWizard.value || store.pages.length === 0)) {
+  if (isRisk.value && store.pages.length === 0) {
+    const riskSchema = createRiskAssessmentTemplate('customer', '', '', '', '');
+    loadSchema(riskSchema, { duration: 0 });
+  } else if (!isRisk.value && (openedFromWizard.value || store.pages.length === 0)) {
     welcomeWizardVisible.value = true;
   }
 }
 
 function handleCreateCanvasClose() {
   createCanvasModalVisible.value = false;
-  if (!isRisk.value && store.pages.length === 0) {
+  if (isRisk.value && store.pages.length === 0) {
+    const riskSchema = createRiskAssessmentTemplate('customer', '', '', '', '');
+    loadSchema(riskSchema, { duration: 0 });
+  } else if (!isRisk.value && store.pages.length === 0) {
     welcomeWizardVisible.value = true;
   }
 }
@@ -252,16 +257,15 @@ onMounted(async () => {
 
   const resetToBlankState = () => {
     if (isRisk.value) {
-      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer');
+      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer', '', '', '', '');
       loadSchema(riskSchema, { duration: 0 });
+      store.selectedType = null;
+      store.selectedId = null;
       store.meta.formId = '';
       store.meta.serialNo = '';
       syncUrlParams('');
       store.activeTemplateKey = 'blank';
       store.sidebarTab = 'components';
-      if (store.pages[0]?.fields?.[0]) {
-        selectElement(store.pages[0].fields[0]);
-      }
       return;
     }
     loadSchema(blankTemplate, { duration: 0 });

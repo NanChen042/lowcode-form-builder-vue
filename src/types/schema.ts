@@ -69,8 +69,17 @@ export interface FormElement {
     fieldKey: string;
     value: string;
   };
-  // 风险评估问题权重 (1-10，默认 1)
+  // 风险评估问题权重 (1-10，默认 1) 及所属分组 ID
   weight?: number;
+  groupId?: string;
+}
+
+export interface FormQuestionGroup {
+  id: string;
+  title: string;
+  title_en?: string;
+  description?: string;
+  description_en?: string;
 }
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
@@ -116,6 +125,7 @@ export interface FormPageSchema {
   description: string;
   description_en?: string;
   fields: FormElement[];
+  groups?: FormQuestionGroup[];
   pageType?: 'form' | 'system_profile';
   profileType?: ProfileType;
   showSkeleton?: boolean;

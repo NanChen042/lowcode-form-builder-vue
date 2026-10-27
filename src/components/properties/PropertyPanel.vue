@@ -28,10 +28,18 @@
         <div class="flex items-center justify-between border-b border-[#f0f0f0] px-4 py-3 shrink-0">
           <div>
             <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800">
-              {{ isRisk && selectedElement ? (store.currentLocale === 'en' ? 'Question Settings' : '问题设置') : t('prop.title') }}
+              {{
+                store.selectedType === 'group'
+                  ? (store.currentLocale === 'en' ? 'Group Settings' : '分组设置')
+                  : (isRisk && selectedElement ? (store.currentLocale === 'en' ? 'Question Settings' : '问题设置') : t('prop.title'))
+              }}
             </h2>
             <p class="m-0 text-[11px] leading-4 text-slate-400">
-              {{ store.selectedType === 'page' ? t('prop.pageSubtitle') : (selectedElement ? t('prop.elementSubtitle') : t('prop.emptyTitle')) }}
+              {{
+                store.selectedType === 'group'
+                  ? (store.currentLocale === 'en' ? 'Configure group title and questions' : '配置分组名称及组内问题')
+                  : (store.selectedType === 'page' ? t('prop.pageSubtitle') : (selectedElement ? t('prop.elementSubtitle') : t('prop.emptyTitle')))
+              }}
             </p>
           </div>
           <div class="flex items-center gap-1.5">
@@ -50,7 +58,7 @@
           </div>
         </div>
 
-        <!-- 仅在开启中英文双语模式且选中了组件或画板时，展示编辑语言切换 -->
+
         <div
           v-if="store.selectedType && isBilingual"
           class="px-3.5 py-1.5 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0 gap-2"
@@ -107,6 +115,77 @@
           :page="selectedPage"
         />
 
+        <div v-else-if="store.selectedType === 'group' && selectedGroup" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div>
+                <span class="text-[12px] font-semibold text-slate-700">
+                  {{ store.currentLocale === 'en' ? 'Group Information' : '分组信息' }}
+                </span>
+                <span class="block text-[11px] text-slate-400">
+                  {{ store.currentLocale === 'en' ? 'English group title is required; Chinese is optional' : '英文分组名称为必填项，中文翻译选填' }}
+                </span>
+              </div>
+              <a-tag size="small" class="text-[11px] font-normal">
+                {{ store.currentLocale === 'en' ? 'Question Group' : '问题分组' }}
+              </a-tag>
+            </div>
+
+            <div class="mb-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <label for="group-prop-title-input" class="text-[12px] font-medium text-slate-700">
+                    {{ store.currentLocale === 'en' ? 'Group Name (EN)' : '分组名称 (中文)' }}
+                  </label>
+                  <a-tag
+                    v-if="isBilingual && (store.currentLocale === 'en' ? (selectedGroup.title && !selectedGroup.title_en) : (selectedGroup.title_en && !selectedGroup.title))"
+                    color="orange"
+                    size="small"
+                    class="text-[10px] scale-90 origin-left"
+                  >
+                    {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+                  </a-tag>
+                </div>
+              </div>
+              <a-input
+                id="group-prop-title-input"
+                v-model="groupTitleModel"
+                allow-clear
+                :placeholder="store.currentLocale === 'en' ? 'Enter group name' : '请输入分组名称'"
+                class="w-full"
+                @input="markDirty"
+              />
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+              <a-button
+                type="outline"
+                size="small"
+                class="w-full"
+                @click="addElement('radio', store.pages[0]?.id, selectedGroup.id)"
+              >
+                <template #icon>
+                  <Plus class="h-3.5 w-3.5" />
+                </template>
+                {{ store.currentLocale === 'en' ? 'Add Question to Group' : '添加本组问题' }}
+              </a-button>
+
+              <a-button
+                status="danger"
+                size="small"
+                class="w-full"
+                :disabled="(store.pages[0]?.groups?.length || 0) <= 1"
+                @click="deleteQuestionGroup(selectedGroup.id)"
+              >
+                <template #icon>
+                  <Trash2 class="h-3.5 w-3.5" />
+                </template>
+                {{ store.currentLocale === 'en' ? 'Delete Group' : '删除分组' }}
+              </a-button>
+            </div>
+          </div>
+        </div>
+
         <div v-else-if="selectedElement" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
           <a-form id="prop-editor" :model="selectedElement" layout="vertical" size="small">
             <FieldBasicProps :element="selectedElement" />
@@ -150,9 +229,13 @@ import {
   isRisk,
   selectedElement,
   selectedPage,
+  selectedGroup,
+  addElement,
+  deleteQuestionGroup,
   duplicateElement,
   deleteElement,
   triggerHighlight,
+  markDirty,
   isBilingual
 } from '@/core/store';
 import { t } from '@/core/i18n';
@@ -168,10 +251,27 @@ import {
   Copy,
   Trash2,
   Globe,
-  PanelRight
+  PanelRight,
+  Plus
 } from '@lucide/vue';
 
 const isCountryListModalVisible = ref(false);
+
+const groupTitleModel = computed({
+  get() {
+    if (!selectedGroup.value) return '';
+    return store.currentLocale === 'en' ? (selectedGroup.value.title_en || '') : (selectedGroup.value.title || '');
+  },
+  set(val: string) {
+    if (!selectedGroup.value) return;
+    if (store.currentLocale === 'en') {
+      selectedGroup.value.title_en = val;
+    } else {
+      selectedGroup.value.title = val;
+    }
+    markDirty();
+  }
+});
 
 function openCountryListModal() {
   isCountryListModalVisible.value = true;
@@ -189,6 +289,13 @@ const { isResizing, startResize } = useSidebarResize({
 
 const headerBadgeText = computed(() => {
   if (store.selectedType === 'page') return store.selectedId || t('prop.page');
+  if (store.selectedType === 'group') {
+    const idx = store.pages[0]?.groups?.findIndex(g => g.id === store.selectedId) ?? -1;
+    if (idx !== -1) {
+      return `Group ${String(idx + 1).padStart(2, '0')}`;
+    }
+    return store.selectedId || 'Group';
+  }
   if (store.selectedType === 'element') {
     if (isRisk.value && store.selectedId) {
       const idx = store.pages[0]?.fields?.findIndex(f => f.id === store.selectedId) ?? -1;

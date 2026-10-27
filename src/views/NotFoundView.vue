@@ -159,7 +159,7 @@
         {{ isFormNotFound ? t('notFound.formDesc') : t('notFound.desc') }}
       </p>
 
-      <!-- 操作按钮组 (遵循项目规范：标准 4px 微圆角、36px 黄金高度、#186df5 品牌色与白底精细描边次按钮) -->
+
       <div class="flex items-center justify-center gap-3 mt-8">
         <button
           type="button"
@@ -202,7 +202,7 @@
         </button>
       </div>
 
-      <!-- 诊断与自动返回倒计时 -->
+
       <div class="mt-8 text-xs text-slate-400 font-mono">
         <span>{{ t('notFound.autoRedirect', undefined, { countdown }) }}</span>
       </div>
@@ -227,7 +227,7 @@ const primaryBtnText = computed(() => {
   return isFormNotFound.value ? t('notFound.createNewForm') : t('notFound.backToBuilder');
 });
 
-// 自动倒计时
+
 const countdown = ref(15);
 let countdownTimer: number | null = null;
 

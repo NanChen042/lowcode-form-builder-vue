@@ -3,6 +3,7 @@ import type {
   FormSchema,
   FormPage,
   FormElement,
+  FormQuestionGroup,
   ComponentType,
   CanvasState,
   ProfileType
@@ -65,9 +66,10 @@ export const store = reactive({
 
   pages: [] as FormPage[],
 
-  selectedType: null as 'element' | 'page' | null,
+  selectedType: null as 'element' | 'page' | 'group' | null,
   selectedId: null as string | null,
   activePageId: null as string | null,
+  activeGroupId: null as string | null,
 
   canvasState: {
     x: 320,
@@ -113,10 +115,47 @@ export const store = reactive({
   },
 
   lockedProfileType: null as ProfileType | null,
-  editorMode: 'standard' as 'standard' | 'risk'
+  editorMode: 'standard' as 'standard' | 'risk',
+  riskPageWidth: 860,
+  isRiskPageWidthCustomized: false
 });
 
+export const DEFAULT_RISK_PAGE_RATIO = 0.82;
+
+export function getMiddleCanvasWidth(): number {
+  if (typeof window === 'undefined') return 1200;
+  if (typeof document !== 'undefined') {
+    const canvasEl = document.getElementById('tour-canvas-area');
+    if (canvasEl && canvasEl.clientWidth > 0) {
+      return canvasEl.clientWidth;
+    }
+  }
+  const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+  const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+  return Math.max(360, window.innerWidth - leftWidth - rightWidth);
+}
+
+export function calculateDefaultRiskPageWidth(): number {
+  const middleWidth = getMiddleCanvasWidth();
+  const maxSafeWidth = Math.max(440, middleWidth - 56);
+  return Math.min(1160, maxSafeWidth, Math.max(440, Math.round(middleWidth * DEFAULT_RISK_PAGE_RATIO)));
+}
+
 export const isRisk = computed<boolean>(() => store.editorMode === 'risk');
+
+export function getPageWidth(): number {
+  if (isRisk.value) {
+    if (!store.isRiskPageWidthCustomized && typeof window !== 'undefined') {
+      const calculated = calculateDefaultRiskPageWidth();
+      if (store.riskPageWidth !== calculated) {
+        store.riskPageWidth = calculated;
+      }
+      return calculated;
+    }
+    return store.riskPageWidth || calculateDefaultRiskPageWidth();
+  }
+  return PAGE_WIDTH;
+}
 
 export function findElementById(elements: FormElement[], id: string): FormElement | null {
   for (const el of elements) {
@@ -151,6 +190,15 @@ export const selectedPage = computed<FormPage | null>(() => {
   return store.pages.find(p => p.id === store.selectedId) || null;
 });
 
+export const selectedGroup = computed<FormQuestionGroup | null>(() => {
+  if (store.selectedType !== 'group' || !store.selectedId) return null;
+  for (const page of store.pages) {
+    const g = page.groups?.find(grp => grp.id === store.selectedId);
+    if (g) return g;
+  }
+  return null;
+});
+
 export function getUniqueId(): number {
   return store.uniqueIdCounter++;
 }
@@ -170,8 +218,12 @@ export function selectElement(el: FormElement | string | null) {
 
   // 联动更新激活画板：找到该元素所在的画板并提升层级
   for (const page of store.pages) {
-    if (findElementById(page.fields, targetId)) {
+    const found = findElementById(page.fields, targetId);
+    if (found) {
       store.activePageId = page.id;
+      if (found.groupId) {
+        store.activeGroupId = found.groupId;
+      }
       break;
     }
   }
@@ -190,13 +242,22 @@ export function selectPage(pageId: string) {
   }
 }
 
+export function selectGroup(groupId: string) {
+  store.selectedType = 'group';
+  store.selectedId = groupId;
+  store.activeGroupId = groupId;
+  if (!store.rightSidebarVisible) {
+    store.rightSidebarVisible = true;
+  }
+}
+
 export function clearSelection() {
   store.selectedType = null;
   store.selectedId = null;
   store.focusedTarget = null;
 }
 
-export function createElement(type: ComponentType): FormElement {
+export function createElement(type: ComponentType, groupId?: string): FormElement {
   const meta = componentRegistry[type];
   const id = `cmp_${getUniqueId()}`;
   const defaultData = meta ? meta.defaultData() : {};
@@ -204,13 +265,13 @@ export function createElement(type: ComponentType): FormElement {
   if (isRisk.value) {
     return {
       id,
-      type: 'checkbox',
-      key: makeFieldKey('checkbox', id),
+      type: 'radio',
+      key: makeFieldKey('radio', id),
       required: true,
       showLabel: true,
       layout: 'inline',
-      maxSelections: 1,
       weight: 1,
+      groupId,
       label: '',
       label_en: '',
       options: RISK_FIXED_OPTIONS.map(o => ({ ...o }))
@@ -231,7 +292,66 @@ export function createElement(type: ComponentType): FormElement {
   };
 }
 
-export function addElement(type: ComponentType, targetPageId?: string) {
+export function addQuestionGroup(afterGroupId?: string, insertIndexOverride?: number): FormQuestionGroup | null {
+  const page = store.pages[0];
+  if (!page) return null;
+  if (!page.groups) page.groups = [];
+  const newId = `grp_${Date.now()}_${getUniqueId()}`;
+  const idxNum = page.groups.length + 1;
+  const newGroup: FormQuestionGroup = {
+    id: newId,
+    title: `问题分组 ${idxNum}`,
+    title_en: `Question Group ${idxNum}`
+  };
+  let insertIdx = page.groups.length;
+  if (typeof insertIndexOverride === 'number') {
+    insertIdx = Math.max(0, Math.min(insertIndexOverride, page.groups.length));
+  } else if (afterGroupId) {
+    const foundIdx = page.groups.findIndex(g => g.id === afterGroupId);
+    if (foundIdx !== -1) insertIdx = foundIdx + 1;
+  }
+  page.groups.splice(insertIdx, 0, newGroup);
+  const firstQuestion = createElement('radio', newId);
+  page.fields.push(firstQuestion);
+  const groupOrder = page.groups.map(g => g.id);
+  page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  selectGroup(newId);
+  markDirty();
+  return newGroup;
+}
+
+export function deleteQuestionGroup(groupId: string): boolean {
+  const page = store.pages[0];
+  if (!page || !page.groups || page.groups.length <= 1) return false;
+  const idx = page.groups.findIndex(g => g.id === groupId);
+  if (idx === -1) return false;
+  page.groups.splice(idx, 1);
+  page.fields = page.fields.filter(f => f.groupId !== groupId);
+  if (store.selectedId === groupId) {
+    clearSelection();
+  }
+  if (store.activeGroupId === groupId) {
+    store.activeGroupId = page.groups[0]?.id || null;
+  }
+  markDirty();
+  return true;
+}
+
+export function moveQuestionGroup(groupId: string, direction: 'up' | 'down') {
+  const page = store.pages[0];
+  if (!page || !page.groups) return;
+  const idx = page.groups.findIndex(g => g.id === groupId);
+  if (idx === -1) return;
+  const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= page.groups.length) return;
+  const [moved] = page.groups.splice(idx, 1);
+  page.groups.splice(targetIdx, 0, moved);
+  const groupOrder = page.groups.map(g => g.id);
+  page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  markDirty();
+}
+
+export function addElement(type: ComponentType, targetPageId?: string, targetGroupId?: string, insertAfterElementId?: string) {
   if (store.pages.length === 0) {
     addPage();
   }
@@ -239,19 +359,49 @@ export function addElement(type: ComponentType, targetPageId?: string) {
   if (isRisk.value) {
     const page = store.pages[0];
     if (!page) return;
-    const newEl = createElement(type);
-    if (selectedElement.value && store.selectedType === 'element') {
-      const searchRes = findElementParentAndIndex(page.fields, selectedElement.value.id);
+    if (!page.groups || page.groups.length === 0) {
+      page.groups = [
+        { id: 'grp_risk_1', title: '', title_en: '' }
+      ];
+    }
+    const resolvedGroupId =
+      targetGroupId ||
+      (selectedElement.value && store.selectedType === 'element' ? selectedElement.value.groupId : undefined) ||
+      store.activeGroupId ||
+      page.groups[0].id;
+    const newEl = createElement('radio', resolvedGroupId);
+
+    const targetAfterId = insertAfterElementId || (!targetGroupId && selectedElement.value && store.selectedType === 'element' && selectedElement.value.groupId === resolvedGroupId ? selectedElement.value.id : undefined);
+
+    if (targetAfterId) {
+      const searchRes = findElementParentAndIndex(page.fields, targetAfterId);
       if (searchRes) {
+        newEl.groupId = page.fields[searchRes.index].groupId || resolvedGroupId;
         searchRes.parentArray.splice(searchRes.index + 1, 0, newEl);
         store.activePageId = page.id;
+        store.activeGroupId = newEl.groupId;
         selectElement(newEl);
         markDirty();
         return;
       }
     }
-    page.fields.push(newEl);
+
+    let lastGroupItemIdx = -1;
+    for (let i = page.fields.length - 1; i >= 0; i--) {
+      if (page.fields[i].groupId === resolvedGroupId) {
+        lastGroupItemIdx = i;
+        break;
+      }
+    }
+    if (lastGroupItemIdx !== -1) {
+      page.fields.splice(lastGroupItemIdx + 1, 0, newEl);
+    } else {
+      page.fields.push(newEl);
+      const groupOrder = page.groups.map(g => g.id);
+      page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+    }
     store.activePageId = page.id;
+    store.activeGroupId = resolvedGroupId;
     selectElement(newEl);
     markDirty();
     return;
@@ -411,6 +561,9 @@ export function toChineseNum(num: number): string {
 }
 
 export function addPage(afterPageId?: string | null, options: { focus?: boolean } = {}) {
+  if (isRisk.value && store.pages.length >= 1) {
+    return store.pages[0];
+  }
   const isFirst = store.pages.length === 0;
   const newId = `page_${Date.now()}_${getUniqueId()}`;
   let insertIndex = store.pages.length;
@@ -443,7 +596,7 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
 
   store.pages.splice(insertIndex, 0, newPage);
 
-  // 重新排列后续页面
+
   for (let i = insertIndex + 1; i < store.pages.length; i++) {
     store.pages[i].x = store.pages[i - 1].x + PAGE_WIDTH + PAGE_GAP;
   }
@@ -458,6 +611,7 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
 }
 
 export function deletePage(pageId: string) {
+  if (isRisk.value) return;
   const idx = store.pages.findIndex(p => p.id === pageId);
   if (idx === -1) return;
 
@@ -470,7 +624,7 @@ export function deletePage(pageId: string) {
 
   store.pages.splice(idx, 1);
 
-  // 重新排列被删除画板之后的后续画板
+
   for (let i = idx; i < store.pages.length; i++) {
     store.pages[i].x = store.pages[i - 1].x + PAGE_WIDTH + PAGE_GAP;
   }
@@ -508,7 +662,7 @@ export function adjustZoom(delta: number, clientX?: number, clientY?: number, vi
     store.canvasState.x = pointerX - worldX * nextScale;
     store.canvasState.y = pointerY - worldY * nextScale;
   } else {
-    // 居中缩放
+
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     const worldX = (centerX - store.canvasState.x) / oldScale;
@@ -564,7 +718,7 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
   } else if (page.pageType === 'system_profile') {
     realHeight = presetExpectedHeight;
   }
-  const realWidth = PAGE_WIDTH;
+  const realWidth = getPageWidth();
 
   const badgeOffset = 32;
   const totalContentHeight = realHeight + badgeOffset;
@@ -624,6 +778,10 @@ export function resetCanvasView(options?: { duration?: number }) {
     return;
   }
 
+  if (isRisk.value && !store.isRiskPageWidthCustomized && typeof window !== 'undefined') {
+    store.riskPageWidth = calculateDefaultRiskPageWidth();
+  }
+
   const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
   const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
   const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
@@ -649,7 +807,7 @@ export function resetCanvasView(options?: { duration?: number }) {
     } else if (p.pageType === 'system_profile') {
       pHeight = presetExpectedHeight;
     }
-    const pWidth = PAGE_WIDTH;
+    const pWidth = getPageWidth();
 
     if (p.x < minX) minX = p.x;
     if (p.y - 28 < minY) minY = p.y - 28;
@@ -659,6 +817,18 @@ export function resetCanvasView(options?: { duration?: number }) {
 
   const totalWidth = maxX - minX;
   const totalHeight = maxY - minY;
+
+  if (isRisk.value) {
+    const safeWidth = Math.max(240, viewportWidth - 48);
+    let targetScale = Math.min(1, safeWidth / totalWidth);
+    if (Math.abs(targetScale - 1) < 0.03) targetScale = 1;
+    store.canvasState.scale = clampScale(targetScale);
+    const contentCenterX = minX + totalWidth / 2;
+    store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * store.canvasState.scale);
+    store.canvasState.y = headerHeight + 36;
+    return;
+  }
+
   const padding = 120;
 
   const safeWidth = Math.max(10, viewportWidth - padding);
@@ -727,6 +897,7 @@ export function buildSchema(): FormSchema {
       showSkeleton: p.showSkeleton,
       title: p.title,
       description: p.description,
+      groups: p.groups && p.groups.length > 0 ? JSON.parse(JSON.stringify(p.groups)) : undefined,
       fields: p.fields.map(f => {
         const fieldCopy: any = JSON.parse(JSON.stringify(f));
         // 国家和国籍组件是系统内建预设字典，无需在 Schema JSON 中冗余序列化全部244个国家选项
@@ -909,7 +1080,13 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   store.meta.description = schema.meta?.description || '';
   store.meta.description_en = schema.meta?.description_en || '';
   if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
-    store.meta.enabledLocales = [...schema.meta.enabledLocales];
+    if (isRisk.value && schema.meta.enabledLocales.length === 1) {
+      store.meta.enabledLocales = [store.currentLocale || 'zh'];
+    } else {
+      store.meta.enabledLocales = [...schema.meta.enabledLocales];
+    }
+  } else if (isRisk.value) {
+    store.meta.enabledLocales = [store.currentLocale || 'zh'];
   } else {
     const hasExplicitEn = Boolean(
       schema.meta?.title_en ||
@@ -961,7 +1138,7 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   }
   store.uniqueIdCounter = maxId + 1;
 
-  // 构建页面
+
   if (schema.pages && schema.pages.length > 0) {
     store.pages = schema.pages.map((p, idx) => {
       const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (p.title === '基本资料' || p.title_en === 'Basic Information'));
@@ -976,6 +1153,20 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
           pageTitleEn = '';
         }
       }
+      let hydratedGroups = p.groups && p.groups.length > 0
+        ? JSON.parse(JSON.stringify(p.groups))
+        : undefined;
+      if (isRisk.value && !isSystemProfile && (!hydratedGroups || hydratedGroups.length === 0)) {
+        hydratedGroups = [
+          {
+            id: 'grp_risk_1',
+            title: '',
+            title_en: ''
+          }
+        ];
+      }
+      const fallbackGroupId = hydratedGroups?.[0]?.id;
+
       return {
         id: p.id || `page_${Date.now()}_${getUniqueId()}_${idx}`,
         pageType: (isSystemProfile ? 'system_profile' : 'form') as 'form' | 'system_profile',
@@ -985,25 +1176,32 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
         title_en: isSystemProfile ? (p.title_en || 'Basic Information') : pageTitleEn,
         description: p.description || '',
         description_en: p.description_en || '',
+        groups: hydratedGroups,
         fields: isSystemProfile ? [] : (p.fields || []).map(f => {
-          const meta = componentRegistry[f.type];
+          const resolvedType = isRisk.value ? 'radio' : f.type;
+          const meta = componentRegistry[resolvedType];
           const defaultData = meta ? meta.defaultData() : {};
-          const fieldOptions = f.options && f.options.length
-            ? f.options
-            : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined);
+          const fieldOptions = isRisk.value
+            ? RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+            : (f.options && f.options.length
+                ? f.options
+                : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined));
           return {
             ...defaultData,
             ...f,
-            options: (['country', 'nationality'].includes(f.type) && fieldOptions && fieldOptions.length >= 200)
+            type: resolvedType,
+            groupId: isRisk.value ? (f.groupId || fallbackGroupId) : f.groupId,
+            options: (['country', 'nationality'].includes(resolvedType) && fieldOptions && fieldOptions.length >= 200)
               ? []
               : fieldOptions
           };
         }),
-        x: idx * (PAGE_WIDTH + PAGE_GAP),
+        x: idx * (getPageWidth() + PAGE_GAP),
         y: 0
       };
     });
     store.activePageId = store.pages.length > 0 ? store.pages[0].id : null;
+    store.activeGroupId = store.pages[0]?.groups?.[0]?.id || null;
     setTimeout(() => {
       resetCanvasView({ duration: options?.duration });
     }, 50);
@@ -1015,7 +1213,7 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   establishBaseline();
 }
 
-// 脏状态比对
+
 let dirtyTimer: ReturnType<typeof setTimeout> | null = null;
 export function markDirty() {
   if (dirtyTimer) clearTimeout(dirtyTimer);
@@ -1031,7 +1229,7 @@ export function establishBaseline() {
   store.isDirty = false;
 }
 
-// 属性面板联动高亮与滚动
+
 export function triggerHighlight(input: HTMLElement | null) {
   if (!input) return;
   input.classList.remove('pulse-highlight');

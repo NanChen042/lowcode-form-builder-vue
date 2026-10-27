@@ -19,7 +19,7 @@
     </div>
 
     <div v-if="element.type === 'textarea'" class="space-y-0.5">
-      <!-- 行数范围 (最小 ~ 最大行数自适应联动) -->
+
       <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
           <span class="text-[12px] font-medium text-slate-600">{{ t('prop.rowRange') }}</span>
@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- 最大字数字符上限 -->
+
       <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
         <div class="flex items-center gap-1.5">
           <span class="text-[12px] font-medium text-slate-600">{{ t('prop.maxLength') }}</span>

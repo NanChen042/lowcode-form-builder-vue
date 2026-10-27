@@ -16,13 +16,21 @@
           <template #icon>
             <Copy class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ t('context.duplicate') }}</span>
+          <span>{{ isRisk ? (store.currentLocale === 'en' ? 'Duplicate Question' : '复制问题') : t('context.duplicate') }}</span>
           <template #suffix>
             <span class="text-[10px] text-slate-400 font-mono">{{ isMac ? '⌘D' : 'Ctrl+D' }}</span>
           </template>
         </a-doption>
 
+        <a-doption v-if="isRisk" @click="handleInsertRiskQuestionBelow">
+          <template #icon>
+            <Plus class="h-4 w-4 text-blue-500" />
+          </template>
+          <span>{{ store.currentLocale === 'en' ? 'Insert Question Below' : '在下方插入问题' }}</span>
+        </a-doption>
+
         <ComponentCascadeMenu
+          v-else
           :title="t('context.insertBelow')"
           value-prefix="elem-insert"
           @select="handleQuickAddComponent"
@@ -34,7 +42,7 @@
           <template #icon>
             <Trash2 class="h-4 w-4 text-red-500" />
           </template>
-          <span>{{ t('context.deleteElement') }}</span>
+          <span>{{ isRisk ? (store.currentLocale === 'en' ? 'Delete Question' : '删除问题') : t('context.deleteElement') }}</span>
         </a-doption>
       </template>
 
@@ -48,17 +56,32 @@
         </div>
 
         <template v-if="!isTargetSystemProfilePage">
+          <a-doption v-if="isRisk" @click="handleQuickAddRiskQuestion">
+            <template #icon>
+              <Plus class="h-4 w-4 text-blue-500" />
+            </template>
+            <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
+          </a-doption>
+
           <ComponentCascadeMenu
+            v-else
             :title="t('context.addComponent')"
             value-prefix="page-insert"
             title-class="font-medium text-slate-800"
             @select="handleQuickAddComponent"
           />
 
+          <a-doption v-if="isRisk" @click="handleAddGroup">
+            <template #icon>
+              <FilePlus class="h-4 w-4 text-slate-500" />
+            </template>
+            <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+          </a-doption>
+
           <a-divider style="margin: 4px 0" />
         </template>
 
-        <a-doption @click="handleAddPage">
+        <a-doption v-if="!isRisk" @click="handleAddPage">
           <template #icon>
             <FilePlus class="h-4 w-4 text-slate-500" />
           </template>
@@ -72,7 +95,7 @@
           <span>{{ t('context.resetView') }}</span>
         </a-doption>
 
-        <template v-if="!isTargetSystemProfilePage">
+        <template v-if="!isRisk && !isTargetSystemProfilePage">
           <a-divider style="margin: 4px 0" />
 
           <a-doption class="context-danger-option" @click="handleDeletePage">
@@ -85,7 +108,13 @@
       </template>
 
       <template v-else>
-        <a-doption @click="handleAddPage">
+        <a-doption v-if="isRisk" @click="handleAddGroup">
+          <template #icon>
+            <FilePlus class="h-4 w-4 text-slate-500" />
+          </template>
+          <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+        </a-doption>
+        <a-doption v-else @click="handleAddPage">
           <template #icon>
             <FilePlus class="h-4 w-4 text-slate-500" />
           </template>
@@ -111,16 +140,18 @@ import type { ComponentType } from '@/types/schema';
 import {
   addPage,
   deletePage,
+  addQuestionGroup,
   resetCanvasView,
   duplicateElement,
   deleteElement,
   addElement,
   clearSelection,
+  isRisk,
   store
 } from '@/core/store';
 import { t } from '@/core/i18n';
 import { Modal } from '@arco-design/web-vue';
-import { FilePlus, Expand, Trash2, Copy, Lock } from '@lucide/vue';
+import { FilePlus, Expand, Trash2, Copy, Lock, Plus } from '@lucide/vue';
 import ComponentCascadeMenu from './ComponentCascadeMenu.vue';
 
 const props = withDefaults(
@@ -151,6 +182,7 @@ const targetPage = computed(() => {
 
 const isTargetSystemProfilePage = computed(() => {
   if (!props.targetPageId) return false;
+  if (isRisk.value) return false;
   return targetPage.value?.pageType === 'system_profile' || store.pages[0]?.id === props.targetPageId;
 });
 
@@ -175,6 +207,28 @@ function handleQuickAddComponent(type: ComponentType) {
     }
   } catch (err) {
     console.error('Failed to add component via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
+
+function handleInsertRiskQuestionBelow() {
+  try {
+    if (props.targetElementId) {
+      addElement('radio', undefined, undefined, props.targetElementId);
+    }
+  } catch (err) {
+    console.error('Failed to insert question below via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
+
+function handleQuickAddRiskQuestion() {
+  try {
+    addElement('radio', store.pages[0]?.id);
+  } catch (err) {
+    console.error('Failed to add question via context menu:', err);
   } finally {
     emit('close');
   }
@@ -209,6 +263,16 @@ function handleAddPage() {
     addPage(props.targetPageId);
   } catch (err) {
     console.error('Failed to add page via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
+
+function handleAddGroup() {
+  try {
+    addQuestionGroup();
+  } catch (err) {
+    console.error('Failed to add group via context menu:', err);
   } finally {
     emit('close');
   }

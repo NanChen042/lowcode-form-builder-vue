@@ -1,10 +1,11 @@
 import { computed } from 'vue';
-import { store, selectPage, selectElement, focusOnPage } from '@/core/store';
+import { store, isRisk, selectPage, selectElement, selectGroup, focusOnPage } from '@/core/store';
 import { componentRegistry } from '@/registry/components';
 
 export type TranslationFieldType =
   | 'page_title'
   | 'page_desc'
+  | 'group_title'
   | 'field_label'
   | 'field_placeholder'
   | 'field_help'
@@ -16,6 +17,7 @@ export interface UntranslatedItem {
   pageId: string;
   pageIndex: number;
   pageTitle: string;
+  groupId?: string;
   elementId?: string;
   elementLabel?: string;
   componentType?: string;
@@ -80,6 +82,7 @@ export function calculateTranslationStats(): TranslationStats {
     pageId: string;
     pageIndex: number;
     pageTitle: string;
+    groupId?: string;
     elementId?: string;
     elementLabel?: string;
     componentType?: string;
@@ -106,6 +109,7 @@ export function calculateTranslationStats(): TranslationStats {
         pageId: params.pageId,
         pageIndex: params.pageIndex,
         pageTitle: params.pageTitle,
+        groupId: params.groupId,
         elementId: params.elementId,
         elementLabel: params.elementLabel,
         componentType: params.componentType,
@@ -125,6 +129,7 @@ export function calculateTranslationStats(): TranslationStats {
         pageId: params.pageId,
         pageIndex: params.pageIndex,
         pageTitle: params.pageTitle,
+        groupId: params.groupId,
         elementId: params.elementId,
         elementLabel: params.elementLabel,
         componentType: params.componentType,
@@ -167,6 +172,24 @@ export function calculateTranslationStats(): TranslationStats {
       zhText: page.description,
       enText: page.description_en
     });
+
+    // 2.5 问题分组标题 (风险评估表单)
+    if (page.groups && Array.isArray(page.groups)) {
+      page.groups.forEach((group, gIdx) => {
+        const gLabel = (store.currentLocale === 'en' ? (group.title_en || group.title) : (group.title || group.title_en)) || `Group ${gIdx + 1}`;
+        registerItem({
+          id: `${group.id}_title`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          groupId: group.id,
+          fieldType: 'group_title',
+          fieldName: `${store.currentLocale === 'en' ? 'Group' : '分组'} ${String(gIdx + 1).padStart(2, '0')} · ${gLabel}`,
+          zhText: group.title,
+          enText: group.title_en
+        });
+      });
+    }
 
     // 3. 页面内的各个字段
     page.fields?.forEach(element => {
@@ -240,8 +263,8 @@ export function calculateTranslationStats(): TranslationStats {
         });
       }
 
-      // 选项列表 (单选、多选、下拉、声明条款等)
-      if (element.options && Array.isArray(element.options)) {
+      // 选项列表 (单选、多选、下拉、声明条款等；风险评估固定选项无需计入)
+      if (!isRisk.value && element.options && Array.isArray(element.options)) {
         element.options.forEach((opt, optIdx) => {
           const optName = (store.currentLocale === 'en' ? (opt.label_en || opt.label) : (opt.label || opt.label_en)) || `${store.currentLocale === 'en' ? 'Option' : '选项'} ${optIdx + 1}`;
           let zhText = opt.label;
@@ -334,8 +357,13 @@ export function navigateToUntranslatedItem(item: UntranslatedItem) {
   // 2. 镜头平滑居中聚焦目标画板
   focusOnPage(item.pageId, { duration: 400 });
 
-  // 3. 选中画板或组件
-  if (!item.elementId) {
+  // 3. 选中画板、问题分组或组件
+  if (item.groupId) {
+    selectGroup(item.groupId);
+    setTimeout(() => {
+      document.getElementById('group-prop-title-input')?.focus();
+    }, 100);
+  } else if (!item.elementId) {
     // 页面级别 (标题或描述)
     selectPage(item.pageId);
     store.focusedTarget = {

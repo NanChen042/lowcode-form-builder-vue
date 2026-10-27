@@ -14,9 +14,10 @@
       class="flex h-full min-h-0 flex-row shrink-0"
       :style="{ width: `${store.leftSidebarWidth}px` }"
     >
-      <div v-if="!isRisk" class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
+      <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
         <div id="tour-activity-bar" class="flex flex-col items-center gap-2 w-full px-1">
           <button
+              v-if="!isRisk"
               type="button"
               class="figma-activity-btn"
               :class="{ active: activeTab === 'templates' }"
@@ -57,10 +58,10 @@
                 class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
                 :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
               >
-                {{ t('sidebar.pages') }}
+                {{ isRisk ? (store.currentLocale === 'en' ? 'Groups' : '分组') : t('sidebar.pages') }}
               </span>
-              <span v-if="store.pages.length > 0" class="figma-page-count-badge">
-                {{ store.pages.length }}
+              <span v-if="isRisk ? (store.pages[0]?.groups?.length || 0) > 0 : store.pages.length > 0" class="figma-page-count-badge">
+                {{ isRisk ? (store.pages[0]?.groups?.length || 0) : store.pages.length }}
               </span>
             </button>
           </div>
@@ -263,42 +264,31 @@
           </div>
 
           <div id="tour-component-panel" v-show="activeTab === 'components'" class="space-y-4">
-            <button
-              v-if="isRisk"
-              type="button"
-              class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg border border-slate-200/90 hover:border-[#1677ff] bg-white hover:bg-blue-50/30 text-slate-700 hover:text-[#1677ff] transition-all duration-150 cursor-pointer group shadow-2xs hover:shadow-xs"
-              @click="$emit('open-create-canvas')"
-            >
-              <div class="flex items-center gap-2.5 min-w-0">
-                <div class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 group-hover:bg-[#1677ff] text-[#1677ff] group-hover:text-white transition-colors shrink-0">
-                  <Plus class="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div class="flex flex-col text-left min-w-0">
-                  <span class="text-[12.5px] font-semibold text-slate-800 group-hover:text-[#1677ff] leading-tight">
-                    {{ store.currentLocale === 'en' ? 'New Risk Form' : '新建风险评估表单' }}
-                  </span>
-                  <span class="text-[10.5px] text-slate-400 leading-tight mt-0.5 truncate">
-                    {{ store.currentLocale === 'en' ? 'Select Client / Individual / Entity' : '选择客户 / 个人 / 实体主体创建' }}
-                  </span>
-                </div>
-              </div>
-              <ArrowRight class="w-3.5 h-3.5 text-slate-300 group-hover:text-[#1677ff] group-hover:translate-x-0.5 transition-all shrink-0 ml-1.5" />
-            </button>
-
             <section v-if="filteredBasicComponents.length > 0">
               <h3 class="mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
-                {{ t('sidebar.catBasic') }}
+                {{ isRisk ? (store.currentLocale === 'en' ? 'Risk Assessment Components' : '风险评估组件') : t('sidebar.catBasic') }}
               </h3>
-              <div id="components-basic" ref="basicGroupRef" class="sidebar-drag-group grid grid-cols-2 gap-2">
+              <div id="components-basic" ref="basicGroupRef" class="sidebar-drag-group grid gap-2" :class="isRisk ? 'grid-cols-1' : 'grid-cols-2'">
                 <div
                   v-for="item in filteredBasicComponents"
                   :key="item.type + '_' + store.currentLocale"
-                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
+                  class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2.5 py-1.5 transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
+                  :class="isRisk ? 'min-h-[84px] !items-start !py-2.5' : 'h-[34px]'"
                   :data-type="item.type"
-                  :title="getFieldText(item, 'label')"
+                  :title="isRisk ? (store.currentLocale === 'en' ? 'Risk Question' : '风险评估问题') : getFieldText(item, 'label')"
                   @click="handleComponentClick(item.type)"
                 >
-                  <div class="sidebar-btn-view flex w-full items-center gap-1.5 overflow-hidden">
+                  <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="truncate text-[12px] font-semibold text-slate-700 transition-colors group-hover:text-[#1677ff]">
+                        {{ store.currentLocale === 'en' ? 'Risk Question' : '风险评估问题' }}
+                      </span>
+                      <span class="text-[15px] font-bold leading-none text-[#1677ff] tabular-nums">1</span>
+                    </div>
+                    <div class="h-1.5 w-4/5 rounded-full bg-slate-100"></div>
+                    <div class="h-1.5 w-3/5 rounded-full bg-slate-100"></div>
+                  </div>
+                  <div v-else class="sidebar-btn-view flex w-full items-center gap-2 overflow-hidden">
                     <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-[#1677ff] shrink-0" />
                     <span
                       class="truncate font-medium text-slate-700 transition-colors group-hover:text-[#1677ff]"
@@ -348,7 +338,89 @@
             </div>
           </div>
 
-          <div v-show="activeTab === 'pages'" class="space-y-2">
+          <div id="tour-risk-groups" v-show="activeTab === 'pages' && isRisk" class="space-y-2">
+            <div v-if="store.pages[0]?.groups" ref="sidebarRiskGroupsRef" class="space-y-2">
+              <div
+                v-for="(grp, gIdx) in store.pages[0].groups"
+                :key="grp.id"
+                class="sidebar-risk-group-item group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
+                :class="[
+                  store.selectedType === 'group' && store.selectedId === grp.id
+                    ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
+                    : store.activeGroupId === grp.id
+                      ? 'border-blue-200/90 bg-blue-50/25 shadow-2xs'
+                      : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40'
+                ]"
+                @click="selectGroup(grp.id)"
+              >
+                <div class="flex items-center gap-2 min-w-0 flex-1 pr-1">
+                  <GripVertical class="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 shrink-0 cursor-grab active:cursor-grabbing" />
+                  <span
+                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
+                    :class="[
+                      store.selectedType === 'group' && store.selectedId === grp.id
+                        ? 'bg-[#1677ff] text-white'
+                        : store.activeGroupId === grp.id
+                          ? 'bg-blue-100 text-[#1677ff]'
+                          : 'bg-slate-100 text-slate-500'
+                    ]"
+                  >
+                    {{ Number(gIdx) + 1 }}
+                  </span>
+                  <div class="min-w-0 flex-1">
+                    <div
+                      class="text-[12px] truncate leading-snug"
+                      :class="[
+                        store.selectedType === 'group' && store.selectedId === grp.id
+                          ? 'font-bold text-[#1677ff]'
+                          : 'font-medium text-slate-700'
+                      ]"
+                    >
+                      {{ getRiskGroupDisplayTitle(grp, Number(gIdx)) }}
+                    </div>
+                    <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
+                      {{ getRiskGroupQuestionCount(grp.id) }} {{ store.currentLocale === 'en' ? 'questions' : '个问题' }}
+                    </div>
+                  </div>
+                </div>
+
+                <a-popconfirm
+                  v-if="store.pages[0].groups.length > 1"
+                  :content="store.currentLocale === 'en' ? 'Delete this group and its questions?' : '确定删除该分组及其包含的问题吗？'"
+                  position="tr"
+                  type="warning"
+                  :ok-text="t('modal.confirm')"
+                  :cancel-text="t('modal.cancel')"
+                  :ok-button-props="{ status: 'danger', size: 'small' }"
+                  :cancel-button-props="{ size: 'small' }"
+                  @ok="deleteQuestionGroup(grp.id)"
+                >
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
+                    @click.stop
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </a-popconfirm>
+              </div>
+            </div>
+
+            <div class="pt-1">
+              <button
+                type="button"
+                class="group flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300/90 bg-white py-2 px-3 text-[12px] font-medium text-slate-600 transition-all duration-180 hover:border-[#1677ff] hover:bg-blue-50/40 hover:text-[#1677ff] hover:shadow-xs cursor-pointer"
+                @click="addQuestionGroup()"
+              >
+                <span class="flex h-4.5 w-4.5 items-center justify-center rounded bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#1677ff] group-hover:text-white">
+                  <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+                </span>
+                <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-show="activeTab === 'pages' && !isRisk" class="space-y-2">
             <div
               v-for="(page, idx) in store.pages"
               :key="page.id"
@@ -440,7 +512,7 @@
       </div>
     </div>
 
-    <!-- 右侧拖拽拉伸边框把手 -->
+
     <div
       v-if="store.leftSidebarVisible"
       class="sidebar-resize-handle-right absolute right-0 top-0 bottom-0 w-2 -mr-1 cursor-col-resize hover:bg-[#1677ff]/40 active:bg-[#1677ff] transition-colors z-40 group select-none flex items-center justify-center"
@@ -480,8 +552,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { store, isRisk, addElement, focusOnPage, addPage, applyTemplateKey, selectPage, deletePage } from '@/core/store';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import {
+  store,
+  isRisk,
+  addElement,
+  focusOnPage,
+  addPage,
+  applyTemplateKey,
+  selectPage,
+  selectGroup,
+  addQuestionGroup,
+  deleteQuestionGroup,
+  deletePage,
+  markDirty
+} from '@/core/store';
 import { RISK_FIXED_OPTIONS } from '@/templates/recommend';
 import { t, getPageText, getFieldText } from '@/core/i18n';
 import { componentRegistry, getComponentIcon } from '@/registry/components';
@@ -512,7 +597,8 @@ import {
   Trash2,
   Settings,
   HelpCircle,
-  FileText
+  FileText,
+  GripVertical
 } from '@lucide/vue';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
 import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
@@ -531,9 +617,14 @@ function handleTriggerTour() {
 }
 
 const activeTab = computed({
-  get: () => (isRisk.value ? 'components' : store.sidebarTab),
+  get: () => {
+    if (isRisk.value && store.sidebarTab === 'templates') {
+      return 'components';
+    }
+    return store.sidebarTab;
+  },
   set: (val: 'templates' | 'components' | 'pages') => {
-    store.sidebarTab = isRisk.value ? 'components' : val;
+    store.sidebarTab = isRisk.value && val === 'templates' ? 'components' : val;
   }
 });
 
@@ -597,13 +688,24 @@ const { isResizing, startResize } = useSidebarResize({
 
 const drawerTitle = computed(() => {
   if (activeTab.value === 'templates') return t('sidebar.tabTemplates');
-  if (activeTab.value === 'pages') return t('sidebar.tabPages');
+  if (activeTab.value === 'pages') {
+    if (isRisk.value) {
+      return store.currentLocale === 'en' ? 'Question Groups' : '问题分组';
+    }
+    return t('sidebar.tabPages');
+  }
   return t('sidebar.tabComponents');
 });
 
 const drawerSubtitle = computed(() => {
   if (activeTab.value === 'templates') return t('sidebar.subTemplates');
-  if (activeTab.value === 'pages') return `${store.pages.length} ${t('common.pagesUnit')}`;
+  if (activeTab.value === 'pages') {
+    if (isRisk.value) {
+      const count = store.pages[0]?.groups?.length || 0;
+      return store.currentLocale === 'en' ? `${count} groups` : `${count} 个分组`;
+    }
+    return `${store.pages.length} ${t('common.pagesUnit')}`;
+  }
   return t('sidebar.subComponents');
 });
 
@@ -702,8 +804,10 @@ function handleDeletePage(pageId: string) {
 
 const basicGroupRef = ref<HTMLElement | null>(null);
 const businessGroupRef = ref<HTMLElement | null>(null);
+const sidebarRiskGroupsRef = ref<HTMLElement | null>(null);
 let basicSortable: Sortable | null = null;
 let businessSortable: Sortable | null = null;
+let sidebarRiskGroupsSortable: Sortable | null = null;
 
 const isMac = ref(false);
 
@@ -720,10 +824,49 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+function initSidebarRiskGroupsSortable() {
+  if (!isRisk.value || !sidebarRiskGroupsRef.value || sidebarRiskGroupsSortable) return;
+  sidebarRiskGroupsSortable = new Sortable(sidebarRiskGroupsRef.value, {
+    animation: 180,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'drag-chosen',
+    draggable: '.sidebar-risk-group-item',
+    filter: 'button',
+    preventOnFilter: false,
+    onUpdate(evt) {
+      const page = store.pages[0];
+      if (!page?.groups || evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) return;
+      const groups = [...page.groups];
+      const [moved] = groups.splice(evt.oldIndex, 1);
+      if (moved) {
+        groups.splice(evt.newIndex, 0, moved);
+        page.groups = groups;
+        const firstGroupId = groups[0]?.id;
+        page.fields = groups.flatMap(g =>
+          page.fields.filter(f => (f.groupId || firstGroupId) === g.id)
+        );
+        selectGroup(moved.id);
+        markDirty();
+      }
+    }
+  });
+}
+
+watch(
+  () => [isRisk.value, Boolean(store.pages[0]?.groups), activeTab.value],
+  () => {
+    nextTick(() => {
+      initSidebarRiskGroupsSortable();
+    });
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   isMac.value = /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
   window.addEventListener('keydown', handleKeydown);
   initDragSources();
+  initSidebarRiskGroupsSortable();
 });
 
 onBeforeUnmount(() => {
@@ -735,6 +878,10 @@ onBeforeUnmount(() => {
   if (businessSortable) {
     businessSortable.destroy();
     businessSortable = null;
+  }
+  if (sidebarRiskGroupsSortable) {
+    sidebarRiskGroupsSortable.destroy();
+    sidebarRiskGroupsSortable = null;
   }
 });
 
@@ -803,12 +950,11 @@ function createGhostElement(type: ComponentType): FormElement {
   if (isRisk.value) {
     return {
       id: `ghost_${type}`,
-      type: 'checkbox',
+      type: 'radio',
       key: `ghost_${type}`,
       required: true,
       showLabel: true,
       layout: 'inline',
-      maxSelections: 1,
       weight: 1,
       label: '',
       label_en: '',
@@ -843,7 +989,7 @@ function getGhostElement(type: ComponentType) {
 
 const filteredBasicComponents = computed(() => {
   const all = Object.values(componentRegistry).filter(c =>
-    isRisk.value ? c.type === 'checkbox' : c.category === 'basic'
+    isRisk.value ? c.type === 'radio' : c.category === 'basic'
   );
   if (!searchQuery.value.trim()) return all;
   const q = searchQuery.value.trim().toLowerCase();
@@ -875,6 +1021,20 @@ const noSearchResult = computed(() => {
     filteredBusinessComponents.value.length === 0
   );
 });
+
+function getRiskGroupDisplayTitle(grp: any, idx: number): string {
+  if (store.currentLocale === 'en') {
+    return grp.title_en?.trim() || `Question Group ${idx + 1}`;
+  }
+  return grp.title?.trim() || `问题分组 ${idx + 1}`;
+}
+
+function getRiskGroupQuestionCount(groupId: string): number {
+  const page = store.pages[0];
+  if (!page) return 0;
+  const firstGroupId = page.groups?.[0]?.id;
+  return (page.fields || []).filter(f => (f.groupId || firstGroupId) === groupId).length;
+}
 
 function handleComponentClick(type: ComponentType) {
   const activePage = store.pages.find(p => p.id === store.activePageId) || store.pages[1] || store.pages[0];

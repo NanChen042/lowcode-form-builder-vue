@@ -10,14 +10,14 @@
     :mask-closable="!isSubmitting"
     @cancel="handleClose"
   >
-    <!-- 发布成功视图 -->
+
     <div v-if="isSuccess" class="py-4 flex flex-col items-center text-center">
-      <!-- 成功徽标 -->
+
       <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 ring-8 ring-emerald-50/60 shrink-0">
         <Check class="w-6 h-6 stroke-[2.5]" />
       </div>
 
-      <!-- 成功标题与说明 -->
+
       <h3 class="text-base font-semibold text-slate-800 m-0 mb-1.5">
         {{ t('publish.successTitle') }}
       </h3>
@@ -25,9 +25,9 @@
         {{ t('publish.successDesc') }}
       </p>
 
-      <!-- 链接展示卡片与操作：可直接点击打开预览，也可一键复制 -->
+
       <div class="w-full space-y-3">
-        <!-- 真正可点击的链接条：点击直接新窗口打开 -->
+
         <a
           :href="publishedUrl"
           target="_blank"
@@ -46,7 +46,7 @@
           </span>
         </a>
 
-        <!-- 复制链接主按钮 -->
+
         <a-button
           type="primary"
           long
@@ -62,7 +62,7 @@
       </div>
     </div>
 
-    <!-- 正常确认与编辑表单视图 -->
+
     <div v-else class="space-y-3.5 py-1">
       <div class="flex items-center justify-between pb-0.5">
         <p class="text-xs text-slate-500 m-0 leading-relaxed pr-3">
@@ -132,7 +132,7 @@
       </a-form>
     </div>
 
-    <!-- 弹窗底部操作按钮 (发布成功后隐藏 Footer) -->
+
     <template #footer>
       <div v-if="!isSuccess" class="flex items-center justify-end gap-2">
         <a-button type="primary" :loading="isSubmitting" class="bg-[#1677ff]" @click="handleConfirmPublish">

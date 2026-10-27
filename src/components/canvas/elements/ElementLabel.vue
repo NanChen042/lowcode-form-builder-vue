@@ -1,15 +1,20 @@
 <template>
-  <div v-if="element.showLabel !== false || element.type === 'alert'" class="component-label text-[13px] text-slate-800 font-semibold leading-5 mb-1.5 pr-12">
+  <div
+    v-if="element.showLabel !== false || element.type === 'alert'"
+    class="component-label text-[13px] leading-5"
+    :class="isRisk ? 'mb-0 pr-0 font-normal text-slate-700 text-[13.5px] leading-relaxed' : 'mb-1.5 pr-12 font-semibold text-slate-800'"
+  >
     <span v-if="isRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><EditableText
       v-model="currentLabel"
-      :placeholder="t('prop.fieldLabelPlaceholder')"
+      :placeholder="labelPlaceholder"
       :element-id="element.id"
       field="label"
       custom-class="label-text inline break-words"
     /><span
       v-if="isRisk"
-      class="ml-1.5 inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-1.5 py-0.5 text-[11px] font-semibold text-[#1677ff] leading-none align-middle select-none"
-    >{{ store.currentLocale === 'en' ? `Weight ${element.weight ?? 1}` : `权重 ${element.weight ?? 1}` }}</span>
+      class="ml-2 inline-flex items-center rounded-[3px] border border-blue-200/80 bg-blue-50/80 px-1.5 py-0.5 text-[11px] font-bold text-[#1677ff] leading-none align-baseline select-none whitespace-nowrap"
+      :title="store.currentLocale === 'en' ? `Weight: ${element.weight ?? 1}` : `权重：${element.weight ?? 1}`"
+    >{{ element.weight ?? 1 }}</span>
 
     <EditableText
       v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
@@ -51,6 +56,10 @@ const isRequired = computed(() => {
     return Boolean(props.element.declarationRequired || props.element.required);
   }
   return Boolean(props.element.required);
+});
+
+const labelPlaceholder = computed(() => {
+  return t('prop.fieldLabelPlaceholder');
 });
 
 const currentLabel = computed({

@@ -4,21 +4,46 @@
     :data-page-id="page.id"
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
-    class="mobile-frame absolute min-h-[720px] w-[390px] bg-white rounded-2xl shadow-sm flex flex-col"
+    class="mobile-frame absolute min-h-[720px] bg-white flex flex-col"
     :class="[
-      isPageSelected ? 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
+      isRisk ? 'rounded-none shadow-[0_1px_4px_rgba(0,0,0,0.06),0_12px_32px_-6px_rgba(0,0,0,0.08)]' : 'w-[390px] rounded-2xl shadow-sm',
+      isPageSelected ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md') : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
       isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
       store.isDraggingComponent && !isSystemProfile ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
       store.isDraggingComponent && isSystemProfile ? 'opacity-85' : '',
-      store.isDraggingFrame && store.draggedFrameId === page.id ? '!transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
+      (store.isDraggingFrame && store.draggedFrameId === page.id) || isResizingCanvasWidth ? '!transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
     ]"
     :style="{
-      transform: `translate(${page.x}px, ${page.y}px)`
+      transform: `translate(${page.x}px, ${page.y}px)`,
+      width: isRisk ? `${store.riskPageWidth}px` : undefined
     }"
     @mousedown="handleFrameMouseDown"
     @click.stop="selectPage(page.id)"
   >
-    <div class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
+
+    <div
+      v-if="isRisk"
+      class="canvas-resize-handle absolute -left-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
+      :title="store.currentLocale === 'en' ? 'Drag to resize canvas width' : '左右拖拽调整画布宽度'"
+      @mousedown.stop.prevent="startResizeCanvasWidth($event, 'left')"
+    >
+      <div
+        class="w-1 h-10 rounded-full transition-colors"
+        :class="isResizingCanvasWidth ? 'bg-[#1677ff]' : 'bg-transparent group-hover:bg-[#1677ff]/60'"
+      ></div>
+    </div>
+    <div
+      v-if="isRisk"
+      class="canvas-resize-handle absolute -right-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
+      :title="store.currentLocale === 'en' ? 'Drag to resize canvas width' : '左右拖拽调整画布宽度'"
+      @mousedown.stop.prevent="startResizeCanvasWidth($event, 'right')"
+    >
+      <div
+        class="w-1 h-10 rounded-full transition-colors"
+        :class="isResizingCanvasWidth ? 'bg-[#1677ff]' : 'bg-transparent group-hover:bg-[#1677ff]/60'"
+      ></div>
+    </div>
+    <div v-if="!isRisk" class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
       <Smartphone class="h-3.5 w-3.5" />
       <template v-if="isSystemProfile">
         <span class="font-mono font-medium text-slate-700">01 · {{ t('common.basicInfo') }}</span>
@@ -50,7 +75,7 @@
       <span>{{ t('canvas.droppable') }}</span>
     </div>
 
-    <div class="flex-1 flex flex-col w-full rounded-2xl relative">
+    <div class="flex-1 flex flex-col w-full relative" :class="isRisk ? 'rounded-none' : 'rounded-2xl'">
       <div
         v-if="store.isDraggingComponent && isSystemProfile"
         class="absolute inset-0 z-30 rounded-2xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
@@ -66,7 +91,7 @@
         </p>
       </div>
 
-      <div class="page-header-area px-5 pt-6 pb-4 shrink-0 bg-white rounded-t-2xl" @click.stop="selectPage(page.id)">
+      <div class="page-header-area pb-4 shrink-0 bg-white" :class="isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl'" @click.stop="selectPage(page.id)">
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
@@ -106,6 +131,123 @@
           :show-skeleton="page.showSkeleton !== false"
           :is-canvas="true"
         />
+      </div>
+
+      <div v-else-if="isRisk" class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-none px-8 pb-10 pt-2 space-y-5">
+        <div ref="riskGroupsContainerRef" class="risk-groups-list space-y-5">
+          <div
+            v-for="(grp, gIdx) in page.groups"
+            :key="grp.id"
+            :id="'risk_grp_' + grp.id"
+            :data-risk-group-id="grp.id"
+            class="risk-group-section border transition-all duration-150 rounded-[4px] bg-white"
+            :class="
+              store.selectedType === 'group' && store.selectedId === grp.id
+                ? 'border-[#1677ff] ring-2 ring-blue-500/20 shadow-xs'
+                : 'border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-slate-300'
+            "
+            @click.stop="selectGroup(grp.id)"
+          >
+
+            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-[#e5e6eb] bg-[#f7f8fa] rounded-t-[4px] cursor-grab active:cursor-grabbing">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <GripVertical
+                  class="risk-group-drag-handle h-4 w-4 text-slate-300 hover:text-slate-500 shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+                  :title="store.currentLocale === 'en' ? 'Drag to reorder group' : '按住拖拽调整分组顺序'"
+                />
+                <EditableText
+                  :model-value="getGroupTitle(grp)"
+                  :placeholder="getGroupTitlePlaceholder(grp, gIdx)"
+                  :element-id="grp.id"
+                  field="title"
+                  tag="span"
+                  custom-class="group-title-text text-[14px] font-semibold text-slate-800 leading-5 inline-block max-w-full truncate"
+                  @update:model-value="(val) => setGroupTitle(grp, val)"
+                />
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0 select-none">
+                <span class="rounded bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200/80 shadow-2xs">
+                  {{ getGroupFields(grp.id).length }} {{ store.currentLocale === 'en' ? 'questions' : '题' }}
+                </span>
+
+                <a-popconfirm
+                  v-if="(page.groups?.length || 0) > 1"
+                  :content="store.currentLocale === 'en' ? 'Delete this question group and all questions inside?' : '确定删除该问题分组及其下所有问题吗？'"
+                  position="tr"
+                  type="warning"
+                  :ok-text="t('modal.confirm')"
+                  :cancel-text="t('modal.cancel')"
+                  :ok-button-props="{ status: 'danger', size: 'small' }"
+                  :cancel-button-props="{ size: 'small' }"
+                  @ok="deleteQuestionGroup(grp.id)"
+                >
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                    :title="store.currentLocale === 'en' ? 'Delete Group' : '删除分组'"
+                    @click.stop
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </a-popconfirm>
+              </div>
+            </div>
+
+
+            <div
+              :ref="(el) => setRiskGroupDropzoneRef(grp.id, el as HTMLElement | null)"
+              class="risk-group-dropzone min-h-[48px] bg-white transition-colors"
+              :class="{ 'bg-blue-50/15': store.isDraggingComponent }"
+              :data-page-id="page.id"
+              :data-risk-group-id="grp.id"
+            >
+              <div
+                v-for="element in getGroupFields(grp.id)"
+                :key="element.id"
+                :data-group-id="element.id"
+                :data-element-id="element.id"
+                class="canvas-element-group relative"
+              >
+                <CanvasElement :element="element" />
+              </div>
+
+              <div
+                v-if="getGroupFields(grp.id).length === 0 && !store.isDraggingComponent"
+                class="pointer-events-none py-6 text-center text-[12.5px] text-slate-400 border border-dashed border-slate-200/90 rounded-[3px] bg-slate-50/40 m-3"
+              >
+                {{ store.currentLocale === 'en' ? 'Drag radio component here or click button below to add question' : '从左侧拖入单选组件，或点击下方按钮添加问题' }}
+              </div>
+            </div>
+
+
+            <div class="px-3 py-1 bg-slate-50/40 border-t border-slate-100/90">
+              <a-button
+                type="text"
+                size="small"
+                class="!text-[#1677ff] hover:!bg-blue-50/70 !font-medium !rounded-[4px]"
+                @click.stop="addElement('radio', page.id, grp.id)"
+              >
+                <template #icon>
+                  <Plus class="h-3.5 w-3.5 stroke-[2.2]" />
+                </template>
+                {{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}
+              </a-button>
+            </div>
+          </div>
+        </div>
+
+        <a-button
+          type="outline"
+          long
+          class="!h-10 !rounded-md !font-semibold"
+          @click.stop="addQuestionGroup()"
+        >
+          <template #icon>
+            <Plus class="h-4 w-4 stroke-[2.2]" />
+          </template>
+          {{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}
+        </a-button>
       </div>
 
       <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-b-2xl">
@@ -148,17 +290,6 @@
             />
           </div>
         </div>
-
-        <div v-if="isRisk" class="px-3 pb-4 pt-1 bg-white rounded-b-2xl">
-          <button
-            type="button"
-            class="group flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-slate-50/40 py-2.5 px-3 text-[12.5px] font-semibold text-[#1677ff] transition-all hover:border-[#1677ff] hover:bg-blue-50/50 active:scale-[0.99] cursor-pointer"
-            @click.stop="addElement('checkbox', page.id)"
-          >
-            <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
-            <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
-          </button>
-        </div>
       </div>
     </div>
 
@@ -171,15 +302,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import type { FormPage, FormElement, ComponentType } from '@/types/schema';
-import { store, isRisk, addElement, selectPage, addPage, createElement, selectElement, markDirty } from '@/core/store';
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import type { FormPage, FormElement, FormQuestionGroup, ComponentType } from '@/types/schema';
+import {
+  store,
+  isRisk,
+  addElement,
+  selectPage,
+  selectGroup,
+  addQuestionGroup,
+  deleteQuestionGroup,
+  addPage,
+  createElement,
+  selectElement,
+  markDirty
+} from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
 import EditableText from '@/components/common/EditableText.vue';
 import SystemProfileView from '@/components/common/SystemProfileView.vue';
-import { Smartphone, ArrowDownToLine, Plus, Lock } from '@lucide/vue';
+import { Smartphone, ArrowDownToLine, GripVertical, Trash2, Plus, Lock } from '@lucide/vue';
 
 const props = defineProps<{
   page: FormPage;
@@ -193,6 +336,287 @@ const pageIndexString = computed(() => {
 });
 
 const dropzoneRef = ref<HTMLElement | null>(null);
+const riskGroupsContainerRef = ref<HTMLElement | null>(null);
+let riskGroupsSortable: Sortable | null = null;
+const riskGroupDropzoneEls = new Map<string, HTMLElement>();
+const riskGroupSortables = new Map<string, Sortable>();
+
+const isResizingCanvasWidth = ref(false);
+
+function startResizeCanvasWidth(e: MouseEvent, side: 'left' | 'right') {
+  if (!isRisk.value) return;
+  isResizingCanvasWidth.value = true;
+  store.isRiskPageWidthCustomized = true;
+  const startX = e.clientX;
+  const startWidth = store.riskPageWidth;
+  const startPageX = props.page.x;
+  const scale = store.canvasState.scale || 1;
+  document.body.style.cursor = 'ew-resize';
+  document.body.style.userSelect = 'none';
+
+  const onMouseMove = (moveEvt: MouseEvent) => {
+    const deltaScreenX = moveEvt.clientX - startX;
+    const deltaWorldX = deltaScreenX / scale;
+    if (side === 'right') {
+      const nextWidth = Math.min(1360, Math.max(560, Math.round(startWidth + deltaWorldX)));
+      store.riskPageWidth = nextWidth;
+    } else {
+      const nextWidth = Math.min(1360, Math.max(560, Math.round(startWidth - deltaWorldX)));
+      const actualDiff = nextWidth - startWidth;
+      store.riskPageWidth = nextWidth;
+      props.page.x = Math.round(startPageX - actualDiff);
+    }
+  };
+
+  const onMouseUp = () => {
+    isResizingCanvasWidth.value = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  };
+
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('mouseup', onMouseUp);
+}
+
+function setRiskGroupDropzoneRef(groupId: string, el: HTMLElement | null) {
+  if (el) {
+    riskGroupDropzoneEls.set(groupId, el);
+  } else {
+    riskGroupDropzoneEls.delete(groupId);
+  }
+}
+
+function getGroupTitle(grp: FormQuestionGroup): string {
+  return store.currentLocale === 'en' ? (grp.title_en || '') : (grp.title || '');
+}
+
+function getGroupTitlePlaceholder(_grp: FormQuestionGroup, idx: number): string {
+  return store.currentLocale === 'en' ? `Question Group ${idx + 1}` : `问题分组 ${idx + 1}`;
+}
+
+function setGroupTitle(grp: FormQuestionGroup, val: string) {
+  if (store.currentLocale === 'en') {
+    grp.title_en = val;
+  } else {
+    grp.title = val;
+  }
+  markDirty();
+}
+
+function getGroupFields(groupId: string): FormElement[] {
+  const firstGroupId = props.page.groups?.[0]?.id;
+  return props.page.fields.filter(f => (f.groupId || firstGroupId) === groupId);
+}
+
+function rebuildRiskFieldsOrder(targetGroupId: string, updatedGroupList: FormElement[]) {
+  const groups = props.page.groups || [];
+  const firstGroupId = groups[0]?.id;
+  const newFields: FormElement[] = [];
+  for (const grp of groups) {
+    if (grp.id === targetGroupId) {
+      updatedGroupList.forEach(el => {
+        el.groupId = grp.id;
+        newFields.push(el);
+      });
+    } else {
+      props.page.fields
+        .filter(f => (f.groupId || firstGroupId) === grp.id)
+        .forEach(el => newFields.push(el));
+    }
+  }
+  props.page.fields = newFields;
+}
+
+function syncRiskGroupSortables() {
+  if (!isRisk.value) return;
+
+  if (riskGroupsContainerRef.value && !riskGroupsSortable) {
+    riskGroupsSortable = new Sortable(riskGroupsContainerRef.value, {
+      group: {
+        name: 'risk-groups',
+        put: ['risk-groups', 'sidebar-risk-groups']
+      },
+      animation: 200,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      chosenClass: 'drag-chosen',
+      fallbackClass: 'drag-fallback',
+      forceFallback: true,
+      fallbackOnBody: true,
+      fallbackTolerance: 3,
+      handle: '.risk-group-header',
+      draggable: '.risk-group-section',
+      filter: 'input, textarea, select, button, [contenteditable]',
+      preventOnFilter: false,
+      onStart(evt) {
+        const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
+        if (fallback && evt.item) {
+          const rect = evt.item.getBoundingClientRect();
+          const scale = store.canvasState.scale || 1;
+          const visual = evt.item.cloneNode(true) as HTMLElement;
+          visual.classList.remove('sortable-ghost', 'drag-chosen');
+          visual.classList.add('drag-fallback-visual');
+          visual.style.position = 'relative';
+          visual.style.left = '0';
+          visual.style.top = '0';
+          visual.style.width = `${evt.item.offsetWidth}px`;
+          visual.style.height = `${evt.item.offsetHeight}px`;
+          visual.style.transform = `scale(${scale})`;
+          visual.style.transformOrigin = '0 0';
+          visual.style.boxSizing = 'border-box';
+          visual.style.pointerEvents = 'none';
+          visual.querySelectorAll('.element-actions, .arco-popconfirm, .arco-popover').forEach(el => el.remove());
+          fallback.style.left = `${rect.left}px`;
+          fallback.style.top = `${rect.top}px`;
+          fallback.style.width = `${rect.width}px`;
+          fallback.style.height = `${rect.height}px`;
+          fallback.classList.add('drag-fallback-shell');
+          fallback.innerHTML = '';
+          fallback.appendChild(visual);
+        }
+      },
+      onAdd(evt) {
+        const itemEl = evt.item;
+        const insertIdx = evt.newIndex ?? (props.page.groups?.length || 0);
+        itemEl.remove();
+        addQuestionGroup(undefined, insertIdx);
+      },
+      onUpdate(evt) {
+        if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex && props.page.groups) {
+          const groups = [...props.page.groups];
+          const [movedGrp] = groups.splice(evt.oldIndex, 1);
+          if (movedGrp) {
+            groups.splice(evt.newIndex, 0, movedGrp);
+            props.page.groups = groups;
+            const firstGroupId = groups[0]?.id;
+            props.page.fields = groups.flatMap(g =>
+              props.page.fields.filter(f => (f.groupId || firstGroupId) === g.id)
+            );
+            selectGroup(movedGrp.id);
+            markDirty();
+          }
+        }
+      }
+    });
+  }
+
+  for (const [id, inst] of riskGroupSortables.entries()) {
+    if (!riskGroupDropzoneEls.has(id)) {
+      inst.destroy();
+      riskGroupSortables.delete(id);
+    }
+  }
+
+  for (const [grpId, containerEl] of riskGroupDropzoneEls.entries()) {
+    if (riskGroupSortables.has(grpId)) continue;
+    const inst = new Sortable(containerEl, {
+      group: 'shared',
+      animation: 200,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      chosenClass: 'drag-chosen',
+      fallbackClass: 'drag-fallback',
+      forceFallback: true,
+      fallbackOnBody: true,
+      fallbackTolerance: 3,
+      swapThreshold: 0.65,
+      emptyInsertThreshold: 24,
+      draggable: '.canvas-element-group, .component-item',
+      filter: 'input, textarea, select, button, [contenteditable], .action-btn, .risk-weight-selector',
+      preventOnFilter: false,
+      onStart(evt) {
+        store.isDraggingComponent = true;
+        document.body.classList.add('is-dragging-component');
+        const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
+        if (fallback && evt.item) {
+          const rect = evt.item.getBoundingClientRect();
+          const scale = store.canvasState.scale || 1;
+          const visual = evt.item.cloneNode(true) as HTMLElement;
+          visual.classList.remove('sortable-ghost', 'drag-chosen');
+          visual.classList.add('drag-fallback-visual');
+          visual.style.position = 'relative';
+          visual.style.left = '0';
+          visual.style.top = '0';
+          visual.style.width = `${evt.item.offsetWidth}px`;
+          visual.style.height = `${evt.item.offsetHeight}px`;
+          visual.style.transform = `scale(${scale})`;
+          visual.style.transformOrigin = '0 0';
+          visual.style.boxSizing = 'border-box';
+          visual.style.pointerEvents = 'none';
+          visual.querySelectorAll('.element-actions').forEach(btn => btn.remove());
+          fallback.style.left = `${rect.left}px`;
+          fallback.style.top = `${rect.top}px`;
+          fallback.style.width = `${rect.width}px`;
+          fallback.style.height = `${rect.height}px`;
+          fallback.classList.add('drag-fallback-shell');
+          fallback.innerHTML = '';
+          fallback.appendChild(visual);
+        }
+      },
+      onEnd() {
+        store.isDraggingComponent = false;
+        document.body.classList.remove('is-dragging-component');
+        document.body.style.removeProperty('--drag-placeholder-height');
+      },
+      onAdd(evt) {
+        const itemEl = evt.item;
+        const currentGrpFields = [...getGroupFields(grpId)];
+        const insertIdx = Math.min(evt.newIndex ?? currentGrpFields.length, currentGrpFields.length);
+        itemEl.remove();
+
+        if (itemEl.classList.contains('component-item')) {
+          const newEl = createElement('radio', grpId);
+          currentGrpFields.splice(insertIdx, 0, newEl);
+          rebuildRiskFieldsOrder(grpId, currentGrpFields);
+          selectElement(newEl);
+          markDirty();
+          return;
+        }
+
+        const movedId = itemEl.getAttribute('data-element-id') || itemEl.getAttribute('data-group-id') || itemEl.id;
+        if (movedId) {
+          const movedEl = props.page.fields.find(f => f.id === movedId);
+          if (movedEl) {
+            props.page.fields = props.page.fields.filter(f => f.id !== movedId);
+            movedEl.groupId = grpId;
+            const targetList = [...getGroupFields(grpId)];
+            targetList.splice(insertIdx, 0, movedEl);
+            rebuildRiskFieldsOrder(grpId, targetList);
+            selectElement(movedEl);
+            markDirty();
+          }
+        }
+      },
+      onUpdate(evt) {
+        if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+          const list = [...getGroupFields(grpId)];
+          const [moved] = list.splice(evt.oldIndex, 1);
+          if (moved) {
+            list.splice(evt.newIndex, 0, moved);
+            rebuildRiskFieldsOrder(grpId, list);
+            selectElement(moved);
+            markDirty();
+          }
+        }
+      }
+    });
+    riskGroupSortables.set(grpId, inst);
+  }
+}
+
+watch(
+  () => [isRisk.value, props.page.groups?.map(g => g.id).join(',')],
+  () => {
+    nextTick(() => {
+      syncRiskGroupSortables();
+    });
+  },
+  { immediate: true }
+);
 
 const displayPageTitle = computed({
   get() {
@@ -420,6 +844,7 @@ onMounted(() => {
       }
     });
   }
+  syncRiskGroupSortables();
 });
 
 onBeforeUnmount(() => {
@@ -427,6 +852,14 @@ onBeforeUnmount(() => {
     sortableInstance.destroy();
     sortableInstance = null;
   }
+  if (riskGroupsSortable) {
+    riskGroupsSortable.destroy();
+    riskGroupsSortable = null;
+  }
+  for (const inst of riskGroupSortables.values()) {
+    inst.destroy();
+  }
+  riskGroupSortables.clear();
 });
 
 function handleFrameMouseDown(e: MouseEvent) {
@@ -434,7 +867,7 @@ function handleFrameMouseDown(e: MouseEvent) {
 
   if (e.button === 0 && !store.isSpacePressed) {
     const isClickingElement = (e.target as HTMLElement).closest(
-      '.canvas-element, .icon-btn, .add-next-page-btn'
+      '.canvas-element, .risk-group-section, .canvas-resize-handle, .icon-btn, .add-next-page-btn'
     );
     if (!isClickingElement) {
       selectPage(props.page.id);
@@ -450,7 +883,7 @@ function handleFrameMouseDown(e: MouseEvent) {
   if (
     isEditingThisText ||
     (e.target as HTMLElement).closest(
-      'input, textarea, select, button, .canvas-element, .icon-btn, .add-next-page-btn'
+      'input, textarea, select, button, .canvas-element, .risk-group-section, .canvas-resize-handle, .icon-btn, .add-next-page-btn'
     )
   ) {
     return;

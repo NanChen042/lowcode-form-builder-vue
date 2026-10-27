@@ -5,6 +5,7 @@ import {
   kycIndividualTemplate,
   kycEntityTemplate,
   createBlankTemplate,
+  createRiskAssessmentTemplate,
   allComponentsDemoTemplate
 } from '@/templates/recommend';
 import { generateFormId } from '@/core/store';
@@ -132,13 +133,14 @@ Mock.mock(/\/pc\/form\/getTemplate.*/, 'get', (options: any) => {
     };
   }
 
-  // 若为自建格式 ID (diy)，动态创建空白表单并持久化到 Mock 库
+  // 若为自建格式 ID (diy)，动态创建空白表单并持久化到 Mock 库（风险评估路由创建风险评估问卷，而非 KYC 空白模板）
   if (id.includes('_diy_')) {
     let pType: ProfileType = 'customer';
     if (id.startsWith('ent_')) pType = 'entity';
     else if (id.startsWith('ind_')) pType = 'individual';
 
-    const blank = createBlankTemplate(pType);
+    const isRiskRoute = window.location.pathname.includes('/risk') || new URLSearchParams(window.location.search).get('mode') === 'risk';
+    const blank = isRiskRoute ? createRiskAssessmentTemplate(pType) : createBlankTemplate(pType);
     blank.meta.formId = id;
     blank.meta.serialNo = id;
     mockDatabase.set(id, blank);

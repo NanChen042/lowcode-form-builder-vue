@@ -13,8 +13,8 @@ window.addEventListener('vite:preloadError', () => {
   }
 });
 
-// 仅在显式配置 VITE_USE_MOCK === 'true' 时加载 Mock 拦截，默认发起真实网络请求
-if (import.meta.env.VITE_USE_MOCK === 'true') {
+// 默认加载 Mock 拦截，确保纯前端与本地环境正常体验（配置 VITE_USE_MOCK === 'false' 时走真实接口）
+if (import.meta.env.VITE_USE_MOCK !== 'false') {
   await import('./mock');
 }
 import router from './router';

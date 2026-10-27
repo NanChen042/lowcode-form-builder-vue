@@ -28,10 +28,10 @@
         transform: `translate(${store.canvasState.x}px, ${store.canvasState.y}px) scale(${store.canvasState.scale})`
       }"
     >
-      <CanvasConnections />
+      <CanvasConnections v-if="!isRisk" />
 
       <PageFrame
-        v-for="(page, idx) in store.pages"
+        v-for="(page, idx) in (isRisk ? store.pages.slice(0, 1) : store.pages)"
         :key="page.id"
         :page="page"
         :page-index="idx"
@@ -86,13 +86,13 @@
       </a-tooltip>
     </transition>
 
-    <!-- 底部双语待补齐悬浮胶囊 -->
+
     <transition name="pill-bounce">
       <div
         v-if="isBilingual && store.pages.length > 0 && translationStats.untranslatedCount > 0 && !isPillDismissed"
         class="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 px-3.5 py-1.5 bg-white/95 text-slate-700 rounded-full shadow-md shadow-slate-900/5 border border-slate-200/90 backdrop-blur-md select-none pointer-events-auto transition-all text-xs"
       >
-        <!-- 待补齐微清单气泡 -->
+
         <a-popover
           v-if="translationStats.untranslatedCount > 1"
           v-model:popup-visible="isPillPopoverOpen"
@@ -116,7 +116,7 @@
 
           <template #content>
             <div class="w-[340px] max-h-[320px] flex flex-col -m-1">
-              <!-- 气泡顶栏 -->
+
               <div class="flex items-center justify-between gap-2 px-2 py-2.5 border-b border-slate-100  rounded-t-lg shrink-0">
                 <div class="flex items-center gap-1.5 min-w-0">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
@@ -129,7 +129,7 @@
                 </span>
               </div>
 
-              <!-- 清单滚动区 -->
+
               <div class="overflow-y-auto custom-scrollbar p-1 space-y-1.5 max-h-[240px]">
                 <div
                   v-for="group in translationStats.groupedByPage"
@@ -163,7 +163,7 @@
           </template>
         </a-popover>
 
-        <!-- 单项提示 -->
+
         <div v-else class="flex items-center gap-1.5 py-0.5 select-none">
           <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
           <span class="font-medium text-[12px] text-slate-700 whitespace-nowrap">
@@ -282,10 +282,10 @@
       </a-dropdown>
     </div>
 
-    <!-- 右键菜单 -->
+
     <ContextMenu :visible="contextMenuVisible" :x="contextMenuPos.x" :y="contextMenuPos.y" :target-page-id="contextMenuTargetPageId" :target-element-id="contextMenuTargetElementId" :target-type="contextMenuTargetType" @close="contextMenuVisible = false" />
 
-    <!-- 画布加载状态指示器 (分层平滑加载) -->
+
     <transition name="fade">
       <div
         v-if="store.isCanvasLoading"
@@ -308,7 +308,8 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import {
   store,
-  PAGE_WIDTH,
+  isRisk,
+  getPageWidth,
   PAGE_HEIGHT,
   adjustZoom,
   resetCanvasView,
@@ -342,7 +343,7 @@ defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
 
-// 底部巡检胶囊相关状态
+
 const isPillDismissed = ref(false);
 const isPillPopoverOpen = ref(false);
 const currentUntranslatedIndex = ref(0);
@@ -508,10 +509,11 @@ const allPagesWorldBox = computed(() => {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
+  const pWidth = getPageWidth();
   store.pages.forEach(p => {
     if (p.x < minX) minX = p.x;
     if (p.y < minY) minY = p.y;
-    if (p.x + PAGE_WIDTH > maxX) maxX = p.x + PAGE_WIDTH;
+    if (p.x + pWidth > maxX) maxX = p.x + pWidth;
     if (p.y + PAGE_HEIGHT > maxY) maxY = p.y + PAGE_HEIGHT;
   });
 
@@ -665,7 +667,6 @@ function onMouseDown(e: MouseEvent) {
     panStartY = e.clientY;
     panStartCanvasX = store.canvasState.x;
     panStartCanvasY = store.canvasState.y;
-        document.body.classList.add('is-panning');
 
     if (e.button === 0 && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
       clearSelection();
@@ -677,7 +678,6 @@ function onMouseDown(e: MouseEvent) {
       frameStartY = page.y;
       panStartX = e.clientX;
       panStartY = e.clientY;
-      document.body.classList.add('is-panning');
     }
   }
 }
@@ -685,11 +685,17 @@ function onMouseDown(e: MouseEvent) {
 function onMouseMove(e: MouseEvent) {
   if (store.isPanning) {
     e.preventDefault();
+    if (Math.hypot(e.clientX - panStartX, e.clientY - panStartY) > 3) {
+      document.body.classList.add('is-panning');
+    }
     store.canvasState.x = panStartCanvasX + (e.clientX - panStartX);
     store.canvasState.y = panStartCanvasY + (e.clientY - panStartY);
     checkOffScreenStatus();
   } else if (store.isDraggingFrame && store.draggedFrameId) {
     e.preventDefault();
+    if (Math.hypot(e.clientX - panStartX, e.clientY - panStartY) > 3) {
+      document.body.classList.add('is-panning');
+    }
     const dx = (e.clientX - panStartX) / store.canvasState.scale;
     const dy = (e.clientY - panStartY) / store.canvasState.scale;
     const page = store.pages.find(p => p.id === store.draggedFrameId);
@@ -754,7 +760,7 @@ function onContextMenu(e: MouseEvent) {
   const elementEl = target.closest('.canvas-element') as HTMLElement | null;
   const frameEl = target.closest('.mobile-frame') as HTMLElement | null;
 
-  // 辅助解析所属画板 ID（优先从 data-page-id 取真实 ID，次之兼容 id 解析与第一页回退）
+
   const getFramePageId = (el: HTMLElement | null): string | null => {
     if (!el) return null;
     return (
@@ -860,11 +866,18 @@ function handleKeyUp(e: KeyboardEvent) {
   }
 }
 
+function handleWindowResize() {
+  if (isRisk.value && store.pages.length > 0) {
+    resetCanvasView({ duration: 0 });
+  }
+}
+
 onMounted(() => {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
+  window.addEventListener('resize', handleWindowResize);
 });
 
 onUnmounted(() => {
@@ -872,6 +885,7 @@ onUnmounted(() => {
   window.removeEventListener('mouseup', onMouseUp);
   window.removeEventListener('keydown', handleKeyDown, true);
   window.removeEventListener('keyup', handleKeyUp, true);
+  window.removeEventListener('resize', handleWindowResize);
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = null;
