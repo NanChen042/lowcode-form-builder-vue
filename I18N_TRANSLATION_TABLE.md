@@ -11,9 +11,6 @@
 | 提示 | Notice | | | |
 | 提示说明项 | Notice item | | | |
 | 已签字 | Signed | | | |
-| 已签名 | Signed | | | |
-| 完成签名 | Done | | | |
-| 修改签名 | Edit | | | |
 | 清除签名 | Clear Signature | | | |
 | 点击此处手写签名 | Click to sign | | | |
 | 长期 | Long-term | | | |
@@ -59,10 +56,12 @@
 
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
+| 风险评估设计工作台 | Risk Assessment Workspace | | | |
+| 表单设计工作台 | Form Design Workspace | | | |
 | 有未保存变更 | Unsaved Changes | | | |
-| 全部已保存 | All Saved | | | |
+| 已保存至草稿 | Saved to draft | | | |
 | 正在保存... | Saving... | | | |
-| 保存 | Save | | | |
+| 保存至草稿 | Save to Draft | | | |
 | 预览 | Preview | | | |
 | 发布表单 | Publish | | | |
 | 面板布局设置 | Panel Settings | | | |
@@ -74,7 +73,7 @@
 | 点击修改表单名称 | Click to rename form | | | |
 | 修改表单名称 | Rename form | | | |
 | 操作指南 | User Guide | | | |
-| 表单配置已成功保存！ | Form configuration saved successfully! | | | |
+| 已保存至草稿 | Saved to draft | | | |
 | 保存失败，请检查网络或重试 | Save failed, please check network or try again | | | |
 | 保存遇到异常，请重试 | Error during save, please try again | | | |
 | 已成功退出登录 | Logged out successfully | | | |
@@ -115,7 +114,6 @@
 | :--- | :--- | :--- | :--- | :--- |
 | 个人中心 | Profile | | | |
 | 账号设置 | Settings | | | |
-| 操作日志 | Activity Log | | | |
 | 退出登录 | Sign Out | | | |
 | 系统管理员 | System Administrator | | | |
 
@@ -127,12 +125,12 @@
 | 未找到匹配的组件 | No matching components found | | | |
 | 基础输入 | Basic Inputs | | | |
 | 业务组件 | Business Components | | | |
-| 完全收起侧边栏 | Collapse Sidebar | | | |
+| 收起 | Collapse | | | |
 | 组件 | Components | | | |
 | 模板 | Templates | | | |
 | 页面 | Pages | | | |
 | 搜索 | Search | | | |
-| 完全收起 | Collapse Sidebar | | | |
+| 收起 | Collapse | | | |
 | 搜索模板名称... | Search templates... | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
 | 从零开始自由搭建表单 | Build form from scratch | | | |
@@ -201,7 +199,7 @@
 | 查看操作指南 | View User Guide | | | |
 | 我知道了 | Got it | | | |
 | 个人案例 | Individual | | | |
-| 机构案例 | Entity | | | |
+| 实体案例 | Entity | | | |
 | 母案例 | Customer | | | |
 | 中文待补齐清单 | Chinese Completion Checklist | | | |
 | 英文待翻译清单 | English Translation Checklist | | | |
@@ -369,7 +367,7 @@
 | 起止日期 | Date Range | | | |
 | 提示内容 | Notice Content | | | |
 | 直接输入告示或说明文本，支持自然换行。行首以“- ”开头自动生成无序列表，支持 [文字](链接) 插入超链接。 | Enter notice text directly. Lines starting with "- " create bullet points. Supports [Link](url) hyperlinks. | | | |
-| 请输入提示内容...<br>- 以“- ”开头自动生成列表项<br>- 支持 [链接文案](xxx.com) 插入超链接 | Enter notice content...<br>- Start with "- " for list items<br>- Supports [Link Text](xxx.com) hyperlinks | | | |
+| 请输入提示内容...\n- 以“- ”开头自动生成列表项\n- 支持 [链接文案](xxx.com) 插入超链接 | Enter notice content...\n- Start with "- " for list items\n- Supports [Link Text](xxx.com) hyperlinks | | | |
 | 请输入提示内容 | Please enter notice content | | | |
 | 列表形式 | List Style | | | |
 | 选择无序圆点列表或有序数字编号列表。 | Select circle bullets or numbered list items. | | | |
@@ -491,20 +489,34 @@
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | DIY 表单设计器 | DIY Form Builder | | | |
+| 风险评估表单设计器 | Risk Assessment Form Builder | | | |
 | Create NEW | Create NEW | | | |
 | 新建空白画布 | Create Blank Canvas | | | |
 | 点击左下方立即创建按钮，开始创建您的第一个定制表单。 | Click the "Create Now" button at the bottom left to start creating your first custom form. | | | |
+| 新建风险评估表单 | Create Risk Assessment Form | | | |
+| 基于 Yes / No / NA 三态判定与 1~10 分动态权重，快速配置客户、个人或实体的合规问卷。 | Configure compliance risk forms for Customer, Individual, or Entity profiles with Yes / No / NA logic and dynamic scoring weights. | | | |
 | 立即创建 | Create Now | | | |
 | 选择模板 | Select Template | | | |
 | 使用模板快速创建，提升设计效率 | Create quickly with templates to boost design efficiency | | | |
 | 适用于客户身份认证、KYC 相关的业务场景。 | Suitable for customer identification and KYC-related scenarios. | | | |
 | 适用于个人用户信息采集、身份验证等场景。 | Suitable for personal user data collection and identity verification. | | | |
-| 适用于机构客户、企业信息采集等场景。 | Suitable for corporate clients and enterprise information collection. | | | |
+| 适用于实体成员、企业信息采集等场景。 | Suitable for corporate clients and enterprise information collection. | | | |
 | 覆盖确认 | Confirm Overwrite | | | |
 | 当前画布已包含 {pages} 个画板页面，载入 {title} 将完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Applying {title} will overwrite all current canvas contents. Are you sure you want to continue? | | | |
 | 确定覆盖 | Confirm Overwrite | | | |
 | {count} 页面 | {count} Pages | | | |
 | {count} 字段 | {count} Fields | | | |
+| 选择风险评估适用主体 | Select Target Profile for Risk Assessment | | | |
+| 请选择您要创建的风险评估表单适用的主体类型，点击即可快速初始化。 | Please select the target profile type to initialize the new risk assessment form. | | | |
+| 客户案例风险评估 | Customer Risk Assessment | | | |
+| 适用于针对委托客户/主体的洗钱与合规风险评估，内置专属评分维度。 | Suitable for AML and compliance risk evaluation of customer accounts. | | | |
+| 个人成员风险评估 | Individual Risk Assessment | | | |
+| 适用于针对个人董事、股东或关键管理人员的风险评估与问卷采集。 | Suitable for risk evaluation of individual directors, shareholders, or key persons. | | | |
+| 机构/实体风险评估 | Entity Risk Assessment | | | |
+| 适用于针对法人企业、机构成员实体的业务资质与合规风险评估。 | Suitable for compliance and operational risk evaluation of corporate entities. | | | |
+| 客户案例 | Customer | | | |
+| 个人成员 | Individual | | | |
+| 机构/实体 | Entity | | | |
 
 ## 新建表单弹窗 (CreateFormModal)
 
@@ -516,7 +528,7 @@
 | 表单名称 | Form Title | | | |
 | 客户案例 | Customer | | | |
 | 个人案例 | Individual | | | |
-| 机构案例 | Entity | | | |
+| 实体案例 | Entity | | | |
 | 初始化所选主体的基本资料画板，后续可在画布中自由拖拽编排。 | Initializes basic profile artboard for the selected entity. You can freely orchestrate components on the canvas afterward. | | | |
 | 立即创建 | Create Canvas | | | |
 | 取消 | Cancel | | | |
@@ -555,6 +567,7 @@
 | 发布失败 | Publish failed | | | |
 | 发布表单 | Publish Form | | | |
 | 核对并确认表单基本信息与发布介绍，确认无误后即可生成公网访问链接。 | Confirm form name and description before generating public access link. | | | |
+| 核对并确认风险评估表单基本信息，确认无误后即可发布生效。 | Verify and confirm risk assessment form details before publishing. | | | |
 | 已开启双语填报：请核对中英文表单名称与描述，发布后填表端支持双语自由切换。 | Bilingual filing enabled: please verify Chinese and English titles & descriptions. Respondents can switch languages freely. | | | |
 | 编辑语言 | Language | | | |
 | 表单名称 | Form Name | | | |
@@ -574,10 +587,14 @@
 | 全部齐备 | All Completed | | | |
 | {count} 项待补齐 | {count} to complete | | | |
 | 表单名称不能为空 | Form name is required | | | |
+| 表单名称已存在，请更换名称 | Form name already exists, please use another name | | | |
 | 确认发布 | Confirm Publish | | | |
 | 正在发布... | Publishing... | | | |
 | 表单发布成功！ | Form Published Successfully! | | | |
 | 表单已成功部署并生成公网访问链接，填表人可通过下方链接提交表单。 | Your form is now live and accessible via the public link below. | | | |
+| 风险评估表单已发布生效。您可以关闭当前页面后刷新列表，或直接返回表单管理页面。 | The risk assessment form has been published. You can close this page and refresh the list, or return to the form settings page. | | | |
+| 返回表单设置 | Back to Form Settings | | | |
+| 关闭页面 | Close Page | | | |
 | 访问链接 | Public URL | | | |
 | 复制链接 | Copy Link | | | |
 | 已复制 | Copied | | | |
@@ -604,7 +621,7 @@
 | ← 上一步 | ← Back | | | |
 | 开始使用 | Start Now | | | |
 | 第 {{current}} / {{total}} 步 | Step {{current}} of {{total}} | | | |
-| 不再提示 | 不再提示 | | | |
+| 不再提示 | Don't show again | | | |
 | 以后进入页面不再自动弹出操作指南 | Never show user guide automatically on startup | | | |
 | 已关闭操作指南，后续可随时点击顶栏“操作指南”重新开启 | User guide closed. You can restart it anytime from "User Guide" in the top bar. | | | |
 | 1. 侧边导航 | 1. Navigation | | | |
@@ -623,6 +640,18 @@
 | 在手机模拟器中实时测试填表流程与字段校验。 | Test form flow and field validations in mobile preview. | | | |
 | 8. 发布表单 | 8. Publish | | | |
 | 检查多语言完整度，并将表单正式保存发布。 | Verify translation completeness and publish the form. | | | |
+| 1. 风险评估组件 | 1. Risk Components | | | |
+| 点击或拖拽“风险评估问题”到画布，即可在分组内新增问题；回答选项固定为 Yes / No / Not Applicable。 | Click or drag Risk Question onto the canvas to add a question to a group. Answers are fixed as Yes / No / Not Applicable. | | | |
+| 2. 问题分组 | 2. Question Groups | | | |
+| 在此新增、重命名问题分组，并拖拽调整分组顺序。 | Add and rename question groups here, and drag to reorder them. | | | |
+| 3. 问卷画布 | 3. Questionnaire Canvas | | | |
+| 直接在画布上编辑分组名称与问题内容，拖拽调整问题顺序，左右拖拽边缘可调整画布宽度。 | Edit group names and questions inline, drag to reorder, and drag the edges to resize the canvas width. | | | |
+| 4. 权重设置 | 4. Weight | | | |
+| 每道问题权重为 1–10 的整数，点击或按住滑动即可设置；回答 Yes 将按权重扣减风险评分。 | Each question has an integer weight from 1 to 10. Click or press and slide to set it; a Yes answer deducts the weight from the risk score. | | | |
+| 5. 属性配置 | 5. Properties | | | |
+| 配置分组名称、问题内容、权重及双语翻译。 | Configure group names, question content, weights and translations. | | | |
+| 6. 保存与发布 | 6. Save & Publish | | | |
+| 发布前将检查英文内容是否完整，中文翻译可后续补充。 | English content is checked before publishing; Chinese translations can be completed later. | | | |
 
 ## API 接口错误提示
 
@@ -646,7 +675,154 @@
 | :--- | :--- | :--- | :--- | :--- |
 | 页面未找到 | Page Not Found | | | |
 | 抱歉，您访问的页面不存在或已被移除。 | Sorry, the page you are looking for could not be found. | | | |
-| 返回表单构建器 | Back to Form Builder | | | |
-| 返回KYC表单列表 | Back to KYC Forms | | | |
+| 未找到指定表单 | Form Not Found | | | |
+| 抱歉，您访问的表单不存在或已被删除。 | Sorry, the form you are looking for does not exist or has been deleted. | | | |
+| 新建表单 | Create New Form | | | |
+| 返回表单设计器 | Back to Form Builder | | | |
+| 返回表单列表 | Back to Form List | | | |
 | 将在 {countdown}s 后自动返回 | Auto redirecting in {countdown}s | | | |
 
+## 风险评估问卷 (Risk Assessment)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 风险评估 | Risk Assessment | | | |
+| 设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。 | Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight. | | | |
+| 设置个人成员的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。 | Configure individual risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable. | | | |
+| 设置实体机构的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。 | Configure corporate entity risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable. | | | |
+| Yes | Yes | | | |
+| No | No | | | |
+| Not Applicable | Not Applicable | | | |
+| 风险评估组件 | Risk Assessment Components | | | |
+| 风险评估问题 | Risk Question | | | |
+| 包含 Yes / No / NA 与 1~10 权重滑轨 | Includes Yes / No / NA and 1-10 weight slider | | | |
+| 问题分组 | Question Group | | | |
+| 划分评估维度模块（如客户、地域、业务风险） | Section module for risk dimensions (e.g., Client, Country, Service risk) | | | |
+| 问题分组 | Question Groups | | | |
+| 分组 | Groups | | | |
+| {count} 个分组 | {count} groups | | | |
+| 个分组 | groups | | | |
+| {count} 个问题 | {count} questions | | | |
+| 题 | questions | | | |
+| 添加问题分组 | Add Question Group | | | |
+| 添加问题 | Add Question | | | |
+| 添加本组问题 | Add Question to Group | | | |
+| 删除分组 | Delete Group | | | |
+| 确定删除该分组及其包含的问题吗？ | Delete this question group and all questions inside? | | | |
+| 分组 {index} | Section {index} | | | |
+| 分组名称 (中文) | Section Name (ZH) | | | |
+| 分组名称 (EN) | Section Name (EN) | | | |
+| 留空默认为：分组 {index} | Leave empty for: Section {index} | | | |
+| 分组信息 | Group Information | | | |
+| 英文分组名称为必填项，中文翻译选填 | English group title is required; Chinese is optional | | | |
+| 按住拖拽调整分组顺序 | Drag to reorder group | | | |
+| 从左侧拖入评估问题组件，或点击下方按钮添加问题 | Drag question component here or click button below to add | | | |
+| 问题设置 | Question Settings | | | |
+| 配置评估问题与分值权重 | Configure risk question and weight score | | | |
+| 分组设置 | Group Settings | | | |
+| 配置分组名称及组内问题 | Configure group title and questions | | | |
+| 系统固定 | System Fixed | | | |
+| 固定评估规范说明 | Fixed questionnaire rules | | | |
+| 风险评估问卷由系统固定规则驱动，无需配置页面属性。 | The risk questionnaire uses fixed system rules and requires no page configuration. | | | |
+| 添加新问题分组 | Add Question Group | | | |
+| 点击新建一个风险评估分组模块 | Click to add a new assessment section module | | | |
+| 按住调整分组顺序 | Drag to reorder group | | | |
+| 结构 | Section | | | |
+| 单选 | Radio | | | |
+| 已添加新问题分组 | New question group added | | | |
+
+## 标准组件类型名称 (Component Names)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 单行文本 | Single Line Text | | | |
+| 多行文本 | Multi-line Text | | | |
+| 单选框组 | Radio Group | | | |
+| 多选框组 | Checkbox Group | | | |
+| 下拉选择 | Dropdown Select | | | |
+| 日期选择 | Date Picker | | | |
+| 手机号码 | Phone Number | | | |
+| 电子邮箱 | Email Address | | | |
+| 国家/地区 | Country / Region | | | |
+| 国籍选择 | Nationality | | | |
+| 电子签名 | Electronic Signature | | | |
+| 提示说明 | Alert / Notice | | | |
+
+## 风险评估扩展文案 (Risk Assessment Ext)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 复制问题 | Duplicate Question | | | |
+| 在下方插入问题 | Insert Question Below | | | |
+| 删除问题 | Delete Question | | | |
+| 问题内容 | Question Content | | | |
+| 请输入风险评估问题... | Enter risk assessment question... | | | |
+| 权重设置 | Weight Settings | | | |
+| 新问题默认权重为 1。选择 “Yes” 表示命中风险项，系统将按该问题的权重扣减风险评分。请将问题表述为：回答 “Yes” 时明确代表存在风险。 | New questions default to weight 1. Selecting Yes indicates a risk hit and deducts the weight from the risk score. | | | |
+| 权重分值 | Weight Score | | | |
+| 命中扣分权重 | Risk Deduction Weight | | | |
+| 回答“Yes”表示命中风险项，系统将按此权重扣减评分 | Answering "Yes" triggers risk deduction by this weight value | | | |
+| 权重越高，对综合评分的影响越大 | Higher weight has a greater impact on the overall score | | | |
+| 权重：{weight} | Weight: {weight} | | | |
+| 分 | pts | | | |
+| 左右拖拽调整画布宽度 | Drag to resize canvas width | | | |
+| 分组名称 (中文) | Group Name (EN) | | | |
+
+## 发布校验与提示 (Publish & Validation)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 请至少添加一个表单页面后再发布 | Please add at least one form page before publishing | | | |
+| 请填写第 {page} 页的页面标题 | Please enter the page title for Page {page} | | | |
+| 第 {page} 页暂无表单组件，请添加组件或删除空页面 | Page {page} has no components. Please add components or remove the empty page. | | | |
+| 请填写分组 {index} 的分组名称 | Please enter the title for Group {index} | | | |
+| 请填写第 {index} 道评估问题的题目内容 | Please enter question text for Question {index} | | | |
+| 请填写第 {page} 页中未命名组件的标题 | Please enter the label for the untitled field on Page {page} | | | |
+| 已保存至草稿 {time} | Draft saved {time} | | | |
+| 必填项不能为空 | This required field cannot be empty | | | |
+| 请输入有效的手机号码 | Please enter a valid phone number | | | |
+
+## 预览与提交结果 (Preview & Submission)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 提交已完成 | Submission Completed | | | |
+| 感谢您的填写！您的表单信息已成功提交。 | Thank you! Your information has been received successfully. | | | |
+| 处理状态 | Status | | | |
+| 已完成 | Completed | | | |
+| 提交编号 | Submission No. | | | |
+| 提交时间 | Submission Time | | | |
+| 重新体验填报 | Refill Form (Preview) | | | |
+| 签名区域 | Signature Area | | | |
+
+## 发布弹窗扩展 (Publish Modal Ext)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 复制失败，请手动复制链接 | Failed to copy, please copy the link manually | | | |
+| 客户母案例专用KYC问卷 | KYC questionnaire for customer parent cases | | | |
+| 个人成员专用KYC问卷 | KYC questionnaire for individual members | | | |
+| 实体成员专用KYC问卷 | KYC questionnaire for entity members | | | |
+| 空白画布新建自定义表单 | Create custom form from blank canvas | | | |
+| 涵盖全部12种低代码组件、属性测试及中英双语国际化验证 | Covers all 12 low-code components, property tests, and bilingual validation | | | |
+
+## 翻译抽屉与通用 (Translation Helper & Common)
+
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 页面标题 | Page Title | | | |
+| 描述说明 | Page Description | | | |
+| 分组 | Group | | | |
+| 提示说明 | Notice Content | | | |
+| 输入提示 | Placeholder | | | |
+| 副标题 | Help Text | | | |
+| 选项 | Option | | | |
+| 表单字段 | Field | | | |
+| 您有未保存的更改，确定要离开吗？ | You have unsaved changes. Are you sure you want to leave? | | | |
+| 切换语言 / Switch Language | Switch Language / 切换语言 | | | |
+| 中文 | Chinese | | | |
+| 英文 | English | | | |
+| 页面标题 | Page Title (EN) | | | |
+| 页面描述 | Page Description (EN) | | | |
+| 字段标签 | Field Label (EN) | | | |
+| 副标题 | Help Text (EN) | | | |

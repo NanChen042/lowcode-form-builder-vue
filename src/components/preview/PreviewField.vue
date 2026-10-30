@@ -45,58 +45,9 @@
       </div>
     </template>
 
-    <template v-else-if="field.type === 'radio' && field.weight">
-      <div
-        class="w-full rounded-lg border px-3.5 py-3 transition-colors"
-        :class="error ? 'border-red-300 bg-red-50/15' : 'border-slate-200/80 bg-white hover:border-slate-300'"
-      >
-        <div class="flex items-center justify-between gap-6">
-          <div class="min-w-0 flex-1 text-[13px] font-semibold text-slate-800 leading-5">
-            <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span><span
-              class="ml-1.5 inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-1.5 py-0.5 text-[11px] font-semibold text-[#1677ff] leading-none align-middle select-none"
-            >{{ store.currentLocale === 'en' ? `Weight ${field.weight}` : `权重 ${field.weight}` }}</span>
-          </div>
-
-          <div class="choice-group flex shrink-0 items-center gap-x-5">
-            <label
-              v-for="(opt, idx) in field.options"
-              :key="opt.value || idx"
-              class="inline-flex items-center gap-2 cursor-pointer select-none text-[13px] text-slate-800 group whitespace-nowrap"
-              @click="formData[field.key] = opt.value; handleFieldInput();"
-            >
-              <span
-                class="flex items-center justify-center w-4 h-4 rounded-full border transition-all shrink-0"
-                :class="formData[field.key] === opt.value
-                  ? 'border-[#1677ff] bg-[#1677ff]'
-                  : (error ? 'border-red-400 bg-white group-hover:border-red-500' : 'border-slate-300 bg-white group-hover:border-blue-400')"
-              >
-                <span v-if="formData[field.key] === opt.value" class="w-1.5 h-1.5 rounded-full bg-white"></span>
-              </span>
-              <span>{{ getLocalizedOptionLabel(opt) }}</span>
-            </label>
-          </div>
-        </div>
-
-        <div
-          v-if="error"
-          class="mt-1.5 text-[11px] font-medium text-[#f53f3f] flex items-center gap-1 leading-tight"
-        >
-          <svg class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ error }}</span>
-        </div>
-      </div>
-    </template>
-
     <template v-else>
       <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-semibold text-slate-800 leading-5">
-        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span><span
-          v-if="field.weight"
-          class="ml-1.5 inline-flex items-center rounded border border-blue-200 bg-blue-50/90 px-1.5 py-0.5 text-[11px] font-semibold text-[#1677ff] leading-none align-middle select-none"
-        >{{ store.currentLocale === 'en' ? `Weight ${field.weight}` : `权重 ${field.weight}` }}</span>
+        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span>
         <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5 inline">{{ localizedHelp }}</span>
 
         <div v-if="field.helpPosition === 'bottom' && localizedHelp" class="field-help-bottom text-[11px] text-slate-400 font-normal mt-0.5 leading-4">
@@ -417,7 +368,7 @@
         <div class="space-y-1.5">
           <div v-if="localizedPlaceholder || field.required" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
-            <span>{{ localizedPlaceholder || (store.currentLocale === 'en' ? 'Signature Area' : '签名区域') }}</span>
+            <span>{{ localizedPlaceholder || t('preview.signatureArea') }}</span>
           </div>
 
           <div

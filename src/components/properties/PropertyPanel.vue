@@ -30,15 +30,15 @@
             <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800">
               {{
                 store.selectedType === 'group'
-                  ? (store.currentLocale === 'en' ? 'Group Settings' : '分组设置')
-                  : (isRisk && selectedElement ? (store.currentLocale === 'en' ? 'Question Settings' : '问题设置') : t('prop.title'))
+                  ? t('risk.propGroupTitle')
+                  : (isRisk && selectedElement ? t('risk.propQuestionTitle') : t('prop.title'))
               }}
             </h2>
             <p class="m-0 text-[11px] leading-4 text-slate-400">
               {{
                 store.selectedType === 'group'
-                  ? (store.currentLocale === 'en' ? 'Configure group title and questions' : '配置分组名称及组内问题')
-                  : (store.selectedType === 'page' ? t('prop.pageSubtitle') : (selectedElement ? t('prop.elementSubtitle') : t('prop.emptyTitle')))
+                  ? t('risk.propGroupSub')
+                  : (store.selectedType === 'page' ? (isRisk ? t('risk.fixedRulesDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle')))
               }}
             </p>
           </div>
@@ -120,14 +120,14 @@
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <div>
                 <span class="text-[12px] font-semibold text-slate-700">
-                  {{ store.currentLocale === 'en' ? 'Group Information' : '分组信息' }}
+                  {{ t('risk.groupInfo') }}
                 </span>
                 <span class="block text-[11px] text-slate-400">
-                  {{ store.currentLocale === 'en' ? 'English group title is required; Chinese is optional' : '英文分组名称为必填项，中文翻译选填' }}
+                  {{ t('risk.groupInfoSub') }}
                 </span>
               </div>
               <a-tag size="small" class="text-[11px] font-normal">
-                {{ store.currentLocale === 'en' ? 'Question Group' : '问题分组' }}
+                {{ t('risk.cmpGroup') }}
               </a-tag>
             </div>
 
@@ -135,7 +135,7 @@
               <div class="flex items-center justify-between mb-1.5">
                 <div class="flex items-center gap-1.5">
                   <label for="group-prop-title-input" class="text-[12px] font-medium text-slate-700">
-                    {{ store.currentLocale === 'en' ? 'Group Name (EN)' : '分组名称 (中文)' }}
+                    {{ t('risk.groupNameWithLang') }}
                   </label>
                   <a-tag
                     v-if="isBilingual && (store.currentLocale === 'en' ? (selectedGroup.title && !selectedGroup.title_en) : (selectedGroup.title_en && !selectedGroup.title))"
@@ -151,7 +151,7 @@
                 id="group-prop-title-input"
                 v-model="groupTitleModel"
                 allow-clear
-                :placeholder="store.currentLocale === 'en' ? 'Enter group name' : '请输入分组名称'"
+                :placeholder="t('risk.groupNamePlaceholder')"
                 class="w-full"
                 @input="markDirty"
               />
@@ -167,7 +167,7 @@
                 <template #icon>
                   <Plus class="h-3.5 w-3.5" />
                 </template>
-                {{ store.currentLocale === 'en' ? 'Add Question to Group' : '添加本组问题' }}
+                {{ t('risk.addQuestionToGroup') }}
               </a-button>
 
               <a-button
@@ -180,7 +180,7 @@
                 <template #icon>
                   <Trash2 class="h-3.5 w-3.5" />
                 </template>
-                {{ store.currentLocale === 'en' ? 'Delete Group' : '删除分组' }}
+                {{ t('risk.deleteGroup') }}
               </a-button>
             </div>
           </div>
@@ -198,7 +198,7 @@
 
             <FieldDependencyCard v-if="!isRisk" :element="selectedElement" />
 
-            <div class="pt-5 border-t border-slate-100 flex gap-2">
+            <div class="pt-5 mt-4 border-t border-slate-100 flex gap-2">
               <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
                 <template #icon>
                   <Copy class="h-3.5 w-3.5" />

@@ -6,7 +6,32 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>自定义表单构建器</title>
+    <title>表单设计工作台</title>
+    <script>
+      (function () {
+        try {
+          var pathname = (window.location.pathname || '').toLowerCase();
+          var params = new URLSearchParams(window.location.search);
+          var isRisk = pathname.indexOf('/risk') !== -1 || (params.get('mode') || '').toLowerCase() === 'risk';
+          var lang = (params.get('lang') || '').toLowerCase();
+          if (!lang) {
+            lang = (localStorage.getItem('builder_current_locale') || localStorage.getItem('lowcode_current_locale') || '').toLowerCase();
+          }
+          if (!lang && navigator.language) {
+            lang = navigator.language.toLowerCase().indexOf('zh') !== -1 ? 'zh' : 'en';
+          }
+          window.__appInitialLang = (lang === 'en') ? 'en' : 'zh';
+          if (isRisk) {
+            document.title = (window.__appInitialLang === 'en') ? 'Risk Assessment Workspace' : '风险评估设计工作台';
+          } else {
+            document.title = (window.__appInitialLang === 'en') ? 'Form Design Workspace' : '表单设计工作台';
+          }
+          if (window.__appInitialLang === 'en') {
+            document.documentElement.lang = 'en';
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script>
       // 捕获旧版缓存 HTML 请求已更新的带 Hash JS/CSS 404 错误，自动刷新拉取最新入口
       window.addEventListener(
@@ -103,7 +128,11 @@
         <div class="loader-progress-track">
           <div class="loader-progress-bar" id="app-loader-bar"></div>
         </div>
-        <div class="loader-status" id="app-loader-status">正在加载设计工作台...</div>
+        <div class="loader-status" id="app-loader-status">
+          <script>
+            document.write(window.__appInitialLang === 'en' ? 'Loading workspace...' : '正在加载设计工作台...');
+          </script>
+        </div>
       </div>
     </div>
 
@@ -127,7 +156,7 @@
           timer = null;
           if (bar) bar.style.width = '100%';
           var status = document.getElementById('app-loader-status');
-          if (status) status.innerText = '加载就绪';
+          if (status) status.innerText = (window.__appInitialLang === 'en') ? 'Ready' : '加载就绪';
           setTimeout(function () {
             var loader = document.getElementById('app-init-loader');
             if (loader) {

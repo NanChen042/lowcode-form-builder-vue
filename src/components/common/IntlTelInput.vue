@@ -40,6 +40,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { store } from '@/core/store';
+import { t } from '@/core/i18n';
 import type { IntlTelInputInstance, IntlTelInputOptions } from '@/types/intlTelInput';
 import {
   getCountryPhoneRule,
@@ -228,14 +229,14 @@ function validateAndEmit() {
   if (!raw) {
     if (props.required) {
       valid = false;
-      message = props.customErrorMessage || '必填项不能为空';
-      message_en = props.customErrorMessage || 'This required field cannot be empty';
+      message = props.customErrorMessage || t('val.requiredFallback', 'zh');
+      message_en = props.customErrorMessage || t('val.requiredFallback', 'en');
     }
   } else if (props.strict) {
     valid = iti.isValidNumber();
     if (!valid) {
-      message = props.customErrorMessage || '请输入有效的手机号码';
-      message_en = props.customErrorMessage || 'Please enter a valid phone number';
+      message = props.customErrorMessage || t('val.validPhoneFallback', 'zh');
+      message_en = props.customErrorMessage || t('val.validPhoneFallback', 'en');
     }
   }
 

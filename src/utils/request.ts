@@ -108,7 +108,7 @@ service.interceptors.response.use(
         });
       }
       setTimeout(() => {
-        if (typeof window !== 'undefined' && window.top) {
+        if (!import.meta.env.DEV && typeof window !== 'undefined' && window.top) {
           window.top.location.href = '/pc/login/';
         }
       }, 1500);

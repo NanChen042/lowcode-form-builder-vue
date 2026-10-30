@@ -1,13 +1,39 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'node:url'
+import fs from 'node:fs'
+import path from 'node:path'
+
+function generateRiskHtmlPlugin(): Plugin {
+  return {
+    name: 'generate-risk-html',
+    closeBundle() {
+      const distDir = path.resolve(__dirname, 'dist')
+      const indexHtmlPath = path.join(distDir, 'index.html')
+      if (fs.existsSync(indexHtmlPath)) {
+        let html = fs.readFileSync(indexHtmlPath, 'utf8')
+        if (!html.includes('<base href=')) {
+          html = html.replace('<head>', '<head>\n    <base href="/form-builder/" />')
+        }
+        html = html.replace('<title>表单设计工作台</title>', '<title>风险评估设计工作台</title>')
+        const riskDir = path.join(distDir, 'risk')
+        if (!fs.existsSync(riskDir)) {
+          fs.mkdirSync(riskDir, { recursive: true })
+        }
+        fs.writeFileSync(path.join(riskDir, 'index.html'), html, 'utf8')
+        console.log('[generateRiskHtmlPlugin] Successfully created dist/risk/index.html')
+      }
+    }
+  }
+}
 
 export default defineConfig({
   base: './',
   plugins: [
     vue(),
-    tailwindcss()
+    tailwindcss(),
+    generateRiskHtmlPlugin()
   ],
   resolve: {
     alias: {
@@ -44,9 +70,6 @@ export default defineConfig({
             }
             if (id.includes('@lucide')) {
               return 'lucide-vendor';
-            }
-            if (id.includes('mockjs')) {
-              return 'mock-vendor';
             }
           }
         }

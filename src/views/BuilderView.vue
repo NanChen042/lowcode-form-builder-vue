@@ -14,7 +14,6 @@
         />
 
         <InfiniteCanvas
-          class="-mt-14"
           @open-template-gallery="handleOpenTemplateModal"
           @open-create-canvas="handleOpenCreateCanvas"
         />
@@ -24,6 +23,7 @@
 
       <CreateFormModal
         v-model:visible="createCanvasModalVisible"
+        :is-initial="openedFromWizard"
         @created="handleFormCreated"
         @cancel="handleCreateCanvasCancel"
         @close="handleCreateCanvasClose"
@@ -65,15 +65,15 @@ import {
   generateFormId,
   establishBaseline
 } from '@/core/store';
-import { currentArcoLocale } from '@/core/i18n';
+import { currentArcoLocale, t } from '@/core/i18n';
 import { FormAPI, UserAPI } from '@/core/api';
 import {
   kycCustomerTemplate,
   kycIndividualTemplate,
   kycEntityTemplate,
   blankTemplate,
-  createRiskAssessmentTemplate,
-  allComponentsDemoTemplate
+  createBlankTemplate,
+  createRiskAssessmentTemplate
 } from '@/templates/recommend';
 import type { FormSchema } from '@/types/schema';
 import { checkAutoStartTour } from '@/utils/useAppTour';
@@ -136,20 +136,14 @@ function handleFormCreated() {
 
 function handleCreateCanvasCancel() {
   createCanvasModalVisible.value = false;
-  if (isRisk.value && store.pages.length === 0) {
-    const riskSchema = createRiskAssessmentTemplate('customer', '', '', '', '');
-    loadSchema(riskSchema, { duration: 0 });
-  } else if (!isRisk.value && (openedFromWizard.value || store.pages.length === 0)) {
+  if (openedFromWizard.value || store.pages.length === 0) {
     welcomeWizardVisible.value = true;
   }
 }
 
 function handleCreateCanvasClose() {
   createCanvasModalVisible.value = false;
-  if (isRisk.value && store.pages.length === 0) {
-    const riskSchema = createRiskAssessmentTemplate('customer', '', '', '', '');
-    loadSchema(riskSchema, { duration: 0 });
-  } else if (!isRisk.value && store.pages.length === 0) {
+  if (store.pages.length === 0) {
     welcomeWizardVisible.value = true;
   }
 }
@@ -157,8 +151,16 @@ function handleCreateCanvasClose() {
 function handleWelcomeWizardClosed() {
   welcomeWizardVisible.value = false;
   store.sidebarTab = 'components';
+  if (openedFromWizard.value || createCanvasModalVisible.value) {
+    return;
+  }
   if (store.pages.length === 0) {
-    loadSchema(blankTemplate);
+    if (isRisk.value) {
+      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer', '', '', '', '');
+      loadSchema(riskSchema);
+    } else {
+      loadSchema(blankTemplate);
+    }
     store.lastSavedHash = '';
     store.isDirty = true;
     store.lastSavedTime = '';
@@ -191,9 +193,14 @@ onMounted(async () => {
   const rawId = (urlParams.get('id') || '').toLowerCase().trim();
   const isCopyMode = urlParams.get('copy') === '1' || urlParams.get('copy') === 'true';
   const tplParam = (urlParams.get('tpl') || '').toLowerCase().trim();
-  const mockParam = (urlParams.get('mock') || '').toLowerCase().trim();
-  const typeParam = (urlParams.get('type') || urlParams.get('profileType') || '').toLowerCase().trim();
-  const isRiskRoute = window.location.pathname.includes('/risk') || urlParams.get('mode') === 'risk';
+  const rawType = (urlParams.get('type') || '').toLowerCase().trim();
+  const rawFormType = (urlParams.get('formType') || '').toLowerCase().trim();
+  const typeParam = (urlParams.get('profileType') || (rawType !== 'risk' ? rawType : '')).toLowerCase().trim();
+  const isRiskRoute =
+    window.location.pathname.includes('/risk') ||
+    urlParams.get('mode') === 'risk' ||
+    rawFormType === 'risk' ||
+    rawType === 'risk';
   store.editorMode = isRiskRoute ? 'risk' : 'standard';
 
   if (rawId) {
@@ -244,21 +251,15 @@ onMounted(async () => {
   let targetTemplate: FormSchema = blankTemplate;
   let targetTemplateKey = 'blank';
 
-  const isAllComponentsMock =
-    rawId === 'all_components_demo' ||
-    rawId === 'all_components' ||
-    rawId === 'all' ||
-    tplParam === 'all-components-demo' ||
-    tplParam === 'all_components' ||
-    tplParam === 'all' ||
-    mockParam === 'all' ||
-    mockParam === 'all_components' ||
-    mockParam === 'true';
-
   const resetToBlankState = () => {
-    if (isRisk.value) {
-      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer', '', '', '', '');
-      loadSchema(riskSchema, { duration: 0 });
+    if (store.lockedProfileType) {
+      if (isRisk.value) {
+        const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType, '', '', '', '');
+        loadSchema(riskSchema, { duration: 0 });
+      } else {
+        const blankSchema = createBlankTemplate(store.lockedProfileType, '', '', '');
+        loadSchema(blankSchema, { duration: 0 });
+      }
       store.selectedType = null;
       store.selectedId = null;
       store.meta.formId = '';
@@ -268,7 +269,18 @@ onMounted(async () => {
       store.sidebarTab = 'components';
       return;
     }
-    loadSchema(blankTemplate, { duration: 0 });
+    // 首次进入欢迎弹窗前，彻底清空画布（pages: []），防止背景残留 KYC 「基本资料」模板
+    loadSchema({
+      schemaVersion: '1.0.0',
+      meta: {
+        title: '',
+        description: '',
+        formType: isRisk.value ? 'risk' : 'kyc',
+        enabledLocales: [store.currentLocale || 'zh'],
+        source: 'diy'
+      },
+      pages: []
+    }, { duration: 0 });
     store.selectedType = null;
     store.selectedId = null;
     store.meta.formId = '';
@@ -282,11 +294,7 @@ onMounted(async () => {
   let notFound = false;
 
   try {
-    if (isAllComponentsMock) {
-      targetTemplate = allComponentsDemoTemplate;
-      targetTemplateKey = 'all-components-demo';
-      store.lockedProfileType = 'customer';
-    } else if (rawId) {
+    if (rawId) {
       const res = await FormAPI.getTemplate(rawId);
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
         targetTemplate = res.data.schema;
@@ -339,7 +347,7 @@ onMounted(async () => {
     if (typeof (window as any).__dismissAppLoader === 'function') {
       (window as any).__dismissAppLoader();
     }
-    const notFoundPath = window.location.pathname.includes('/form-builder') ? '/form-builder/404' : '/404';
+    const notFoundPath = '/404';
     router.replace({
       path: notFoundPath,
       query: {
@@ -351,7 +359,7 @@ onMounted(async () => {
     return;
   }
 
-  if (rawId || tplParam || isAllComponentsMock) {
+  if (rawId || tplParam) {
     loadSchema(targetTemplate, { duration: 0 });
     if (isCopyMode) {
       const newCopiedId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
@@ -386,16 +394,11 @@ onMounted(async () => {
         store.isDirty = true;
         store.lastSavedTime = '';
       }
-    } else if (targetTemplateKey === 'saved' || isAllComponentsMock) {
-      const effectiveId = isAllComponentsMock ? (rawId || 'all_components_demo') : rawId;
+    } else if (targetTemplateKey === 'saved') {
+      const effectiveId = rawId;
       store.meta.formId = effectiveId;
       store.meta.serialNo = effectiveId;
       syncUrlParams(effectiveId);
-      if (targetTemplateKey !== 'saved') {
-        store.lastSavedHash = '';
-        store.isDirty = true;
-        store.lastSavedTime = '';
-      }
     } else {
       const newFormId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'template');
       store.meta.formId = newFormId;
@@ -408,7 +411,7 @@ onMounted(async () => {
     store.activeTemplateKey = targetTemplateKey;
   }
 
-  if (rawId || tplParam || isAllComponentsMock) {
+  if (rawId || tplParam) {
     checkAutoStartTour();
   }
 
@@ -443,7 +446,7 @@ function handleWindowMessage(event: MessageEvent) {
 function handleBeforeUnload(e: BeforeUnloadEvent) {
   if (store.isDirty) {
     e.preventDefault();
-    e.returnValue = '您有未保存的更改，确定要离开吗？';
+    e.returnValue = t('common.leaveConfirm');
   }
 }
 

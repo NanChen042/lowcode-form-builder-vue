@@ -10,7 +10,7 @@
       type="button"
       class="flex items-center gap-1.5 px-2 py-1.5 text-[13px] font-normal text-slate-700 hover:text-[#1677ff] transition-colors cursor-pointer select-none border-0 bg-transparent shrink-0 outline-none"
       :class="customClass"
-      :title="store.currentLocale === 'zh' ? '切换语言 / Switch Language' : 'Switch Language / 切换语言'"
+      :title="t('common.switchLanguage')"
     >
       <Languages class="w-[15px] h-[15px] text-slate-700 shrink-0" />
       <span class="leading-none select-none text-slate-700">{{ store.currentLocale === 'zh' ? '中文' : 'English' }}</span>

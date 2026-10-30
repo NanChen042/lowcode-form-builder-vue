@@ -297,11 +297,10 @@ export function addQuestionGroup(afterGroupId?: string, insertIndexOverride?: nu
   if (!page) return null;
   if (!page.groups) page.groups = [];
   const newId = `grp_${Date.now()}_${getUniqueId()}`;
-  const idxNum = page.groups.length + 1;
   const newGroup: FormQuestionGroup = {
     id: newId,
-    title: `问题分组 ${idxNum}`,
-    title_en: `Question Group ${idxNum}`
+    title: '',
+    title_en: ''
   };
   let insertIdx = page.groups.length;
   if (typeof insertIndexOverride === 'number') {
@@ -314,7 +313,9 @@ export function addQuestionGroup(afterGroupId?: string, insertIndexOverride?: nu
   const firstQuestion = createElement('radio', newId);
   page.fields.push(firstQuestion);
   const groupOrder = page.groups.map(g => g.id);
-  page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  const groupedFields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  const leftoverFields = page.fields.filter(f => !f.groupId || !groupOrder.includes(f.groupId));
+  page.fields = [...groupedFields, ...leftoverFields];
   selectGroup(newId);
   markDirty();
   return newGroup;
@@ -326,8 +327,9 @@ export function deleteQuestionGroup(groupId: string): boolean {
   const idx = page.groups.findIndex(g => g.id === groupId);
   if (idx === -1) return false;
   page.groups.splice(idx, 1);
+  const deletedFieldIds = new Set(page.fields.filter(f => f.groupId === groupId).map(f => f.id));
   page.fields = page.fields.filter(f => f.groupId !== groupId);
-  if (store.selectedId === groupId) {
+  if (store.selectedId && (store.selectedId === groupId || deletedFieldIds.has(store.selectedId))) {
     clearSelection();
   }
   if (store.activeGroupId === groupId) {
@@ -347,7 +349,9 @@ export function moveQuestionGroup(groupId: string, direction: 'up' | 'down') {
   const [moved] = page.groups.splice(idx, 1);
   page.groups.splice(targetIdx, 0, moved);
   const groupOrder = page.groups.map(g => g.id);
-  page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  const groupedFields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+  const leftoverFields = page.fields.filter(f => !f.groupId || !groupOrder.includes(f.groupId));
+  page.fields = [...groupedFields, ...leftoverFields];
   markDirty();
 }
 
@@ -398,7 +402,9 @@ export function addElement(type: ComponentType, targetPageId?: string, targetGro
     } else {
       page.fields.push(newEl);
       const groupOrder = page.groups.map(g => g.id);
-      page.fields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+      const groupedFields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
+      const leftoverFields = page.fields.filter(f => !f.groupId || !groupOrder.includes(f.groupId));
+      page.fields = [...groupedFields, ...leftoverFields];
     }
     store.activePageId = page.id;
     store.activeGroupId = resolvedGroupId;
@@ -475,6 +481,12 @@ export function duplicateElement(elementId: string) {
       const newParentId = `cmp_${getUniqueId()}`;
       cloneObj.id = newParentId;
       cloneObj.key = makeFieldKey(cloneObj.type, newParentId);
+      if (isRisk.value) {
+        cloneObj.groupId = original.groupId || page.groups?.[0]?.id || 'grp_risk_1';
+        delete cloneObj.defaultValue;
+        cloneObj.type = 'radio';
+        cloneObj.options = RISK_FIXED_OPTIONS.map(o => ({ ...o }));
+      }
 
       // 检查原组件名下是否有紧随其后的从属联动子组件（含多级嵌套），若有则打包一同复制并重映射依赖目标
       const clonedChildren: FormElement[] = [];
@@ -662,9 +674,12 @@ export function adjustZoom(delta: number, clientX?: number, clientY?: number, vi
     store.canvasState.x = pointerX - worldX * nextScale;
     store.canvasState.y = pointerY - worldY * nextScale;
   } else {
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
+    const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+    const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+    const viewportWidth = Math.max(320, (typeof window !== 'undefined' ? window.innerWidth : 1200) - leftWidth - rightWidth);
+    const viewportHeight = Math.max(320, (typeof window !== 'undefined' ? window.innerHeight - 56 : 800));
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
     const worldX = (centerX - store.canvasState.x) / oldScale;
     const worldY = (centerY - store.canvasState.y) / oldScale;
 
@@ -702,7 +717,6 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
   const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
   const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
   const viewportHeight = Math.max(320, window.innerHeight - 56);
-  const headerHeight = 56;
 
   const pType = page.profileType || store.meta.profileType;
   const presetExpectedHeight = pType === 'individual' ? 620 : 1080;
@@ -744,7 +758,7 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
     store.canvasState.x = leftMargin - page.x * finalScale;
 
     const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
-    const viewportCenterY = headerHeight + viewportHeight / 2;
+    const viewportCenterY = viewportHeight / 2;
     store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
   } else {
     const paddingX = 80;
@@ -758,7 +772,7 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
     store.canvasState.x = viewportWidth / 2 - (page.x + realWidth / 2) * finalScale;
 
     const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
-    const viewportCenterY = headerHeight + viewportHeight / 2;
+    const viewportCenterY = viewportHeight / 2;
     store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
   }
 }
@@ -786,7 +800,6 @@ export function resetCanvasView(options?: { duration?: number }) {
   const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
   const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
   const viewportHeight = Math.max(320, window.innerHeight - 56);
-  const headerHeight = 56;
 
   let minX = Infinity;
   let minY = Infinity;
@@ -825,7 +838,7 @@ export function resetCanvasView(options?: { duration?: number }) {
     store.canvasState.scale = clampScale(targetScale);
     const contentCenterX = minX + totalWidth / 2;
     store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * store.canvasState.scale);
-    store.canvasState.y = headerHeight + 36;
+    store.canvasState.y = 36;
     return;
   }
 
@@ -842,21 +855,18 @@ export function resetCanvasView(options?: { duration?: number }) {
   const contentCenterY = minY + totalHeight / 2;
 
   store.canvasState.x = viewportWidth / 2 - contentCenterX * targetScale;
-  store.canvasState.y = (headerHeight + viewportHeight / 2) - contentCenterY * targetScale;
+  store.canvasState.y = (viewportHeight / 2) - contentCenterY * targetScale;
 }
 
-// 统一生成纯小写规范表单业务 ID (例如: cli_diy_20261012_7x8k / ind_diy_... / ent_tpl_...)
-// 结构: [cli客户/ind个人/ent实体]_[diy自建/tpl模板]_[日期]_[纯小写防重随机码]
+// 统一生成纯小写规范表单业务 ID (例如: tpl_20261030_7x8k)
+// 结构: tpl_[日期]_[纯小写防重随机码] (不再区分 cus/ent/ind/diy，由 meta.profileType / case_type 单独分类)
 export function generateFormId(
-  profileType: ProfileType = 'customer',
-  source: 'diy' | 'template' = 'diy'
+  _profileType?: ProfileType,
+  _source?: 'diy' | 'template'
 ): string {
-  const isCus = profileType === 'customer' || profileType === 'client';
-  const typeCode = isCus ? 'cus' : (profileType === 'entity' ? 'ent' : 'ind');
-  const srcCode = source === 'template' ? 'tpl' : 'diy';
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const rand = Math.random().toString(36).substring(2, 6).toLowerCase();
-  return `${typeCode}_${srcCode}_${dateStr}_${rand}`;
+  return `tpl_${dateStr}_${rand}`;
 }
 
 export function generateSerialNo(
@@ -874,22 +884,101 @@ export function buildSchema(): FormSchema {
   if (!store.meta.formId) store.meta.formId = ensuredId;
   if (!store.meta.serialNo) store.meta.serialNo = ensuredId;
 
-  const metaCopy: any = {
-    title: store.meta.title || '未命名表单',
-    title_en: isBilingualMode ? (store.meta.title_en || '') : '',
-    description: store.meta.description || '',
-    description_en: isBilingualMode ? (store.meta.description_en || '') : '',
-    profileType: store.meta.profileType || 'individual',
-    formType: isRisk.value ? 'risk' : 'kyc',
-    enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
-    source: store.meta.source || 'diy',
-    templateKey: store.meta.templateKey,
-    formId: ensuredId,
-    serialNo: ensuredId,
-    createdAt: store.meta.createdAt
-  };
+  const defaultTemplateTitles = [
+    'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
+    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity'
+  ];
+  const effectiveTitle = (store.meta.title || (isRisk.value ? '风险评估' : '未命名表单')).trim();
+  let effectiveTitleEn = (store.meta.title_en || '').trim();
 
-  const pagesCopy = store.pages.map(p => {
+  // 若英文标题仍为默认冲突模版名，且中文标题已被用户修改，则英文标题自动对齐中文标题，彻底杜绝后端 checkTitle 触发 409
+  if (defaultTemplateTitles.includes(effectiveTitleEn) && !defaultTemplateTitles.includes(effectiveTitle)) {
+    effectiveTitleEn = effectiveTitle;
+    store.meta.title_en = effectiveTitle;
+  }
+  if (!effectiveTitleEn && isBilingualMode) {
+    effectiveTitleEn = effectiveTitle;
+    store.meta.title_en = effectiveTitle;
+  }
+
+  const metaCopy: any = isRisk.value
+    ? {
+        formId: ensuredId,
+        serialNo: ensuredId,
+        title: effectiveTitle,
+        profileType: store.meta.profileType || 'customer',
+        formType: 'risk',
+        enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
+        ...(isBilingualMode && effectiveTitleEn ? { title_en: effectiveTitleEn } : {}),
+        ...(store.meta.description ? { description: store.meta.description } : {}),
+        ...(isBilingualMode && store.meta.description_en ? { description_en: store.meta.description_en } : {})
+      }
+    : {
+        title: effectiveTitle,
+        title_en: isBilingualMode ? effectiveTitleEn : '',
+        description: store.meta.description || '',
+        description_en: isBilingualMode ? (store.meta.description_en || '') : '',
+        profileType: store.meta.profileType || 'customer',
+        formType: 'kyc',
+        enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
+        source: store.meta.source || 'diy',
+        templateKey: store.meta.templateKey,
+        formId: ensuredId,
+        serialNo: ensuredId,
+        createdAt: store.meta.createdAt
+      };
+
+  const pagesCopy = store.pages.map((p, idx) => {
+    if (isRisk.value) {
+      // 风险评估模式：彻底剥离所有无用字段（pageType, showSkeleton, profileType, description, type, options, layout 等）
+      const firstGroupId = p.groups?.[0]?.id || 'grp_risk_1';
+      const cleanPage: any = {
+        id: p.id || `page_risk_${idx}`,
+        title: p.title || '风险评估',
+        groups: p.groups && p.groups.length > 0
+          ? p.groups.map(g => ({
+              id: g.id,
+              title: g.title?.trim() || '',
+              title_en: g.title_en?.trim() || ''
+            }))
+          : [],
+        fields: p.fields.map(f => {
+          const cleanField: any = {
+            id: f.id,
+            key: f.key,
+            type: 'radio',
+            groupId: f.groupId || firstGroupId,
+            label: f.label || '',
+            weight: f.weight ?? 1,
+            options: f.options && f.options.length
+              ? JSON.parse(JSON.stringify(f.options))
+              : RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+          };
+          if (isBilingualMode) {
+            cleanField.label_en = f.label_en || '';
+          }
+          if (f.help?.trim()) {
+            cleanField.help = f.help.trim();
+            if (isBilingualMode && f.help_en?.trim()) {
+              cleanField.help_en = f.help_en.trim();
+            }
+          }
+          if (!isBilingualMode && Array.isArray(cleanField.options)) {
+            cleanField.options.forEach((opt: any) => {
+              delete opt.label_en;
+            });
+          }
+          return cleanField;
+        })
+      };
+
+      if (isBilingualMode) {
+        cleanPage.title_en = p.title_en || 'Risk Assessment';
+      }
+
+      return cleanPage;
+    }
+
     const pageCopy: any = {
       id: p.id,
       pageType: p.pageType || 'form',
@@ -927,11 +1016,6 @@ export function buildSchema(): FormSchema {
       pageCopy.description_en = p.description_en;
     }
 
-    if (isRisk.value) {
-      delete pageCopy.description;
-      delete pageCopy.description_en;
-    }
-
     return pageCopy;
   });
 
@@ -939,7 +1023,7 @@ export function buildSchema(): FormSchema {
     schemaVersion: '1.0.0',
     meta: metaCopy,
     pages: pagesCopy,
-    pageConnections: []
+    pageConnections: isRisk.value ? [] : []
   };
 }
 
@@ -949,7 +1033,11 @@ export function syncUrlParams(id?: string) {
     const url = new URL(window.location.href);
     url.searchParams.delete('type');
     url.searchParams.delete('profileType');
-    url.searchParams.delete('mode');
+    if (isRisk.value && !url.pathname.includes('/risk')) {
+      url.searchParams.set('mode', 'risk');
+    } else {
+      url.searchParams.delete('mode');
+    }
     url.searchParams.delete('source');
     url.searchParams.delete('tpl');
     url.searchParams.delete('copy');
@@ -998,25 +1086,29 @@ export function createNewCanvas(options: {
   profileType?: ProfileType;
 }) {
   const profileType = options.profileType || store.meta.profileType || 'customer';
-  const schema = isRisk.value
-    ? createRiskAssessmentTemplate(profileType, options.title, '', options.description || '')
-    : createBlankTemplate(profileType, options.title, '', options.description || '');
-  const formId = generateFormId(profileType, 'diy');
+  // 保留已存在的 ID，如果当前已有正在编辑的表单，新建覆盖时应保持原 ID，保存时原地覆盖 (Update)
+  const existingId = store.meta.formId || store.meta.serialNo;
+  const formId = existingId || generateFormId(profileType, 'diy');
   const now = Date.now();
+  const initialTitle = options.title?.trim() || (existingId && store.meta.title ? store.meta.title : (isRisk.value ? '风险评估' : '未命名表单'));
+  const schema = isRisk.value
+    ? createRiskAssessmentTemplate(profileType, initialTitle, initialTitle, options.description || '')
+    : createBlankTemplate(profileType, initialTitle, initialTitle, options.description || '');
 
   schema.meta.source = 'diy';
   schema.meta.serialNo = formId;
   schema.meta.formId = formId;
-  schema.meta.createdAt = now;
+  schema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(schema);
-  store.meta.title = options.title || schema.meta.title;
+  store.meta.title = initialTitle;
+  store.meta.title_en = initialTitle;
   store.meta.description = options.description !== undefined ? options.description : schema.meta.description;
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
   store.meta.serialNo = formId;
   store.meta.formId = formId;
-  store.meta.createdAt = now;
+  store.meta.createdAt = schema.meta.createdAt;
   store.activeTemplateKey = 'blank';
   store.sidebarTab = 'components';
   if (isRisk.value && store.pages[0]?.fields?.[0]) {
@@ -1026,10 +1118,14 @@ export function createNewCanvas(options: {
   store.lastSavedHash = '';
   store.isDirty = true;
   store.lastSavedTime = '';
-  syncUrlParams('');
+  // 已有 ID 则保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
+  syncUrlParams(existingId ? formId : '');
 }
 
-export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity', customTitle?: string) {
+export function applyTemplateKey(
+  tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity' | 'risk-customer' | 'risk-individual' | 'risk-entity' | string,
+  customTitle?: string
+) {
   let templateSource: FormSchema = kycCustomerTemplate;
   let pType: ProfileType = 'customer';
   let defaultTitle = 'SG_CDD_Customer';
@@ -1042,29 +1138,47 @@ export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'ky
     templateSource = kycEntityTemplate;
     pType = 'entity';
     defaultTitle = 'SG_CDD_Entity';
+  } else if (tplKey === 'risk-individual') {
+    templateSource = createRiskAssessmentTemplate('individual', 'SG_Risk_Individual');
+    pType = 'individual';
+    defaultTitle = 'SG_Risk_Individual';
+  } else if (tplKey === 'risk-entity') {
+    templateSource = createRiskAssessmentTemplate('entity', 'SG_Risk_Entity');
+    pType = 'entity';
+    defaultTitle = 'SG_Risk_Entity';
+  } else if (tplKey === 'risk-customer') {
+    templateSource = createRiskAssessmentTemplate('customer', 'SG_Risk_Customer');
+    pType = 'customer';
+    defaultTitle = 'SG_Risk_Customer';
   }
 
   const clonedSchema: FormSchema = JSON.parse(JSON.stringify(templateSource));
-  const formId = generateFormId(pType, 'template');
+  // 保留已存在的 ID，切换模板时不重新生成 ID，保存时直接原地覆盖 (Update)
+  const existingId = store.meta.formId || store.meta.serialNo;
+  const formId = existingId || generateFormId(pType, 'template');
   const now = Date.now();
-  const title = customTitle?.trim() || defaultTitle;
+  // 保留用户已有标题或自定义标题
+  const title = customTitle?.trim() || (existingId && store.meta.title ? store.meta.title : defaultTitle);
+  const titleEn = (existingId && store.meta.title_en) ? store.meta.title_en : title;
 
   clonedSchema.meta.title = title;
+  clonedSchema.meta.title_en = titleEn;
   clonedSchema.meta.profileType = pType;
   clonedSchema.meta.source = 'template';
   clonedSchema.meta.templateKey = tplKey;
   clonedSchema.meta.formId = formId;
   clonedSchema.meta.serialNo = formId;
-  clonedSchema.meta.createdAt = now;
+  clonedSchema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(clonedSchema);
   store.meta.title = title;
+  store.meta.title_en = titleEn;
   store.meta.profileType = pType;
   store.meta.source = 'template';
   store.meta.templateKey = tplKey;
   store.meta.formId = formId;
   store.meta.serialNo = formId;
-  store.meta.createdAt = now;
+  store.meta.createdAt = clonedSchema.meta.createdAt;
   store.activeTemplateKey = tplKey;
   store.sidebarTab = 'components';
 
@@ -1072,7 +1186,8 @@ export function applyTemplateKey(tplKey: 'kyc-customer' | 'kyc-individual' | 'ky
   store.lastSavedHash = '';
   store.isDirty = true;
   store.lastSavedTime = '';
-  syncUrlParams('');
+  // 已有 ID 则保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
+  syncUrlParams(existingId ? formId : '');
 }
 
 export function loadSchema(schema: FormSchema, options?: { duration?: number }) {
@@ -1267,7 +1382,7 @@ export function highlightPropertyField(
     if (field === 'label') {
       targetInput = document.getElementById('prop-label-input');
     } else if (field === 'title') {
-      targetInput = document.getElementById('page-prop-title-input');
+      targetInput = document.getElementById(store.selectedType === 'group' ? 'group-prop-title-input' : 'page-prop-title-input');
     } else if (field === 'placeholder') {
       targetInput = document.getElementById('prop-placeholder-input');
     } else if (field === 'help') {

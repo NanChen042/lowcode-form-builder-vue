@@ -102,13 +102,8 @@ import type { ProfileType } from '@/types/schema';
 import {
   store,
   isRisk,
-  createNewCanvas,
-  syncUrlParams,
-  establishBaseline,
-  generateFormId
+  createNewCanvas
 } from '@/core/store';
-import { createBlankTemplate, createRiskAssessmentTemplate } from '@/templates/recommend';
-import { FormAPI } from '@/core/api';
 import { t } from '@/core/i18n';
 import {
   Building2,
@@ -117,9 +112,15 @@ import {
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 
-const props = defineProps<{
-  visible: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    visible: boolean;
+    isInitial?: boolean;
+  }>(),
+  {
+    isInitial: false
+  }
+);
 const emit = defineEmits(['close', 'update:visible', 'created', 'cancel']);
 
 const modalVisible = computed({
@@ -180,10 +181,21 @@ function handleCancel() {
 }
 
 function isCanvasDirty(): boolean {
+  if (props.isInitial) return false;
   if (store.pages.length === 0) return false;
+  if (!store.meta.formId && !store.meta.serialNo && !store.isDirty) {
+    return false;
+  }
   const totalFields = store.pages.reduce((acc, p) => acc + (p.fields?.length || 0), 0);
   if (totalFields === 0 && store.pages.length <= 2) {
     return false;
+  }
+  // 针对风险评估模式初始默认仅有1个未编辑空问题的情况，视为纯净模板无需覆盖确认
+  if (isRisk.value && store.pages.length === 1 && totalFields === 1) {
+    const firstField = store.pages[0].fields?.[0];
+    if (firstField && !firstField.label && !firstField.label_en && !store.meta.formId) {
+      return false;
+    }
   }
   return true;
 }
@@ -198,53 +210,19 @@ function handleConfirm() {
   executeCreateCanvas();
 }
 
-async function executeCreateCanvas() {
-  if (isSubmitting.value) return;
+function executeCreateCanvas() {
   const pType = selectedProfile.value;
   const title = customTitle.value.trim() || defaultTitleForProfile.value;
-  const candidateId = generateFormId(pType, 'diy');
-  const candidateSchema = isRisk.value
-    ? createRiskAssessmentTemplate(pType, title, '', '')
-    : createBlankTemplate(pType, title, '', '');
-  candidateSchema.meta.source = 'diy';
-  candidateSchema.meta.serialNo = candidateId;
-  candidateSchema.meta.formId = candidateId;
-  candidateSchema.meta.createdAt = Date.now();
+  createNewCanvas({
+    title,
+    description: '',
+    profileType: pType
+  });
 
-  isSubmitting.value = true;
-  try {
-    const res = await FormAPI.saveTemplate(candidateSchema);
-    if (res.success) {
-      createNewCanvas({
-        title,
-        description: '',
-        profileType: pType
-      });
-      const savedId = res.data?.id || candidateId;
-      store.meta.formId = savedId;
-      store.meta.serialNo = savedId;
-      syncUrlParams(savedId);
-      establishBaseline();
-      const now = new Date();
-      store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-      Message.success(t('modal.createForm.createdSuccess'));
-      confirmOverwriteVisible.value = false;
-      emit('created');
-      modalVisible.value = false;
-    } else if (res.code == 409) {
-      confirmOverwriteVisible.value = false;
-      nameError.value = true;
-      Message.error(t('publish.nameDuplicate'));
-      nextTick(() => {
-        titleInputRef.value?.focus?.();
-      });
-    } else {
-      Message.error(res.message || t('header.saveFailed'));
-    }
-  } finally {
-    isSubmitting.value = false;
-  }
+  Message.success(t('modal.createForm.createdSuccess'));
+  confirmOverwriteVisible.value = false;
+  emit('created');
+  modalVisible.value = false;
 }
 </script>
 

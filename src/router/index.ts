@@ -36,12 +36,8 @@ const router = createRouter({
 
 // PC 端与 Algo 母系统互通：登录态强校验前置守卫
 router.beforeEach(async (to, _from, next) => {
-  // 1. 显式调试参数 (bypass_auth=1 / mock=all) 直接放行
-  if (
-    to.query.bypass_auth === '1' ||
-    to.query.mock === 'all' ||
-    to.query.mock === 'true'
-  ) {
+  // 1. 显式调试参数 (bypass_auth=1) 直接放行
+  if (to.query.bypass_auth === '1') {
     return next();
   }
 

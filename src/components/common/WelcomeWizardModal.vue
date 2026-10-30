@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="'min(860px, 94vw)'"
+    :width="isRisk ? 'min(760px, 94vw)' : 'min(860px, 94vw)'"
     :align-center="true"
     :footer="false"
     :header="false"
@@ -37,12 +37,56 @@
           />
           <span class="text-slate-300 font-light text-sm select-none">|</span>
           <span class="text-[13px] text-slate-600 font-medium select-none">
-            {{ t('wizard.brandSubtitle') }}
+            {{ isRisk ? t('wizard.brandSubtitleRisk') : t('wizard.brandSubtitle') }}
           </span>
         </div>
       </header>
 
-      <div class="p-6 select-none">
+      <!-- 风险评估模式：大气横向卡片，展示专属合规风控特色插画 -->
+      <div v-if="isRisk" class="p-6 flex justify-center select-none">
+        <div
+          class="group flex flex-col sm:flex-row items-center justify-between gap-6 rounded-xl bg-gradient-to-r from-[#edf5fe] via-[#e5f0fe] to-[#d8ebfe] hover:from-[#e6f2fe] hover:to-[#d2e6fe] p-6 cursor-pointer transition-all duration-150 select-none text-left relative overflow-hidden w-full"
+          @click="handleCreateBlank"
+        >
+          <div class="flex-1 z-10 flex flex-col justify-between h-full min-w-0 pr-2">
+            <div>
+              <span class="text-[11.5px] font-bold text-[#1677ff] tracking-wider uppercase">
+                {{ t('wizard.createNewTag') }}
+              </span>
+              <h3 class="text-[20px] font-bold text-slate-900 mt-1.5 leading-tight tracking-tight group-hover:text-[#1677ff] transition-colors">
+                {{ t('wizard.createBlankRisk') }}
+              </h3>
+              <p class="text-[12.5px] text-slate-500 mt-2 leading-relaxed m-0 max-w-[320px]">
+                {{ t('wizard.createBlankRiskDesc') }}
+              </p>
+            </div>
+
+            <div class="mt-5">
+              <a-button
+                type="primary"
+                shape="round"
+                class="px-6 h-8.5 bg-[#1677ff] hover:bg-blue-600 font-medium text-[13px] flex items-center gap-1.5 shadow-sm"
+              >
+                <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{{ t('wizard.createNowBtn') }}</span>
+                <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a-button>
+            </div>
+          </div>
+
+          <div class="w-[310px] sm:w-[360px] h-[160px] sm:h-[185px] shrink-0 flex items-center justify-center z-10 select-none">
+            <img
+              :src="tplRiskHeroImg"
+              :alt="t('wizard.createBlankRisk')"
+              class="w-full h-full object-contain select-none pointer-events-none group-hover:scale-104 transition-transform duration-300 drop-shadow-md"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- KYC 标准模式：左侧快捷空白新建 + 右侧场景预置模板 -->
+      <div v-else class="p-6 select-none">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           
           <div class="md:col-span-5 flex">
@@ -196,12 +240,16 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { store, applyTemplateKey, buildSchema, syncUrlParams, establishBaseline } from '@/core/store';
-import { FormAPI } from '@/core/api';
+import {
+  store,
+  isRisk,
+  applyTemplateKey
+} from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import logoUrl from '@/assets/logo.png';
 import tplBlankHeroImg from '@/assets/templates/tpl-blank-hero.webp';
+import tplRiskHeroImg from '@/assets/templates/tpl-risk-hero.webp';
 import iconCustomer from '@/assets/templates/c.png';
 import iconIndividual from '@/assets/templates/u.png';
 import iconEntity from '@/assets/templates/e.png';
@@ -227,7 +275,7 @@ const emit = defineEmits<{
   (e: 'update:visible', val: boolean): void;
   (e: 'close'): void;
   (e: 'open-blank'): void;
-  (e: 'selected-template', key: 'kyc-customer' | 'kyc-individual' | 'kyc-entity'): void;
+  (e: 'selected-template', key: string): void;
 }>();
 
 const modalVisible = computed({
@@ -289,7 +337,6 @@ function getFieldsText(tpl: (typeof scenarioTemplates)[number]) {
 }
 
 function handleCreateBlank() {
-  modalVisible.value = false;
   emit('open-blank');
 }
 
@@ -321,32 +368,10 @@ function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-e
   executeApplyTemplate();
 }
 
-async function executeApplyTemplate() {
+function executeApplyTemplate() {
   if (!pendingTemplateKey.value) return;
   const tplKey = pendingTemplateKey.value;
   applyTemplateKey(tplKey);
-
-  let res = await FormAPI.saveTemplate(buildSchema());
-  if (!res.success && res.code == 409) {
-    const suffix = (store.meta.formId || '').split('_').pop() || String(Date.now()).slice(-4);
-    store.meta.title = `${store.meta.title}_${suffix}`;
-    if (store.meta.title_en) {
-      store.meta.title_en = `${store.meta.title_en}_${suffix}`;
-    }
-    res = await FormAPI.saveTemplate(buildSchema());
-  }
-
-  if (res.success) {
-    const savedId = res.data?.id || store.meta.formId || store.meta.serialNo;
-    if (savedId) {
-      store.meta.formId = savedId;
-      store.meta.serialNo = savedId;
-      syncUrlParams(savedId);
-    }
-    establishBaseline();
-    const now = new Date();
-    store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  }
 
   Message.success(t('sidebar.templateLoaded') || '场景模板已成功载入');
   emit('selected-template', tplKey);

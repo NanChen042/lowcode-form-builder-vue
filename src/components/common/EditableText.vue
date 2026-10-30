@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { store, markDirty, highlightPropertyField, selectElement, selectPage } from '@/core/store';
+import { store, markDirty, highlightPropertyField, selectElement, selectPage, selectGroup } from '@/core/store';
 
 const props = withDefaults(
   defineProps<{
@@ -124,7 +124,9 @@ function handleFocus(e: FocusEvent) {
   }
 
   if (props.autoSelect && props.elementId) {
-    if (props.field === 'title' || props.field === 'description') {
+    if (props.elementId.startsWith('grp_')) {
+      selectGroup(props.elementId);
+    } else if (props.field === 'title' || props.field === 'description') {
       selectPage(props.elementId);
     } else {
       selectElement(props.elementId);

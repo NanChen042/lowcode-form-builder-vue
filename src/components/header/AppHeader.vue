@@ -12,17 +12,7 @@
 
       <div class="flex items-center min-w-0">
         <div v-if="isEditingTitle" class="flex items-center min-w-0">
-          <input
-            ref="titleInputRef"
-            v-model="editTitleValue"
-            type="text"
-            maxlength="50"
-            class="h-7 w-[180px] sm:w-[240px] px-2 text-[13px] font-medium text-slate-800 bg-white border border-blue-500 rounded-md shadow-2xs outline-none ring-2 ring-blue-100 transition-all"
-            :placeholder="t('header.formTitlePlaceholder')"
-            @keydown.enter.prevent="handleConfirmTitle"
-            @keydown.esc.prevent="handleCancelTitle"
-            @blur="handleConfirmTitle"
-          />
+          <input ref="titleInputRef" v-model="editTitleValue" type="text" maxlength="50" class="h-7 w-[180px] sm:w-[240px] px-2 text-[13px] font-medium text-slate-800 bg-white border border-blue-500 rounded-md shadow-2xs outline-none ring-2 ring-blue-100 transition-all" :placeholder="t('header.formTitlePlaceholder')" @keydown.enter.prevent="handleConfirmTitle" @keydown.esc.prevent="handleCancelTitle" @blur="handleConfirmTitle" />
         </div>
 
         <div v-else class="group flex items-center gap-1.5 px-2 py-1 -ml-1 rounded-md hover:bg-slate-100/80 cursor-pointer transition-colors min-w-0 select-none" :title="t('header.clickToRename')" @click="startEditTitle">
@@ -36,17 +26,17 @@
       </div>
 
 
-      <div v-if="isSaving" class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-50/70 text-[11.5px] font-medium text-blue-600 select-none shrink-0">
+      <div v-if="isSaving" class="flex items-center gap-1.5 text-[11.5px] font-medium text-blue-600 select-none shrink-0">
         <Loader2 class="h-3 w-3 animate-spin shrink-0 text-blue-500" />
         <span>{{ t('app.saving') }}</span>
       </div>
-      <div v-else-if="store.isDirty && store.lastSavedHash" class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50/80 text-[11.5px] font-medium text-amber-600 select-none shrink-0" :title="t('app.dirty')">
+      <div v-else-if="store.isDirty && store.lastSavedHash" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none shrink-0" :title="t('app.dirty')">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
         <span>{{ t('app.dirty') }}</span>
       </div>
-      <div v-else-if="!store.isDirty && store.lastSavedTime" class="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100/80 text-[11.5px] font-medium text-slate-500 select-none shrink-0" :title="t('app.saved')">
+      <div v-else-if="!store.isDirty && store.lastSavedTime" class="flex items-center gap-1 text-[11.5px] font-medium text-slate-400 select-none shrink-0" :title="t('app.saved')">
         <Check class="w-3 h-3 text-emerald-500 stroke-[2.4] shrink-0" />
-        <span>{{ store.currentLocale === 'en' ? `Draft saved ${store.lastSavedTime}` : `已保存至草稿 ${store.lastSavedTime}` }}</span>
+        <span>{{ t('header.draftSavedWithTime', undefined, { time: store.lastSavedTime }) }}</span>
       </div>
     </div>
 
@@ -54,23 +44,11 @@
 
       <div class="flex items-center gap-1.5 select-none shrink-0" :title="t('header.bilingualTooltip')">
         <span class="text-slate-600 font-medium text-[12px] leading-none">{{ t('header.bilingualSwitch') }}</span>
-        <a-switch
-          size="small"
-          :model-value="isBilingual"
-          @change="handleToggleBilingual"
-        />
+        <a-switch size="small" :model-value="isBilingual" @change="handleToggleBilingual" />
 
 
-        <a-popover
-          position="bottom"
-          trigger="hover"
-          :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }"
-        >
-          <button
-            type="button"
-            class="flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
-            :title="t('header.bilingualGuideTitle')"
-          >
+        <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }">
+          <button type="button" class="flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer" :title="t('header.bilingualGuideTitle')">
             <HelpCircle class="w-3.5 h-3.5" />
           </button>
           <template #content>
@@ -84,17 +62,8 @@
               </p>
 
 
-              <div
-                class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900"
-                @click="handleOpenVideoModal"
-              >
-                <img
-                  :src="currentGuideCover"
-                  alt="Video Guide Cover"
-                  width="1024"
-                  height="576"
-                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block"
-                />
+              <div class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900" @click="handleOpenVideoModal">
+                <img :src="currentGuideCover" alt="Video Guide Cover" width="1024" height="576" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block" />
                 <div class="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors pointer-events-none"></div>
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div class="w-11 h-11 rounded-full bg-white/95 text-[#1677ff] flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all duration-200">
@@ -110,12 +79,7 @@
       <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
       <a-space size="small">
-        <a-button
-          type="secondary"
-          :loading="isSaving"
-          :disabled="!store.isDirty"
-          @click="handleSave"
-        >
+        <a-button type="secondary" :loading="isSaving" :disabled="!store.isDirty" @click="handleSave">
           <template #icon>
             <Save class="h-4 w-4" />
           </template>
@@ -142,12 +106,9 @@
       <LanguageSwitcher />
 
       <a-dropdown trigger="hover" position="br" :popup-max-height="false" v-model:popup-visible="isUserDropdownOpen">
-        <div
-          class="flex items-center justify-center p-0.5 rounded-full cursor-pointer transition-all select-none ring-2"
-          :class="isUserDropdownOpen ? 'ring-blue-400/70' : 'ring-transparent hover:ring-slate-200'"
-        >
+        <div class="flex items-center justify-center p-0.5 rounded-full cursor-pointer transition-all select-none ring-2" :class="isUserDropdownOpen ? 'ring-blue-400/70' : 'ring-transparent hover:ring-slate-200'">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-gray-500 overflow-hidden border border-slate-200 shadow-2xs bg-[#EFF6FF] shrink-0">
-            <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display='none'" />
+            <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display = 'none'" />
             <span v-else class="w-full h-full text-[#186DF5] font-bold flex items-center justify-center text-xs">
               {{ store.user.nickname ? store.user.nickname.charAt(0).toUpperCase() : 'U' }}
             </span>
@@ -158,7 +119,7 @@
           <div class="w-[260px] px-3.5 py-3">
             <div class="flex items-center gap-2.5">
               <div class="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 overflow-hidden border border-slate-200 bg-[#EFF6FF] shrink-0">
-                <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display='none'" />
+                <img v-if="store.user.avatar" class="w-full h-full object-cover" :src="store.user.avatar" alt="" @error="($event.target as HTMLElement).style.display = 'none'" />
                 <span v-else class="w-full h-full text-[#186DF5] font-bold flex items-center justify-center text-sm">
                   {{ store.user.nickname ? store.user.nickname.charAt(0).toUpperCase() : 'U' }}
                 </span>
@@ -172,20 +133,13 @@
                 </div>
               </div>
               <a-tooltip :content="t('user.logout')" position="bottom">
-                <button
-                  type="button"
-                  class="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
-                  @click="handleUserAction('logout')"
-                >
+                <button type="button" class="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0" @click="handleUserAction('logout')">
                   <IconExport class="text-[15px]" />
                 </button>
               </a-tooltip>
             </div>
 
-            <div
-              v-if="store.org.companyName"
-              class="mt-2.5 px-2.5 py-1.5 rounded-md bg-slate-50 border border-slate-100 flex items-start gap-1.5 text-[11.5px] text-slate-600 font-medium"
-            >
+            <div v-if="store.org.companyName" class="mt-2.5 px-2.5 py-1.5 rounded-md bg-slate-50 border border-slate-100 flex items-start gap-1.5 text-[11.5px] text-slate-600 font-medium">
               <img :src="companyIcon" alt="Company" class="w-3.5 h-3.5 object-contain opacity-65 shrink-0 mt-0.5" />
               <span class="line-clamp-2 leading-snug break-words">{{ store.org.companyName }}</span>
             </div>
@@ -194,14 +148,7 @@
       </a-dropdown>
     </div>
 
-    <a-modal
-      v-model:visible="publishCheckModalVisible"
-      :title="t('header.warnTitle')"
-      :width="480"
-      :title-align="'start'"
-      draggable
-      unmount-on-close
-    >
+    <a-modal v-model:visible="publishCheckModalVisible" :title="t('header.warnTitle')" :width="480" :title-align="'start'" draggable unmount-on-close>
       <div class="py-1 space-y-3">
 
         <a-alert type="warning" class="rounded">
@@ -217,12 +164,7 @@
 
 
         <div class="max-h-[160px] overflow-y-auto space-y-1.5 custom-scrollbar">
-          <div
-            v-for="item in translationStats.untranslatedItems.slice(0, 10)"
-            :key="item.id"
-            class="flex items-center justify-between py-2 px-3 rounded border border-slate-200/80 bg-white hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer text-xs transition-colors"
-            @click="handleJumpFromPublishCheck(item)"
-          >
+          <div v-for="item in translationStats.untranslatedItems.slice(0, 10)" :key="item.id" class="flex items-center justify-between py-2 px-3 rounded border border-slate-200/80 bg-white hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer text-xs transition-colors" @click="handleJumpFromPublishCheck(item)">
             <span class="text-slate-700 font-medium truncate pr-3">{{ item.fieldName }}</span>
             <a-tag size="small" color="orange" class="shrink-0">
               P{{ item.pageIndex + 1 }} · {{ t('header.untranslatedTag') }}
@@ -248,14 +190,7 @@
     </a-modal>
 
 
-    <a-modal
-      v-model:visible="isDisableBilingualModalVisible"
-      :title="t('header.bilingualDisableTitle')"
-      :title-align="'start'"
-      :simple="false"
-      width="420px"
-      :ok-button-props="{ status: 'danger' }"
-    >
+    <a-modal v-model:visible="isDisableBilingualModalVisible" :title="t('header.bilingualDisableTitle')" :title-align="'start'" :simple="false" width="420px" :ok-button-props="{ status: 'danger' }">
       <div class="py-2 text-sm text-slate-600 leading-relaxed">
         {{ t('header.bilingualDisableDesc') }}
       </div>
@@ -272,26 +207,9 @@
     </a-modal>
 
 
-    <a-modal
-      v-model:visible="isVideoModalVisible"
-      :title="t('header.bilingualVideoTitle')"
-      :title-align="'start'"
-      :width="720"
-      :footer="false"
-      :lock-scroll="false"
-      draggable
-      unmount-on-close
-      @before-close="handleCloseVideoModal"
-    >
+    <a-modal v-model:visible="isVideoModalVisible" :title="t('header.bilingualVideoTitle')" :title-align="'start'" :width="720" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
       <div class="py-1">
-        <video
-          ref="videoPlayerRef"
-          :src="helpVideoUrl"
-          controls
-          autoplay
-          playsinline
-          class="w-full h-auto max-h-[460px] rounded-lg bg-black object-contain shadow-sm"
-        />
+        <video ref="videoPlayerRef" :src="helpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[460px] rounded-lg bg-black object-contain shadow-sm" />
         <div class="mt-3 px-1 flex items-center justify-between text-xs text-slate-500">
           <span>{{ t('header.bilingualVideoTip') }}</span>
           <a-button size="small" type="primary" class="bg-[#1677ff]" @click="handleCloseVideoModal">
@@ -377,7 +295,7 @@ function validateFormBeforePublish(): boolean {
   const isEn = store.currentLocale === 'en';
   const formPages = store.pages.filter(p => p.pageType !== 'system_profile');
   if (formPages.length === 0) {
-    Message.warning(isEn ? 'Please add at least one form page before publishing' : '请至少添加一个表单页面后再发布');
+    Message.warning(t('header.valNoPages'));
     return false;
   }
 
@@ -386,9 +304,12 @@ function validateFormBeforePublish(): boolean {
     if (page.pageType === 'system_profile') continue;
     const pageNum = i + 1;
 
-    const pageTitle = (isEn ? (page.title_en || page.title) : (page.title || page.title_en))?.trim();
+    const rawPageTitle = isRisk.value
+      ? (isEn ? (page.title_en || 'Risk Assessment') : (page.title || '风险评估'))
+      : (isEn ? page.title_en : page.title);
+    const pageTitle = (rawPageTitle || '')?.trim();
     if (!pageTitle) {
-      Message.warning(isEn ? `Please enter the page title for Page ${pageNum}` : `请填写第 ${pageNum} 页的页面标题`);
+      Message.warning(t('header.valEmptyPageTitle', undefined, { page: pageNum }));
       focusOnPage(page.id, { duration: 350 });
       selectPage(page.id);
       store.focusedTarget = { elementId: page.id, field: 'label' };
@@ -397,7 +318,7 @@ function validateFormBeforePublish(): boolean {
     }
 
     if (!page.fields || page.fields.length === 0) {
-      Message.warning(isEn ? `Page ${pageNum} has no components. Please add components or remove the empty page.` : `第 ${pageNum} 页暂无表单组件，请添加组件或删除空页面`);
+      Message.warning(t('header.valEmptyPageFields', undefined, { page: pageNum }));
       focusOnPage(page.id, { duration: 350 });
       selectPage(page.id);
       return false;
@@ -406,9 +327,10 @@ function validateFormBeforePublish(): boolean {
     if (isRisk.value && page.groups && page.groups.length > 0) {
       for (let gIdx = 0; gIdx < page.groups.length; gIdx++) {
         const grp = page.groups[gIdx];
-        const grpTitle = (grp.title_en || grp.title)?.trim();
+        const rawGrpTitle = isEn ? grp.title_en : grp.title;
+        const grpTitle = (rawGrpTitle || '').trim();
         if (!grpTitle) {
-          Message.warning(isEn ? `Please enter the English title for Group ${String(gIdx + 1).padStart(2, '0')}` : `请填写分组 ${String(gIdx + 1).padStart(2, '0')} 的英文分组名称`);
+          Message.warning(t('header.valEmptyGroupTitle', undefined, { index: String(gIdx + 1).padStart(2, '0') }));
           focusOnPage(page.id, { duration: 350 });
           selectGroup(grp.id);
           if (!store.rightSidebarVisible) store.rightSidebarVisible = true;
@@ -417,11 +339,18 @@ function validateFormBeforePublish(): boolean {
       }
     }
 
-    for (const field of page.fields) {
+    for (let fIdx = 0; fIdx < page.fields.length; fIdx++) {
+      const field = page.fields[fIdx];
       if (field.showLabel !== false) {
-        const fieldLabel = (isEn ? (field.label_en || field.label) : (field.label || field.label_en))?.trim();
+        const rawFieldLabel = isEn ? field.label_en : field.label;
+        const fieldLabel = (rawFieldLabel || '').trim();
+
         if (!fieldLabel) {
-          Message.warning(isEn ? `Please enter the label for the untitled field on Page ${pageNum}` : `请填写第 ${pageNum} 页中未命名组件的标题`);
+          if (isRisk.value) {
+            Message.warning(t('header.valEmptyQuestionText', undefined, { index: fIdx + 1 }));
+          } else {
+            Message.warning(t('header.valEmptyFieldLabel', undefined, { page: pageNum }));
+          }
           focusOnPage(page.id, { duration: 350 });
           selectElement(field);
           store.focusedTarget = { elementId: field.id, field: 'label' };
@@ -499,14 +428,28 @@ function handleConfirmTitle() {
   const trimmed = editTitleValue.value.trim();
   const fallback = t('header.untitledForm');
   const newTitle = trimmed || fallback;
+  const defaultTemplateTitles = [
+    'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
+    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
+    '未命名表单', 'Untitled Form'
+  ];
+
   if (store.currentLocale === 'en') {
     if (store.meta.title_en !== newTitle) {
+      const oldEn = store.meta.title_en;
       store.meta.title_en = newTitle;
+      if (!store.meta.title || store.meta.title === oldEn || defaultTemplateTitles.includes(store.meta.title)) {
+        store.meta.title = newTitle;
+      }
       markDirty();
     }
   } else {
     if (store.meta.title !== newTitle) {
+      const oldZh = store.meta.title;
       store.meta.title = newTitle;
+      if (!store.meta.title_en || store.meta.title_en === oldZh || defaultTemplateTitles.includes(store.meta.title_en)) {
+        store.meta.title_en = newTitle;
+      }
       markDirty();
     }
   }
@@ -525,7 +468,7 @@ function handleOpenVideoModal() {
   nextTick(() => {
     if (videoPlayerRef.value) {
       videoPlayerRef.value.currentTime = 0;
-      videoPlayerRef.value.play().catch(() => {});
+      videoPlayerRef.value.play().catch(() => { });
     }
   });
 }

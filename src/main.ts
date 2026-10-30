@@ -13,10 +13,11 @@ window.addEventListener('vite:preloadError', () => {
   }
 });
 
-// 默认加载 Mock 拦截，确保纯前端与本地环境正常体验（配置 VITE_USE_MOCK === 'false' 时走真实接口）
-if (import.meta.env.VITE_USE_MOCK !== 'false') {
+// 仅在本地开发环境动态加载 Mock，确保离线与独立开发时免被接口拦截，生产打包自动剔除
+if (import.meta.env.DEV) {
   await import('./mock');
 }
+
 import router from './router';
 import App from './App.vue';
 

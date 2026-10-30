@@ -16,7 +16,7 @@
           <template #icon>
             <Copy class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ isRisk ? (store.currentLocale === 'en' ? 'Duplicate Question' : '复制问题') : t('context.duplicate') }}</span>
+          <span>{{ isRisk ? t('risk.duplicateQuestion') : t('context.duplicate') }}</span>
           <template #suffix>
             <span class="text-[10px] text-slate-400 font-mono">{{ isMac ? '⌘D' : 'Ctrl+D' }}</span>
           </template>
@@ -26,7 +26,7 @@
           <template #icon>
             <Plus class="h-4 w-4 text-blue-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Insert Question Below' : '在下方插入问题' }}</span>
+          <span>{{ t('risk.insertQuestionBelow') }}</span>
         </a-doption>
 
         <ComponentCascadeMenu
@@ -42,7 +42,7 @@
           <template #icon>
             <Trash2 class="h-4 w-4 text-red-500" />
           </template>
-          <span>{{ isRisk ? (store.currentLocale === 'en' ? 'Delete Question' : '删除问题') : t('context.deleteElement') }}</span>
+          <span>{{ isRisk ? t('risk.deleteQuestion') : t('context.deleteElement') }}</span>
         </a-doption>
       </template>
 
@@ -60,7 +60,7 @@
             <template #icon>
               <Plus class="h-4 w-4 text-blue-500" />
             </template>
-            <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
+            <span>{{ t('risk.addQuestion') }}</span>
           </a-doption>
 
           <ComponentCascadeMenu
@@ -75,7 +75,7 @@
             <template #icon>
               <FilePlus class="h-4 w-4 text-slate-500" />
             </template>
-            <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+            <span>{{ t('risk.addGroup') }}</span>
           </a-doption>
 
           <a-divider style="margin: 4px 0" />
@@ -112,7 +112,7 @@
           <template #icon>
             <FilePlus class="h-4 w-4 text-slate-500" />
           </template>
-          <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+          <span>{{ t('risk.addGroup') }}</span>
         </a-doption>
         <a-doption v-else @click="handleAddPage">
           <template #icon>

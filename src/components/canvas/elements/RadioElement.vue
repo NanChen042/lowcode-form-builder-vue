@@ -1,38 +1,65 @@
 <template>
-  <div v-if="isRisk" class="group/risk-row w-full py-1">
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex items-start gap-2.5 flex-1 min-w-0">
-        <GripVertical class="h-4 w-4 text-slate-300 shrink-0 mt-1 cursor-grab active:cursor-grabbing opacity-0 group-hover/risk-row:opacity-100 hover:!text-slate-500 transition-opacity" />
-        <span class="text-[14px] font-semibold text-slate-700 leading-6 shrink-0 select-none">{{ questionIndex }}.</span>
-        <div class="flex-1 min-w-0">
-          <div class="text-[14px] font-semibold text-slate-800 leading-6 pr-4">
+  <div v-if="isRisk" class="group/risk-row w-full">
+    <!-- 第一行：序号 + 题干文字 + [Yes / No / Not Applicable 胶囊选项] + [复制/删除按钮] -->
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+      <div class="flex items-center gap-2 flex-1 min-w-[220px]">
+        <GripVertical class="risk-question-drag-handle h-4 w-4 text-slate-300 hover:text-slate-600 shrink-0 cursor-grab active:cursor-grabbing transition-colors" />
+        <span class="text-[14px] font-semibold text-slate-700 leading-none shrink-0 select-none cursor-grab">{{ questionIndex }}.</span>
+        <div class="flex-1 min-w-0 pr-2">
+          <div class="text-[14px] font-semibold text-slate-800 leading-normal">
             <EditableText
               v-model="currentLabel"
               :placeholder="labelPlaceholder"
               :element-id="element.id"
               field="label"
-              custom-class="label-text inline break-words"
+              custom-class="label-text break-words"
             /><span v-if="!isRisk && element.required" class="inline-block w-[10px] ml-1 -mr-[14px] text-[#ff4d4f] font-bold select-none">*</span>
           </div>
           <div
             v-if="Boolean(getFieldText(element, 'help'))"
-            class="mt-1 text-[12.5px] text-slate-400 leading-5 font-normal"
+            class="mt-0.5 text-[12px] text-slate-400 leading-normal font-normal"
           >
             <EditableText
               v-model="currentHelp"
               :placeholder="t('prop.fieldHelpPlaceholder')"
               :element-id="element.id"
               field="help"
-              custom-class="field-help text-[12.5px] text-slate-400 font-normal"
+              custom-class="field-help text-[12px] text-slate-400 font-normal"
               :allow-empty="true"
             />
           </div>
         </div>
       </div>
 
-      <div class="shrink-0 flex items-center gap-1 select-none">
+      <!-- 文字右侧：固定 Yes 选中态 + 静态不可选 No / Not Applicable + 复制删除操作按钮 -->
+      <div class="shrink-0 flex items-center gap-3 select-none ml-auto">
+        <div class="flex items-center gap-1.5">
+          <!-- Yes：固定唯一选中的风险项，配白勾与高亮蓝底 -->
+          <div
+            ref="yesPillRef"
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-[6px] text-[12px] font-semibold bg-[#1677ff] border border-[#1677ff] text-white shadow-xs select-none"
+          >
+            <Check class="h-3 w-3 stroke-[3]" />
+            <span>Yes</span>
+          </div>
+
+          <!-- No：不可选中的只读合规选项 -->
+          <div
+            class="inline-flex items-center px-2.5 py-1 rounded-[6px] text-[12px] font-normal bg-slate-50 border border-slate-200/80 text-slate-400 select-none cursor-default"
+          >
+            <span>No</span>
+          </div>
+
+          <!-- Not Applicable：不可选中的只读不适用选项 -->
+          <div
+            class="inline-flex items-center px-2.5 py-1 rounded-[6px] text-[12px] font-normal bg-slate-50 border border-slate-200/80 text-slate-400 select-none cursor-default"
+          >
+            <span>Not Applicable</span>
+          </div>
+        </div>
+
         <div
-          class="flex items-center gap-0.5 transition-opacity duration-150"
+          class="flex items-center gap-0.5 transition-opacity duration-150 pl-2 border-l border-slate-200/80"
           :class="isSelected ? 'opacity-100' : 'opacity-0 group-hover/risk-row:opacity-100'"
         >
           <button
@@ -55,25 +82,82 @@
       </div>
     </div>
 
+    <!-- 第二行：权重分值微面板容器（气泡折角锚定上方 Yes，右对齐） -->
     <div
-      ref="weightBarRef"
-      class="risk-weight-selector mt-2.5 ml-[26px] inline-flex items-center p-1 bg-slate-100/90 rounded-lg border border-slate-200/70 gap-1 select-none cursor-pointer touch-none shadow-2xs"
-      @mousedown.stop.prevent="startDragWeight"
+      class="mt-1 flex justify-end select-none"
+      @click.stop="selectElement(element)"
     >
-      <button
-        v-for="w in 10"
-        :key="w"
-        :data-weight-val="w"
-        type="button"
-        class="w-8 h-7 sm:w-8.5 sm:h-7.5 rounded-[5px] text-[12.5px] font-semibold transition-all duration-120 flex items-center justify-center cursor-pointer pointer-events-none tabular-nums"
-        :class="
-          (element.weight ?? 1) === w
-            ? 'bg-[#1677ff] text-white shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-        "
+      <div
+        ref="sliderCardRef"
+        class="risk-weight-slider-section relative w-full max-w-[360px] sm:max-w-[390px] rounded-lg bg-slate-50/90 border border-slate-200/80 px-3 py-1.5 shadow-2xs hover:border-slate-300/80 transition-colors"
       >
-        {{ w }}
-      </button>
+        <!-- 气泡尖角：精准对齐上方 [✔ Yes] 按钮 -->
+        <div
+          class="absolute -top-[5.5px] w-2.5 h-2.5 bg-slate-50 border-t border-l border-slate-200/80 rotate-45 pointer-events-none"
+          :style="{ right: `${caretOffsetRight}px` }"
+        ></div>
+
+        <div class="flex items-center justify-between mb-1 text-[12px]">
+          <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100/90 text-[#1677ff] leading-none">
+              Yes
+            </span>
+            <span class="font-medium text-slate-700 text-[11.5px]">{{ t('risk.yesDeductionWeight') }}</span>
+            <a-tooltip :content="t('risk.yesDeductionTip')" position="top">
+              <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 cursor-help" />
+            </a-tooltip>
+          </div>
+          <span class="inline-flex items-center gap-1 rounded-full bg-[#1677ff] px-2 py-0.5 text-[10.5px] font-bold text-white shadow-2xs tabular-nums">
+            {{ element.weight ?? 1 }} {{ t('risk.ptsUnit') }}
+          </span>
+        </div>
+
+        <div
+          ref="sliderTrackRef"
+          class="py-0.5 select-none cursor-pointer touch-none"
+          @mousedown.prevent="startSliderDrag"
+        >
+          <div class="relative flex items-center justify-between">
+            <div class="absolute left-[8px] right-[8px] top-[7px] h-[2px] bg-slate-200 rounded-full pointer-events-none"></div>
+            <div
+              class="absolute left-[8px] top-[7px] h-[2px] bg-[#1677ff] rounded-full pointer-events-none"
+              :class="isDraggingSlider ? '' : 'transition-all duration-150'"
+              :style="{ width: `calc((100% - 16px) * ${((element.weight ?? 1) - 1) / 9})` }"
+            ></div>
+
+            <button
+              v-for="w in 10"
+              :key="w"
+              :data-slider-weight="w"
+              type="button"
+              class="relative z-10 flex flex-col items-center gap-1 cursor-pointer group focus:outline-none pointer-events-none"
+            >
+              <div class="h-3.5 w-3.5 flex items-center justify-center">
+                <span
+                  v-if="(element.weight ?? 1) === w"
+                  class="w-3 h-3 rounded-full bg-[#1677ff] ring-3 ring-blue-500/15 flex items-center justify-center shadow-xs transition-transform scale-105"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                </span>
+                <span
+                  v-else-if="w < (element.weight ?? 1)"
+                  class="w-2 h-2 rounded-full bg-[#1677ff] transition-transform group-hover:scale-125"
+                ></span>
+                <span
+                  v-else
+                  class="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-blue-300 transition-transform group-hover:scale-125"
+                ></span>
+              </div>
+              <span
+                class="text-[10.5px] leading-none transition-colors"
+                :class="(element.weight ?? 1) === w ? 'text-[#1677ff] font-bold' : 'text-slate-400 font-medium group-hover:text-slate-700'"
+              >
+                {{ w }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div v-else class="w-full">
@@ -102,17 +186,44 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, isRisk, selectElement, duplicateElement, deleteElement, markDirty } from '@/core/store';
 import { t, getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
-import { GripVertical, Copy, Trash2 } from '@lucide/vue';
+import { GripVertical, Copy, Trash2, Check, HelpCircle } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
 const props = defineProps<{ element: FormElement }>();
 
-const weightBarRef = ref<HTMLElement | null>(null);
+const yesPillRef = ref<HTMLElement | null>(null);
+const sliderCardRef = ref<HTMLElement | null>(null);
+const caretOffsetRight = ref<number>(265);
+
+function updateCaretPosition() {
+  if (!yesPillRef.value || !sliderCardRef.value) return;
+  const yesRect = yesPillRef.value.getBoundingClientRect();
+  const cardRect = sliderCardRef.value.getBoundingClientRect();
+  const yesCenter = yesRect.left + yesRect.width / 2;
+  const offset = Math.round(cardRect.right - yesCenter - 5);
+  if (offset > 0) {
+    caretOffsetRight.value = offset;
+  }
+}
+
+onMounted(() => {
+  if (isRisk.value) {
+    nextTick(updateCaretPosition);
+    window.addEventListener('resize', updateCaretPosition);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateCaretPosition);
+});
+
+const sliderTrackRef = ref<HTMLElement | null>(null);
+const isDraggingSlider = ref(false);
 
 const isSelected = computed(() => {
   return store.selectedType === 'element' && store.selectedId === props.element.id;
@@ -129,7 +240,7 @@ const questionIndex = computed(() => {
 });
 
 const labelPlaceholder = computed(() => {
-  return store.currentLocale === 'en' ? 'Enter risk assessment question...' : '请输入风险评估问题...';
+  return t('risk.enterQuestionPlaceholder');
 });
 
 const currentLabel = computed({
@@ -148,38 +259,51 @@ const currentHelp = computed({
   }
 });
 
-function updateWeightFromClientX(clientX: number) {
-  if (!weightBarRef.value) return;
-  const buttons = weightBarRef.value.querySelectorAll<HTMLElement>('[data-weight-val]');
-  if (!buttons.length) return;
-  let closestWeight = props.element.weight ?? 1;
-  let minDistance = Infinity;
-  buttons.forEach(btn => {
-    const rect = btn.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const dist = Math.abs(clientX - centerX);
-    if (dist < minDistance) {
-      minDistance = dist;
-      closestWeight = Number(btn.dataset.weightVal) || 1;
-    }
-  });
-  if (props.element.weight !== closestWeight) {
-    props.element.weight = closestWeight;
+function setWeight(val: number) {
+  selectElement(props.element);
+  const clamped = Math.min(10, Math.max(1, Math.round(val)));
+  if (props.element.weight !== clamped) {
+    props.element.weight = clamped;
     markDirty();
   }
 }
 
-function startDragWeight(e: MouseEvent) {
+function updateSliderWeightFromClientX(clientX: number) {
+  if (!sliderTrackRef.value) return;
+  const nodes = sliderTrackRef.value.querySelectorAll<HTMLElement>('[data-slider-weight]');
+  if (nodes.length > 0) {
+    let closest = props.element.weight ?? 1;
+    let minDiff = Infinity;
+    nodes.forEach(node => {
+      const rect = node.getBoundingClientRect();
+      const nodeX = rect.left + rect.width / 2;
+      const diff = Math.abs(clientX - nodeX);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = Number(node.dataset.sliderWeight) || 1;
+      }
+    });
+    setWeight(closest);
+    return;
+  }
+  const rect = sliderTrackRef.value.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (clientX - rect.left - 8) / (rect.width - 16)));
+  setWeight(Math.round(1 + ratio * 9));
+}
+
+function startSliderDrag(e: MouseEvent) {
   selectElement(props.element);
-  updateWeightFromClientX(e.clientX);
+  isDraggingSlider.value = true;
+  updateSliderWeightFromClientX(e.clientX);
   document.body.style.cursor = 'ew-resize';
   document.body.style.userSelect = 'none';
 
   const onMouseMove = (moveEvt: MouseEvent) => {
-    updateWeightFromClientX(moveEvt.clientX);
+    updateSliderWeightFromClientX(moveEvt.clientX);
   };
 
   const onMouseUp = () => {
+    isDraggingSlider.value = false;
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
     window.removeEventListener('mousemove', onMouseMove);

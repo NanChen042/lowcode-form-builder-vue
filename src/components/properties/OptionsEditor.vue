@@ -206,14 +206,14 @@ import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import Sortable from 'sortablejs';
 
 const branchTypes = computed(() => [
-  { type: 'input' as const, label: store.currentLocale === 'en' ? 'Input' : '单行输入' },
-  { type: 'textarea' as const, label: store.currentLocale === 'en' ? 'Textarea' : '多行文本' },
-  { type: 'radio' as const, label: store.currentLocale === 'en' ? 'Radio' : '单选框组' },
-  { type: 'checkbox' as const, label: store.currentLocale === 'en' ? 'Checkbox' : '多选框组' },
-  { type: 'select' as const, label: store.currentLocale === 'en' ? 'Dropdown' : '下拉选择' },
-  { type: 'date' as const, label: store.currentLocale === 'en' ? 'Date' : '日期选择' },
-  { type: 'phone' as const, label: store.currentLocale === 'en' ? 'Phone' : '手机号码' },
-  { type: 'email' as const, label: store.currentLocale === 'en' ? 'Email' : '电子邮箱' }
+  { type: 'input' as const, label: t('comp.input') },
+  { type: 'textarea' as const, label: t('comp.textarea') },
+  { type: 'radio' as const, label: t('comp.radio') },
+  { type: 'checkbox' as const, label: t('comp.checkbox') },
+  { type: 'select' as const, label: t('comp.select') },
+  { type: 'date' as const, label: t('comp.date') },
+  { type: 'phone' as const, label: t('comp.phone') },
+  { type: 'email' as const, label: t('comp.email') }
 ]);
 
 const props = defineProps<{ element: FormElement }>();

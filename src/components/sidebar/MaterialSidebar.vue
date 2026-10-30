@@ -58,7 +58,7 @@
                 class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
                 :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
               >
-                {{ isRisk ? (store.currentLocale === 'en' ? 'Groups' : '分组') : t('sidebar.pages') }}
+                {{ isRisk ? t('risk.groupTab') : t('sidebar.pages') }}
               </span>
               <span v-if="isRisk ? (store.pages[0]?.groups?.length || 0) > 0 : store.pages.length > 0" class="figma-page-count-badge">
                 {{ isRisk ? (store.pages[0]?.groups?.length || 0) : store.pages.length }}
@@ -266,27 +266,46 @@
           <div id="tour-component-panel" v-show="activeTab === 'components'" class="space-y-4">
             <section v-if="filteredBasicComponents.length > 0">
               <h3 class="mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
-                {{ isRisk ? (store.currentLocale === 'en' ? 'Risk Assessment Components' : '风险评估组件') : t('sidebar.catBasic') }}
+                {{ isRisk ? t('risk.catComponents') : t('sidebar.catBasic') }}
               </h3>
               <div id="components-basic" ref="basicGroupRef" class="sidebar-drag-group grid gap-2" :class="isRisk ? 'grid-cols-1' : 'grid-cols-2'">
                 <div
                   v-for="item in filteredBasicComponents"
                   :key="item.type + '_' + store.currentLocale"
                   class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2.5 py-1.5 transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
-                  :class="isRisk ? 'min-h-[84px] !items-start !py-2.5' : 'h-[34px]'"
+                  :class="isRisk ? '!items-start !p-2.5' : 'h-[34px]'"
                   :data-type="item.type"
-                  :title="isRisk ? (store.currentLocale === 'en' ? 'Risk Question' : '风险评估问题') : getFieldText(item, 'label')"
+                  :title="isRisk ? t('risk.cmpQuestion') : getFieldText(item, 'label')"
                   @click="handleComponentClick(item.type)"
                 >
                   <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden">
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="truncate text-[12px] font-semibold text-slate-700 transition-colors group-hover:text-[#1677ff]">
-                        {{ store.currentLocale === 'en' ? 'Risk Question' : '风险评估问题' }}
+                    <!-- 标题栏（保留图标与标题，已移除单选标识） -->
+                    <div class="flex items-center gap-1.5 min-w-0 w-full">
+                      <div class="flex h-5 w-5 items-center justify-center rounded bg-blue-50 text-[#1677ff] shrink-0">
+                        <ListOrdered class="h-3.5 w-3.5" />
+                      </div>
+                      <span class="truncate text-[12px] font-semibold text-slate-800 transition-colors group-hover:text-[#1677ff]">
+                        {{ t('risk.cmpQuestion') }}
                       </span>
-                      <span class="text-[15px] font-bold leading-none text-[#1677ff] tabular-nums">1</span>
                     </div>
-                    <div class="h-1.5 w-4/5 rounded-full bg-slate-100"></div>
-                    <div class="h-1.5 w-3/5 rounded-full bg-slate-100"></div>
+
+                    <!-- 选项按扭示意区（模拟真实单选：首项为高亮蓝色带勾，其余两项为白色圆角线框） -->
+                    <div class="grid grid-cols-3 gap-1.5 w-full">
+                      <div class="h-6 rounded-md bg-[#1677ff] flex items-center justify-center shadow-2xs">
+                        <Check class="h-3.5 w-3.5 text-white stroke-[2.8]" />
+                      </div>
+                      <div class="h-6 rounded-md bg-white border border-slate-200/90 group-hover:border-blue-200/80 transition-colors"></div>
+                      <div class="h-6 rounded-md bg-white border border-slate-200/90 group-hover:border-blue-200/80 transition-colors"></div>
+                    </div>
+
+                    <!-- 权重滑轨示意区（浅底胶囊、首点为蓝色激活光环、后续点均匀刻度分布） -->
+                    <div class="w-full rounded-md bg-slate-100/70 group-hover:bg-blue-50/50 transition-colors px-2 py-1.5 flex items-center">
+                      <div class="relative flex items-center justify-between w-full h-2.5">
+                        <div class="absolute left-1 right-1 h-[2px] bg-slate-200/90 group-hover:bg-blue-200/80 transition-colors rounded-full"></div>
+                        <span class="relative z-10 flex h-3 w-3 items-center justify-center rounded-full border-[2px] border-[#1677ff] bg-white ring-2 ring-blue-500/15 shadow-2xs"></span>
+                        <span v-for="dot in 6" :key="dot" class="relative z-10 h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-blue-300 transition-colors"></span>
+                      </div>
+                    </div>
                   </div>
                   <div v-else class="sidebar-btn-view flex w-full items-center gap-2 overflow-hidden">
                     <component :is="getIcon(item.icon)" class="h-3.5 w-3.5 text-slate-400 transition-colors group-hover:text-[#1677ff] shrink-0" />
@@ -379,14 +398,14 @@
                       {{ getRiskGroupDisplayTitle(grp, Number(gIdx)) }}
                     </div>
                     <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
-                      {{ getRiskGroupQuestionCount(grp.id) }} {{ store.currentLocale === 'en' ? 'questions' : '个问题' }}
+                      {{ t('risk.questionsCount', undefined, { count: getRiskGroupQuestionCount(grp.id) }) }}
                     </div>
                   </div>
                 </div>
 
                 <a-popconfirm
                   v-if="store.pages[0].groups.length > 1"
-                  :content="store.currentLocale === 'en' ? 'Delete this group and its questions?' : '确定删除该分组及其包含的问题吗？'"
+                  :content="t('risk.deleteGroupConfirm')"
                   position="tr"
                   type="warning"
                   :ok-text="t('modal.confirm')"
@@ -410,12 +429,12 @@
               <button
                 type="button"
                 class="group flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300/90 bg-white py-2 px-3 text-[12px] font-medium text-slate-600 transition-all duration-180 hover:border-[#1677ff] hover:bg-blue-50/40 hover:text-[#1677ff] hover:shadow-xs cursor-pointer"
-                @click="addQuestionGroup()"
+                @click="handleRiskAddGroup"
               >
                 <span class="flex h-4.5 w-4.5 items-center justify-center rounded bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#1677ff] group-hover:text-white">
                   <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
                 </span>
-                <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+                <span>{{ t('risk.addGroup') }}</span>
               </button>
             </div>
           </div>
@@ -598,7 +617,9 @@ import {
   Settings,
   HelpCircle,
   FileText,
-  GripVertical
+  GripVertical,
+  ListOrdered,
+  Check
 } from '@lucide/vue';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
 import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
@@ -690,7 +711,7 @@ const drawerTitle = computed(() => {
   if (activeTab.value === 'templates') return t('sidebar.tabTemplates');
   if (activeTab.value === 'pages') {
     if (isRisk.value) {
-      return store.currentLocale === 'en' ? 'Question Groups' : '问题分组';
+      return t('risk.groupOutlineTitle');
     }
     return t('sidebar.tabPages');
   }
@@ -702,7 +723,7 @@ const drawerSubtitle = computed(() => {
   if (activeTab.value === 'pages') {
     if (isRisk.value) {
       const count = store.pages[0]?.groups?.length || 0;
-      return store.currentLocale === 'en' ? `${count} groups` : `${count} 个分组`;
+      return t('risk.groupCount', undefined, { count });
     }
     return `${store.pages.length} ${t('common.pagesUnit')}`;
   }
@@ -907,6 +928,10 @@ function initDragSources() {
       if (type) {
         syncDragPlaceholderHeight(type);
       }
+      const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
+      if (fallback) {
+        fallback.style.height = 'auto';
+      }
     },
     onEnd(evt) {
       store.isDraggingComponent = false;
@@ -1023,10 +1048,13 @@ const noSearchResult = computed(() => {
 });
 
 function getRiskGroupDisplayTitle(grp: any, idx: number): string {
-  if (store.currentLocale === 'en') {
-    return grp.title_en?.trim() || `Question Group ${idx + 1}`;
-  }
-  return grp.title?.trim() || `问题分组 ${idx + 1}`;
+  const custom = store.currentLocale === 'en' ? grp.title_en?.trim() : grp.title?.trim();
+  return custom || t('risk.defaultGroupTitle', undefined, { index: idx + 1 });
+}
+
+function handleRiskAddGroup() {
+  addQuestionGroup();
+  Message.success(t('risk.groupCreated'));
 }
 
 function getRiskGroupQuestionCount(groupId: string): number {

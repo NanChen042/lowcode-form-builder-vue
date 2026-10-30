@@ -5,8 +5,7 @@ import {
   kycIndividualTemplate,
   kycEntityTemplate,
   createBlankTemplate,
-  createRiskAssessmentTemplate,
-  allComponentsDemoTemplate
+  createRiskAssessmentTemplate
 } from '@/templates/recommend';
 import { generateFormId } from '@/core/store';
 
@@ -27,13 +26,6 @@ function initMockDatabase() {
   cusTpl.meta.formId = 'cus_tpl_20261013_demo';
   cusTpl.meta.serialNo = 'cus_tpl_20261013_demo';
   mockDatabase.set('cus_tpl_20261013_demo', cusTpl);
-
-  const allTpl: FormSchema = JSON.parse(JSON.stringify(allComponentsDemoTemplate));
-  allTpl.meta.formId = 'all_components_demo';
-  allTpl.meta.serialNo = 'all_components_demo';
-  mockDatabase.set('all_components_demo', allTpl);
-  mockDatabase.set('all_components', allTpl);
-  mockDatabase.set('all', allTpl);
 }
 
 initMockDatabase();

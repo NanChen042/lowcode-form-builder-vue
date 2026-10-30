@@ -13,7 +13,7 @@
     /><span
       v-if="isRisk"
       class="ml-2 inline-flex items-center rounded-[3px] border border-blue-200/80 bg-blue-50/80 px-1.5 py-0.5 text-[11px] font-bold text-[#1677ff] leading-none align-baseline select-none whitespace-nowrap"
-      :title="store.currentLocale === 'en' ? `Weight: ${element.weight ?? 1}` : `权重：${element.weight ?? 1}`"
+      :title="t('risk.weightBadge', undefined, { weight: element.weight ?? 1 })"
     >{{ element.weight ?? 1 }}</span>
 
     <EditableText
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, isRisk } from '@/core/store';
+import { isRisk } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 

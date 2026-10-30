@@ -1,6 +1,7 @@
 import { computed } from 'vue';
 import { store, isRisk, selectPage, selectElement, selectGroup, focusOnPage } from '@/core/store';
 import { componentRegistry } from '@/registry/components';
+import { t } from '@/core/i18n';
 
 export type TranslationFieldType =
   | 'page_title'
@@ -64,7 +65,7 @@ function getFieldDisplayLabel(element: any, locale: 'zh' | 'en'): string {
   if (meta) {
     return isEn ? meta.label_en : meta.label;
   }
-  return isEn ? 'Field' : '表单字段';
+  return t('trans.fieldDefault');
 }
 
 /**
@@ -147,31 +148,34 @@ export function calculateTranslationStats(): TranslationStats {
     // 排除系统固定预设核验页
     if (page.pageType === 'system_profile') return;
 
-    const pageTitle = (store.currentLocale === 'en' ? (page.title_en || page.title) : page.title) || (store.currentLocale === 'en' ? `Page ${pageIdx + 1}` : `第 ${pageIdx + 1} 页`);
+    const isRiskForm = isRisk.value;
+    const defaultRiskTitle = store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估';
+    const pageTitle = (store.currentLocale === 'en' ? (page.title_en || (isRiskForm ? defaultRiskTitle : page.title)) : (page.title || (isRiskForm ? defaultRiskTitle : ''))) || (store.currentLocale === 'en' ? `Page ${pageIdx + 1}` : `第 ${pageIdx + 1} 页`);
 
-    // 1. 页面标题
-    registerItem({
-      id: `${page.id}_title`,
-      pageId: page.id,
-      pageIndex: pageIdx,
-      pageTitle,
-      fieldType: 'page_title',
-      fieldName: store.currentLocale === 'en' ? 'Page Title' : '页面标题',
-      zhText: page.title,
-      enText: page.title_en
-    });
+    // 1. 页面标题 & 2. 页面描述 (风险评估表单使用系统固定规则，无需页面级标题和描述翻译)
+    if (!isRiskForm) {
+      registerItem({
+        id: `${page.id}_title`,
+        pageId: page.id,
+        pageIndex: pageIdx,
+        pageTitle,
+        fieldType: 'page_title',
+        fieldName: t('trans.pageTitle'),
+        zhText: page.title,
+        enText: page.title_en
+      });
 
-    // 2. 页面描述
-    registerItem({
-      id: `${page.id}_desc`,
-      pageId: page.id,
-      pageIndex: pageIdx,
-      pageTitle,
-      fieldType: 'page_desc',
-      fieldName: store.currentLocale === 'en' ? 'Page Description' : '描述说明',
-      zhText: page.description,
-      enText: page.description_en
-    });
+      registerItem({
+        id: `${page.id}_desc`,
+        pageId: page.id,
+        pageIndex: pageIdx,
+        pageTitle,
+        fieldType: 'page_desc',
+        fieldName: t('trans.pageDesc'),
+        zhText: page.description,
+        enText: page.description_en
+      });
+    }
 
     // 2.5 问题分组标题 (风险评估表单)
     if (page.groups && Array.isArray(page.groups)) {
@@ -184,7 +188,7 @@ export function calculateTranslationStats(): TranslationStats {
           pageTitle,
           groupId: group.id,
           fieldType: 'group_title',
-          fieldName: `${store.currentLocale === 'en' ? 'Group' : '分组'} ${String(gIdx + 1).padStart(2, '0')} · ${gLabel}`,
+          fieldName: `${t('trans.group')} ${String(gIdx + 1).padStart(2, '0')} · ${gLabel}`,
           zhText: group.title,
           enText: group.title_en
         });
@@ -223,7 +227,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_content',
-          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Content' : '提示说明'}`,
+          fieldName: `${elLabel} · ${t('trans.content')}`,
           zhText: element.content,
           enText: element.content_en
         });
@@ -240,7 +244,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_placeholder',
-          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Placeholder' : '输入提示'}`,
+          fieldName: `${elLabel} · ${t('trans.placeholder')}`,
           zhText: element.placeholder,
           enText: element.placeholder_en
         });
@@ -257,7 +261,7 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_help',
-          fieldName: `${elLabel} · ${store.currentLocale === 'en' ? 'Help Text' : '副标题'}`,
+          fieldName: `${elLabel} · ${t('trans.helpText')}`,
           zhText: element.help,
           enText: element.help_en
         });
@@ -266,7 +270,7 @@ export function calculateTranslationStats(): TranslationStats {
       // 选项列表 (单选、多选、下拉、声明条款等；风险评估固定选项无需计入)
       if (!isRisk.value && element.options && Array.isArray(element.options)) {
         element.options.forEach((opt, optIdx) => {
-          const optName = (store.currentLocale === 'en' ? (opt.label_en || opt.label) : (opt.label || opt.label_en)) || `${store.currentLocale === 'en' ? 'Option' : '选项'} ${optIdx + 1}`;
+          const optName = (store.currentLocale === 'en' ? (opt.label_en || opt.label) : (opt.label || opt.label_en)) || `${t('trans.option')} ${optIdx + 1}`;
           let zhText = opt.label;
           let enText = opt.label_en;
           // 若中文已被修改为具体业务词（非默认“选项一/选项1”），而英文仍然是默认虚拟占位符“Option N”，则英文判定为未翻译

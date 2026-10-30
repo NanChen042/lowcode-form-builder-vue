@@ -24,7 +24,7 @@
     <div
       v-if="isRisk"
       class="canvas-resize-handle absolute -left-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
-      :title="store.currentLocale === 'en' ? 'Drag to resize canvas width' : '左右拖拽调整画布宽度'"
+      :title="t('risk.dragResizeWidth')"
       @mousedown.stop.prevent="startResizeCanvasWidth($event, 'left')"
     >
       <div
@@ -35,7 +35,7 @@
     <div
       v-if="isRisk"
       class="canvas-resize-handle absolute -right-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
-      :title="store.currentLocale === 'en' ? 'Drag to resize canvas width' : '左右拖拽调整画布宽度'"
+      :title="t('risk.dragResizeWidth')"
       @mousedown.stop.prevent="startResizeCanvasWidth($event, 'right')"
     >
       <div
@@ -106,10 +106,10 @@
         <template v-else-if="isRisk">
           <div class="w-full select-none">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 leading-7">
-              {{ store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估' }}
+              {{ t('risk.pageTitle') }}
             </h2>
             <p class="mt-1.5 w-full text-[14px] leading-6 text-slate-500">
-              {{ store.currentLocale === 'en' ? 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight.' : '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。' }}
+              {{ t('risk.pageDesc') }}
             </p>
           </div>
         </template>
@@ -150,7 +150,7 @@
             :key="grp.id"
             :id="'risk_grp_' + grp.id"
             :data-risk-group-id="grp.id"
-            class="risk-group-section border transition-all duration-150 rounded-[4px] bg-white"
+            class="risk-group-section border rounded-[4px] bg-white transition-[border-color,box-shadow] duration-150"
             :class="
               store.selectedType === 'group' && store.selectedId === grp.id
                 ? 'border-[#1677ff] ring-2 ring-blue-500/20 shadow-xs'
@@ -159,31 +159,31 @@
             @click.stop="selectGroup(grp.id)"
           >
 
-            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-[#e5e6eb] bg-[#f7f8fa] rounded-t-[4px] cursor-grab active:cursor-grabbing">
+            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-blue-100/90 bg-[#f0f6ff] rounded-t-[4px] cursor-grab active:cursor-grabbing">
               <div class="flex items-center gap-2 flex-1 min-w-0">
                 <GripVertical
-                  class="risk-group-drag-handle h-4 w-4 text-slate-300 hover:text-slate-500 shrink-0 cursor-grab active:cursor-grabbing transition-colors"
-                  :title="store.currentLocale === 'en' ? 'Drag to reorder group' : '按住拖拽调整分组顺序'"
+                  class="risk-group-drag-handle h-4 w-4 text-blue-300 hover:text-blue-600 shrink-0 cursor-grab active:cursor-grabbing transition-colors"
+                  :title="t('risk.dragReorderTip')"
                 />
                 <EditableText
-                  :model-value="getGroupTitle(grp)"
+                  :model-value="getGroupTitle(grp, gIdx)"
                   :placeholder="getGroupTitlePlaceholder(grp, gIdx)"
                   :element-id="grp.id"
                   field="title"
                   tag="span"
-                  custom-class="group-title-text text-[14px] font-semibold text-slate-800 leading-5 inline-block max-w-full truncate"
+                  custom-class="group-title-text text-[14px] font-semibold text-blue-950 leading-5 inline-block max-w-full truncate"
                   @update:model-value="(val) => setGroupTitle(grp, val)"
                 />
               </div>
 
               <div class="flex items-center gap-2 shrink-0 select-none">
-                <span class="rounded bg-white/90 px-2 py-0.5 text-[11px] font-medium text-slate-500 border border-slate-200/80 shadow-2xs">
-                  {{ getGroupFields(grp.id).length }} {{ store.currentLocale === 'en' ? 'questions' : '题' }}
+                <span class="rounded bg-white/95 px-2 py-0.5 text-[11px] font-medium text-blue-600 border border-blue-200/80 shadow-2xs">
+                  {{ getGroupFields(grp.id).length }} {{ t('risk.questionUnit') }}
                 </span>
 
                 <a-popconfirm
                   v-if="(page.groups?.length || 0) > 1"
-                  :content="store.currentLocale === 'en' ? 'Delete this question group and all questions inside?' : '确定删除该问题分组及其下所有问题吗？'"
+                  :content="t('risk.deleteGroupConfirm')"
                   position="tr"
                   type="warning"
                   :ok-text="t('modal.confirm')"
@@ -195,7 +195,7 @@
                   <button
                     type="button"
                     class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                    :title="store.currentLocale === 'en' ? 'Delete Group' : '删除分组'"
+                    :title="t('risk.deleteGroup')"
                     @click.stop
                   >
                     <Trash2 class="h-3.5 w-3.5" />
@@ -226,7 +226,7 @@
                 v-if="getGroupFields(grp.id).length === 0 && !store.isDraggingComponent"
                 class="pointer-events-none py-6 text-center text-[12.5px] text-slate-400 border border-dashed border-slate-200/90 rounded-[3px] bg-slate-50/40 m-3"
               >
-                {{ store.currentLocale === 'en' ? 'Drag radio component here or click button below to add question' : '从左侧拖入单选组件，或点击下方按钮添加问题' }}
+                {{ t('risk.dropzoneTip') }}
               </div>
             </div>
 
@@ -238,23 +238,23 @@
                 @click.stop="addElement('radio', page.id, grp.id)"
               >
                 <Plus class="h-3.5 w-3.5 stroke-[2.2]" />
-                <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
+                <span>{{ t('risk.addQuestion') }}</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-center pt-2 pb-1">
-          <button
-            type="button"
-            class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-dashed border-slate-300 bg-white hover:border-[#1677ff] hover:bg-blue-50/40 text-slate-700 hover:text-[#1677ff] text-[13px] font-medium shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer"
-            @click.stop="addQuestionGroup()"
-          >
-            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-slate-500 group-hover:bg-[#1677ff] group-hover:text-white transition-colors">
-              <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
-            </span>
-            <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
-          </button>
+        <!-- 规范化分组添加插槽：与卡片同宽、轻量虚线结构、稳重专业 -->
+        <div
+          class="risk-add-group-slot group/slot flex items-center justify-center gap-2 py-3 px-4 rounded-[4px] border border-dashed border-slate-200/90 hover:border-[#1677ff] bg-slate-50/50 hover:bg-blue-50/30 text-slate-500 hover:text-[#1677ff] transition-all duration-150 cursor-pointer select-none"
+          @click.stop="addQuestionGroup()"
+        >
+          <div class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200/60 group-hover/slot:bg-[#1677ff] text-slate-500 group-hover/slot:text-white transition-colors">
+            <Plus class="h-3 w-3 stroke-[2.5]" />
+          </div>
+          <span class="text-[13px] font-medium leading-none tracking-tight">
+            {{ t('risk.addSectionSlot') }}
+          </span>
         </div>
       </div>
 
@@ -396,12 +396,12 @@ function setRiskGroupDropzoneRef(groupId: string, el: HTMLElement | null) {
   }
 }
 
-function getGroupTitle(grp: FormQuestionGroup): string {
+function getGroupTitle(grp: FormQuestionGroup, _idx?: number): string {
   return store.currentLocale === 'en' ? (grp.title_en || '') : (grp.title || '');
 }
 
-function getGroupTitlePlaceholder(_grp: FormQuestionGroup, idx: number): string {
-  return store.currentLocale === 'en' ? `Question Group ${idx + 1}` : `问题分组 ${idx + 1}`;
+function getGroupTitlePlaceholder(_grp?: FormQuestionGroup, _idx?: number): string {
+  return t('risk.groupNamePlaceholder');
 }
 
 function setGroupTitle(grp: FormQuestionGroup, val: string) {
@@ -446,7 +446,7 @@ function syncRiskGroupSortables() {
         name: 'risk-groups',
         put: ['risk-groups', 'sidebar-risk-groups']
       },
-      animation: 200,
+      animation: 250,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
       ghostClass: 'sortable-ghost',
       dragClass: 'sortable-drag',
@@ -455,11 +455,15 @@ function syncRiskGroupSortables() {
       forceFallback: true,
       fallbackOnBody: true,
       fallbackTolerance: 3,
+      direction: 'vertical',
+      swapThreshold: 0.5,
       handle: '.risk-group-header',
       draggable: '.risk-group-section',
-      filter: 'input, textarea, select, button, [contenteditable]',
+      filter: 'input, textarea, select, button, .group-title-text, [contenteditable]',
       preventOnFilter: false,
       onStart(evt) {
+        store.isDraggingComponent = true;
+        document.body.classList.add('is-dragging-component');
         const fallback = document.querySelector('body > .drag-fallback') as HTMLElement;
         if (fallback && evt.item) {
           const rect = evt.item.getBoundingClientRect();
@@ -485,6 +489,10 @@ function syncRiskGroupSortables() {
           fallback.innerHTML = '';
           fallback.appendChild(visual);
         }
+      },
+      onEnd() {
+        store.isDraggingComponent = false;
+        document.body.classList.remove('is-dragging-component');
       },
       onAdd(evt) {
         const itemEl = evt.item;
@@ -534,7 +542,7 @@ function syncRiskGroupSortables() {
       swapThreshold: 0.65,
       emptyInsertThreshold: 24,
       draggable: '.canvas-element-group, .component-item',
-      filter: 'input, textarea, select, button, [contenteditable], .action-btn, .risk-weight-selector',
+      filter: 'input, textarea, select, button, .canvas-text-focus, .action-btn, .risk-weight-slider-section, .risk-weight-selector, .slider-track',
       preventOnFilter: false,
       onStart(evt) {
         store.isDraggingComponent = true;
@@ -601,6 +609,15 @@ function syncRiskGroupSortables() {
       },
       onUpdate(evt) {
         if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+          const from = evt.from;
+          const item = evt.item;
+          const targetSibling = from.children[evt.oldIndex > evt.newIndex ? evt.oldIndex + 1 : evt.oldIndex];
+          if (targetSibling) {
+            from.insertBefore(item, targetSibling);
+          } else {
+            from.appendChild(item);
+          }
+
           const list = [...getGroupFields(grpId)];
           const [moved] = list.splice(evt.oldIndex, 1);
           if (moved) {

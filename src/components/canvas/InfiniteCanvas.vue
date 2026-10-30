@@ -16,7 +16,7 @@
     @scroll="onCanvasScroll"
     @contextmenu.prevent="onContextMenu"
   >
-    <div id="tour-canvas-viewport" style="position: absolute; top: 56px; left: 0; right: 0; bottom: 0; pointer-events: none;" />
+    <div id="tour-canvas-viewport" class="absolute inset-0 pointer-events-none" />
 
     <div
       class="canvas-world transition-opacity duration-300 ease-out"
@@ -41,7 +41,7 @@
     <transition name="fade">
       <div
         v-if="!store.leftSidebarVisible"
-        class="figma-floating-pill absolute left-4 top-[70px] z-30 flex items-center gap-2.5 px-3 py-1.5 bg-white/95 rounded-xl border border-slate-200/90 shadow-md backdrop-blur-md select-none transition-all duration-200 hover:shadow-lg hover:border-blue-300 cursor-pointer"
+        class="figma-floating-pill absolute left-4 top-3.5 z-30 flex items-center gap-2.5 px-3 py-1.5 bg-white/95 rounded-xl border border-slate-200/90 shadow-md backdrop-blur-md select-none transition-all duration-200 hover:shadow-lg hover:border-blue-300 cursor-pointer"
         @click="store.leftSidebarVisible = true"
       >
         <div class="flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 text-blue-600">
@@ -78,7 +78,7 @@
       >
         <button
           type="button"
-          class="absolute right-3.5 top-[70px] z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
+          class="absolute right-3.5 top-3.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
           @click="store.rightSidebarVisible = true"
         >
           <PanelRight class="h-4 w-4 transition-transform duration-200 group-hover:scale-105" />
@@ -152,7 +152,7 @@
                         {{ item.fieldName }}
                       </div>
                       <div class="text-[10.5px] text-slate-400 group-hover/item:text-blue-500/80 truncate">
-                        {{ item.targetLocale === 'zh' ? (store.currentLocale === 'en' ? 'EN' : '英文') : (store.currentLocale === 'en' ? 'ZH' : '中文') }}: {{ item.sourceText }}
+                        {{ item.targetLocale === 'zh' ? t('common.localeEn') : t('common.localeZh') }}: {{ item.sourceText }}
                       </div>
                     </div>
                     <ArrowRight class="w-3 h-3 text-slate-300 group-hover/item:text-[#1677ff] shrink-0" />
@@ -530,7 +530,6 @@ function checkOffScreenStatus() {
   const container = canvasContainerRef.value;
   const w = container?.clientWidth || window.innerWidth;
   const h = container?.clientHeight || window.innerHeight;
-  const headerHeight = 56;
 
   const { x, y, scale } = store.canvasState;
   const screenMinX = x + box.minX * scale;
@@ -542,7 +541,7 @@ function checkOffScreenStatus() {
     const hasReentered =
       screenMaxX > 100 &&
       screenMinX < w - 100 &&
-      screenMaxY > headerHeight + 80 &&
+      screenMaxY > 80 &&
       screenMinY < h - 80;
 
     if (hasReentered) {
@@ -552,7 +551,7 @@ function checkOffScreenStatus() {
     const isCompletelyOut =
       screenMaxX < -10 ||
       screenMinX > w + 10 ||
-      screenMaxY < headerHeight - 10 ||
+      screenMaxY < -10 ||
       screenMinY > h + 10;
 
     if (isCompletelyOut) {
@@ -571,10 +570,9 @@ const offScreenDirection = computed(() => {
   const container = canvasContainerRef.value;
   const cw = container?.clientWidth || window.innerWidth;
   const ch = container?.clientHeight || window.innerHeight;
-  const headerHeight = 56;
 
   const viewCenterX = cw / 2;
-  const viewCenterY = headerHeight + (ch - headerHeight) / 2;
+  const viewCenterY = ch / 2;
 
   const { x, y, scale } = store.canvasState;
   const screenCenterX = x + ((box.minX + box.maxX) / 2) * scale;
@@ -594,12 +592,11 @@ function zoomTo100() {
   const oldScale = store.canvasState.scale;
   if (Math.abs(oldScale - 1.0) < 0.001) return;
   animateCanvasTransition(300);
-  const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
-  const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
-  const viewportWidth = Math.max(320, window.innerWidth - leftWidth - rightWidth);
-  const viewportHeight = Math.max(320, window.innerHeight - 56);
-  const centerX = leftWidth + viewportWidth / 2;
-  const centerY = 56 + viewportHeight / 2;
+  const container = canvasContainerRef.value;
+  const viewportWidth = container?.clientWidth || Math.max(320, window.innerWidth - (store.leftSidebarVisible ? store.leftSidebarWidth : 0) - (store.rightSidebarVisible ? store.rightSidebarWidth : 0));
+  const viewportHeight = container?.clientHeight || Math.max(320, window.innerHeight - 56);
+  const centerX = viewportWidth / 2;
+  const centerY = viewportHeight / 2;
   const worldX = (centerX - store.canvasState.x) / oldScale;
   const worldY = (centerY - store.canvasState.y) / oldScale;
   store.canvasState.scale = 1.0;
@@ -732,9 +729,8 @@ function onWheel(e: WheelEvent) {
   if (e.ctrlKey || e.metaKey) {
     const oldScale = store.canvasState.scale;
     const nextScale = oldScale * Math.exp(-e.deltaY * 0.0016);
-    const left = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
-    adjustZoom(nextScale - oldScale, e.clientX, e.clientY, { left, top: 0 } as DOMRect);
-  checkOffScreenStatus();
+    adjustZoom(nextScale - oldScale, e.clientX, e.clientY, canvasContainerRef.value?.getBoundingClientRect());
+    checkOffScreenStatus();
   } else {
     let dy = e.deltaY;
     let dx = e.deltaX;

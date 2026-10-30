@@ -824,10 +824,19 @@ body.is-dragging-frame .mobile-frame {
     border-bottom: 1px solid #f1f5f9 !important;
     border-radius: 0 !important;
     background: #ffffff !important;
-    padding: 14px 20px !important;
+    padding: 10px 18px !important;
     box-shadow: none !important;
-    cursor: default !important;
+    cursor: var(--canvas-cursor) !important;
     transition: background-color 0.15s ease !important;
+}
+
+.risk-group-section,
+.risk-groups-list,
+.risk-group-dropzone,
+.risk-group-header,
+.risk-add-group-slot,
+.risk-group-dropzone .canvas-element .risk-weight-slider-section {
+    cursor: var(--canvas-cursor) !important;
 }
 
 .risk-group-dropzone .canvas-element-group:last-child .canvas-element {
@@ -1295,6 +1304,13 @@ body.is-dragging-component .canvas-element .field-help {
     padding: 0 !important;
 }
 
+#components-basic .sortable-ghost[data-type="radio"],
+.sidebar-drag-group .sortable-ghost[data-type="radio"] {
+    height: 96px !important;
+    min-height: 96px !important;
+    border-radius: 8px !important;
+}
+
 #components-basic .sortable-ghost > *,
 #components-business .sortable-ghost > *,
 .sidebar-drag-group .sortable-ghost > * {
@@ -1329,6 +1345,18 @@ body.is-dragging-component .canvas-element .field-help {
     opacity: 0.95 !important;
     background: #ffffff !important;
     border-radius: 8px !important;
+}
+
+.component-item.drag-fallback,
+.component-item.sortable-fallback {
+    height: auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #1677ff !important;
+    box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(22, 119, 255, 0.15) !important;
+    overflow: hidden !important;
 }
 
 .drag-fallback-shell {

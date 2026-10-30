@@ -2,8 +2,6 @@ import request from '@/utils/request';
 import type { FormSchema } from '@/types/schema';
 import { generateFormId } from '@/core/store';
 
-const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms));
-
 export interface ApiResponse<T = any> {
   code: number | string;
   success: boolean;
@@ -35,18 +33,11 @@ export const FormAPI = {
         message: res?.msg || res?.message || '保存失败'
       };
     } catch (err: any) {
-      console.warn('[FormAPI.saveTemplate] Local fallback save:', err);
-      const formId = schema.meta.formId || generateFormId(schema.meta.profileType, schema.meta.source);
-      const updatedAt = new Date().toISOString();
       return {
-        code: 200,
-        success: true,
-        data: {
-          id: formId,
-          updatedAt,
-          schema
-        },
-        message: '本地已保存'
+        code: err?.response?.status || 500,
+        success: false,
+        data: null as any,
+        message: err?.response?.data?.msg || err?.message || '保存失败'
       };
     }
   },
@@ -94,8 +85,8 @@ export const FormAPI = {
   async publishForm(schema: FormSchema): Promise<ApiResponse<{ url: string }>> {
     try {
       const res = await request.post<any, any>('/pc/form/publish', { schema });
-      if (res && (res.code === 0 || res.code === 200 || res.success) && res.data?.url) {
-        let finalUrl = res.data.url;
+      if (res && (res.code === 0 || res.code === 200 || res.success)) {
+        let finalUrl = res.data?.url || '';
         if (typeof window !== 'undefined' && finalUrl.startsWith('/')) {
           finalUrl = `${window.location.origin}${finalUrl}`;
         }
@@ -123,23 +114,19 @@ export const FormAPI = {
           message: e.response.data.msg
         };
       }
+      return {
+        code: e?.response?.status || 500,
+        success: false,
+        data: null as any,
+        message: e?.message || '发布失败'
+      };
     }
 
-    await delay(300);
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://jzw.qingmob.com';
-    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const formId = (schema.meta?.formId || schema.meta?.serialNo || `form_${Date.now()}`).toLowerCase().trim();
-    const dynamicUrl = isLocal
-      ? `http://localhost:5174/?id=${encodeURIComponent(formId)}`
-      : `${origin}/form-mobile/?id=${encodeURIComponent(formId)}`;
-
     return {
-      code: 200,
-      success: true,
-      data: {
-        url: dynamicUrl
-      },
-      message: '发布成功'
+      code: 500,
+      success: false,
+      data: null as any,
+      message: '发布失败'
     };
   }
 };

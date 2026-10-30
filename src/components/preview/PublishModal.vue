@@ -21,52 +21,77 @@
       <h3 class="text-base font-semibold text-slate-800 m-0 mb-1.5">
         {{ t('publish.successTitle') }}
       </h3>
-      <p class="text-xs text-slate-500 m-0 mb-4 max-w-[340px] leading-relaxed">
-        {{ t('publish.successDesc') }}
-      </p>
 
+      <!-- 风险评估模式：不展示公网访问链接，提供返回列表与关闭页面入口 -->
+      <template v-if="isRisk">
+        <p class="text-xs text-slate-500 m-0 mb-5 max-w-[360px] leading-relaxed">
+          {{ t('publish.riskSuccessDesc') }}
+        </p>
 
-      <div class="w-full space-y-3">
+        <div class="w-full flex items-center justify-center gap-3">
+          <a-button
+            type="primary"
+            class="h-9 px-5 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium"
+            @click="handleBackToRiskSetting"
+          >
+            {{ t('publish.backToRiskSetting') }}
+          </a-button>
 
-        <a
-          :href="publishedUrl"
-          target="_blank"
-          class="group flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 transition-all text-left no-underline cursor-pointer"
-          :title="t('publish.openPreviewTip')"
-        >
-          <div class="flex items-center gap-2 min-w-0 flex-1 pr-3">
-            <Link2 class="w-4 h-4 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
-            <span class="text-xs text-slate-600 group-hover:text-blue-600 font-mono break-all select-all leading-relaxed transition-colors">
-              {{ publishedUrl }}
+          <a-button
+            class="h-9 px-5 rounded-md flex items-center justify-center gap-1.5 text-xs font-medium text-slate-700"
+            @click="handleClosePage"
+          >
+            {{ t('publish.closePage') }}
+          </a-button>
+        </div>
+      </template>
+
+      <!-- 标准/KYC模式：展示公网访问链接与复制按钮 -->
+      <template v-else>
+        <p class="text-xs text-slate-500 m-0 mb-4 max-w-[340px] leading-relaxed">
+          {{ t('publish.successDesc') }}
+        </p>
+
+        <div class="w-full space-y-3">
+          <a
+            :href="publishedUrl"
+            target="_blank"
+            class="group flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 transition-all text-left no-underline cursor-pointer"
+            :title="t('publish.openPreviewTip')"
+          >
+            <div class="flex items-center gap-2 min-w-0 flex-1 pr-3">
+              <Link2 class="w-4 h-4 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
+              <span class="text-xs text-slate-600 group-hover:text-blue-600 font-mono break-all select-all leading-relaxed transition-colors">
+                {{ publishedUrl }}
+              </span>
+            </div>
+            <span class="text-xs text-slate-400 group-hover:text-blue-600 flex items-center gap-1 shrink-0 font-medium transition-colors">
+              <span>{{ t('publish.openPreview') }}</span>
+              <ExternalLink class="w-3.5 h-3.5" />
             </span>
-          </div>
-          <span class="text-xs text-slate-400 group-hover:text-blue-600 flex items-center gap-1 shrink-0 font-medium transition-colors">
-            <span>{{ t('publish.openPreview') }}</span>
-            <ExternalLink class="w-3.5 h-3.5" />
-          </span>
-        </a>
+          </a>
 
-
-        <a-button
-          type="primary"
-          long
-          class="h-9 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium"
-          @click="handleCopyUrl"
-        >
-          <template #icon>
-            <Check v-if="isCopied" class="w-4 h-4" />
-            <Copy v-else class="w-4 h-4" />
-          </template>
-          {{ isCopied ? t('publish.copied') : t('publish.copyLink') }}
-        </a-button>
-      </div>
+          <a-button
+            type="primary"
+            long
+            class="h-9 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium"
+            @click="handleCopyUrl"
+          >
+            <template #icon>
+              <Check v-if="isCopied" class="w-4 h-4" />
+              <Copy v-else class="w-4 h-4" />
+            </template>
+            {{ isCopied ? t('publish.copied') : t('publish.copyLink') }}
+          </a-button>
+        </div>
+      </template>
     </div>
 
 
     <div v-else class="space-y-3.5 py-1">
       <div class="flex items-center justify-between pb-0.5">
         <p class="text-xs text-slate-500 m-0 leading-relaxed pr-3">
-          {{ t('publish.modalDesc') }}
+          {{ isRisk ? t('publish.riskModalDesc') : t('publish.modalDesc') }}
         </p>
         <a-radio-group v-if="isBilingual" v-model="activeLocale" type="button" size="small" class="shrink-0">
           <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
@@ -148,7 +173,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
-import { store, buildSchema, isBilingual, primaryLocale, establishBaseline, syncUrlParams } from '@/core/store';
+import { store, buildSchema, isBilingual, primaryLocale, establishBaseline, syncUrlParams, isRisk } from '@/core/store';
 import { t } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
@@ -242,9 +267,8 @@ watch(
 async function handleConfirmPublish() {
   nameError.value = false;
   const activeTitle = activeLocale.value === 'zh' ? formModel.titleZh.trim() : formModel.titleEn.trim();
-  const fallbackTitle = formModel.titleZh.trim() || formModel.titleEn.trim();
 
-  if (!activeTitle && !fallbackTitle) {
+  if (!activeTitle) {
     nameError.value = true;
     Message.warning(t('publish.nameRequired'));
     if (activeLocale.value === 'zh') {
@@ -265,8 +289,10 @@ async function handleConfirmPublish() {
 
   try {
     const res = await FormAPI.publishForm(schema);
-    if (res.success && res.data?.url) {
-      publishedUrl.value = res.data.url;
+    if (res.success) {
+      if (res.data?.url) {
+        publishedUrl.value = res.data.url;
+      }
       isSuccess.value = true;
       const savedId = store.meta.formId || store.meta.serialNo;
       if (savedId) {
@@ -275,7 +301,7 @@ async function handleConfirmPublish() {
       establishBaseline();
       const now = new Date();
       store.lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      emit('published', { url: res.data.url });
+      emit('published', { url: publishedUrl.value });
     } else {
       const rawMsg = res.message || res.msg || '';
       if (res.code == 409 || rawMsg.includes('重名') || rawMsg.includes('名称已存在') || rawMsg.includes('already exists')) {
@@ -300,6 +326,31 @@ async function handleConfirmPublish() {
   }
 }
 
+function handleBackToRiskSetting() {
+  const targetUrl = '/pc/csp/formsetting?tab=risk';
+  try {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.href = targetUrl;
+      window.opener.focus();
+      window.close();
+      return;
+    }
+  } catch (_) {}
+  window.location.href = targetUrl;
+}
+
+function handleClosePage() {
+  try {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
+  } catch (_) {}
+  window.close();
+  setTimeout(() => {
+    handleClose();
+  }, 300);
+}
+
 async function handleCopyUrl() {
   if (!publishedUrl.value) return;
   try {
@@ -319,7 +370,7 @@ async function handleCopyUrl() {
       isCopied.value = false;
     }, 2000);
   } catch (_) {
-    Message.error('复制失败，请手动复制链接');
+    Message.error(t('publish.copyFailed'));
   }
 }
 </script>
