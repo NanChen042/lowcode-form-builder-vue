@@ -57,7 +57,7 @@
 
     <div
       ref="weightBarRef"
-      class="risk-weight-selector mt-3 ml-[26px] inline-flex items-center flex-wrap gap-2 select-none cursor-pointer touch-none"
+      class="risk-weight-selector mt-2.5 ml-[26px] inline-flex items-center p-1 bg-slate-100/90 rounded-lg border border-slate-200/70 gap-1 select-none cursor-pointer touch-none shadow-2xs"
       @mousedown.stop.prevent="startDragWeight"
     >
       <button
@@ -65,11 +65,11 @@
         :key="w"
         :data-weight-val="w"
         type="button"
-        class="w-9 h-8 rounded-[6px] text-[13px] transition-all duration-100 flex items-center justify-center cursor-pointer pointer-events-none"
+        class="w-8 h-7 sm:w-8.5 sm:h-7.5 rounded-[5px] text-[12.5px] font-semibold transition-all duration-120 flex items-center justify-center cursor-pointer pointer-events-none tabular-nums"
         :class="
           (element.weight ?? 1) === w
-            ? 'bg-[#1677ff] border border-[#1677ff] text-white font-semibold shadow-sm shadow-blue-500/20'
-            : 'bg-white border border-slate-200/90 text-slate-700 font-medium hover:border-[#1677ff] hover:text-[#1677ff] hover:bg-blue-50/30 shadow-2xs'
+            ? 'bg-[#1677ff] text-white shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
         "
       >
         {{ w }}

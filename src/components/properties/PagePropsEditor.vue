@@ -35,6 +35,35 @@
       </div>
     </div>
 
+    <div v-else-if="isRisk" id="risk-page-prop-editor" class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div>
+          <span class="text-[12px] font-semibold text-slate-700">
+            {{ store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估问卷' }}
+          </span>
+          <span class="block text-[11px] text-slate-400">
+            {{ store.currentLocale === 'en' ? 'Questionnaire Rules' : '固定规范说明' }}
+          </span>
+        </div>
+        <a-tag color="arcoblue" size="small" class="text-[11px] font-normal">
+          {{ store.currentLocale === 'en' ? 'System Fixed' : '系统固定' }}
+        </a-tag>
+      </div>
+
+      <div class="p-3.5 bg-slate-50/80 rounded-lg border border-slate-200/80 text-[12px] text-slate-600 leading-relaxed space-y-2">
+        <div class="font-semibold text-slate-800">
+          {{ store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估' }}
+        </div>
+        <div class="text-slate-500 text-[12px] leading-5">
+          {{ store.currentLocale === 'en' ? 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight.' : '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。' }}
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-400 leading-normal px-0.5">
+        {{ store.currentLocale === 'en' ? 'This description is fixed by the system and does not require property configuration.' : '此说明文案由系统固定下发，无需在属性面板中配置。' }}
+      </div>
+    </div>
+
     <a-form v-else id="page-prop-editor" :model="page" layout="vertical" size="small">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3.5">
         <div>
@@ -113,7 +142,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormPage, ProfileType } from '@/types/schema';
-import { store, markDirty, deletePage, isBilingual } from '@/core/store';
+import { store, markDirty, deletePage, isBilingual, isRisk } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import {
   Building2,

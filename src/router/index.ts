@@ -27,16 +27,6 @@ const router = createRouter({
       component: BuilderView
     },
     {
-      path: '/caller',
-      name: 'Caller',
-      component: () => import('@/views/CallerHostView.vue')
-    },
-    {
-      path: '/form-builder/caller',
-      name: 'CallerSubpath',
-      component: () => import('@/views/CallerHostView.vue')
-    },
-    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('@/views/NotFoundView.vue')
@@ -46,9 +36,8 @@ const router = createRouter({
 
 // PC 端与 Algo 母系统互通：登录态强校验前置守卫
 router.beforeEach(async (to, _from, next) => {
-  // 1. 本地调用中心 (Caller) 或显式调试参数 (bypass_auth=1 / mock=all) 直接放行
+  // 1. 显式调试参数 (bypass_auth=1 / mock=all) 直接放行
   if (
-    to.path.includes('/caller') ||
     to.query.bypass_auth === '1' ||
     to.query.mock === 'all' ||
     to.query.mock === 'true'
@@ -111,4 +100,3 @@ router.beforeEach(async (to, _from, next) => {
 });
 
 export default router;
-

@@ -103,6 +103,16 @@
             </span>
           </div>
         </template>
+        <template v-else-if="isRisk">
+          <div class="w-full select-none">
+            <h2 class="text-xl font-bold tracking-tight text-slate-800 leading-7">
+              {{ store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估' }}
+            </h2>
+            <p class="mt-1.5 w-full text-[14px] leading-6 text-slate-500">
+              {{ store.currentLocale === 'en' ? 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight.' : '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。' }}
+            </p>
+          </div>
+        </template>
         <template v-else>
           <EditableText
             v-model="displayPageTitle"
@@ -221,33 +231,31 @@
             </div>
 
 
-            <div class="px-3 py-1 bg-slate-50/40 border-t border-slate-100/90">
-              <a-button
-                type="text"
-                size="small"
-                class="!text-[#1677ff] hover:!bg-blue-50/70 !font-medium !rounded-[4px]"
+            <div class="px-4 py-2 bg-slate-50/40 border-t border-slate-100 flex items-center">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-medium text-[#1677ff] hover:bg-blue-50/80 rounded transition-colors cursor-pointer"
                 @click.stop="addElement('radio', page.id, grp.id)"
               >
-                <template #icon>
-                  <Plus class="h-3.5 w-3.5 stroke-[2.2]" />
-                </template>
-                {{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}
-              </a-button>
+                <Plus class="h-3.5 w-3.5 stroke-[2.2]" />
+                <span>{{ store.currentLocale === 'en' ? 'Add Question' : '添加问题' }}</span>
+              </button>
             </div>
           </div>
         </div>
 
-        <a-button
-          type="outline"
-          long
-          class="!h-10 !rounded-md !font-semibold"
-          @click.stop="addQuestionGroup()"
-        >
-          <template #icon>
-            <Plus class="h-4 w-4 stroke-[2.2]" />
-          </template>
-          {{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}
-        </a-button>
+        <div class="flex items-center justify-center pt-2 pb-1">
+          <button
+            type="button"
+            class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-dashed border-slate-300 bg-white hover:border-[#1677ff] hover:bg-blue-50/40 text-slate-700 hover:text-[#1677ff] text-[13px] font-medium shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer"
+            @click.stop="addQuestionGroup()"
+          >
+            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-slate-500 group-hover:bg-[#1677ff] group-hover:text-white transition-colors">
+              <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+            </span>
+            <span>{{ store.currentLocale === 'en' ? 'Add Question Group' : '添加问题分组' }}</span>
+          </button>
+        </div>
       </div>
 
       <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-b-2xl">

@@ -927,6 +927,11 @@ export function buildSchema(): FormSchema {
       pageCopy.description_en = p.description_en;
     }
 
+    if (isRisk.value) {
+      delete pageCopy.description;
+      delete pageCopy.description_en;
+    }
+
     return pageCopy;
   });
 
