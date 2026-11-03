@@ -20,6 +20,9 @@
         </div>
         <div v-if="!isRisk" class="flex items-center gap-1.5 font-normal select-none">
           <span class="text-[11px] text-slate-400">{{ t('prop.showLabel') }}</span>
+          <a-tooltip :content="t('prop.showLabelTip')" position="top">
+            <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+          </a-tooltip>
           <a-switch v-model="isShowLabel" size="small" />
         </div>
       </div>
@@ -35,6 +38,10 @@
         @blur="clearFocus"
         @input="markDirty"
       />
+      <div v-if="!isRisk && !isShowLabel" class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+        <span>{{ t('prop.hiddenLabelNote') }}</span>
+      </div>
     </div>
 
     <template v-if="isRisk">

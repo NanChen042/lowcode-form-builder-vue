@@ -437,7 +437,7 @@ function quickInsertFollowupField(option: FormElementOption, type: ComponentType
   if (!currentPage.value || !props.element || isMaxDepthReached.value) return;
   const newEl = createElement(type);
   newEl.label = typeLabel || t('options.singleInputDefault');
-  newEl.required = false;
+  newEl.required = true;
   newEl.defaultValue = '';
   newEl.dependsOn = {
     fieldKey: props.element.key,

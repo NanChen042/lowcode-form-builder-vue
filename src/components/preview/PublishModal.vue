@@ -31,14 +31,14 @@
         <div class="w-full flex items-center justify-center gap-3">
           <a-button
             type="primary"
-            class="h-9 px-5 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium"
-            @click="handleBackToRiskSetting"
+            class="h-9 px-5 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium flex-1"
+            @click="handleBackToFormSetting"
           >
             {{ t('publish.backToRiskSetting') }}
           </a-button>
 
           <a-button
-            class="h-9 px-5 rounded-md flex items-center justify-center gap-1.5 text-xs font-medium text-slate-700"
+            class="h-9 px-5 rounded-md flex items-center justify-center gap-1.5 text-xs font-medium text-slate-700 flex-1"
             @click="handleClosePage"
           >
             {{ t('publish.closePage') }}
@@ -46,43 +46,49 @@
         </div>
       </template>
 
-      <!-- 标准/KYC模式：展示公网访问链接与复制按钮 -->
+      <!-- 标准/KYC模式：展示公网访问链接与操作按钮 -->
       <template v-else>
-        <p class="text-xs text-slate-500 m-0 mb-4 max-w-[340px] leading-relaxed">
+        <p class="text-xs text-slate-500 m-0 mb-4 max-w-[360px] leading-relaxed">
           {{ t('publish.successDesc') }}
         </p>
 
-        <div class="w-full space-y-3">
-          <a
-            :href="publishedUrl"
-            target="_blank"
-            class="group flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-blue-50/70 border border-slate-200/90 hover:border-blue-300 transition-all text-left no-underline cursor-pointer"
-            :title="t('publish.openPreviewTip')"
+        <div class="w-full space-y-4">
+          <div
+            class="group flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200/90 text-left transition-all hover:border-slate-300"
           >
             <div class="flex items-center gap-2 min-w-0 flex-1 pr-3">
-              <Link2 class="w-4 h-4 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
-              <span class="text-xs text-slate-600 group-hover:text-blue-600 font-mono break-all select-all leading-relaxed transition-colors">
+              <Link2 class="w-4 h-4 text-slate-400 shrink-0" />
+              <span class="text-xs text-slate-600 font-mono break-all select-all leading-relaxed">
                 {{ publishedUrl }}
               </span>
             </div>
-            <span class="text-xs text-slate-400 group-hover:text-blue-600 flex items-center gap-1 shrink-0 font-medium transition-colors">
+            <a
+              :href="publishedUrl"
+              target="_blank"
+              class="text-xs text-[#1677ff] hover:text-blue-700 flex items-center gap-1 font-medium transition-colors no-underline px-2.5 py-1 rounded hover:bg-blue-50 shrink-0"
+              :title="t('publish.openPreviewTip')"
+            >
               <span>{{ t('publish.openPreview') }}</span>
               <ExternalLink class="w-3.5 h-3.5" />
-            </span>
-          </a>
+            </a>
+          </div>
 
-          <a-button
-            type="primary"
-            long
-            class="h-9 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium"
-            @click="handleCopyUrl"
-          >
-            <template #icon>
-              <Check v-if="isCopied" class="w-4 h-4" />
-              <Copy v-else class="w-4 h-4" />
-            </template>
-            {{ isCopied ? t('publish.copied') : t('publish.copyLink') }}
-          </a-button>
+          <div class="w-full flex items-center justify-center gap-3">
+            <a-button
+              type="primary"
+              class="h-9 px-5 rounded-md bg-[#1677ff] flex items-center justify-center gap-1.5 text-xs font-medium flex-1"
+              @click="handleBackToFormSetting"
+            >
+              {{ t('publish.backToRiskSetting') }}
+            </a-button>
+
+            <a-button
+              class="h-9 px-5 rounded-md flex items-center justify-center gap-1.5 text-xs font-medium text-slate-700 flex-1"
+              @click="handleClosePage"
+            >
+              {{ t('publish.closePage') }}
+            </a-button>
+          </div>
         </div>
       </template>
     </div>
@@ -177,7 +183,7 @@ import { store, buildSchema, isBilingual, primaryLocale, establishBaseline, sync
 import { t } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
-import { Check, Copy, ExternalLink, Link2 } from '@lucide/vue';
+import { Check, ExternalLink, Link2 } from '@lucide/vue';
 
 const props = defineProps<{
   visible: boolean;
@@ -206,7 +212,6 @@ const nameError = ref(false);
 const isSubmitting = ref(false);
 const isSuccess = ref(false);
 const publishedUrl = ref('');
-const isCopied = ref(false);
 
 const titleInputZhRef = ref<any>(null);
 const titleInputEnRef = ref<any>(null);
@@ -222,7 +227,6 @@ watch(
     if (val) {
       isSuccess.value = false;
       nameError.value = false;
-      isCopied.value = false;
 
       formModel.titleZh = store.meta.title || '';
       formModel.titleEn = store.meta.title_en || '';
@@ -326,8 +330,8 @@ async function handleConfirmPublish() {
   }
 }
 
-function handleBackToRiskSetting() {
-  const targetUrl = '/pc/csp/formsetting?tab=risk';
+function handleBackToFormSetting() {
+  const targetUrl = isRisk.value ? '/pc/csp/formsetting?tab=risk' : '/pc/csp/formsetting?tab=kyc';
   try {
     if (window.opener && !window.opener.closed) {
       window.opener.location.href = targetUrl;
@@ -349,28 +353,5 @@ function handleClosePage() {
   setTimeout(() => {
     handleClose();
   }, 300);
-}
-
-async function handleCopyUrl() {
-  if (!publishedUrl.value) return;
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(publishedUrl.value);
-    } else {
-      const textarea = document.createElement('textarea');
-      textarea.value = publishedUrl.value;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
-    isCopied.value = true;
-    Message.success(t('publish.copySuccess'));
-    setTimeout(() => {
-      isCopied.value = false;
-    }, 2000);
-  } catch (_) {
-    Message.error(t('publish.copyFailed'));
-  }
 }
 </script>

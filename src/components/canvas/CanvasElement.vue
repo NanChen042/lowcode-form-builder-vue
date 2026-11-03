@@ -66,6 +66,11 @@
         {{ t('canvas.conditionPrefix', undefined, { option: triggerOptName }) }}
         <span v-if="elementDepth >= 2" class="text-[9.5px] bg-blue-100/90 text-blue-700 px-1 py-0.2 rounded font-semibold ml-0.5">{{ t('canvas.tier2') }}</span>
       </span>
+      <span
+        v-if="element.showLabel === false && element.required"
+        class="text-[#ff4d4f] font-bold text-[13px] leading-none select-none"
+        :title="t('prop.required')"
+      >*</span>
     </div>
 
     <component :is="renderComponent" :element="element" />

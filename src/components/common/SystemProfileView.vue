@@ -73,33 +73,41 @@
       </div>
     </div>
 
-    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
-      <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3">
+    <div v-if="profileType === 'individual' || profileType === 'entity'" class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+      <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
         <div class="flex items-center gap-2">
+          <Link2 class="h-4 w-4 text-[#1677ff]" />
           <span class="text-[13px] font-bold text-slate-800">
             {{ t('profile.associatedInfo') }}
           </span>
         </div>
       </div>
 
-      <div class="rounded-xl bg-white border border-slate-200/80 p-3 shadow-2xs">
-        <div class="text-[11.5px] text-slate-400 font-medium">
-          {{ t('profile.associatedEntity') }}
-        </div>
-        <div class="mt-1">
-          <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
-            <a-skeleton-line :rows="1" :widths="['35%']" />
-          </a-skeleton>
-          <div v-else class="text-[13.5px] font-bold text-slate-900 tracking-tight font-mono">
-            {{ profileType === 'entity' ? 'Algo Global Trading Pte. Ltd.' : 'SG-CORP-CDD-001' }}
+      <div class="space-y-3">
+        <div class="border-b border-slate-50 pb-2.5">
+          <div class="text-[11.5px] text-slate-400 font-medium">
+            {{ t('profile.associatedEntity') }}
+          </div>
+          <div class="mt-0.5">
+            <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
+              <a-skeleton-line :rows="1" :widths="['35%']" />
+            </a-skeleton>
+            <div v-else class="text-[13.5px] font-bold text-slate-900 tracking-tight font-mono">
+              {{ profileType === 'entity' ? 'Algo Global Trading Pte. Ltd.' : 'SG-CORP-CDD-001' }}
+            </div>
           </div>
         </div>
 
-        <div v-if="profileType === 'individual'" class="mt-3 pt-2.5 border-t border-slate-200/50">
+        <div v-if="profileType === 'individual'">
           <div class="text-[11.5px] text-slate-400 font-medium mb-1.5">
             {{ t('profile.relationshipType') }}
           </div>
-          <div class="flex items-center gap-1.5 flex-wrap">
+          <div v-if="showSkeleton" class="mt-0.5">
+            <a-skeleton :animation="true" class="w-full">
+              <a-skeleton-line :rows="1" :widths="['35%']" />
+            </a-skeleton>
+          </div>
+          <div v-else class="flex items-center gap-1.5 flex-wrap">
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-[#1677ff] border border-blue-100">
               {{ t('profile.shareholder') }}
             </span>
@@ -109,6 +117,65 @@
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-[#1677ff] border border-blue-100">
               {{ t('profile.partner') }}
             </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 股份与出资信息卡片 (针对 individual / entity 展示) -->
+    <div v-if="hasCapital" class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+      <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
+        <div class="flex items-center gap-2">
+          <CircleDollarSign class="h-4 w-4 text-[#1677ff]" />
+          <span class="text-[13px] font-bold text-slate-800">
+            {{ t('profile.capitalTitle') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="border-b border-slate-50 pb-2.5">
+          <div class="text-[11.5px] text-slate-400 font-medium">
+            {{ t('profile.shareClass') }}
+          </div>
+          <div class="mt-0.5">
+            <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
+              <a-skeleton-line :rows="1" :widths="['45%']" />
+            </a-skeleton>
+            <div v-else class="text-[13.5px] font-bold text-slate-900 tracking-tight font-sans">
+              SGD · 普通股
+            </div>
+          </div>
+        </div>
+
+        <div class="border-b border-slate-50 pb-2.5">
+          <div class="text-[11.5px] text-slate-400 font-medium">
+            {{ t('profile.sharesHeld') }}
+          </div>
+          <div class="mt-0.5">
+            <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
+              <a-skeleton-line :rows="1" :widths="['35%']" />
+            </a-skeleton>
+            <div v-else class="flex items-center gap-1.5 text-[13.5px] font-bold text-slate-900 tracking-tight font-sans">
+              <span>10,000</span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/60">
+                25.00%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-[11.5px] text-slate-400 font-medium">
+            {{ t('profile.paidUpAmount') }}
+          </div>
+          <div class="mt-0.5">
+            <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
+              <a-skeleton-line :rows="1" :widths="['40%']" />
+            </a-skeleton>
+            <div v-else class="text-[13.5px] font-bold text-slate-900 tracking-tight font-sans">
+              10,000.00 SGD
+            </div>
           </div>
         </div>
       </div>
@@ -124,7 +191,9 @@ import { formatInlineText } from '@/utils/alertParser';
 import {
   Info,
   Building2,
-  User
+  User,
+  Link2,
+  CircleDollarSign
 } from '@lucide/vue';
 
 const props = withDefaults(
@@ -200,6 +269,10 @@ const repFields = computed(() => {
     { label: t('profile.field.phone'), value: '+65 8123 1232', skeletonWidth: '55%' },
     { label: t('profile.field.email'), value: 'compliance@example.com', skeletonWidth: '65%' }
   ];
+});
+
+const hasCapital = computed(() => {
+  return props.profileType === 'individual' || props.profileType === 'entity';
 });
 </script>
 
