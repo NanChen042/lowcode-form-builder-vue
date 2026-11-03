@@ -36,6 +36,125 @@
           @select="handleQuickAddComponent"
         />
 
+        <a-dsubmenu
+          v-if="!isRisk && !isTargetChoiceComponent && upstreamLinkableParents.length > 0"
+          value="elem-link-parent"
+          trigger="hover"
+        >
+          <template #icon>
+            <Link2 class="h-4 w-4 text-[#1677ff]" />
+          </template>
+          <template #default>
+            <span class="text-[13px] text-slate-700">{{ t('context.linkComponent') }}</span>
+          </template>
+          <template #content>
+            <a-dsubmenu
+              v-for="parentItem in upstreamLinkableParents"
+              :key="parentItem.field.id"
+              :value="`link_p_${parentItem.field.id}`"
+              trigger="hover"
+            >
+              <template #default>
+                <div class="flex items-center justify-between gap-2 max-w-[210px]">
+                  <span
+                    class="text-[13px] truncate"
+                    :class="parentItem.isLinked ? 'text-[#1677ff] font-medium' : 'text-slate-700'"
+                  >
+                    #{{ parentItem.orderNum }} {{ parentItem.title }}
+                  </span>
+                  <span class="text-[11px] text-slate-400 shrink-0">
+                    {{ t(`comp.${parentItem.field.type}`) }}
+                  </span>
+                </div>
+              </template>
+              <template #content>
+                <a-doption
+                  v-for="opt in parentItem.field.options"
+                  :key="`${parentItem.field.id}_${opt.value}`"
+                  @click="handleToggleUpstreamParentOption(parentItem.field, opt)"
+                >
+                  <div class="flex items-center justify-between gap-3 min-w-[130px]">
+                    <span
+                      class="text-[13px] truncate max-w-[160px]"
+                      :class="isLinkedToParentOption(parentItem.field, opt) ? 'text-[#1677ff] font-semibold' : 'text-slate-700'"
+                    >
+                      {{ getOptionLabel(opt) || opt.value }}
+                    </span>
+                    <Check
+                      v-if="isLinkedToParentOption(parentItem.field, opt)"
+                      class="h-3.5 w-3.5 text-[#1677ff] shrink-0"
+                    />
+                  </div>
+                </a-doption>
+              </template>
+            </a-dsubmenu>
+          </template>
+        </a-dsubmenu>
+
+        <a-dsubmenu
+          v-else-if="!isRisk && isTargetChoiceComponent && downstreamLinkableTargets.length > 0"
+          value="elem-link-child"
+          trigger="hover"
+        >
+          <template #icon>
+            <Link2 class="h-4 w-4 text-[#1677ff]" />
+          </template>
+          <template #default>
+            <span class="text-[13px] text-slate-700">{{ t('context.linkComponent') }}</span>
+          </template>
+          <template #content>
+            <a-dsubmenu
+              v-for="opt in targetElement?.options"
+              :key="`down_opt_${opt.value}`"
+              :value="`down_opt_${opt.value}`"
+              trigger="hover"
+            >
+              <template #default>
+                <div class="flex items-center justify-between gap-2 min-w-[130px] max-w-[200px]">
+                  <span
+                    class="text-[13px] truncate"
+                    :class="hasAnyDownstreamLinkedToOption(opt) ? 'text-[#1677ff] font-medium' : 'text-slate-700'"
+                  >
+                    {{ getOptionLabel(opt) || opt.value }}
+                  </span>
+                </div>
+              </template>
+              <template #content>
+                <a-doption
+                  v-for="downItem in downstreamLinkableTargets"
+                  :key="`${opt.value}_${downItem.field.id}`"
+                  @click="handleToggleDownstreamTarget(opt, downItem.field)"
+                >
+                  <div class="flex items-center justify-between gap-2.5 min-w-[170px] max-w-[230px]">
+                    <span
+                      class="text-[13px] truncate"
+                      :class="isDownstreamLinkedToOption(downItem.field, opt) ? 'text-[#1677ff] font-semibold' : 'text-slate-700'"
+                    >
+                      #{{ downItem.orderNum }} {{ downItem.title }}
+                    </span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <span class="text-[11px] text-slate-400">
+                        {{ t(`comp.${downItem.field.type}`) }}
+                      </span>
+                      <Check
+                        v-if="isDownstreamLinkedToOption(downItem.field, opt)"
+                        class="h-3.5 w-3.5 text-[#1677ff] shrink-0"
+                      />
+                    </div>
+                  </div>
+                </a-doption>
+              </template>
+            </a-dsubmenu>
+          </template>
+        </a-dsubmenu>
+
+        <a-doption v-if="!isRisk && hasTargetLinkage" @click="handleUnlinkElement">
+          <template #icon>
+            <Unlink class="h-4 w-4 text-amber-500" />
+          </template>
+          <span>{{ t('context.unlinkElement') }}</span>
+        </a-doption>
+
         <a-divider style="margin: 4px 0" />
 
         <a-doption class="context-danger-option" @click="handleDeleteElement">
@@ -136,7 +255,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ComponentType } from '@/types/schema';
+import type { ComponentType, FormElement, FormElementOption } from '@/types/schema';
 import {
   addPage,
   deletePage,
@@ -146,12 +265,22 @@ import {
   deleteElement,
   addElement,
   clearSelection,
+  markDirty,
   isRisk,
   store
 } from '@/core/store';
-import { t } from '@/core/i18n';
+import { t, getFieldText, getOptionLabel } from '@/core/i18n';
+import {
+  getDirectChildren,
+  getFieldDepthInPage,
+  getSubtreeDepth,
+  isParentLinkedToTargetWithOption,
+  isParentLinkedToTargetAnyOption,
+  toggleParentOptionLink,
+  unlinkElementFromGroup
+} from '@/utils/helpers';
 import { Modal } from '@arco-design/web-vue';
-import { FilePlus, Expand, Trash2, Copy, Lock, Plus } from '@lucide/vue';
+import { FilePlus, Expand, Trash2, Copy, Lock, Plus, Link2, Unlink, Check } from '@lucide/vue';
 import ComponentCascadeMenu from './ComponentCascadeMenu.vue';
 
 const props = withDefaults(
@@ -179,6 +308,149 @@ const emit = defineEmits<{
 const targetPage = computed(() => {
   return props.targetPageId ? store.pages.find(p => p.id === props.targetPageId) : null;
 });
+
+const resolvedTargetPage = computed(() => {
+  if (targetPage.value) return targetPage.value;
+  if (!props.targetElementId) return null;
+  return store.pages.find(p => p.fields?.some(f => f.id === props.targetElementId)) || null;
+});
+
+const targetElement = computed(() => {
+  if (!props.targetElementId || !resolvedTargetPage.value?.fields) return null;
+  return resolvedTargetPage.value.fields.find(f => f.id === props.targetElementId) || null;
+});
+
+const hasTargetLinkage = computed(() => {
+  if (!targetElement.value || !resolvedTargetPage.value?.fields) return false;
+  if (targetElement.value.linkage?.conditions?.length) return true;
+  return getDirectChildren(resolvedTargetPage.value.fields, targetElement.value.key).length > 0;
+});
+
+const isTargetChoiceComponent = computed(() => {
+  if (!targetElement.value) return false;
+  return ['radio', 'select', 'checkbox'].includes(targetElement.value.type) && Boolean(targetElement.value.options?.length);
+});
+
+const upstreamLinkableParents = computed(() => {
+  if (isRisk.value || isTargetChoiceComponent.value || !targetElement.value || !resolvedTargetPage.value?.fields) return [];
+  const fields = resolvedTargetPage.value.fields;
+
+  return fields
+    .map((f, idx) => ({ field: f, idx }))
+    .filter(({ field }) => {
+      if (field.id === targetElement.value!.id) return false;
+      if (getFieldDepthInPage(field, fields) >= 2) return false;
+      return ['radio', 'select', 'checkbox'].includes(field.type) && Boolean(field.options?.length);
+    })
+    .map(({ field, idx }) => ({
+      field,
+      orderNum: idx + 1,
+      title: getFieldText(field, 'label', undefined, true) || field.label || field.key,
+      isLinked: isParentLinkedToTargetAnyOption(fields, field, targetElement.value!)
+    }));
+});
+
+const downstreamLinkableTargets = computed(() => {
+  if (isRisk.value || !isTargetChoiceComponent.value || !targetElement.value || !resolvedTargetPage.value?.fields) {
+    return [];
+  }
+  const fields = resolvedTargetPage.value.fields;
+  const myDepth = getFieldDepthInPage(targetElement.value, fields);
+  if (myDepth >= 2) return [];
+
+  const ancestorKeys = new Set<string>();
+  const collectAncestors = (el: FormElement | undefined) => {
+    const conds = el?.linkage?.conditions;
+    if (!conds) return;
+    for (const c of conds) {
+      if (!ancestorKeys.has(c.fieldKey)) {
+        ancestorKeys.add(c.fieldKey);
+        const parent = fields.find(f => f.key === c.fieldKey);
+        if (parent) collectAncestors(parent);
+      }
+    }
+  };
+  collectAncestors(targetElement.value);
+
+  return fields
+    .map((f, idx) => ({ field: f, idx }))
+    .filter(({ field }) => {
+      if (field.id === targetElement.value!.id || ancestorKeys.has(field.key)) return false;
+      const targetSubtreeDepth = getSubtreeDepth(field, fields);
+      return myDepth + 1 + targetSubtreeDepth <= 2;
+    })
+    .map(({ field, idx }) => ({
+      field,
+      orderNum: idx + 1,
+      title: getFieldText(field, 'label', undefined, true) || field.label || field.key
+    }));
+});
+
+function isLinkedToParentOption(parent: FormElement, opt: FormElementOption): boolean {
+  if (!targetElement.value || !resolvedTargetPage.value?.fields) return false;
+  return isParentLinkedToTargetWithOption(
+    resolvedTargetPage.value.fields,
+    parent,
+    opt,
+    targetElement.value
+  );
+}
+
+function isDownstreamLinkedToOption(downField: FormElement, opt: FormElementOption): boolean {
+  if (!targetElement.value || !resolvedTargetPage.value?.fields) return false;
+  return isParentLinkedToTargetWithOption(
+    resolvedTargetPage.value.fields,
+    targetElement.value,
+    opt,
+    downField
+  );
+}
+
+function hasAnyDownstreamLinkedToOption(opt: FormElementOption): boolean {
+  return downstreamLinkableTargets.value.some(item => isDownstreamLinkedToOption(item.field, opt));
+}
+
+function handleToggleUpstreamParentOption(parent: FormElement, opt: FormElementOption) {
+  try {
+    const el = targetElement.value;
+    const page = resolvedTargetPage.value;
+    if (!el || !page?.fields) return;
+    toggleParentOptionLink(page.fields, parent, opt, el);
+    markDirty();
+  } catch (err) {
+    console.error('Failed to link upstream parent option via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
+
+function handleToggleDownstreamTarget(opt: FormElementOption, downField: FormElement) {
+  try {
+    const el = targetElement.value;
+    const page = resolvedTargetPage.value;
+    if (!el || !page?.fields) return;
+    toggleParentOptionLink(page.fields, el, opt, downField);
+    markDirty();
+  } catch (err) {
+    console.error('Failed to link downstream target via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
+
+function handleUnlinkElement() {
+  try {
+    const el = targetElement.value;
+    const page = resolvedTargetPage.value;
+    if (!el || !page?.fields) return;
+    unlinkElementFromGroup(page.fields, el);
+    markDirty();
+  } catch (err) {
+    console.error('Failed to unlink element via context menu:', err);
+  } finally {
+    emit('close');
+  }
+}
 
 const isTargetSystemProfilePage = computed(() => {
   if (!props.targetPageId) return false;

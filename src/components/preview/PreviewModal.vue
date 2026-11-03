@@ -418,42 +418,41 @@ watch(
   { immediate: true }
 );
 
-function isFieldVisibleInForm(field: FormElement): boolean {
-  let cur: FormElement | undefined = field;
-  const visited = new Set<string>();
-  const allFields = pages.value.flatMap(p => p.fields || []);
+function isFieldVisibleInForm(
+  field: FormElement | undefined,
+  allFields = pages.value.flatMap(p => p.fields || []),
+  visited = new Set<string>()
+): boolean {
+  if (!field) return true;
+  const conds = field.linkage?.conditions;
+  if (!conds || conds.length === 0) return true;
+  if (visited.has(field.key)) return true;
+  const nextVisited = new Set(visited);
+  nextVisited.add(field.key);
 
-  while (cur?.dependsOn) {
-    const parentKey: string = cur.dependsOn.fieldKey;
-    const targetVal: any = cur.dependsOn.value;
-    if (visited.has(parentKey)) break;
-    visited.add(parentKey);
-
-    const parentVal = formData[parentKey];
-    let matches = false;
-    if (parentVal === targetVal) {
-      matches = true;
-    } else if (Array.isArray(parentVal)) {
-      matches = parentVal.includes(targetVal);
-    } else if (typeof parentVal === 'string' && parentVal) {
-      const list = parseMultiValue(parentVal);
-      matches = list.includes(targetVal);
-    }
-
-    if (!matches) {
+  const evaluateCondition = (cond: { fieldKey: string; value: string }): boolean => {
+    const parentField = allFields.find(f => f.key === cond.fieldKey);
+    if (parentField && !isFieldVisibleInForm(parentField, allFields, nextVisited)) {
       return false;
     }
+    const parentVal = formData[cond.fieldKey];
+    if (parentVal === cond.value) return true;
+    if (Array.isArray(parentVal)) return parentVal.includes(cond.value);
+    if (typeof parentVal === 'string' && parentVal) {
+      return parseMultiValue(parentVal).includes(cond.value);
+    }
+    return false;
+  };
 
-    cur = allFields.find(f => f.key === parentKey);
-  }
-
-  return true;
+  return field.linkage?.logic === 'or'
+    ? conds.some(evaluateCondition)
+    : conds.every(evaluateCondition);
 }
 
 function validateField(field: FormElement): string | null {
   if (field.type === 'alert') return null;
 
-  if (field.dependsOn && !isFieldVisibleInForm(field)) {
+  if (field.linkage?.conditions?.length && !isFieldVisibleInForm(field)) {
     return null;
   }
 

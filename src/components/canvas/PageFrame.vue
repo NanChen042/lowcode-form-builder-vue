@@ -274,6 +274,58 @@
           </p>
         </div>
 
+        <svg
+          v-if="!store.isDraggingComponent && linkageSvgRuns.length > 0"
+          class="branch-line-decor pointer-events-none absolute inset-0 w-full h-full overflow-visible z-20"
+        >
+          <g v-for="run in linkageSvgRuns" :key="run.key">
+            <path
+              :d="run.trunkPath"
+              fill="none"
+              stroke="#3b82f6"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <line
+              v-for="pLine in run.parentBranches"
+              :key="pLine.key"
+              :x1="pLine.x1"
+              :y1="pLine.y"
+              :x2="pLine.x2"
+              :y2="pLine.y"
+              stroke="#3b82f6"
+              stroke-width="2"
+            />
+            <line
+              v-for="cLine in run.childBranches"
+              :key="cLine.key"
+              :x1="cLine.x1"
+              :y1="cLine.y"
+              :x2="cLine.x2"
+              :y2="cLine.y"
+              stroke="#3b82f6"
+              stroke-width="2"
+            />
+            <polygon
+              v-for="arrow in run.arrows"
+              :key="arrow.key"
+              :points="arrow.points"
+              fill="#3b82f6"
+            />
+            <circle
+              v-for="dot in run.dots"
+              :key="dot.key"
+              :cx="dot.x"
+              :cy="dot.y"
+              r="3.5"
+              fill="#3b82f6"
+              stroke="#ffffff"
+              stroke-width="1.2"
+            />
+          </g>
+        </svg>
+
         <div
           ref="dropzoneRef"
           class="canvas-dropzone relative z-10 flex-1 min-h-[520px] p-3 transition-colors duration-200"
@@ -282,6 +334,7 @@
             'bg-blue-50/15': store.isDraggingComponent
           }"
           :data-page-id="page.id"
+          :style="page.fields.some(f => f.linkage?.conditions?.length) ? { paddingLeft: '24px' } : undefined"
           @click.self="selectPage(page.id)"
         >
           <div
@@ -326,6 +379,7 @@ import {
   markDirty
 } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
+import { getConnectedLinkageGroup, getDirectChildren } from '@/utils/helpers';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -348,6 +402,220 @@ const riskGroupsContainerRef = ref<HTMLElement | null>(null);
 let riskGroupsSortable: Sortable | null = null;
 const riskGroupDropzoneEls = new Map<string, HTMLElement>();
 const riskGroupSortables = new Map<string, Sortable>();
+
+const linkageLayoutTick = ref(0);
+let linkageResizeObserver: ResizeObserver | null = null;
+let linkageMutationObserver: MutationObserver | null = null;
+
+function refreshLinkageLayout() {
+  linkageLayoutTick.value++;
+}
+
+function syncLinkageObservers() {
+  if (!dropzoneRef.value || isRisk.value || isSystemProfile.value) return;
+  if (linkageResizeObserver) {
+    linkageResizeObserver.disconnect();
+    linkageResizeObserver.observe(dropzoneRef.value);
+    dropzoneRef.value.querySelectorAll('.canvas-element').forEach(el => {
+      linkageResizeObserver?.observe(el);
+    });
+  }
+  refreshLinkageLayout();
+}
+
+interface LinkageSvgRun {
+  key: string;
+  trunkPath: string;
+  parentBranches: Array<{ key: string; x1: number; x2: number; y: number }>;
+  childBranches: Array<{ key: string; x1: number; x2: number; y: number }>;
+  arrows: Array<{ key: string; points: string }>;
+  dots: Array<{ key: string; x: number; y: number }>;
+}
+
+const linkageSvgRuns = computed<LinkageSvgRun[]>(() => {
+  void linkageLayoutTick.value;
+  if (isRisk.value || isSystemProfile.value || store.isDraggingComponent) return [];
+  const dz = dropzoneRef.value;
+  const fields = props.page.fields || [];
+  if (!dz || fields.length === 0) return [];
+
+  const getCardMetrics = (fieldId: string) => {
+    const groupEl = dz.querySelector(`[data-group-id="${fieldId}"]`) as HTMLElement | null;
+    if (!groupEl) return null;
+    const cardEl = (groupEl.querySelector(':scope > .canvas-element') || groupEl) as HTMLElement;
+    const left = dz.offsetLeft + groupEl.offsetLeft + cardEl.offsetLeft;
+    const top = dz.offsetTop + groupEl.offsetTop + cardEl.offsetTop;
+    const height = cardEl.offsetHeight;
+    return { left, top, height };
+  };
+
+  const keyToIdx = new Map<string, number>();
+  fields.forEach((f, idx) => {
+    if (f.key) keyToIdx.set(f.key, idx);
+  });
+
+  const rawIntervals: Array<{
+    min: number;
+    max: number;
+    parentKeys: Set<string>;
+    childIndices: Set<number>;
+  }> = [];
+
+  for (let idx = 0; idx < fields.length; idx++) {
+    const conds = fields[idx].linkage?.conditions;
+    if (!conds || conds.length === 0) continue;
+    let min = idx;
+    let max = idx;
+    const parentKeys = new Set<string>();
+    for (const c of conds) {
+      const pIdx = keyToIdx.get(c.fieldKey);
+      if (pIdx !== undefined) {
+        min = Math.min(min, pIdx);
+        max = Math.max(max, pIdx);
+        parentKeys.add(c.fieldKey);
+      }
+    }
+    rawIntervals.push({
+      min,
+      max,
+      parentKeys,
+      childIndices: new Set([idx])
+    });
+  }
+
+  if (rawIntervals.length === 0) return [];
+
+  rawIntervals.sort((a, b) => a.min - b.min || a.max - b.max);
+  const mergedIntervals: typeof rawIntervals = [];
+  for (const interval of rawIntervals) {
+    const prev = mergedIntervals[mergedIntervals.length - 1];
+    if (prev && interval.min <= prev.max) {
+      prev.max = Math.max(prev.max, interval.max);
+      for (const pk of interval.parentKeys) prev.parentKeys.add(pk);
+      for (const ci of interval.childIndices) prev.childIndices.add(ci);
+    } else {
+      mergedIntervals.push({
+        min: interval.min,
+        max: interval.max,
+        parentKeys: new Set(interval.parentKeys),
+        childIndices: new Set(interval.childIndices)
+      });
+    }
+  }
+
+  const runs: LinkageSvgRun[] = [];
+  const laneX = 12;
+  const cornerR = 4;
+
+  for (const group of mergedIntervals) {
+    interface TrunkNode {
+      id: string;
+      kind: 'parent' | 'child';
+      left: number;
+      endX: number;
+      y: number;
+      isMulti: boolean;
+    }
+
+    const nodes: TrunkNode[] = [];
+    for (let idx = group.min; idx <= group.max; idx++) {
+      const field = fields[idx];
+      const isChild = group.childIndices.has(idx);
+      const isParent = group.parentKeys.has(field.key);
+      if (!isChild && !isParent) continue;
+
+      const m = getCardMetrics(field.id);
+      if (!m) continue;
+
+      if (isChild) {
+        nodes.push({
+          id: field.id,
+          kind: 'child',
+          left: m.left,
+          endX: m.left - 5,
+          y: Math.round(m.top + 25),
+          isMulti: (field.linkage?.conditions?.length || 0) > 1
+        });
+      } else if (isParent) {
+        nodes.push({
+          id: field.id,
+          kind: 'parent',
+          left: m.left,
+          endX: m.left,
+          y: Math.round(m.top + m.height / 2),
+          isMulti: false
+        });
+      }
+    }
+
+    if (nodes.length === 0) continue;
+    nodes.sort((a, b) => a.y - b.y);
+
+    const runKey = `run_${group.min}_${group.max}`;
+    const firstNode = nodes[0];
+    const lastNode = nodes[nodes.length - 1];
+    const topY = firstNode.y;
+    const bottomY = lastNode.y;
+
+    let trunkPath = '';
+    if (nodes.length >= 2 && bottomY > topY) {
+      const r = Math.min(cornerR, Math.max(0, Math.floor((bottomY - topY) / 2)));
+      trunkPath = `M ${firstNode.endX} ${topY} H ${laneX + r} Q ${laneX} ${topY} ${laneX} ${topY + r} V ${bottomY - r} Q ${laneX} ${bottomY} ${laneX + r} ${bottomY} H ${lastNode.endX}`;
+    } else {
+      const fallbackTopY = topY - 8;
+      trunkPath = `M ${laneX} ${fallbackTopY} V ${bottomY - cornerR} Q ${laneX} ${bottomY} ${laneX + cornerR} ${bottomY} H ${lastNode.endX}`;
+    }
+
+    const parentBranches: Array<{ key: string; x1: number; x2: number; y: number }> = [];
+    const childBranches: Array<{ key: string; x1: number; x2: number; y: number }> = [];
+
+    for (let k = 1; k < nodes.length - 1; k++) {
+      const node = nodes[k];
+      if (node.kind === 'parent') {
+        parentBranches.push({
+          key: `pb_${runKey}_${node.id}`,
+          x1: laneX,
+          x2: node.endX,
+          y: node.y
+        });
+      } else {
+        childBranches.push({
+          key: `cb_${runKey}_${node.id}`,
+          x1: laneX,
+          x2: node.endX,
+          y: node.y
+        });
+      }
+    }
+
+    const arrows = nodes
+      .filter(n => n.kind === 'child')
+      .map(c => ({
+        key: `arr_${runKey}_${c.id}`,
+        points: `${c.left - 1},${c.y} ${c.left - 6},${c.y - 3.5} ${c.left - 6},${c.y + 3.5}`
+      }));
+
+    const dots: Array<{ key: string; x: number; y: number }> = [];
+    for (const n of nodes) {
+      if (n.kind === 'parent') {
+        dots.push({ key: `pdot_${runKey}_${n.id}`, x: n.left, y: n.y });
+      } else if (n.isMulti) {
+        dots.push({ key: `cdot_${runKey}_${n.id}`, x: laneX, y: n.y });
+      }
+    }
+
+    runs.push({
+      key: runKey,
+      trunkPath,
+      parentBranches,
+      childBranches,
+      arrows,
+      dots
+    });
+  }
+
+  return runs;
+});
 
 const isResizingCanvasWidth = ref(false);
 
@@ -685,30 +953,186 @@ interface ElementGroup {
 }
 
 const elementGroups = computed<ElementGroup[]>(() => {
-  const result: ElementGroup[] = [];
-  const fields = props.page.fields;
-  let currentGroup: ElementGroup | null = null;
-
-  for (let i = 0; i < fields.length; i++) {
-    const el = fields[i];
-    if (currentGroup && el.dependsOn && currentGroup.elements.some(m => m.key === el.dependsOn?.fieldKey)) {
-      currentGroup.elements.push(el);
-    } else {
-      currentGroup = {
-        id: el.id,
-        elements: [el]
-      };
-      result.push(currentGroup);
-    }
-  }
-
-  return result;
+  return props.page.fields.map(el => ({
+    id: el.id,
+    elements: [el]
+  }));
 });
 
 let globalDraggingGroup: {
   sourcePageId: string;
   group: ElementGroup;
+  isWholeGroupDrag: boolean;
+  liveElements: FormElement[];
+  handledDrop: boolean;
 } | null = null;
+
+function cleanupTempGroupDom(container: HTMLElement | null | undefined) {
+  if (!container) return;
+  container.querySelectorAll('[data-temp-ghost-clone]').forEach(el => el.remove());
+  container.querySelectorAll('[data-temp-orig-hidden]').forEach(el => {
+    (el as HTMLElement).style.display = '';
+    el.removeAttribute('data-temp-orig-hidden');
+  });
+  container.querySelectorAll('[data-temp-companion-hidden]').forEach(el => {
+    (el as HTMLElement).style.display = '';
+    el.removeAttribute('data-temp-companion-hidden');
+  });
+}
+
+function restoreSortableDomPosition(evt: Sortable.SortableEvent) {
+  if (!evt.from || !evt.item || evt.oldIndex === undefined) return;
+  const from = evt.from;
+  const item = evt.item;
+  const currentIdx = Array.from(from.children).indexOf(item);
+  if (currentIdx === -1 || currentIdx === evt.oldIndex) return;
+  const targetSibling = from.children[currentIdx > evt.oldIndex ? evt.oldIndex : evt.oldIndex + 1];
+  if (targetSibling) {
+    from.insertBefore(item, targetSibling);
+  } else {
+    from.appendChild(item);
+  }
+}
+
+function applySamePageReorder(evt: Sortable.SortableEvent) {
+  if (!evt.from) return;
+
+  if (globalDraggingGroup?.isWholeGroupDrag && globalDraggingGroup.liveElements.length > 1) {
+    const connectedEls = globalDraggingGroup.liveElements;
+    const connectedIdSet = new Set(connectedEls.map(e => e.id));
+    const newFields: FormElement[] = [];
+
+    for (const child of Array.from(evt.from.children)) {
+      if (child === evt.item) {
+        newFields.push(...connectedEls);
+      } else {
+        const gid = child.getAttribute('data-group-id');
+        if (gid && !connectedIdSet.has(gid)) {
+          const f = props.page.fields.find(el => el.id === gid);
+          if (f) newFields.push(f);
+        }
+      }
+    }
+
+    restoreSortableDomPosition(evt);
+    cleanupTempGroupDom(evt.from);
+
+    if (newFields.length === props.page.fields.length) {
+      props.page.fields = newFields;
+      selectElement(connectedEls[0]);
+      markDirty();
+    }
+    globalDraggingGroup.handledDrop = true;
+    return;
+  }
+
+  if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+    restoreSortableDomPosition(evt);
+    const list = [...props.page.fields];
+    const [moved] = list.splice(evt.oldIndex, 1);
+    if (moved) {
+      list.splice(evt.newIndex, 0, moved);
+      props.page.fields = list;
+      selectElement(moved);
+      markDirty();
+    }
+    if (globalDraggingGroup) {
+      globalDraggingGroup.handledDrop = true;
+    }
+  }
+}
+
+function createGroupDragSvg(cardsContainer: HTMLElement, elements: FormElement[]): SVGSVGElement | null {
+  const cardEls = Array.from(cardsContainer.querySelectorAll(':scope > .canvas-element[data-temp-ghost-clone="true"]')) as HTMLElement[];
+  if (cardEls.length <= 1) return null;
+
+  interface NodeMetric {
+    id: string;
+    kind: 'parent' | 'child';
+    left: number;
+    endX: number;
+    y: number;
+    isMulti: boolean;
+  }
+
+  const nodes: NodeMetric[] = [];
+  for (let idx = 0; idx < elements.length; idx++) {
+    const el = elements[idx];
+    const cardEl = cardEls[idx];
+    if (!cardEl) continue;
+    const isChild = Boolean(el.linkage?.conditions?.length);
+    const top = cardEl.offsetTop;
+    const height = cardEl.offsetHeight;
+    const left = cardEl.offsetLeft;
+
+    if (isChild) {
+      nodes.push({
+        id: el.id,
+        kind: 'child',
+        left,
+        endX: left - 5,
+        y: Math.round(top + 25),
+        isMulti: (el.linkage?.conditions?.length || 0) > 1
+      });
+    } else {
+      nodes.push({
+        id: el.id,
+        kind: 'parent',
+        left,
+        endX: left,
+        y: Math.round(top + height / 2),
+        isMulti: false
+      });
+    }
+  }
+
+  if (nodes.length < 2) return null;
+  nodes.sort((a, b) => a.y - b.y);
+
+  const laneX = -12;
+  const cornerR = 4;
+  const firstNode = nodes[0];
+  const lastNode = nodes[nodes.length - 1];
+  const topY = firstNode.y;
+  const bottomY = lastNode.y;
+  const r = Math.min(cornerR, Math.max(0, Math.floor((bottomY - topY) / 2)));
+
+  const trunkPath = `M ${firstNode.endX} ${topY} H ${laneX + r} Q ${laneX} ${topY} ${laneX} ${topY + r} V ${bottomY - r} Q ${laneX} ${bottomY} ${laneX + r} ${bottomY} H ${lastNode.endX}`;
+
+  let branchesHtml = '';
+  for (let k = 1; k < nodes.length - 1; k++) {
+    const n = nodes[k];
+    branchesHtml += `<line x1="${laneX}" y1="${n.y}" x2="${n.endX}" y2="${n.y}" stroke-linecap="round" />`;
+  }
+
+  let arrowsHtml = '';
+  for (const n of nodes) {
+    if (n.kind === 'child') {
+      const pts = `${n.left - 1},${n.y} ${n.left - 6},${n.y - 3.5} ${n.left - 6},${n.y + 3.5}`;
+      arrowsHtml += `<polygon points="${pts}" />`;
+    }
+  }
+
+  let dotsHtml = '';
+  for (const n of nodes) {
+    if (n.kind === 'parent') {
+      dotsHtml += `<circle cx="${n.left}" cy="${n.y}" r="3" stroke="#ffffff" stroke-width="1.5" />`;
+    } else if (n.isMulti) {
+      dotsHtml += `<circle cx="${laneX}" cy="${n.y}" r="3" stroke="#ffffff" stroke-width="1.5" />`;
+    }
+  }
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'drag-group-svg pointer-events-none absolute inset-0 w-full h-full overflow-visible');
+  svg.setAttribute('style', 'z-index: 20;');
+  svg.innerHTML = `
+    <path d="${trunkPath}" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    ${branchesHtml}
+    ${arrowsHtml}
+    ${dotsHtml}
+  `;
+  return svg;
+}
 
 let sortableInstance: Sortable | null = null;
 
@@ -728,7 +1152,7 @@ onMounted(() => {
       swapThreshold: 0.65,
       emptyInsertThreshold: 28,
       draggable: '.canvas-element-group, .component-item',
-      filter: '.is-branch-child, input, textarea, select, button, [contenteditable], .action-btn, .alert-canvas-parsed, .alert-content-text',
+      filter: 'input, textarea, select, button, [contenteditable], .action-btn, .alert-canvas-parsed, .alert-content-text',
       preventOnFilter: false,
       onStart(evt) {
         store.isDraggingComponent = true;
@@ -739,12 +1163,83 @@ onMounted(() => {
         }
 
         const groupId = evt.item.getAttribute('data-group-id') || evt.item.id;
-        if (groupId) {
-          const group = elementGroups.value.find(g => g.id === groupId);
-          if (group) {
+        const draggedEl = groupId ? props.page.fields.find(f => f.id === groupId) : undefined;
+
+        if (draggedEl) {
+          const isLinkedGroup = Boolean(
+            draggedEl.linkage?.conditions?.length ||
+            getDirectChildren(props.page.fields, draggedEl.key).length > 0
+          );
+          if (isLinkedGroup) {
+            const rawConnected = getConnectedLinkageGroup(props.page.fields, draggedEl);
+            const connectedIdSet = new Set(rawConnected.map(e => e.id));
+            const connectedEls = props.page.fields.filter(f => connectedIdSet.has(f.id));
+
+            if (connectedEls.length > 1) {
+              globalDraggingGroup = {
+                sourcePageId: props.page.id,
+                group: {
+                  id: draggedEl.id,
+                  elements: JSON.parse(JSON.stringify(connectedEls))
+                },
+                isWholeGroupDrag: true,
+                liveElements: connectedEls,
+                handledDrop: false
+              };
+
+              if (evt.from) {
+                const groupDomNodes = connectedEls
+                  .map(el => evt.from.querySelector(`[data-group-id="${el.id}"]`) as HTMLElement | null)
+                  .filter((n): n is HTMLElement => Boolean(n));
+
+                const origCard = evt.item.querySelector(':scope > .canvas-element') as HTMLElement | null;
+                if (origCard) {
+                  origCard.style.display = 'none';
+                  origCard.setAttribute('data-temp-orig-hidden', 'true');
+                }
+
+                for (const domNode of groupDomNodes) {
+                  const cardEl = domNode.querySelector(':scope > .canvas-element') as HTMLElement | null;
+                  if (cardEl) {
+                    const cardClone = cardEl.cloneNode(true) as HTMLElement;
+                    cardClone.style.display = '';
+                    cardClone.setAttribute('data-temp-ghost-clone', 'true');
+                    evt.item.appendChild(cardClone);
+                  }
+                  if (domNode !== evt.item) {
+                    domNode.style.display = 'none';
+                    domNode.setAttribute('data-temp-companion-hidden', 'true');
+                  }
+                }
+
+                const dragSvg = createGroupDragSvg(evt.item, connectedEls);
+                if (dragSvg) {
+                  dragSvg.setAttribute('data-temp-ghost-clone', 'true');
+                  evt.item.appendChild(dragSvg);
+                }
+              }
+            } else {
+              globalDraggingGroup = {
+                sourcePageId: props.page.id,
+                group: {
+                  id: draggedEl.id,
+                  elements: [JSON.parse(JSON.stringify(draggedEl))]
+                },
+                isWholeGroupDrag: false,
+                liveElements: [draggedEl],
+                handledDrop: false
+              };
+            }
+          } else {
             globalDraggingGroup = {
               sourcePageId: props.page.id,
-              group: JSON.parse(JSON.stringify(group))
+              group: {
+                id: draggedEl.id,
+                elements: [JSON.parse(JSON.stringify(draggedEl))]
+              },
+              isWholeGroupDrag: false,
+              liveElements: [draggedEl],
+              handledDrop: false
             };
           }
         }
@@ -778,6 +1273,12 @@ onMounted(() => {
         }
       },
       onEnd(evt) {
+        if (globalDraggingGroup?.isWholeGroupDrag && !globalDraggingGroup.handledDrop && evt.from === evt.to) {
+          applySamePageReorder(evt);
+        } else {
+          cleanupTempGroupDom(evt.from);
+          cleanupTempGroupDom(dropzoneRef.value);
+        }
         store.isDraggingComponent = false;
         document.body.classList.remove('is-dragging-component');
         document.body.style.removeProperty('--drag-placeholder-height');
@@ -786,20 +1287,24 @@ onMounted(() => {
           frame.style.zIndex = '';
         }
         globalDraggingGroup = null;
+        nextTick(() => {
+          syncLinkageObservers();
+        });
       },
       onAdd(evt) {
         const itemEl = evt.item;
-        const insertIdx = props.page.fields.length === 0 ? 0 : Math.min(evt.newIndex ?? elementGroups.value.length, elementGroups.value.length);
+        const insertIdx = props.page.fields.length === 0 ? 0 : Math.min(evt.newIndex ?? props.page.fields.length, props.page.fields.length);
 
+        cleanupTempGroupDom(evt.from);
         itemEl.remove();
 
         if (itemEl.classList.contains('component-item')) {
           const type = itemEl.getAttribute('data-type') as ComponentType;
           if (type) {
             const newEl = createElement(type);
-            const groups = [...elementGroups.value];
-            groups.splice(insertIdx, 0, { id: newEl.id, elements: [newEl] });
-            props.page.fields = groups.flatMap(g => g.elements);
+            const list = [...props.page.fields];
+            list.splice(insertIdx, 0, newEl);
+            props.page.fields = list;
             selectElement(newEl);
             markDirty();
           }
@@ -808,71 +1313,66 @@ onMounted(() => {
 
         if (globalDraggingGroup) {
           const { sourcePageId, group } = globalDraggingGroup;
+          globalDraggingGroup.handledDrop = true;
           const sourcePage = store.pages.find(p => p.id === sourcePageId);
           if (sourcePage) {
             const idsToRemove = new Set(group.elements.map(e => e.id));
             sourcePage.fields = sourcePage.fields.filter(f => !idsToRemove.has(f.id));
           }
 
-          const groups = [...elementGroups.value];
-          groups.splice(insertIdx, 0, group);
-          props.page.fields = groups.flatMap(g => g.elements);
+          const list = [...props.page.fields];
+          list.splice(insertIdx, 0, ...group.elements);
+          props.page.fields = list;
 
           selectElement(group.elements[0]);
           markDirty();
           globalDraggingGroup = null;
           return;
         }
-
-        const fallbackGroupId = itemEl.getAttribute('data-group-id') || itemEl.id;
-        if (fallbackGroupId) {
-          for (const p of store.pages) {
-            const idx = p.fields.findIndex(f => f.id === fallbackGroupId);
-            if (idx !== -1) {
-              const el = p.fields[idx];
-              const descendantKeys = new Set<string>([el.key]);
-              const children: FormElement[] = [];
-              let i = idx + 1;
-              while (i < p.fields.length) {
-                const next = p.fields[i];
-                if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
-                  if (next.key) descendantKeys.add(next.key);
-                  children.push(next);
-                  i++;
-                } else {
-                  break;
-                }
-              }
-              const movedElements = p.fields.splice(idx, 1 + children.length);
-
-              const groups = [...elementGroups.value];
-              groups.splice(insertIdx, 0, { id: el.id, elements: movedElements });
-              props.page.fields = groups.flatMap(g => g.elements);
-              selectElement(el);
-              markDirty();
-              return;
-            }
-          }
-        }
       },
       onUpdate(evt) {
-        if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
-          const groups = [...elementGroups.value];
-          const [movedGroup] = groups.splice(evt.oldIndex, 1);
-          groups.splice(evt.newIndex, 0, movedGroup);
-
-          props.page.fields = groups.flatMap(g => g.elements);
-          selectElement(movedGroup.elements[0]);
-          markDirty();
-        }
+        applySamePageReorder(evt);
         globalDraggingGroup = null;
       }
     });
   }
+  if (dropzoneRef.value && !isSystemProfile.value && !isRisk.value) {
+    linkageResizeObserver = new ResizeObserver(() => {
+      refreshLinkageLayout();
+    });
+    linkageMutationObserver = new MutationObserver(() => {
+      syncLinkageObservers();
+    });
+    linkageMutationObserver.observe(dropzoneRef.value, { childList: true });
+    syncLinkageObservers();
+  }
   syncRiskGroupSortables();
 });
 
+watch(
+  () => [
+    props.page.fields.length,
+    store.currentLocale,
+    props.page.fields
+      .map(f => `${f.id}:${f.linkage?.logic || ''}:${(f.linkage?.conditions || []).map(c => `${c.fieldKey}=${c.value}`).join(',')}`)
+      .join('|')
+  ],
+  () => {
+    nextTick(() => {
+      syncLinkageObservers();
+    });
+  }
+);
+
 onBeforeUnmount(() => {
+  if (linkageResizeObserver) {
+    linkageResizeObserver.disconnect();
+    linkageResizeObserver = null;
+  }
+  if (linkageMutationObserver) {
+    linkageMutationObserver.disconnect();
+    linkageMutationObserver = null;
+  }
   if (sortableInstance) {
     sortableInstance.destroy();
     sortableInstance = null;

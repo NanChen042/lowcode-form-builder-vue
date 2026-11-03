@@ -449,7 +449,7 @@ export function addElement(type: ComponentType, targetPageId?: string, targetGro
         let insertIdx = searchRes.index + 1;
         while (insertIdx < searchRes.parentArray.length) {
           const next = searchRes.parentArray[insertIdx];
-          if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
+          if (next?.linkage?.conditions?.some(c => descendantKeys.has(c.fieldKey))) {
             if (next.key) descendantKeys.add(next.key);
             insertIdx++;
           } else {
@@ -494,16 +494,18 @@ export function duplicateElement(elementId: string) {
       let insertIdx = res.index + 1;
       while (insertIdx < res.parentArray.length) {
         const childOriginal = res.parentArray[insertIdx];
-        if (childOriginal?.dependsOn?.fieldKey && keyMap[childOriginal.dependsOn.fieldKey]) {
+        if (childOriginal?.linkage?.conditions?.some(c => Boolean(keyMap[c.fieldKey]))) {
           const childClone: FormElement = JSON.parse(JSON.stringify(toRaw(childOriginal)));
           const newChildId = `cmp_${getUniqueId()}`;
           childClone.id = newChildId;
           childClone.key = makeFieldKey(childClone.type, newChildId);
           keyMap[childOriginal.key] = childClone.key;
-          childClone.dependsOn = {
-            fieldKey: keyMap[childOriginal.dependsOn.fieldKey],
-            value: childOriginal.dependsOn.value
-          };
+          if (childClone.linkage?.conditions) {
+            childClone.linkage.conditions = childClone.linkage.conditions.map(c => ({
+              fieldKey: keyMap[c.fieldKey] || c.fieldKey,
+              value: c.value
+            }));
+          }
           clonedChildren.push(childClone);
           insertIdx++;
         } else {
@@ -531,15 +533,27 @@ export function deleteElement(elementId: string) {
         keysToDelete.add(original.key);
       }
 
-      // 级联查找所有依附于该父组件（及多级从属）的全部联动子项一并删除
+      // 级联查找完全依附于该父组件（及多级从属）的联动子项一并删除；若子项还关联了其他未删除的父组件，则仅移除已删父组件条件
       let foundMore = true;
       while (foundMore) {
         foundMore = false;
         for (const f of page.fields) {
-          if (!idsToDelete.has(f.id) && f.dependsOn?.fieldKey && keysToDelete.has(f.dependsOn.fieldKey)) {
-            idsToDelete.add(f.id);
-            if (f.key) keysToDelete.add(f.key);
-            foundMore = true;
+          if (!idsToDelete.has(f.id) && f.linkage?.conditions?.length) {
+            const allParentsDeleted = f.linkage.conditions.every(c => keysToDelete.has(c.fieldKey));
+            if (allParentsDeleted) {
+              idsToDelete.add(f.id);
+              if (f.key) keysToDelete.add(f.key);
+              foundMore = true;
+            }
+          }
+        }
+      }
+
+      for (const f of page.fields) {
+        if (!idsToDelete.has(f.id) && f.linkage?.conditions?.length) {
+          f.linkage.conditions = f.linkage.conditions.filter(c => !keysToDelete.has(c.fieldKey));
+          if (f.linkage.conditions.length === 0) {
+            delete f.linkage;
           }
         }
       }

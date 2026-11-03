@@ -110,7 +110,7 @@
                         :key="item.type"
                         type="button"
                         class="flex items-center gap-1.5 px-2 py-1.5 rounded border border-slate-200/80 bg-white hover:bg-blue-50/70 hover:border-blue-300 hover:text-[#1677ff] text-[11px] text-slate-700 transition-all cursor-pointer text-left select-none"
-                        @click.stop="quickInsertFollowupField(option, item.type, item.label)"
+                        @click.stop="quickInsertFollowupField(option, item.type)"
                       >
                         <Plus class="w-3 h-3 text-[#1677ff] shrink-0" />
                         <span class="truncate">{{ item.label }}</span>
@@ -135,7 +135,7 @@
                           class="!m-0 pointer-events-none"
                         />
                         <span class="truncate flex-1 font-medium text-slate-700 text-[11px]">{{ getFieldText(df, 'label', undefined, true) || df.key }}</span>
-                        <span class="text-[10px] text-slate-400 font-mono shrink-0">({{ df.type }})</span>
+                        <span class="text-[10px] text-slate-400 shrink-0">({{ t(`comp.${df.type}`) }})</span>
                       </div>
                     </div>
                   </div>
@@ -171,7 +171,7 @@
                 type="button"
                 class="ml-0.5 text-blue-400 hover:text-red-500 transition-colors cursor-pointer text-xs font-bold leading-none"
                 :title="t('options.unlink')"
-                @click.stop="unlinkField(lf.id)"
+                @click.stop="unlinkField(lf.id, option)"
               >
                 ×
               </button>
@@ -202,7 +202,14 @@ import type { FormElement, FormElementOption, ComponentType } from '@/types/sche
 import { store, markDirty, createElement, selectElement } from '@/core/store';
 import { t, formatOptionLabel, getOptionLabel, setOptionLabel, getFieldText } from '@/core/i18n';
 import { Trash2, GripVertical, Plus, Link2, CornerDownRight } from '@lucide/vue';
-import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
+import {
+  parseMultiValue,
+  stringifyMultiValue,
+  getFieldDepthInPage,
+  getSubtreeDepth,
+  isParentLinkedToTargetWithOption,
+  toggleParentOptionLink
+} from '@/utils/helpers';
 import Sortable from 'sortablejs';
 
 const branchTypes = computed(() => [
@@ -213,7 +220,11 @@ const branchTypes = computed(() => [
   { type: 'select' as const, label: t('comp.select') },
   { type: 'date' as const, label: t('comp.date') },
   { type: 'phone' as const, label: t('comp.phone') },
-  { type: 'email' as const, label: t('comp.email') }
+  { type: 'email' as const, label: t('comp.email') },
+  { type: 'country' as const, label: t('comp.country') },
+  { type: 'nationality' as const, label: t('comp.nationality') },
+  { type: 'signature' as const, label: t('comp.signature') },
+  { type: 'alert' as const, label: t('comp.alert') }
 ]);
 
 const props = defineProps<{ element: FormElement }>();
@@ -361,98 +372,90 @@ const currentPage = computed(() => {
   return store.pages.find(p => p.fields?.some(f => f.id === props.element.id)) || null;
 });
 
-const MAX_NESTING_DEPTH = 2;
-
-const currentElementDepth = computed(() => {
-  if (!props.element?.dependsOn || !currentPage.value) return 0;
-  let depth = 0;
-  let current: FormElement | undefined = props.element;
-  const visited = new Set<string>();
-  const fields = currentPage.value.fields || [];
-  while (current?.dependsOn?.fieldKey) {
-    if (visited.has(current.dependsOn.fieldKey)) break;
-    visited.add(current.dependsOn.fieldKey);
-    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
-    if (!parent) break;
-    depth++;
-    current = parent;
-  }
-  return depth;
-});
-
 const isMaxDepthReached = computed(() => {
-  return currentElementDepth.value >= MAX_NESTING_DEPTH;
+  if (!currentPage.value?.fields || !props.element) return false;
+  return getFieldDepthInPage(props.element, currentPage.value.fields) >= 2;
 });
 
 const downstreamFields = computed(() => {
   if (!currentPage.value || !props.element) return [];
   const fields = currentPage.value.fields || [];
-  const currentIndex = fields.findIndex(f => f.id === props.element.id);
-  if (currentIndex < 0) return [];
+  const myDepth = getFieldDepthInPage(props.element, fields);
+  if (myDepth >= 2) return [];
 
   const ancestorKeys = new Set<string>();
-  let cur: FormElement | undefined = props.element;
-  while (cur?.dependsOn?.fieldKey) {
-    ancestorKeys.add(cur.dependsOn.fieldKey);
-    cur = fields.find(f => f.key === cur?.dependsOn?.fieldKey);
-  }
-  return fields.slice(currentIndex + 1).filter(f => !ancestorKeys.has(f.key));
+  const collectAncestors = (el: FormElement | undefined) => {
+    const conds = el?.linkage?.conditions;
+    if (!conds) return;
+    for (const c of conds) {
+      if (!ancestorKeys.has(c.fieldKey)) {
+        ancestorKeys.add(c.fieldKey);
+        const parent = fields.find(f => f.key === c.fieldKey);
+        if (parent) collectAncestors(parent);
+      }
+    }
+  };
+  collectAncestors(props.element);
+
+  return fields.filter(f => {
+    if (f.id === props.element.id || ancestorKeys.has(f.key)) return false;
+    const targetSubtreeDepth = getSubtreeDepth(f, fields);
+    return myDepth + 1 + targetSubtreeDepth <= 2;
+  });
 });
 
 function getLinkedFieldsForOption(option: FormElementOption) {
   if (!props.element?.key || !option.value) return [];
   return downstreamFields.value.filter(f => {
-    return f.dependsOn?.fieldKey === props.element.key && f.dependsOn?.value === option.value;
+    return f.linkage?.conditions?.some(
+      c => c.fieldKey === props.element.key && c.value === option.value
+    );
   });
 }
 
 function isFieldLinkedToOption(fieldId: string, option: FormElementOption): boolean {
   const f = downstreamFields.value.find(field => field.id === fieldId);
-  return f?.dependsOn?.fieldKey === props.element.key && f?.dependsOn?.value === option.value;
+  if (!f || !currentPage.value?.fields) return false;
+  return isParentLinkedToTargetWithOption(currentPage.value.fields, props.element, option, f);
 }
 
 function toggleFieldLinkToOption(fieldId: string, option: FormElementOption) {
   const f = downstreamFields.value.find(field => field.id === fieldId);
-  if (!f) return;
-  if (isFieldLinkedToOption(fieldId, option)) {
-    delete f.dependsOn;
+  if (!f || !currentPage.value?.fields) return;
+  toggleParentOptionLink(currentPage.value.fields, props.element, option, f);
+  markDirty();
+}
+
+function unlinkField(fieldId: string, option?: FormElementOption) {
+  const f = downstreamFields.value.find(field => field.id === fieldId);
+  if (!f || !f.linkage) return;
+  if (option) {
+    f.linkage.conditions = f.linkage.conditions.filter(
+      c => !(c.fieldKey === props.element.key && c.value === option.value)
+    );
   } else {
-    f.dependsOn = {
-      fieldKey: props.element.key,
-      value: option.value
-    };
+    f.linkage.conditions = f.linkage.conditions.filter(
+      c => c.fieldKey !== props.element.key
+    );
+  }
+  if (f.linkage.conditions.length === 0) {
+    delete f.linkage;
   }
   markDirty();
 }
 
-function unlinkField(fieldId: string) {
-  const f = downstreamFields.value.find(field => field.id === fieldId);
-  if (f) {
-    delete f.dependsOn;
-    markDirty();
-  }
-}
-
-function quickInsertFollowupField(option: FormElementOption, type: ComponentType = 'input', typeLabel?: string) {
+function quickInsertFollowupField(option: FormElementOption, type: ComponentType = 'input') {
   if (!currentPage.value || !props.element || isMaxDepthReached.value) return;
   const newEl = createElement(type);
-  newEl.label = typeLabel || t('options.singleInputDefault');
-  newEl.required = true;
-  newEl.defaultValue = '';
-  newEl.dependsOn = {
-    fieldKey: props.element.key,
-    value: option.value
-  };
 
   const fields = currentPage.value.fields || [];
   const currentIdx = fields.findIndex(f => f.id === props.element.id);
-
 
   const descendantKeys = new Set<string>([props.element.key]);
   let insertIdx = currentIdx + 1;
   while (insertIdx < fields.length) {
     const next = fields[insertIdx];
-    if (next?.dependsOn?.fieldKey && descendantKeys.has(next.dependsOn.fieldKey)) {
+    if (next?.linkage?.conditions?.some(c => descendantKeys.has(c.fieldKey))) {
       if (next.key) descendantKeys.add(next.key);
       insertIdx++;
     } else {
@@ -461,6 +464,7 @@ function quickInsertFollowupField(option: FormElementOption, type: ComponentType
   }
 
   fields.splice(insertIdx, 0, newEl);
+  toggleParentOptionLink(fields, props.element, option, newEl);
   selectElement(newEl);
   markDirty();
 }
@@ -483,8 +487,13 @@ function removeOption(idx: number) {
   if (removed && props.element.key) {
     for (const page of store.pages) {
       for (const f of (page.fields || [])) {
-        if (f.dependsOn?.fieldKey === props.element.key && f.dependsOn?.value === removed.value) {
-          delete f.dependsOn;
+        if (f.linkage?.conditions?.length) {
+          f.linkage.conditions = f.linkage.conditions.filter(
+            c => !(c.fieldKey === props.element.key && c.value === removed.value)
+          );
+          if (f.linkage.conditions.length === 0) {
+            delete f.linkage;
+          }
         }
       }
     }

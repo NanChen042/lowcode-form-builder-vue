@@ -1,3 +1,5 @@
+import type { FormElement, FormElementOption } from '@/types/schema';
+
 /**
  * 读取多选默认值，兼容历史逗号字符串和新的 JSON 数组格式
  * @param value 原始默认值字符串
@@ -174,5 +176,233 @@ export function getSmartEdges(
     return { sourceEdge: 'top', targetEdge: 'left' };
   } else {
     return { sourceEdge: 'bottom', targetEdge: 'left' };
+  }
+}
+
+export function getFieldDepthInPage(
+  el: FormElement | undefined,
+  fields: FormElement[],
+  visited = new Set<string>()
+): number {
+  const conds = el?.linkage?.conditions;
+  if (!conds || conds.length === 0) return 0;
+  let maxParentDepth = 0;
+  for (const c of conds) {
+    if (visited.has(c.fieldKey)) continue;
+    const nextVisited = new Set(visited);
+    nextVisited.add(c.fieldKey);
+    const parent = fields.find(f => f.key === c.fieldKey);
+    if (parent) {
+      maxParentDepth = Math.max(maxParentDepth, 1 + getFieldDepthInPage(parent, fields, nextVisited));
+    }
+  }
+  return maxParentDepth;
+}
+
+export function getSubtreeDepth(
+  el: FormElement | undefined,
+  fields: FormElement[],
+  visited = new Set<string>()
+): number {
+  if (!el?.key || visited.has(el.key)) return 0;
+  const nextVisited = new Set(visited);
+  nextVisited.add(el.key);
+  let maxChildDepth = 0;
+  for (const f of fields) {
+    if (f.linkage?.conditions?.some(c => c.fieldKey === el.key)) {
+      maxChildDepth = Math.max(maxChildDepth, 1 + getSubtreeDepth(f, fields, nextVisited));
+    }
+  }
+  return maxChildDepth;
+}
+
+/**
+ * 规整关联组内组件顺序：确保所有触发父组件排在上方，同组从属子组件紧邻排在下方，二级从属子组件紧跟对应一级父组件
+ */
+export function normalizeConnectedLinkageOrder(fields: FormElement[], ...seedKeys: string[]) {
+  const processedKeys = new Set<string>();
+
+  for (const rawSeed of seedKeys) {
+    if (!rawSeed || processedKeys.has(rawSeed)) continue;
+
+    const connectedKeys = new Set<string>([rawSeed]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const el of fields) {
+        const conds = el.linkage?.conditions;
+        if (!conds?.length) continue;
+        const isChildInSet = connectedKeys.has(el.key);
+        const hasParentInSet = conds.some(c => connectedKeys.has(c.fieldKey));
+        if (isChildInSet || hasParentInSet) {
+          if (!connectedKeys.has(el.key)) {
+            connectedKeys.add(el.key);
+            changed = true;
+          }
+          for (const c of conds) {
+            if (!connectedKeys.has(c.fieldKey)) {
+              connectedKeys.add(c.fieldKey);
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+
+    for (const k of connectedKeys) {
+      processedKeys.add(k);
+    }
+
+    const groupEls = fields.filter(el => connectedKeys.has(el.key));
+    if (groupEls.length <= 1) continue;
+
+    const firstIdx = fields.findIndex(el => connectedKeys.has(el.key));
+    if (firstIdx === -1) continue;
+
+    const rootParents = groupEls.filter(el => !el.linkage?.conditions?.length);
+    const depth1Children = groupEls.filter(el => getFieldDepthInPage(el, fields) === 1);
+    const depth2Children = groupEls.filter(el => getFieldDepthInPage(el, fields) >= 2);
+
+    const orderedChildren: FormElement[] = [];
+    const placedDepth2Ids = new Set<string>();
+
+    for (const d1 of depth1Children) {
+      orderedChildren.push(d1);
+      for (const d2 of depth2Children) {
+        if (!placedDepth2Ids.has(d2.id) && d2.linkage?.conditions?.some(c => c.fieldKey === d1.key)) {
+          orderedChildren.push(d2);
+          placedDepth2Ids.add(d2.id);
+        }
+      }
+    }
+    for (const d2 of depth2Children) {
+      if (!placedDepth2Ids.has(d2.id)) {
+        orderedChildren.push(d2);
+      }
+    }
+
+    const orderedGroup = [...rootParents, ...orderedChildren];
+    const before = fields.slice(0, firstIdx).filter(el => !connectedKeys.has(el.key));
+    const after = fields.slice(firstIdx).filter(el => !connectedKeys.has(el.key));
+    fields.splice(0, fields.length, ...before, ...orderedGroup, ...after);
+  }
+}
+
+export function getConnectedLinkageGroup(fields: FormElement[], seedEl: FormElement): FormElement[] {
+  if (!seedEl?.key) return [seedEl];
+  const connectedKeys = new Set<string>([seedEl.key]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const el of fields) {
+      const conds = el.linkage?.conditions;
+      if (!conds?.length) continue;
+      const isChildInSet = connectedKeys.has(el.key);
+      const hasParentInSet = conds.some(c => connectedKeys.has(c.fieldKey));
+      if (isChildInSet || hasParentInSet) {
+        if (!connectedKeys.has(el.key)) {
+          connectedKeys.add(el.key);
+          changed = true;
+        }
+        for (const c of conds) {
+          if (!connectedKeys.has(c.fieldKey)) {
+            connectedKeys.add(c.fieldKey);
+            changed = true;
+          }
+        }
+      }
+    }
+  }
+  const groupEls = fields.filter(el => connectedKeys.has(el.key));
+  return groupEls.length > 0 ? groupEls : [seedEl];
+}
+
+export function getDirectChildren(fields: FormElement[], parentKey: string): FormElement[] {
+  if (!parentKey) return [];
+  return fields.filter(f => f.linkage?.conditions?.some(c => c.fieldKey === parentKey));
+}
+
+export function isParentLinkedToTargetWithOption(
+  _fields: FormElement[],
+  parent: FormElement,
+  option: FormElementOption,
+  target: FormElement
+): boolean {
+  if (!parent?.key || !option?.value || !target) return false;
+  return Boolean(
+    target.linkage?.conditions?.some(c => c.fieldKey === parent.key && c.value === option.value)
+  );
+}
+
+export function isParentLinkedToTargetAnyOption(
+  _fields: FormElement[],
+  parent: FormElement,
+  target: FormElement
+): boolean {
+  if (!parent?.key || !target) return false;
+  return Boolean(target.linkage?.conditions?.some(c => c.fieldKey === parent.key));
+}
+
+function upsertConditionOnElement(el: FormElement, fieldKey: string, value: string) {
+  if (!fieldKey || el.key === fieldKey) return;
+  if (!el.linkage || !Array.isArray(el.linkage.conditions)) {
+    el.linkage = {
+      logic: 'or',
+      conditions: []
+    };
+  }
+  const existingIdx = el.linkage.conditions.findIndex(c => c.fieldKey === fieldKey);
+  if (existingIdx !== -1) {
+    el.linkage.conditions[existingIdx].value = value;
+  } else {
+    el.linkage.conditions.push({ fieldKey, value });
+  }
+}
+
+function removeConditionFromElement(el: FormElement, fieldKey: string, value?: string) {
+  if (!el.linkage?.conditions) return;
+  el.linkage.conditions = el.linkage.conditions.filter(c => {
+    if (c.fieldKey !== fieldKey) return true;
+    return value !== undefined ? c.value !== value : false;
+  });
+  if (el.linkage.conditions.length === 0) {
+    delete el.linkage;
+  }
+}
+
+/**
+ * 绑定或切换父组件选项与目标子组件的关联关系（保持原位置不自动位移）
+ */
+export function toggleParentOptionLink(
+  fields: FormElement[],
+  parent: FormElement,
+  option: FormElementOption,
+  target: FormElement
+) {
+  if (!parent?.key || !option?.value || !target || parent.id === target.id) return;
+
+  if (isParentLinkedToTargetWithOption(fields, parent, option, target)) {
+    removeConditionFromElement(target, parent.key, option.value);
+    return;
+  }
+
+  upsertConditionOnElement(target, parent.key, option.value);
+}
+
+/**
+ * 解除指定组件的关联关系（保持组件位置不动：若为子组件则清除其从属规则；若为父组件则从其名下子组件中移除该父组件条件）
+ */
+export function unlinkElementFromGroup(fields: FormElement[], el: FormElement) {
+  if (!el) return;
+
+  if (el.linkage?.conditions?.length) {
+    delete el.linkage;
+  }
+
+  const directChildren = getDirectChildren(fields, el.key);
+  if (directChildren.length > 0) {
+    for (const ch of directChildren) {
+      removeConditionFromElement(ch, el.key);
+    }
   }
 }

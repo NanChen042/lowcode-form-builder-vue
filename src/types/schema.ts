@@ -18,6 +18,16 @@ export interface FormElementOption {
   value: string;
 }
 
+export interface LinkageCondition {
+  fieldKey: string;
+  value: string;
+}
+
+export interface FieldLinkage {
+  logic: 'and' | 'or';
+  conditions: LinkageCondition[];
+}
+
 export interface FormElement {
   id: string;
   type: ComponentType;
@@ -64,11 +74,8 @@ export interface FormElement {
   customErrorMessage_en?: string;
   declarationErrorMessage?: string;
   declarationErrorMessage_en?: string;
-  // 条件联动显示规则 (例如: 仅当指定字段等于某值时展开)
-  dependsOn?: {
-    fieldKey: string;
-    value: string;
-  };
+  // 条件联动显示规则（支持单父或多父组合联动）
+  linkage?: FieldLinkage;
   // 风险评估问题权重 (1-10，默认 1) 及所属分组 ID
   weight?: number;
   groupId?: string;

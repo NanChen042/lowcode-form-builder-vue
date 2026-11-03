@@ -511,15 +511,16 @@ const emit = defineEmits<{
 }>();
 
 const fieldDepth = computed(() => {
-  if (!props.field.dependsOn) return 0;
+  if (!props.field.linkage?.conditions?.length) return 0;
   let depth = 0;
   let current: FormElement | undefined = props.field;
   const visited = new Set<string>();
   const fields = props.allFields || store.pages.flatMap(p => p.fields || []);
-  while (current?.dependsOn?.fieldKey) {
-    if (visited.has(current.dependsOn.fieldKey)) break;
-    visited.add(current.dependsOn.fieldKey);
-    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
+  while (current?.linkage?.conditions?.[0]?.fieldKey) {
+    const parentKey: string = current.linkage.conditions[0].fieldKey;
+    if (visited.has(parentKey)) break;
+    visited.add(parentKey);
+    const parent: FormElement | undefined = fields.find(f => f.key === parentKey);
     if (!parent) break;
     depth++;
     current = parent;
@@ -527,36 +528,40 @@ const fieldDepth = computed(() => {
   return depth;
 });
 
-const isFieldVisible = computed<boolean>(() => {
-  let cur: FormElement | undefined = props.field;
-  const visited = new Set<string>();
-  const fields = props.allFields || store.pages.flatMap(p => p.fields || []);
+function checkElementVisible(
+  target: FormElement | undefined,
+  fields: FormElement[],
+  visited = new Set<string>()
+): boolean {
+  if (!target) return true;
+  const conds = target.linkage?.conditions;
+  if (!conds || conds.length === 0) return true;
+  if (visited.has(target.key)) return true;
+  const nextVisited = new Set(visited);
+  nextVisited.add(target.key);
 
-  while (cur?.dependsOn) {
-    const parentKey: string = cur.dependsOn.fieldKey;
-    const targetVal: any = cur.dependsOn.value;
-    if (visited.has(parentKey)) break;
-    visited.add(parentKey);
-
-    const parentVal = props.formData[parentKey];
-    let matches = false;
-    if (parentVal === targetVal) {
-      matches = true;
-    } else if (Array.isArray(parentVal)) {
-      matches = parentVal.includes(targetVal);
-    } else if (typeof parentVal === 'string' && parentVal) {
-      const list = parseMultiValue(parentVal);
-      matches = list.includes(targetVal);
-    }
-
-    if (!matches) {
+  const evaluateCondition = (cond: { fieldKey: string; value: string }): boolean => {
+    const parentField = fields.find(f => f.key === cond.fieldKey);
+    if (parentField && !checkElementVisible(parentField, fields, nextVisited)) {
       return false;
     }
+    const parentVal = props.formData[cond.fieldKey];
+    if (parentVal === cond.value) return true;
+    if (Array.isArray(parentVal)) return parentVal.includes(cond.value);
+    if (typeof parentVal === 'string' && parentVal) {
+      return parseMultiValue(parentVal).includes(cond.value);
+    }
+    return false;
+  };
 
-    cur = fields.find(f => f.key === parentKey);
-  }
+  return target.linkage?.logic === 'or'
+    ? conds.some(evaluateCondition)
+    : conds.every(evaluateCondition);
+}
 
-  return true;
+const isFieldVisible = computed<boolean>(() => {
+  const fields = props.allFields || store.pages.flatMap(p => p.fields || []);
+  return checkElementVisible(props.field, fields);
 });
 
 function handleFieldInput() {

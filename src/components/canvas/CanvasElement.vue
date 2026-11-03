@@ -5,46 +5,13 @@
     class="canvas-element"
     :class="{
       'is-selected': isSelected,
-      'is-branch-child': Boolean(element.dependsOn),
+      'is-branch-child': hasLinkage,
       'branch-depth-1': elementDepth === 1,
       'branch-depth-2': elementDepth >= 2
     }"
     :data-type="element.type"
     @click.stop="handleClick"
   >
-    <div
-      v-if="isBranchParent"
-      class="absolute left-[13px] -bottom-[13px] w-[2px] h-[13px] bg-blue-500 z-10 pointer-events-none"
-    >
-      <div class="absolute -top-1 -left-[3px] w-2 h-2 rounded-full bg-blue-500 border border-white shadow-xs"></div>
-    </div>
-
-    <div
-      v-if="hasGrandparentPassThrough"
-      class="absolute -left-[35px] top-[-13px] -bottom-[13px] w-[2px] bg-blue-500 z-10 pointer-events-none"
-    ></div>
-
-    <div
-      v-if="element.dependsOn"
-      class="absolute -left-[11px] pointer-events-none z-10"
-      :class="isLastBranchChild ? 'top-[-13px] h-[38px] w-[14px]' : 'top-[-13px] -bottom-[13px] w-[14px]'"
-    >
-      <div
-        class="absolute left-0 top-0 w-[2px] bg-blue-500"
-        :class="isLastBranchChild ? 'h-[31px]' : 'bottom-0'"
-      ></div>
-
-      <template v-if="isLastBranchChild">
-        <div class="absolute left-0 top-[29px] w-[8px] h-[8px] border-l-2 border-b-2 border-blue-500 rounded-bl-[4px]"></div>
-        <div class="absolute left-[7px] top-[33.5px] w-0 h-0 border-y-[3.5px] border-y-transparent border-l-[5px] border-l-blue-500"></div>
-      </template>
-
-      <template v-else>
-        <div class="absolute left-0 top-[36px] w-[8px] h-[2px] bg-blue-500"></div>
-        <div class="absolute left-[7px] top-[33.5px] w-0 h-0 border-y-[3.5px] border-y-transparent border-l-[5px] border-l-blue-500"></div>
-      </template>
-    </div>
-
     <div class="element-actions">
       <button class="action-btn copy-btn" type="button" @click.stop="duplicateElement(element.id)">
         <Copy class="h-3.5 w-3.5" />
@@ -55,8 +22,8 @@
     </div>
 
     <div
-      v-if="element.dependsOn"
-      class="inline-flex items-center gap-1.5 mb-2 select-none"
+      v-if="hasLinkage"
+      class="inline-flex items-center gap-1.5 mb-2 pr-14 select-none flex-wrap"
     >
       <span
         class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#1677ff] font-medium text-[11px] border border-blue-200/60 shadow-2xs"
@@ -81,7 +48,7 @@
 import { computed } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
-import { t, getOptionLabel } from '@/core/i18n';
+import { t, getOptionLabel, getFieldText } from '@/core/i18n';
 import { Copy, Trash2, Lock } from '@lucide/vue';
 
 import InputElement from './elements/InputElement.vue';
@@ -97,25 +64,98 @@ import AlertElement from './elements/AlertElement.vue';
 import PhoneElement from './elements/PhoneElement.vue';
 import EmailElement from './elements/EmailElement.vue';
 
-const props = defineProps<{ element: FormElement }>();
+const props = defineProps<{
+  element: FormElement;
+}>();
 
 const isSelected = computed(() => {
   return store.selectedType === 'element' && store.selectedId === props.element.id;
 });
 
+const hasLinkage = computed(() => {
+  return Boolean(props.element.linkage?.conditions?.length);
+});
+
+const DEFAULT_TITLES = new Set([
+  '请输入字段标题',
+  'Please enter field title',
+  '单选框组',
+  'Radio Group',
+  '下拉选择',
+  'Select',
+  '多选框组',
+  'Checkbox Group'
+]);
+
 const triggerOptName = computed(() => {
-  if (!props.element.dependsOn) return '';
-  const dep = props.element.dependsOn;
-  for (const page of store.pages) {
-    const parentField = page.fields.find(f => f.key === dep.fieldKey);
-    if (parentField) {
-      const opt = parentField.options?.find(o => o.value === dep.value);
-      if (opt) {
-        return getOptionLabel(opt, undefined, true) || opt.label || opt.value;
+  const conds = props.element.linkage?.conditions;
+  if (!conds || conds.length === 0) return '';
+
+  const pageFields = currentPage.value?.fields || [];
+  // 计算当前子组件所属父组件链中的序号 (#1, #2...)
+  const chainParentKeys: string[] = [];
+  if (currentFieldIndex.value > 0) {
+    // 找到紧邻当前子组件块上方的所有被引用父组件
+    let firstChildIdx = currentFieldIndex.value;
+    while (firstChildIdx > 0 && pageFields[firstChildIdx - 1]?.linkage?.conditions?.length) {
+      firstChildIdx--;
+    }
+    const blockParentKeySet = new Set<string>();
+    for (let i = firstChildIdx; i < pageFields.length; i++) {
+      const f = pageFields[i];
+      if (!f?.linkage?.conditions?.length) break;
+      for (const c of f.linkage.conditions) {
+        blockParentKeySet.add(c.fieldKey);
+      }
+    }
+    for (let i = 0; i < firstChildIdx; i++) {
+      if (blockParentKeySet.has(pageFields[i].key)) {
+        chainParentKeys.push(pageFields[i].key);
       }
     }
   }
-  return dep.value === 'yes' ? t('canvas.yes') : (dep.value === 'no' ? t('canvas.no') : dep.value);
+
+  const resolveItem = (dep: { fieldKey: string; value: string }, idx: number) => {
+    let optLabel = dep.value === 'yes' ? t('canvas.yes') : (dep.value === 'no' ? t('canvas.no') : dep.value);
+    let customParentName = '';
+    const chainIdx = chainParentKeys.indexOf(dep.fieldKey);
+    const pNum = chainIdx !== -1 ? chainIdx + 1 : idx + 1;
+
+    for (const page of store.pages) {
+      const parentField = page.fields.find(f => f.key === dep.fieldKey);
+      if (parentField) {
+        const opt = parentField.options?.find(o => o.value === dep.value);
+        if (opt) {
+          optLabel = getOptionLabel(opt, undefined, true) || opt.label || opt.value;
+        }
+        const rawLabel = (getFieldText(parentField, 'label', undefined, true) || '').trim();
+        if (rawLabel && !DEFAULT_TITLES.has(rawLabel)) {
+          customParentName = rawLabel.length > 8 ? `${rawLabel.slice(0, 8)}…` : rawLabel;
+        }
+        break;
+      }
+    }
+
+    return { pNum, optLabel, customParentName };
+  };
+
+  if (conds.length === 1) {
+    const { pNum, optLabel, customParentName } = resolveItem(conds[0], 0);
+    if (chainParentKeys.length > 1) {
+      return customParentName ? `${customParentName}:${optLabel}` : `#${pNum} ${optLabel}`;
+    }
+    return optLabel;
+  }
+
+  const joinStr = props.element.linkage?.logic === 'and' ? ' + ' : ' / ';
+  const resolvedList = conds.map((dep, idx) => resolveItem(dep, idx));
+  resolvedList.sort((a, b) => a.pNum - b.pNum);
+
+  return resolvedList
+    .map(({ pNum, optLabel, customParentName }) => {
+      return customParentName ? `${customParentName}:${optLabel}` : `#${pNum} ${optLabel}`;
+    })
+    .join(joinStr);
 });
 
 const currentPage = computed(() => {
@@ -127,56 +167,26 @@ const currentFieldIndex = computed(() => {
   return currentPage.value.fields.findIndex(f => f.id === props.element.id);
 });
 
-const elementDepth = computed(() => {
-  if (!props.element?.dependsOn || !currentPage.value) return 0;
+function getFieldDepthInPage(field: FormElement | undefined, fields: FormElement[]): number {
+  if (!field?.linkage?.conditions?.length) return 0;
   let depth = 0;
-  let current: FormElement | undefined = props.element;
+  let current: FormElement | undefined = field;
   const visited = new Set<string>();
-  const fields = currentPage.value.fields;
-  while (current?.dependsOn?.fieldKey) {
-    if (visited.has(current.dependsOn.fieldKey)) break;
-    visited.add(current.dependsOn.fieldKey);
-    const parent = fields.find(f => f.key === current?.dependsOn?.fieldKey);
+  while (current?.linkage?.conditions?.[0]?.fieldKey) {
+    const parentKey: string = current.linkage.conditions[0].fieldKey;
+    if (visited.has(parentKey)) break;
+    visited.add(parentKey);
+    const parent: FormElement | undefined = fields.find(f => f.key === parentKey);
     if (!parent) break;
     depth++;
     current = parent;
   }
   return depth;
-});
+}
 
-const isBranchParent = computed(() => {
-  if (!currentPage.value || currentFieldIndex.value === -1) return false;
-  const fields = currentPage.value.fields;
-  const nextField = fields[currentFieldIndex.value + 1];
-  return Boolean(nextField && nextField.dependsOn?.fieldKey === props.element.key);
-});
-
-const hasLaterSibling = computed(() => {
-  if (!props.element.dependsOn || !currentPage.value || currentFieldIndex.value === -1) return false;
-  const fields = currentPage.value.fields;
-  for (let i = currentFieldIndex.value + 1; i < fields.length; i++) {
-    if (fields[i].dependsOn?.fieldKey === props.element.dependsOn.fieldKey) {
-      return true;
-    }
-  }
-  return false;
-});
-
-const isLastBranchChild = computed(() => {
-  if (!props.element.dependsOn) return false;
-  return !hasLaterSibling.value;
-});
-
-const hasGrandparentPassThrough = computed(() => {
-  if (elementDepth.value < 2 || !currentPage.value || currentFieldIndex.value === -1) return false;
-  const fields = currentPage.value.fields;
-  const parent = fields.find(f => f.key === props.element.dependsOn?.fieldKey);
-  if (!parent?.dependsOn?.fieldKey) return false;
-  const grandparentKey = parent.dependsOn.fieldKey;
-  for (let i = currentFieldIndex.value + 1; i < fields.length; i++) {
-    if (fields[i].dependsOn?.fieldKey === grandparentKey) return true;
-  }
-  return false;
+const elementDepth = computed(() => {
+  if (!hasLinkage.value || !currentPage.value) return 0;
+  return getFieldDepthInPage(props.element, currentPage.value.fields);
 });
 
 const renderComponent = computed(() => {
@@ -228,9 +238,9 @@ function handleClick(e: MouseEvent) {
 
 <style scoped>
 .canvas-element.branch-depth-1 {
-  margin-left: 24px !important;
+  margin-left: 15px;
 }
 .canvas-element.branch-depth-2 {
-  margin-left: 48px !important;
+  margin-left: 36px ;
 }
 </style>

@@ -2024,3 +2024,48 @@ body.tour-active.driver-active .driver-overlay {
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
     border-bottom-color: #ffffff !important;
 }
+
+/* 拖拽过程中隐藏被拖拽组件（含占位幽灵与跟手副本）上的关联连线，避免线段残留 */
+.canvas-element-group.drag-fallback-visual .branch-line-decor,
+.canvas-element-group.sortable-drag .branch-line-decor,
+.canvas-element-group.sortable-ghost .branch-line-decor,
+.canvas-element.sortable-ghost .branch-line-decor {
+    display: none !important;
+}
+
+
+/* 拖拽联动组内的跟随连接线与落位虚线连接线 */
+.drag-group-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible !important;
+}
+
+.drag-fallback-visual .drag-group-svg path,
+.drag-fallback-visual .drag-group-svg line {
+    stroke: #1677ff;
+    stroke-width: 2px;
+}
+
+.drag-fallback-visual .drag-group-svg polygon,
+.drag-fallback-visual .drag-group-svg circle {
+    fill: #1677ff;
+}
+
+.sortable-ghost .drag-group-svg path,
+.sortable-ghost .drag-group-svg line {
+    stroke: #60a5fa;
+    stroke-dasharray: 4 3;
+    stroke-width: 2px;
+    opacity: 0.85;
+}
+
+.sortable-ghost .drag-group-svg polygon,
+.sortable-ghost .drag-group-svg circle {
+    fill: #60a5fa;
+    opacity: 0.85;
+}

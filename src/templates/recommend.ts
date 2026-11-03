@@ -408,9 +408,14 @@ export const kycCustomerTemplate: FormSchema = {
           "type": "input",
           "key": "input_12",
           "helpPosition": "right",
-          "dependsOn": {
-            "fieldKey": "radio_11",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_11",
+                "value": "option_1"
+              }
+            ]
           }
         }
       ],
@@ -716,9 +721,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_10",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_10",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -762,9 +772,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_24",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_24",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -808,9 +823,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_22",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_22",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -854,9 +874,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_32",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_32",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -900,9 +925,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_30",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_30",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -946,9 +976,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_28",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_28",
+                "value": "option_1"
+              }
+            ]
           }
         },
         {
@@ -992,9 +1027,14 @@ export const kycIndividualTemplate: FormSchema = {
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
-          "dependsOn": {
-            "fieldKey": "radio_26",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_26",
+                "value": "option_1"
+              }
+            ]
           }
         }
       ],
@@ -1274,9 +1314,14 @@ export const kycEntityTemplate: FormSchema = {
           "type": "input",
           "key": "input_12",
           "helpPosition": "right",
-          "dependsOn": {
-            "fieldKey": "radio_11",
-            "value": "option_1"
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_11",
+                "value": "option_1"
+              }
+            ]
           }
         }
       ],
@@ -1346,7 +1391,7 @@ export const allComponentsDemoTemplate: FormSchema = {
       title: '第 1 页：单行文本',
       title_en: 'Page 1: Single-line Text (Input)',
       description: '测试单行文本普通文本、数字输入、前置条件联动及自定义校验提示',
-      description_en: 'Test text/number input, conditional visibility (dependsOn) and custom error messages',
+      description_en: 'Test text/number input, conditional visibility (linkage) and custom error messages',
       fields: [
         {
           id: 'test_input_basic',
@@ -1399,9 +1444,14 @@ export const allComponentsDemoTemplate: FormSchema = {
           showLabel: true,
           placeholder: '请输入上级母公司登记全称',
           placeholder_en: 'Please enter registered name of parent entity',
-          dependsOn: {
-            fieldKey: 'radio_has_parent',
-            value: 'yes'
+          linkage: {
+            logic: 'and',
+            conditions: [
+              {
+                fieldKey: 'radio_has_parent',
+                value: 'yes'
+              }
+            ]
           }
         },
         {
