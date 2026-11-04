@@ -379,7 +379,7 @@ import {
   markDirty
 } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
-import { getConnectedLinkageGroup, getDirectChildren } from '@/utils/helpers';
+import { getConnectedLinkageGroup } from '@/utils/helpers';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -1166,69 +1166,52 @@ onMounted(() => {
         const draggedEl = groupId ? props.page.fields.find(f => f.id === groupId) : undefined;
 
         if (draggedEl) {
-          const isLinkedGroup = Boolean(
-            draggedEl.linkage?.conditions?.length ||
-            getDirectChildren(props.page.fields, draggedEl.key).length > 0
-          );
-          if (isLinkedGroup) {
-            const rawConnected = getConnectedLinkageGroup(props.page.fields, draggedEl);
-            const connectedIdSet = new Set(rawConnected.map(e => e.id));
-            const connectedEls = props.page.fields.filter(f => connectedIdSet.has(f.id));
+          const rawConnected = getConnectedLinkageGroup(props.page.fields, draggedEl);
+          const connectedIdSet = new Set(rawConnected.map(e => e.id));
+          const connectedEls = props.page.fields.filter(f => connectedIdSet.has(f.id));
 
-            if (connectedEls.length > 1) {
-              globalDraggingGroup = {
-                sourcePageId: props.page.id,
-                group: {
-                  id: draggedEl.id,
-                  elements: JSON.parse(JSON.stringify(connectedEls))
-                },
-                isWholeGroupDrag: true,
-                liveElements: connectedEls,
-                handledDrop: false
-              };
+          if (connectedEls.length > 1) {
+            globalDraggingGroup = {
+              sourcePageId: props.page.id,
+              group: {
+                id: draggedEl.id,
+                elements: JSON.parse(JSON.stringify(connectedEls))
+              },
+              isWholeGroupDrag: true,
+              liveElements: connectedEls,
+              handledDrop: false
+            };
 
-              if (evt.from) {
-                const groupDomNodes = connectedEls
-                  .map(el => evt.from.querySelector(`[data-group-id="${el.id}"]`) as HTMLElement | null)
-                  .filter((n): n is HTMLElement => Boolean(n));
+            if (evt.from) {
+              const groupDomNodes = connectedEls
+                .map(el => evt.from.querySelector(`[data-group-id="${el.id}"]`) as HTMLElement | null)
+                .filter((n): n is HTMLElement => Boolean(n));
 
-                const origCard = evt.item.querySelector(':scope > .canvas-element') as HTMLElement | null;
-                if (origCard) {
-                  origCard.style.display = 'none';
-                  origCard.setAttribute('data-temp-orig-hidden', 'true');
+              const origCard = evt.item.querySelector(':scope > .canvas-element') as HTMLElement | null;
+              if (origCard) {
+                origCard.style.display = 'none';
+                origCard.setAttribute('data-temp-orig-hidden', 'true');
+              }
+
+              for (const domNode of groupDomNodes) {
+                const cardEl = domNode.querySelector(':scope > .canvas-element') as HTMLElement | null;
+                if (cardEl) {
+                  const cardClone = cardEl.cloneNode(true) as HTMLElement;
+                  cardClone.style.display = '';
+                  cardClone.setAttribute('data-temp-ghost-clone', 'true');
+                  evt.item.appendChild(cardClone);
                 }
-
-                for (const domNode of groupDomNodes) {
-                  const cardEl = domNode.querySelector(':scope > .canvas-element') as HTMLElement | null;
-                  if (cardEl) {
-                    const cardClone = cardEl.cloneNode(true) as HTMLElement;
-                    cardClone.style.display = '';
-                    cardClone.setAttribute('data-temp-ghost-clone', 'true');
-                    evt.item.appendChild(cardClone);
-                  }
-                  if (domNode !== evt.item) {
-                    domNode.style.display = 'none';
-                    domNode.setAttribute('data-temp-companion-hidden', 'true');
-                  }
-                }
-
-                const dragSvg = createGroupDragSvg(evt.item, connectedEls);
-                if (dragSvg) {
-                  dragSvg.setAttribute('data-temp-ghost-clone', 'true');
-                  evt.item.appendChild(dragSvg);
+                if (domNode !== evt.item) {
+                  domNode.style.display = 'none';
+                  domNode.setAttribute('data-temp-companion-hidden', 'true');
                 }
               }
-            } else {
-              globalDraggingGroup = {
-                sourcePageId: props.page.id,
-                group: {
-                  id: draggedEl.id,
-                  elements: [JSON.parse(JSON.stringify(draggedEl))]
-                },
-                isWholeGroupDrag: false,
-                liveElements: [draggedEl],
-                handledDrop: false
-              };
+
+              const dragSvg = createGroupDragSvg(evt.item, connectedEls);
+              if (dragSvg) {
+                dragSvg.setAttribute('data-temp-ghost-clone', 'true');
+                evt.item.appendChild(dragSvg);
+              }
             }
           } else {
             globalDraggingGroup = {

@@ -7,7 +7,8 @@ export const presetCustomerProfileFields: ProfileFieldItem[] = [
   { label: '法律实体形式', label_en: 'Entity Type', value: '私人豁免有限公司 / Private Limited Company', skeletonWidth: '45%' },
   { label: '授权代表姓名', label_en: 'Authorized Representative', value: 'Alexander Tan (陈建国)', skeletonWidth: '35%' },
   { label: '官方联络邮箱', label_en: 'Contact Email', value: 'compliance@algocandy.com', skeletonWidth: '55%' },
-  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' },
+  { label: '居住地址', label_en: 'Residential Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
 ];
 
 export const presetIndividualProfileFields: ProfileFieldItem[] = [
@@ -22,7 +23,8 @@ export const presetIndividualProfileFields: ProfileFieldItem[] = [
   { label: '性别', label_en: 'Gender', value: '男 / Male', skeletonWidth: '20%' },
   { label: '手机号码', label_en: 'Mobile Phone', value: '+65 91234567', skeletonWidth: '45%' },
   { label: '电子邮箱', label_en: 'Email', value: 'alex.tan@example.com', skeletonWidth: '50%' },
-  { label: '居住地址', label_en: 'Residential Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+  { label: '居住地址', label_en: 'Residential Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' },
+  { label: '联系地址', label_en: 'Contact Address', value: '8 Marina View, #07-02 Asia Square Tower 1, Singapore 018960', skeletonWidth: '80%' }
 ];
 
 export const presetEntityProfileFields: ProfileFieldItem[] = [
@@ -32,7 +34,8 @@ export const presetEntityProfileFields: ProfileFieldItem[] = [
   { label: '法律实体形式', label_en: 'Entity Type', value: '私人豁免有限公司 / Private Limited Company', skeletonWidth: '45%' },
   { label: '授权代表姓名', label_en: 'Authorized Representative', value: 'Alexander Tan (陈建国)', skeletonWidth: '35%' },
   { label: '官方联络邮箱', label_en: 'Contact Email', value: 'contact@algoholdings.com', skeletonWidth: '55%' },
-  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
+  { label: '企业注册地址', label_en: 'Registered Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' },
+  { label: '居住地址', label_en: 'Residential Address', value: '10 Marina Boulevard, #38-01 MBFC Tower 2, Singapore 018983', skeletonWidth: '85%' }
 ];
 
 
@@ -470,10 +473,10 @@ export const kycClientTemplate: FormSchema = kycCustomerTemplate;
 export const kycIndividualTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SC-CDD-INDIVIDUAL",
-    "title_en": "SC-CDD-INDIVIDUAL",
-    "description": "",
-    "description_en": "",
+    "title": "推荐个人案例模板（新）_Copy",
+    "title_en": "推荐个人案例模板（新）_Copy",
+    "description": "tpl_20261030_7wzp",
+    "description_en": "tpl_20261030_7wzp",
     "profileType": "individual",
     "formType": "kyc",
     "enabledLocales": [
@@ -481,7 +484,10 @@ export const kycIndividualTemplate: FormSchema = {
       "en"
     ],
     "source": "template",
-    "templateKey": "kyc-individual"
+    "templateKey": "kyc-individual",
+    "formId": "individual_diy_161456",
+    "serialNo": "individual_diy_161456",
+    "createdAt": 1793347455387
   },
   "pages": [
     {
@@ -580,31 +586,27 @@ export const kycIndividualTemplate: FormSchema = {
       "description": "",
       "fields": [
         {
+          "label": "提示",
+          "label_en": "Note",
+          "required": false,
+          "showLabel": true,
+          "listStyle": "circle",
+          "content": "政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n· 国家元首或政府首脑（如总统、总理）\n· 高级政治人物（如部长、副部长、议员）\n· 高级政府官员（如政府部门或重要监管机构高级官员）\n· 司法或军事机构的高级官员（如最高法院法官、将军）\n· 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n· 中央银行高级管理人员（如行长、副行长）\n· 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员（如执行董事、理事会成员）\n\n基于 AML/CFT 合规要求，PEP 还包括：\n· PEP 的直系家庭成员\n· PEP 的密切关联人士 ",
+          "content_en": "A Politically Exposed Person (PEP) refers to an individual who currently holds, or has previously held, a prominent public function in Singapore, another country, or an international organisation. This typically includes:\n· Head of state or government, such as President or Prime Minister\n· Senior political figure, such as Minister, Deputy Minister, or Member of Parliament\n· Senior government official, such as a senior official of a government department or key regulatory authority\n· Senior official of a judicial or military body, such as a Supreme Court Judge or General\n· Senior management of an important state-owned enterprise (SOE), such as Chairman or Chief Executive Officer\n· Senior executive of a central bank, such as Governor or Deputy Governor\n· Senior management of a major international organisation, such as Executive Director or Board Member of the United Nations, World Bank, or International Monetary Fund\n\nFor AML/CFT purposes, PEP also includes:\n· Immediate family members of a PEP\n· Close associates of a PEP ",
           "id": "cmp_4",
           "type": "alert",
           "key": "alert_4",
-          "required": false,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "提示",
-          "label_en": "Note",
-          "listStyle": "circle",
-          "content": "政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n· 国家元首或政府首脑（如总统、总理）\n· 高级政治人物（如部长、副部长、议员）\n· 高级政府官员（如政府部门或重要监管机构高级官员）\n· 司法或军事机构的高级官员（如最高法院法官、将军）\n· 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n· 中央银行高级管理人员（如行长、副行长）\n· 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员（如执行董事、理事会成员）\n\n基于 AML/CFT 合规要求，PEP 还包括：\n· PEP 的直系家庭成员\n· PEP 的密切关联人士 ",
-          "content_en": "A Politically Exposed Person (PEP) refers to an individual who currently holds, or has previously held, a prominent public function in Singapore, another country, or an international organisation. This typically includes:\n· Head of state or government, such as President or Prime Minister\n· Senior political figure, such as Minister, Deputy Minister, or Member of Parliament\n· Senior government official, such as a senior official of a government department or key regulatory authority\n· Senior official of a judicial or military body, such as a Supreme Court Judge or General\n· Senior management of an important state-owned enterprise (SOE), such as Chairman or Chief Executive Officer\n· Senior executive of a central bank, such as Governor or Deputy Governor\n· Senior management of a major international organisation, such as Executive Director or Board Member of the United Nations, World Bank, or International Monetary Fund\n\nFor AML/CFT purposes, PEP also includes:\n· Immediate family members of a PEP\n· Close associates of a PEP "
+          "helpPosition": "right"
         },
         {
-          "id": "cmp_5",
-          "type": "radio",
-          "key": "radio_5",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
           "label": "您是否目前在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职？",
           "label_en": "Are you currently holding a prominent public position in Singapore, in any other country or under the mandate of an international organization?",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -616,21 +618,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
+          ],
+          "id": "cmp_5",
+          "type": "radio",
+          "key": "radio_5",
+          "helpPosition": "right"
         },
         {
-          "id": "cmp_7",
-          "type": "radio",
-          "key": "radio_7",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
           "label": "您是否曾在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职，并已辞去该重要公职？",
           "label_en": "Have you previously held a prominent public position in Singapore, overseas or under an international organization, and have since stepped down?",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -642,21 +644,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
+          ],
+          "id": "cmp_7",
+          "type": "radio",
+          "key": "radio_7",
+          "helpPosition": "right"
         },
         {
-          "id": "cmp_8",
-          "type": "radio",
-          "key": "radio_8",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
           "label": "您是否是现任或已卸任的政治人物的家庭成员或关系密切者？",
           "label_en": "Are you a family member or close associate of a current or former political figure?",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -668,7 +670,240 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
+          ],
+          "id": "cmp_8",
+          "type": "radio",
+          "key": "radio_8",
+          "helpPosition": "right"
+        },
+        {
+          "label": "被识别的PEP是以下哪种类型？",
+          "label_en": "What type of PEP has been identified?",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
+          "options": [
+            {
+              "label": "新加坡敏感政治人物",
+              "label_en": "Singapore-sensitive political figure",
+              "value": "option_1"
+            },
+            {
+              "label": "外国敏感政治人物",
+              "label_en": "Foreign-sensitive political figure",
+              "value": "option_2"
+            },
+            {
+              "label": "国际组织敏感政治人物",
+              "label_en": "International organization PEP",
+              "value": "option_3_mw02dacj"
+            },
+            {
+              "label": "敏感政治人物的家庭成员",
+              "label_en": "Family member of a PEP",
+              "value": "option_4_mw02dju4"
+            },
+            {
+              "label": "敏感政治人物的亲密伙伴",
+              "label_en": "Close associate of a PEP",
+              "value": "option_5_mw02dr61"
+            }
+          ],
+          "id": "cmp_36",
+          "type": "checkbox",
+          "key": "checkbox_36",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "label": "与PEP(政界公众人士)的关系说明(如适用)",
+          "label_en": "Description of relationship with the PEP(Politically Exposed Person), if applicable",
+          "placeholder": "请输入详细描述...",
+          "placeholder_en": "Please enter detailed description...",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "required": true,
+          "showLabel": true,
+          "minRows": 3,
+          "maxRows": 6,
+          "maxLength": 800,
+          "id": "cmp_37",
+          "type": "textarea",
+          "key": "textarea_37",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "label": "PEP(政界公众人士)的姓名",
+          "label_en": "Name of the PEP (Politically Exposed Person)",
+          "placeholder": "请输入内容",
+          "placeholder_en": "Please enter content",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
+          "id": "cmp_38",
+          "type": "input",
+          "key": "input_38",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "label": "PEP(政界公众人士)担任重要公职的国家或国际组织名称",
+          "label_en": "Name of the country or international\norganization where the PEP holds or held a\nprominent public position",
+          "placeholder": "请输入内容",
+          "placeholder_en": "Please enter content",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
+          "id": "cmp_39",
+          "type": "input",
+          "key": "input_39",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "label": "描述正在或曾经担任的重要公共职务",
+          "label_en": "Description of the prominent public position\ncurrently or previously held",
+          "placeholder": "请输入内容",
+          "placeholder_en": "Please enter content",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
+          "id": "cmp_40",
+          "type": "input",
+          "key": "input_40",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "label": "曾属于PEP(政界公众人士)身份的起止时间",
+          "label_en": "Period during which the individual was classified as a PEP",
+          "placeholder": "请选择日期",
+          "placeholder_en": "Please select a date",
+          "help": "",
+          "help_en": "",
+          "defaultValue": "",
+          "endValue": "",
+          "dateType": "date",
+          "dateMode": "range",
+          "enableLongTerm": false,
+          "defaultLongTerm": false,
+          "required": true,
+          "showLabel": true,
+          "id": "cmp_41",
+          "type": "date",
+          "key": "date_41",
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
         }
       ],
       "title_en": "PEP Declaration",
@@ -677,22 +912,19 @@ export const kycIndividualTemplate: FormSchema = {
     {
       "id": "page_1793339330496_9",
       "pageType": "form",
+      "showSkeleton": true,
       "title": "犯罪记录声明",
       "description": "",
       "fields": [
         {
-          "id": "cmp_10",
-          "type": "radio",
-          "key": "radio_10",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
           "label": "欺骗，金融诈骗，贿赂，受贿，伪造或逃税的行为",
           "label_en": "Fraud, financial scams, bribery, acceptance of bribes, forgery, or tax evasion",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -704,46 +936,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_11",
-          "type": "input",
-          "key": "input_11",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_10",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_24",
+          ],
+          "id": "cmp_10",
           "type": "radio",
-          "key": "radio_24",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_10",
+          "helpPosition": "right"
+        },
+        {
           "label": "在规范市场或第三方国家的等价市场中进行交易的金融证券股票市场价格进行操控",
           "label_en": "Manipulation of financial securities or stock prices in regulated or equivalent third-country markets",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -755,46 +962,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_25",
-          "type": "input",
-          "key": "input_25",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_24",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_22",
+          ],
+          "id": "cmp_24",
           "type": "radio",
-          "key": "radio_22",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_24",
+          "helpPosition": "right"
+        },
+        {
           "label": "被判处有期徒刑罪行",
           "label_en": "Criminal offenses resulting in imprisonment",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -806,46 +988,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_23",
-          "type": "input",
-          "key": "input_23",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_22",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_32",
+          ],
+          "id": "cmp_22",
           "type": "radio",
-          "key": "radio_32",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_22",
+          "helpPosition": "right"
+        },
+        {
           "label": "涉及使用机密信息的犯罪或违法行为",
           "label_en": "Crimes or misconduct involving confidential information",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -857,46 +1014,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_33",
-          "type": "input",
-          "key": "input_33",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_32",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_30",
+          ],
+          "id": "cmp_32",
           "type": "radio",
-          "key": "radio_30",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_32",
+          "helpPosition": "right"
+        },
+        {
           "label": "涉及洗钱、恐怖分子资金筹集/扩大融资等违规及违法活动",
           "label_en": "Offenses related to money laundering or terrorist financing",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -908,46 +1040,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_31",
-          "type": "input",
-          "key": "input_31",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_30",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_28",
+          ],
+          "id": "cmp_30",
           "type": "radio",
-          "key": "radio_28",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_30",
+          "helpPosition": "right"
+        },
+        {
           "label": "宣布破产",
           "label_en": "Bankruptcy declaration",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -959,46 +1066,21 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
-        },
-        {
-          "id": "cmp_29",
-          "type": "input",
-          "key": "input_29",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "linkage": {
-            "logic": "and",
-            "conditions": [
-              {
-                "fieldKey": "radio_28",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "id": "cmp_26",
+          ],
+          "id": "cmp_28",
           "type": "radio",
-          "key": "radio_26",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
+          "key": "radio_28",
+          "helpPosition": "right"
+        },
+        {
           "label": "其他犯罪行为",
           "label_en": "Other criminal offenses",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "options": [
             {
               "label": "是",
@@ -1010,26 +1092,54 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "No",
               "value": "option_2"
             }
-          ]
+          ],
+          "id": "cmp_26",
+          "type": "radio",
+          "key": "radio_26",
+          "helpPosition": "right"
         },
         {
-          "id": "cmp_27",
-          "type": "input",
-          "key": "input_27",
-          "required": true,
-          "showLabel": true,
-          "helpPosition": "right",
-          "label": "请说明",
-          "label_en": "Please provide details",
+          "label": "说明",
+          "label_en": "Description",
           "placeholder": "请说明",
           "placeholder_en": "Please enter description",
           "help": "",
           "help_en": "",
           "defaultValue": "",
           "inputType": "text",
+          "required": true,
+          "showLabel": false,
+          "id": "cmp_27",
+          "type": "input",
+          "key": "input_27",
+          "helpPosition": "right",
           "linkage": {
-            "logic": "and",
+            "logic": "or",
             "conditions": [
+              {
+                "fieldKey": "radio_10",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_24",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_22",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_32",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_30",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_28",
+                "value": "option_1"
+              },
               {
                 "fieldKey": "radio_26",
                 "value": "option_1"
@@ -1044,22 +1154,19 @@ export const kycIndividualTemplate: FormSchema = {
     {
       "id": "page_1793339759637_34",
       "pageType": "form",
+      "showSkeleton": true,
       "title": "声明及签名",
       "description": "",
       "fields": [
         {
-          "id": "cmp_35",
-          "type": "signature",
-          "key": "signature_35",
-          "required": true,
-          "showLabel": false,
-          "helpPosition": "right",
           "label": "声明",
           "label_en": "",
           "placeholder": "请在下方指定区域签名",
           "placeholder_en": "Please sign in the designated area below",
           "help": "",
           "help_en": "",
+          "showLabel": false,
+          "required": true,
           "declarationRequired": true,
           "options": [
             {
@@ -1067,7 +1174,11 @@ export const kycIndividualTemplate: FormSchema = {
               "label_en": "I hereby declare that all information provided above is true, accurate and complete. I acknowledge that if I make any false statements or intentionally conceal material facts, I may bear corresponding legal liabilities, including criminal liability.",
               "value": "dec_1"
             }
-          ]
+          ],
+          "id": "cmp_35",
+          "type": "signature",
+          "key": "signature_35",
+          "helpPosition": "right"
         }
       ],
       "title_en": "Declaration and Signature",
@@ -1076,7 +1187,6 @@ export const kycIndividualTemplate: FormSchema = {
   ],
   "pageConnections": []
 };
-
 
 export const kycEntityTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
