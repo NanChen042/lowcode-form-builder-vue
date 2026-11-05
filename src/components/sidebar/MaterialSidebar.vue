@@ -662,7 +662,7 @@ const scenarioTemplates = [
     desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
     stats: '3 页面 · 9 字段',
     stats_en: '3 Pages · 9 Fields',
-    code: 'SG_CDD_Customer',
+    code: 'SG_CDD_CUSTOMER',
     bannerBgClass: 'bg-[#faf5ff]'
   },
   {
@@ -677,7 +677,7 @@ const scenarioTemplates = [
     desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
     stats: '5 页面 · 15 字段',
     stats_en: '5 Pages · 15 Fields',
-    code: 'SG_CDD_Individual',
+    code: 'SG_CDD_INDIVIDUAL',
     bannerBgClass: 'bg-[#f0fdf4]'
   },
   {
@@ -692,7 +692,7 @@ const scenarioTemplates = [
     desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
     stats: '3 页面 · 16 字段',
     stats_en: '3 Pages · 16 Fields',
-    code: 'SG_CDD_Entity',
+    code: 'SG_CDD_ENTITY',
     bannerBgClass: 'bg-[#eff6ff]'
   }
 ];

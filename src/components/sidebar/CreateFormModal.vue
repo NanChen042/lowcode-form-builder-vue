@@ -145,13 +145,13 @@ const profileOptions = computed(() => [
 
 const defaultTitleForProfile = computed(() => {
   if (isRisk.value) {
-    if (selectedProfile.value === 'individual') return 'SG_Risk_Individual';
-    if (selectedProfile.value === 'entity') return 'SG_Risk_Entity';
-    return 'SG_Risk_Customer';
+    if (selectedProfile.value === 'individual') return 'SG_RISK_INDIVIDUAL';
+    if (selectedProfile.value === 'entity') return 'SG_RISK_ENTITY';
+    return 'SG_RISK_CUSTOMER';
   }
-  if (selectedProfile.value === 'individual') return 'SG_CDD_Individual';
-  if (selectedProfile.value === 'entity') return 'SG_CDD_Entity';
-  return 'SG_CDD_Customer';
+  if (selectedProfile.value === 'individual') return 'SG_CDD_INDIVIDUAL';
+  if (selectedProfile.value === 'entity') return 'SG_CDD_ENTITY';
+  return 'SG_CDD_CUSTOMER';
 });
 
 const computedTitlePlaceholder = computed(() => {
@@ -212,7 +212,7 @@ function handleConfirm() {
 
 function executeCreateCanvas() {
   const pType = selectedProfile.value;
-  const title = customTitle.value.trim() || defaultTitleForProfile.value;
+  const title = customTitle.value.trim();
   createNewCanvas({
     title,
     description: '',

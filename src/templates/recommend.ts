@@ -48,12 +48,12 @@ export function createBlankTemplate(
 ): FormSchema {
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
   const defaultMetaMap: Record<string, { title: string; desc: string }> = {
-    customer: { title: 'SG-CDD-CUSTOMER', desc: '' },
-    client: { title: 'SG-CDD-CUSTOMER', desc: '' },
-    individual: { title: 'SC-CDD-INDIVIDUAL', desc: '' },
-    entity: { title: 'SG-CDD-ENTITY', desc: '' }
+    customer: { title: 'SG_CDD_CUSTOMER', desc: '' },
+    client: { title: 'SG_CDD_CUSTOMER', desc: '' },
+    individual: { title: 'SG_CDD_INDIVIDUAL', desc: '' },
+    entity: { title: 'SG_CDD_ENTITY', desc: '' }
   };
-  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG-CDD-CUSTOMER';
+  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_CUSTOMER';
   const resolvedDesc = description || '';
 
   const defaultFields = normType === 'individual'
@@ -119,21 +119,21 @@ export function createRiskAssessmentTemplate(
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
   const defaultMetaMap: Record<string, { title: string; pageTitle: string; pageTitleEn: string; pageDesc: string; pageDescEn: string }> = {
     customer: {
-      title: 'SG_Risk_Customer',
+      title: 'SG_RISK_CUSTOMER',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
       pageDescEn: 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
     },
     individual: {
-      title: 'SG_Risk_Individual',
+      title: 'SG_RISK_INDIVIDUAL',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置个人成员的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
       pageDescEn: 'Configure individual risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
     },
     entity: {
-      title: 'SG_Risk_Entity',
+      title: 'SG_RISK_ENTITY',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置实体机构的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
@@ -178,8 +178,8 @@ export function createRiskAssessmentTemplate(
 export const kycCustomerTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SG-CDD-CUSTOMER",
-    "title_en": "SG-CDD-CUSTOMER",
+    "title": "SG_CDD_CUSTOMER",
+    "title_en": "SG_CDD_CUSTOMER",
     "description": "",
     "description_en": "",
     "profileType": "customer",
@@ -473,10 +473,10 @@ export const kycClientTemplate: FormSchema = kycCustomerTemplate;
 export const kycIndividualTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "推荐个人案例模板（新）_Copy",
-    "title_en": "推荐个人案例模板（新）_Copy",
-    "description": "tpl_20261030_7wzp",
-    "description_en": "tpl_20261030_7wzp",
+    "title": "SG_CDD_INDIVIDUAL",
+    "title_en": "SG_CDD_INDIVIDUAL",
+    "description": "",
+    "description_en": "",
     "profileType": "individual",
     "formType": "kyc",
     "enabledLocales": [
@@ -1160,7 +1160,7 @@ export const kycIndividualTemplate: FormSchema = {
       "fields": [
         {
           "label": "声明",
-          "label_en": "",
+          "label_en": "Applicant's Declaration",
           "placeholder": "请在下方指定区域签名",
           "placeholder_en": "Please sign in the designated area below",
           "help": "",
@@ -1191,8 +1191,8 @@ export const kycIndividualTemplate: FormSchema = {
 export const kycEntityTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SG-CDD-ENTITY",
-    "title_en": "SG-CDD-ENTITY",
+    "title": "SG_CDD_ENTITY",
+    "title_en": "SG_CDD_ENTITY",
     "description": "",
     "description_en": "",
     "profileType": "entity",

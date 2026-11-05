@@ -899,6 +899,8 @@ export function buildSchema(): FormSchema {
   if (!store.meta.serialNo) store.meta.serialNo = ensuredId;
 
   const defaultTemplateTitles = [
+    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
     'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity'
   ];
@@ -1100,14 +1102,33 @@ export function createNewCanvas(options: {
   profileType?: ProfileType;
 }) {
   const profileType = options.profileType || store.meta.profileType || 'customer';
-  // 保留已存在的 ID，如果当前已有正在编辑的表单，新建覆盖时应保持原 ID，保存时原地覆盖 (Update)
+  const defaultTemplateTitles = [
+    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
+    'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
+    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
+    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment'
+  ];
+  const defaultTitle = isRisk.value
+    ? (profileType === 'individual' ? 'SG_RISK_INDIVIDUAL' : profileType === 'entity' ? 'SG_RISK_ENTITY' : 'SG_RISK_CUSTOMER')
+    : (profileType === 'individual' ? 'SG_CDD_INDIVIDUAL' : profileType === 'entity' ? 'SG_CDD_ENTITY' : 'SG_CDD_CUSTOMER');
+  const persistedUrlId = typeof window !== 'undefined'
+    ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
+    : '';
+  const isPersisted = Boolean((persistedUrlId && !persistedUrlId.startsWith('preset-cdd-')) || store.lastSavedTime);
+  // 保留已持久化保存的 ID，如果当前已有已保存的表单，新建覆盖时保持原 ID，保存时原地覆盖 (Update)
   const existingId = store.meta.formId || store.meta.serialNo;
-  const formId = existingId || generateFormId(profileType, 'diy');
+  const formId = (isPersisted && existingId) ? existingId : generateFormId(profileType, 'diy');
   const now = Date.now();
-  const initialTitle = options.title?.trim() || (existingId && store.meta.title ? store.meta.title : (isRisk.value ? '风险评估' : '未命名表单'));
+  const curTitle = (store.meta.title || '').trim();
+  const curTitleEn = (store.meta.title_en || '').trim();
+  const shouldKeepTitle = isPersisted || Boolean(curTitle && !defaultTemplateTitles.includes(curTitle));
+  const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
+  const initialTitle = options.title?.trim() || (shouldKeepTitle && curTitle ? curTitle : defaultTitle);
+  const initialTitleEn = options.title?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : initialTitle);
   const schema = isRisk.value
-    ? createRiskAssessmentTemplate(profileType, initialTitle, initialTitle, options.description || '')
-    : createBlankTemplate(profileType, initialTitle, initialTitle, options.description || '');
+    ? createRiskAssessmentTemplate(profileType, initialTitle, initialTitleEn, options.description || '')
+    : createBlankTemplate(profileType, initialTitle, initialTitleEn, options.description || '');
 
   schema.meta.source = 'diy';
   schema.meta.serialNo = formId;
@@ -1116,7 +1137,7 @@ export function createNewCanvas(options: {
 
   loadSchema(schema);
   store.meta.title = initialTitle;
-  store.meta.title_en = initialTitle;
+  store.meta.title_en = initialTitleEn;
   store.meta.description = options.description !== undefined ? options.description : schema.meta.description;
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
@@ -1129,11 +1150,10 @@ export function createNewCanvas(options: {
     selectElement(store.pages[0].fields[0]);
   }
   if (dirtyTimer) clearTimeout(dirtyTimer);
-  store.lastSavedHash = '';
-  store.isDirty = true;
+  establishBaseline();
   store.lastSavedTime = '';
-  // 已有 ID 则保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
-  syncUrlParams(existingId ? formId : '');
+  // 已持久化保存的表单保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
+  syncUrlParams(isPersisted ? formId : '');
 }
 
 export function applyTemplateKey(
@@ -1142,38 +1162,56 @@ export function applyTemplateKey(
 ) {
   let templateSource: FormSchema = kycCustomerTemplate;
   let pType: ProfileType = 'customer';
-  let defaultTitle = 'SG_CDD_Customer';
+  let defaultTitle = 'SG_CDD_CUSTOMER';
 
   if (tplKey === 'kyc-individual') {
     templateSource = kycIndividualTemplate;
     pType = 'individual';
-    defaultTitle = 'SG_CDD_Individual';
+    defaultTitle = 'SG_CDD_INDIVIDUAL';
   } else if (tplKey === 'kyc-entity') {
     templateSource = kycEntityTemplate;
     pType = 'entity';
-    defaultTitle = 'SG_CDD_Entity';
+    defaultTitle = 'SG_CDD_ENTITY';
   } else if (tplKey === 'risk-individual') {
-    templateSource = createRiskAssessmentTemplate('individual', 'SG_Risk_Individual');
+    templateSource = createRiskAssessmentTemplate('individual', 'SG_RISK_INDIVIDUAL');
     pType = 'individual';
-    defaultTitle = 'SG_Risk_Individual';
+    defaultTitle = 'SG_RISK_INDIVIDUAL';
   } else if (tplKey === 'risk-entity') {
-    templateSource = createRiskAssessmentTemplate('entity', 'SG_Risk_Entity');
+    templateSource = createRiskAssessmentTemplate('entity', 'SG_RISK_ENTITY');
     pType = 'entity';
-    defaultTitle = 'SG_Risk_Entity';
+    defaultTitle = 'SG_RISK_ENTITY';
   } else if (tplKey === 'risk-customer') {
-    templateSource = createRiskAssessmentTemplate('customer', 'SG_Risk_Customer');
+    templateSource = createRiskAssessmentTemplate('customer', 'SG_RISK_CUSTOMER');
     pType = 'customer';
-    defaultTitle = 'SG_Risk_Customer';
+    defaultTitle = 'SG_RISK_CUSTOMER';
   }
 
+  const defaultTemplateTitles = [
+    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
+    'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
+    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
+    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment'
+  ];
+  const persistedUrlId = typeof window !== 'undefined'
+    ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
+    : '';
+  const isPersisted = Boolean((persistedUrlId && !persistedUrlId.startsWith('preset-cdd-')) || store.lastSavedTime);
+
   const clonedSchema: FormSchema = JSON.parse(JSON.stringify(templateSource));
-  // 保留已存在的 ID，切换模板时不重新生成 ID，保存时直接原地覆盖 (Update)
+  // 保留已持久化保存的 ID，切换模板时不重新生成 ID，保存时直接原地覆盖 (Update)
   const existingId = store.meta.formId || store.meta.serialNo;
-  const formId = existingId || generateFormId(pType, 'template');
+  const formId = (isPersisted && existingId) ? existingId : generateFormId(pType, 'template');
   const now = Date.now();
-  // 保留用户已有标题或自定义标题
-  const title = customTitle?.trim() || (existingId && store.meta.title ? store.meta.title : defaultTitle);
-  const titleEn = (existingId && store.meta.title_en) ? store.meta.title_en : title;
+
+  const curTitle = (store.meta.title || '').trim();
+  const curTitleEn = (store.meta.title_en || '').trim();
+  const shouldKeepTitle = isPersisted || Boolean(curTitle && !defaultTemplateTitles.includes(curTitle));
+  const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
+
+  // 若用户已手动修改过标题或表单已保存，则保留原标题；否则随模板切换自动同步为新模板默认名称
+  const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : defaultTitle);
+  const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : title);
 
   clonedSchema.meta.title = title;
   clonedSchema.meta.title_en = titleEn;
@@ -1197,11 +1235,10 @@ export function applyTemplateKey(
   store.sidebarTab = 'components';
 
   if (dirtyTimer) clearTimeout(dirtyTimer);
-  store.lastSavedHash = '';
-  store.isDirty = true;
+  establishBaseline();
   store.lastSavedTime = '';
-  // 已有 ID 则保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
-  syncUrlParams(existingId ? formId : '');
+  // 已持久化保存的表单保持 URL 参数稳定；若全新创建尚未持久化保存则清空 URL
+  syncUrlParams(isPersisted ? formId : '');
 }
 
 export function loadSchema(schema: FormSchema, options?: { duration?: number }) {

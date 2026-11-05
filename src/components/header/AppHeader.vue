@@ -30,7 +30,7 @@
         <Loader2 class="h-3 w-3 animate-spin shrink-0 text-blue-500" />
         <span>{{ t('app.saving') }}</span>
       </div>
-      <div v-else-if="store.isDirty && store.lastSavedHash" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none shrink-0" :title="t('app.dirty')">
+      <div v-else-if="store.isDirty" class="flex items-center gap-1.5 text-[11.5px] font-medium text-amber-600 select-none shrink-0" :title="t('app.dirty')">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
         <span>{{ t('app.dirty') }}</span>
       </div>
@@ -79,7 +79,7 @@
       <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
       <a-space size="small">
-        <a-button type="secondary" :loading="isSaving" :disabled="!store.isDirty" @click="handleSave">
+        <a-button type="secondary" :loading="isSaving" :disabled="isSaveDisabled" @click="handleSave">
           <template #icon>
             <Save class="h-4 w-4" />
           </template>
@@ -429,6 +429,8 @@ function handleConfirmTitle() {
   const fallback = t('header.untitledForm');
   const newTitle = trimmed || fallback;
   const defaultTemplateTitles = [
+    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
     'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
     '未命名表单', 'Untitled Form'
@@ -513,8 +515,15 @@ function handleUserAction(action: string) {
   }
 }
 
+const isSaveDisabled = computed(() => {
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const rawId = (urlParams?.get('id') || '').toLowerCase().trim();
+  const isPersisted = Boolean((rawId && !rawId.startsWith('preset-cdd-')) || store.lastSavedTime);
+  return isPersisted && !store.isDirty;
+});
+
 async function handleSave() {
-  if (isSaving.value || !store.isDirty) return;
+  if (isSaving.value || isSaveDisabled.value) return;
 
   isSaving.value = true;
 
@@ -547,7 +556,7 @@ function handleGlobalKeyDown(e: KeyboardEvent) {
   if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || (e.key && e.key.toLowerCase() === 's'))) {
     e.preventDefault();
     e.stopPropagation();
-    if (!store.isDirty || isSaving.value) return;
+    if (isSaveDisabled.value || isSaving.value) return;
     handleSave();
   }
 }

@@ -161,8 +161,7 @@ function handleWelcomeWizardClosed() {
     } else {
       loadSchema(blankTemplate);
     }
-    store.lastSavedHash = '';
-    store.isDirty = true;
+    establishBaseline();
     store.lastSavedTime = '';
   }
 }
@@ -404,8 +403,7 @@ onMounted(async () => {
       store.meta.formId = newFormId;
       store.meta.serialNo = newFormId;
       syncUrlParams('');
-      store.lastSavedHash = '';
-      store.isDirty = true;
+      establishBaseline();
       store.lastSavedTime = '';
     }
     store.activeTemplateKey = targetTemplateKey;
