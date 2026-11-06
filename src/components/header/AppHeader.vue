@@ -42,10 +42,28 @@
 
     <div class="flex items-center gap-2.5">
 
-      <div class="flex items-center gap-1.5 select-none shrink-0" :title="t('header.bilingualTooltip')">
-        <span class="text-slate-600 font-medium text-[12px] leading-none">{{ t('header.bilingualSwitch') }}</span>
-        <a-switch size="small" :model-value="isBilingual" @change="handleToggleBilingual" />
-
+      <div class="flex items-center gap-1.5 select-none shrink-0">
+        <a-button
+          :type="store.workspaceMode === 'translation' ? 'primary' : 'secondary'"
+          @click="handleToggleTranslationWorkspace"
+        >
+          <template #icon>
+            <Languages class="h-4 w-4" />
+          </template>
+          <span>
+            {{
+              store.workspaceMode === 'translation'
+                ? t('trans.exitWorkspace')
+                : isBilingual
+                  ? t('trans.multilingualWithCount', undefined, { count: targetLocales.length + 1 })
+                  : t('trans.addLanguage')
+            }}
+          </span>
+          <span
+            v-if="isBilingual && translationStats.untranslatedCount > 0 && store.workspaceMode !== 'translation'"
+            class="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"
+          />
+        </a-button>
 
         <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }">
           <button type="button" class="flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer" :title="t('header.bilingualGuideTitle')">
@@ -102,8 +120,6 @@
       </a-space>
 
       <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
-
-      <LanguageSwitcher />
 
       <a-dropdown trigger="hover" position="br" :popup-max-height="false" v-model:popup-visible="isUserDropdownOpen">
         <div class="flex items-center justify-center p-0.5 rounded-full cursor-pointer transition-all select-none ring-2" :class="isUserDropdownOpen ? 'ring-blue-400/70' : 'ring-transparent hover:ring-slate-200'">
@@ -237,16 +253,18 @@ import {
   markDirty,
   syncUrlParams,
   isBilingual,
-  enableBilingual,
+  primaryLocale,
+  targetLocales,
   disableMultiLanguage,
+  openTranslationWorkspace,
+  closeTranslationWorkspace,
   selectPage,
   selectElement,
   selectGroup,
   focusOnPage
 } from '@/core/store';
 import { FormAPI } from '@/core/api';
-import { t } from '@/core/i18n';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import { t, getPageText, getFieldText, getGroupText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import {
   IconExport
@@ -292,7 +310,7 @@ const isUserDropdownOpen = ref(false);
 const publishCheckModalVisible = ref(false);
 
 function validateFormBeforePublish(): boolean {
-  const isEn = store.currentLocale === 'en';
+  const baseLoc = primaryLocale.value;
   const formPages = store.pages.filter(p => p.pageType !== 'system_profile');
   if (formPages.length === 0) {
     Message.warning(t('header.valNoPages'));
@@ -305,8 +323,8 @@ function validateFormBeforePublish(): boolean {
     const pageNum = i + 1;
 
     const rawPageTitle = isRisk.value
-      ? (isEn ? (page.title_en || 'Risk Assessment') : (page.title || '风险评估'))
-      : (isEn ? page.title_en : page.title);
+      ? (getPageText(page, 'title', baseLoc) || '风险评估')
+      : getPageText(page, 'title', baseLoc);
     const pageTitle = (rawPageTitle || '')?.trim();
     if (!pageTitle) {
       Message.warning(t('header.valEmptyPageTitle', undefined, { page: pageNum }));
@@ -327,7 +345,7 @@ function validateFormBeforePublish(): boolean {
     if (isRisk.value && page.groups && page.groups.length > 0) {
       for (let gIdx = 0; gIdx < page.groups.length; gIdx++) {
         const grp = page.groups[gIdx];
-        const rawGrpTitle = isEn ? grp.title_en : grp.title;
+        const rawGrpTitle = getGroupText(grp, 'title', baseLoc);
         const grpTitle = (rawGrpTitle || '').trim();
         if (!grpTitle) {
           Message.warning(t('header.valEmptyGroupTitle', undefined, { index: String(gIdx + 1).padStart(2, '0') }));
@@ -342,7 +360,7 @@ function validateFormBeforePublish(): boolean {
     for (let fIdx = 0; fIdx < page.fields.length; fIdx++) {
       const field = page.fields[fIdx];
       if (field.showLabel !== false) {
-        const rawFieldLabel = isEn ? field.label_en : field.label;
+        const rawFieldLabel = getFieldText(field, 'label', baseLoc);
         const fieldLabel = (rawFieldLabel || '').trim();
 
         if (!fieldLabel) {
@@ -482,13 +500,11 @@ function handleCloseVideoModal() {
   isVideoModalVisible.value = false;
 }
 
-function handleToggleBilingual(val: any) {
-  const enable = Boolean(val);
-  if (enable) {
-    enableBilingual();
-    Message.success(t('header.bilingualEnabledMsg'));
+function handleToggleTranslationWorkspace() {
+  if (store.workspaceMode === 'translation') {
+    closeTranslationWorkspace();
   } else {
-    isDisableBilingualModalVisible.value = true;
+    openTranslationWorkspace();
   }
 }
 

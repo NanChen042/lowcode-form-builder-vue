@@ -6,12 +6,12 @@
       <div v-if="element.showLabel !== false" class="flex items-center gap-2 mb-2.5">
         <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
         <EditableText
-          :model-value="getFieldText(element, 'label')"
-          :placeholder="t('common.notice')"
+          :model-value="getFieldText(element, 'label', frameLocale)"
+          :placeholder="(isTranslationFrame && getFieldText(element, 'label', primaryLocale)) ? getFieldText(element, 'label', primaryLocale) : t('common.notice')"
           :element-id="element.id"
           field="label"
           custom-class="label-text text-[14px] font-bold text-slate-800 m-0 leading-5"
-          @update:model-value="(val) => setFieldText(element, 'label', val)"
+          @update:model-value="(val) => setFieldText(element, 'label', val, frameLocale)"
         />
       </div>
 
@@ -45,14 +45,14 @@
         v-else
         ref="editableTextRef"
         :model-value="rawContent"
-        :placeholder="t('prop.alertEmptyContentPlaceholder')"
+        :placeholder="(isTranslationFrame && getFieldText(element, 'content', primaryLocale)) ? getFieldText(element, 'content', primaryLocale) : t('prop.alertEmptyContentPlaceholder')"
         :element-id="element.id"
         field="content"
         tag="div"
-        :allow-empty="true"
+        :allow-empty="!isTranslationFrame || !getFieldText(element, 'content', primaryLocale)"
         multiline
         custom-class="alert-content-text w-full text-[13px] leading-relaxed text-slate-700 block border-b-2 border-transparent pb-0.5 cursor-text whitespace-pre-wrap font-sans select-text min-h-[22px]"
-        @update:model-value="(val) => setFieldText(element, 'content', val)"
+        @update:model-value="(val) => setFieldText(element, 'content', val, frameLocale)"
         @focus="handleContentFocus"
         @blur="handleContentBlur"
       />
@@ -61,21 +61,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
-import { store, selectElement, highlightPropertyField } from '@/core/store';
+import { store, primaryLocale, selectElement, highlightPropertyField } from '@/core/store';
 import EditableText from '@/components/common/EditableText.vue';
 import { Info } from '@lucide/vue';
 import { parseAlertContent } from '@/utils/alertParser';
 
 const props = defineProps<{ element: FormElement }>();
 
+const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
+const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
+
 const isEditing = ref(false);
 const editableTextRef = ref<any>(null);
 
 const rawContent = computed(() => {
-  return getFieldText(props.element, 'content');
+  return getFieldText(props.element, 'content', frameLocale.value);
 });
 
 const segments = computed(() => {
@@ -96,6 +100,7 @@ function focusEditableText() {
 }
 
 function startEditContent(e?: MouseEvent) {
+  if (isReadOnlyFrame.value) return;
   if (e) {
     const target = e.target as HTMLElement;
     if (target.tagName.toLowerCase() === 'a' || Boolean(target.closest('a'))) {
@@ -104,6 +109,7 @@ function startEditContent(e?: MouseEvent) {
     }
   }
 
+  store.editingLocale = frameLocale.value;
   selectElement(props.element);
   isEditing.value = true;
   store.focusedTarget = { elementId: props.element.id, field: 'content' };
@@ -115,6 +121,7 @@ function startEditContent(e?: MouseEvent) {
 }
 
 function handleContentFocus() {
+  store.editingLocale = frameLocale.value;
   isEditing.value = true;
   store.focusedTarget = { elementId: props.element.id, field: 'content' };
 }
@@ -124,9 +131,11 @@ function handleContentBlur() {
 }
 
 function handleCardClick(e: MouseEvent) {
+  if (isReadOnlyFrame.value) return;
   const target = e.target as HTMLElement;
   const isLabelClick = Boolean(target.closest('.label-text'));
 
+  store.editingLocale = frameLocale.value;
   selectElement(props.element);
 
   if (!isLabelClick) {

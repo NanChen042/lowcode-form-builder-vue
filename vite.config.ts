@@ -9,7 +9,7 @@ function generateRiskHtmlPlugin(): Plugin {
   return {
     name: 'generate-risk-html',
     closeBundle() {
-      const distDir = path.resolve(__dirname, 'dist')
+      const distDir = fileURLToPath(new URL('./dist', import.meta.url))
       const indexHtmlPath = path.join(distDir, 'index.html')
       if (fs.existsSync(indexHtmlPath)) {
         let html = fs.readFileSync(indexHtmlPath, 'utf8')

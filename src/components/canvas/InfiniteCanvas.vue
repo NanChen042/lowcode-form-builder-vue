@@ -28,14 +28,54 @@
         transform: `translate(${store.canvasState.x}px, ${store.canvasState.y}px) scale(${store.canvasState.scale})`
       }"
     >
-      <CanvasConnections v-if="!isRisk" />
+      <template v-if="store.workspaceMode === 'translation' && activeTranslationPage">
+        <PageFrame
+          :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
+          :page="activeTranslationPage"
+          :page-index="activeTranslationPageIndex"
+          :is-translation-frame="true"
+          :is-read-only-reference="true"
+          :in-translation-workspace="true"
+          :translation-locale="primaryLocale"
+          :custom-x="0"
+          :custom-y="0"
+        />
 
-      <PageFrame
-        v-for="(page, idx) in (isRisk ? store.pages.slice(0, 1) : store.pages)"
-        :key="page.id"
-        :page="page"
-        :page-index="idx"
-      />
+        <div
+          class="absolute flex flex-col items-center justify-center pointer-events-none select-none z-20"
+          :style="{
+            left: `${translationFrameWidth}px`,
+            top: '140px',
+            width: '64px'
+          }"
+        >
+          <div class="w-8 h-8 rounded-full bg-white border border-blue-200/90 shadow-xs flex items-center justify-center text-[#1677ff]">
+            <ArrowRight class="w-4 h-4" />
+          </div>
+        </div>
+
+        <PageFrame
+          :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
+          :page="activeTranslationPage"
+          :page-index="activeTranslationPageIndex"
+          :is-translation-frame="true"
+          :in-translation-workspace="true"
+          :translation-locale="store.activeTargetLocale"
+          :custom-x="translationFrameWidth + 64"
+          :custom-y="0"
+        />
+      </template>
+
+      <template v-else>
+        <CanvasConnections v-if="!isRisk" />
+
+        <PageFrame
+          v-for="(page, idx) in (isRisk ? store.pages.slice(0, 1) : store.pages)"
+          :key="page.id"
+          :page="page"
+          :page-index="idx"
+        />
+      </template>
     </div>
 
     <transition name="fade">
@@ -152,7 +192,7 @@
                         {{ item.fieldName }}
                       </div>
                       <div class="text-[10.5px] text-slate-400 group-hover/item:text-blue-500/80 truncate">
-                        {{ item.targetLocale === 'zh' ? t('common.localeEn') : t('common.localeZh') }}: {{ item.sourceText }}
+                        {{ getLocaleDisplayName(primaryLocale) }}: {{ item.sourceText }}
                       </div>
                     </div>
                     <ArrowRight class="w-3 h-3 text-slate-300 group-hover/item:text-[#1677ff] shrink-0" />
@@ -310,6 +350,7 @@ import {
   store,
   isRisk,
   getPageWidth,
+  getPagePairWidth,
   PAGE_HEIGHT,
   adjustZoom,
   resetCanvasView,
@@ -320,9 +361,10 @@ import {
   selectPage,
   duplicateElement,
   deleteElement,
-  isBilingual
+  isBilingual,
+  primaryLocale
 } from '@/core/store';
-import { t } from '@/core/i18n';
+import { t, getLocaleDisplayName } from '@/core/i18n';
 import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
 import ContextMenu from './ContextMenu.vue';
@@ -342,6 +384,19 @@ import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } f
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
+
+const activeTranslationPageIndex = computed(() => {
+  const idx = store.pages.findIndex(p => p.id === store.activePageId && p.pageType !== 'system_profile');
+  if (idx >= 0) return idx;
+  const firstFormIdx = store.pages.findIndex(p => p.pageType !== 'system_profile');
+  return firstFormIdx >= 0 ? firstFormIdx : 0;
+});
+
+const activeTranslationPage = computed(() => {
+  return store.pages[activeTranslationPageIndex.value] || null;
+});
+
+const translationFrameWidth = computed(() => getPageWidth());
 
 
 const isPillDismissed = ref(false);
@@ -363,9 +418,11 @@ const isMissingZh = computed(() => {
 
 const pillTitle = computed(() => {
   const count = translationStats.value.untranslatedCount;
-  return isMissingZh.value
-    ? t('canvas.todoZhCount', undefined, { count })
-    : t('canvas.todoEnCount', undefined, { count });
+  const targetLoc = translationStats.value.untranslatedItems[0]?.targetLocale || store.activeTargetLocale || 'en';
+  if (targetLoc === 'zh') return t('canvas.todoZhCount', undefined, { count });
+  if (targetLoc === 'en') return t('canvas.todoEnCount', undefined, { count });
+  const langName = getLocaleDisplayName(targetLoc);
+  return t('trans.pendingSummary', undefined, { count, langName });
 });
 
 function handleJumpToCurrentUntranslated() {
@@ -504,13 +561,22 @@ const isCanvasOffScreen = ref(false);
 
 const allPagesWorldBox = computed(() => {
   if (store.pages.length === 0) return null;
+  if (store.workspaceMode === 'translation') {
+    const w = translationFrameWidth.value;
+    return {
+      minX: 0,
+      minY: 0,
+      maxX: w * 2 + 64,
+      maxY: PAGE_HEIGHT
+    };
+  }
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  const pWidth = getPageWidth();
   store.pages.forEach(p => {
+    const pWidth = getPagePairWidth(p);
     if (p.x < minX) minX = p.x;
     if (p.y < minY) minY = p.y;
     if (p.x + pWidth > maxX) maxX = p.x + pWidth;
@@ -651,13 +717,18 @@ function onMouseDown(e: MouseEvent) {
   const isSpaceDrag = store.isSpacePressed;
   const isCtrlDrag = e.button === 0 && (e.ctrlKey || e.metaKey);
   const isMiddleDrag = e.button === 1;
+  const targetEl = e.target as HTMLElement;
+  const isTranslationPan =
+    store.workspaceMode === 'translation' &&
+    e.button === 0 &&
+    !targetEl.closest('[contenteditable="plaintext-only"], input, textarea, button, a, .arco-dropdown');
   const isBackgroundDrag =
     e.button === 0 &&
     (e.target === canvasContainerRef.value ||
-      (e.target as HTMLElement).classList.contains('canvas-world') ||
-      (e.target as HTMLElement).id === 'canvas-connections');
+      targetEl.classList.contains('canvas-world') ||
+      targetEl.id === 'canvas-connections');
 
-  if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag) {
+  if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag || isTranslationPan) {
     e.preventDefault();
     store.isPanning = true;
     panStartX = e.clientX;
@@ -863,7 +934,7 @@ function handleKeyUp(e: KeyboardEvent) {
 }
 
 function handleWindowResize() {
-  if (isRisk.value && store.pages.length > 0) {
+  if ((isRisk.value || store.workspaceMode === 'translation') && store.pages.length > 0) {
     resetCanvasView({ duration: 0 });
   }
 }

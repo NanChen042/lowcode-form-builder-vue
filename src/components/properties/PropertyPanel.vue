@@ -26,24 +26,44 @@
     >
       <section class="flex flex-1 min-h-0 flex-col w-full">
         <div class="flex items-center justify-between border-b border-[#f0f0f0] px-4 py-3 shrink-0">
-          <div>
-            <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800">
+          <div class="min-w-0 flex-1 pr-2">
+            <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800 truncate">
               {{
-                store.selectedType === 'group'
-                  ? t('risk.propGroupTitle')
-                  : (isRisk && selectedElement ? t('risk.propQuestionTitle') : t('prop.title'))
+                store.workspaceMode === 'translation'
+                  ? t('trans.multilingualTitle')
+                  : (store.selectedType === 'group'
+                      ? t('risk.propGroupTitle')
+                      : (isRisk && selectedElement ? t('risk.propQuestionTitle') : t('prop.title')))
               }}
             </h2>
-            <p class="m-0 text-[11px] leading-4 text-slate-400">
+            <p class="m-0 text-[11px] leading-4 text-slate-400 truncate">
               {{
-                store.selectedType === 'group'
-                  ? t('risk.propGroupSub')
-                  : (store.selectedType === 'page' ? (isRisk ? t('risk.fixedRulesDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle')))
+                store.workspaceMode === 'translation'
+                  ? t('trans.sideBySideSubtitle')
+                  : (store.selectedType === 'group'
+                      ? t('risk.propGroupSub')
+                      : (store.selectedType === 'page' ? (isRisk ? t('risk.fixedRulesDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle'))))
               }}
             </p>
           </div>
-          <div class="flex items-center gap-1.5">
-            <a-tag v-if="store.selectedId" color="arcoblue" size="small" class="font-mono">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <a-tag
+              v-if="store.workspaceMode === 'translation'"
+              color="arcoblue"
+              size="small"
+              class="text-[11px] font-medium"
+            >
+              {{ getLocaleNativeName(store.activeTargetLocale) }}
+            </a-tag>
+            <a-tag
+              v-else-if="store.selectedType && isBilingual"
+              :color="effectiveEditingLocale === primaryLocale ? 'gray' : 'arcoblue'"
+              size="small"
+              class="text-[11px] font-medium"
+            >
+              {{ getLocaleNativeName(effectiveEditingLocale) }}
+            </a-tag>
+            <a-tag v-if="store.selectedId && store.workspaceMode !== 'translation' && headerBadgeText" color="arcoblue" size="small" class="font-mono">
               {{ headerBadgeText }}
             </a-tag>
             <a-tooltip :content="t('prop.collapsePanel')" position="bottom">
@@ -58,163 +78,124 @@
           </div>
         </div>
 
+        <TranslationPropsEditor v-if="store.workspaceMode === 'translation'" />
 
-        <div
-          v-if="store.selectedType && isBilingual"
-          class="px-3.5 py-1.5 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0 gap-2"
-          :title="store.currentLocale === 'en' ? t('prop.configuringEnMode') : t('prop.configuringZhMode')"
-        >
-          <span class="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
-            <Globe class="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <span>{{ t('prop.editLanguage') }}</span>
-          </span>
-
-          <div class="flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 text-[11px] select-none shadow-2xs shrink-0 whitespace-nowrap">
-            <button
-              type="button"
-              class="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all cursor-pointer font-medium leading-none whitespace-nowrap shrink-0"
-              :class="store.currentLocale === 'zh' ? 'bg-white text-slate-800 font-semibold shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-              :title="t('prop.zhCompleteness', undefined, { percent: translationStats.zhPercent })"
-              @click="store.currentLocale = 'zh'"
-            >
-              <span>中文</span>
-              <span
-                class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="translationStats.zhPercent === 100 ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'"
-              />
-              <span class="text-[10px] text-slate-400 font-normal">({{ translationStats.zhPercent }}%)</span>
-            </button>
-            <button
-              type="button"
-              class="flex items-center gap-1 px-2 py-0.5 rounded-md transition-all cursor-pointer font-medium leading-none whitespace-nowrap shrink-0"
-              :class="store.currentLocale === 'en' ? 'bg-white text-slate-800 font-semibold shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-              :title="t('prop.enCompleteness', undefined, { percent: translationStats.enPercent })"
-              @click="store.currentLocale = 'en'"
-            >
-              <span>EN</span>
-              <span
-                class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="translationStats.enPercent === 100 ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'"
-              />
-              <span class="text-[10px] text-slate-400 font-normal">({{ translationStats.enPercent }}%)</span>
-            </button>
+        <template v-else>
+          <div v-if="!store.selectedType" class="flex flex-1 items-center justify-center p-6 text-center">
+            <a-empty :description="t('prop.emptyTitle')">
+              <template #image>
+                <SlidersHorizontal class="h-10 w-10 text-slate-300 mx-auto" />
+              </template>
+              <span class="text-xs text-slate-400">{{ t('prop.emptyDesc') }}</span>
+            </a-empty>
           </div>
-        </div>
 
-        <div v-if="!store.selectedType" class="flex flex-1 items-center justify-center p-6 text-center">
-          <a-empty :description="t('prop.emptyTitle')">
-            <template #image>
-              <SlidersHorizontal class="h-10 w-10 text-slate-300 mx-auto" />
-            </template>
-            <span class="text-xs text-slate-400">{{ t('prop.emptyDesc') }}</span>
-          </a-empty>
-        </div>
+          <PagePropsEditor
+            v-else-if="store.selectedType === 'page' && selectedPage"
+            :page="selectedPage"
+          />
 
-        <PagePropsEditor
-          v-else-if="store.selectedType === 'page' && selectedPage"
-          :page="selectedPage"
-        />
-
-        <div v-else-if="store.selectedType === 'group' && selectedGroup" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
-          <div class="space-y-3.5">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-              <div>
-                <span class="text-[12px] font-semibold text-slate-700">
-                  {{ t('risk.groupInfo') }}
-                </span>
-                <span class="block text-[11px] text-slate-400">
-                  {{ t('risk.groupInfoSub') }}
-                </span>
-              </div>
-              <a-tag size="small" class="text-[11px] font-normal">
-                {{ t('risk.cmpGroup') }}
-              </a-tag>
-            </div>
-
-            <div class="mb-3">
-              <div class="flex items-center justify-between mb-1.5">
-                <div class="flex items-center gap-1.5">
-                  <label for="group-prop-title-input" class="text-[12px] font-medium text-slate-700">
-                    {{ t('risk.groupNameWithLang') }}
-                  </label>
-                  <a-tag
-                    v-if="isBilingual && (store.currentLocale === 'en' ? (selectedGroup.title && !selectedGroup.title_en) : (selectedGroup.title_en && !selectedGroup.title))"
-                    color="orange"
-                    size="small"
-                    class="text-[10px] scale-90 origin-left"
-                  >
-                    {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
-                  </a-tag>
+          <div v-else-if="store.selectedType === 'group' && selectedGroup" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
+            <div class="space-y-3.5">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div>
+                  <span class="text-[12px] font-semibold text-slate-700">
+                    {{ t('risk.groupInfo') }}
+                  </span>
+                  <span class="block text-[11px] text-slate-400">
+                    {{ t('risk.groupInfoSub') }}
+                  </span>
                 </div>
+                <a-tag size="small" class="text-[11px] font-normal">
+                  {{ t('risk.cmpGroup') }}
+                </a-tag>
               </div>
-              <a-input
-                id="group-prop-title-input"
-                v-model="groupTitleModel"
-                allow-clear
-                :placeholder="t('risk.groupNamePlaceholder')"
-                class="w-full"
-                @input="markDirty"
-              />
-            </div>
 
-            <div class="pt-4 border-t border-slate-100 flex flex-col gap-2">
-              <a-button
-                type="outline"
-                size="small"
-                class="w-full"
-                @click="addElement('radio', store.pages[0]?.id, selectedGroup.id)"
-              >
-                <template #icon>
-                  <Plus class="h-3.5 w-3.5" />
-                </template>
-                {{ t('risk.addQuestionToGroup') }}
-              </a-button>
+              <div class="mb-3">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <label for="group-prop-title-input" class="text-[12px] font-medium text-slate-700">
+                      {{ t('risk.groupNameWithLang') }}
+                    </label>
+                    <a-tag
+                      v-if="isGroupTitleMissing"
+                      color="orange"
+                      size="small"
+                      class="text-[10px] scale-90 origin-left"
+                    >
+                      {{ t('prop.untranslated') }}
+                    </a-tag>
+                  </div>
+                </div>
+                <a-input
+                  id="group-prop-title-input"
+                  v-model="groupTitleModel"
+                  allow-clear
+                  :placeholder="t('risk.groupNamePlaceholder')"
+                  class="w-full"
+                  @input="markDirty"
+                />
+              </div>
 
-              <a-button
-                status="danger"
-                size="small"
-                class="w-full"
-                :disabled="(store.pages[0]?.groups?.length || 0) <= 1"
-                @click="deleteQuestionGroup(selectedGroup.id)"
-              >
-                <template #icon>
-                  <Trash2 class="h-3.5 w-3.5" />
-                </template>
-                {{ t('risk.deleteGroup') }}
-              </a-button>
+              <div class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                <a-button
+                  type="outline"
+                  size="small"
+                  class="w-full"
+                  @click="addElement('radio', store.pages[0]?.id, selectedGroup.id)"
+                >
+                  <template #icon>
+                    <Plus class="h-3.5 w-3.5" />
+                  </template>
+                  {{ t('risk.addQuestionToGroup') }}
+                </a-button>
+
+                <a-button
+                  status="danger"
+                  size="small"
+                  class="w-full"
+                  :disabled="(store.pages[0]?.groups?.length || 0) <= 1"
+                  @click="deleteQuestionGroup(selectedGroup.id)"
+                >
+                  <template #icon>
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </template>
+                  {{ t('risk.deleteGroup') }}
+                </a-button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div v-else-if="selectedElement" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
-          <a-form id="prop-editor" :model="selectedElement" layout="vertical" size="small">
-            <FieldBasicProps :element="selectedElement" />
+          <div v-else-if="selectedElement" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
+            <a-form id="prop-editor" :model="selectedElement" layout="vertical" size="small">
+              <FieldBasicProps :element="selectedElement" />
 
-            <FieldSpecificProps
-              v-if="!isRisk"
-              :element="selectedElement"
-              @open-country-modal="openCountryListModal"
-            />
+              <FieldSpecificProps
+                v-if="!isRisk"
+                :element="selectedElement"
+                @open-country-modal="openCountryListModal"
+              />
 
-            <FieldDependencyCard v-if="!isRisk" :element="selectedElement" />
+              <FieldDependencyCard v-if="!isRisk" :element="selectedElement" />
 
-            <div class="pt-5 mt-4 border-t border-slate-100 flex gap-2">
-              <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
-                <template #icon>
-                  <Copy class="h-3.5 w-3.5" />
-                </template>
-                {{ t('prop.copy') }}
-              </a-button>
+              <div class="pt-5 mt-4 border-t border-slate-100 flex gap-2">
+                <a-button type="secondary" size="small" class="flex-1" @click="duplicateElement(selectedElement.id)">
+                  <template #icon>
+                    <Copy class="h-3.5 w-3.5" />
+                  </template>
+                  {{ t('prop.copy') }}
+                </a-button>
 
-              <a-button status="danger" size="small" class="flex-1" @click="deleteElement(selectedElement.id)">
-                <template #icon>
-                  <Trash2 class="h-3.5 w-3.5" />
-                </template>
-                {{ t('prop.delete') }}
-              </a-button>
-            </div>
-          </a-form>
-        </div>
+                <a-button status="danger" size="small" class="flex-1" @click="deleteElement(selectedElement.id)">
+                  <template #icon>
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </template>
+                  {{ t('prop.delete') }}
+                </a-button>
+              </div>
+            </a-form>
+          </div>
+        </template>
       </section>
     </div>
   </aside>
@@ -236,41 +217,52 @@ import {
   deleteElement,
   triggerHighlight,
   markDirty,
-  isBilingual
+  isBilingual,
+  primaryLocale
 } from '@/core/store';
-import { t } from '@/core/i18n';
+import {
+  t,
+  getEffectiveFormLocale,
+  getLocaleNativeName,
+  getGroupText,
+  setGroupText
+} from '@/core/i18n';
+import { componentRegistry } from '@/registry/components';
 import { useSidebarResize } from '@/utils/useSidebarResize';
-import { translationStats } from '@/utils/translationHelper';
 import PagePropsEditor from './PagePropsEditor.vue';
 import FieldBasicProps from './FieldBasicProps.vue';
 import FieldSpecificProps from './FieldSpecificProps.vue';
 import FieldDependencyCard from './FieldDependencyCard.vue';
 import CountryDirectoryModal from './CountryDirectoryModal.vue';
+import TranslationPropsEditor from './TranslationPropsEditor.vue';
 import {
   SlidersHorizontal,
   Copy,
   Trash2,
-  Globe,
   PanelRight,
   Plus
 } from '@lucide/vue';
 
 const isCountryListModalVisible = ref(false);
 
+const effectiveEditingLocale = computed(() => getEffectiveFormLocale());
+
 const groupTitleModel = computed({
   get() {
     if (!selectedGroup.value) return '';
-    return store.currentLocale === 'en' ? (selectedGroup.value.title_en || '') : (selectedGroup.value.title || '');
+    return getGroupText(selectedGroup.value, 'title');
   },
   set(val: string) {
     if (!selectedGroup.value) return;
-    if (store.currentLocale === 'en') {
-      selectedGroup.value.title_en = val;
-    } else {
-      selectedGroup.value.title = val;
-    }
-    markDirty();
+    setGroupText(selectedGroup.value, 'title', val);
   }
+});
+
+const isGroupTitleMissing = computed(() => {
+  if (!isBilingual.value || !selectedGroup.value) return false;
+  const currentVal = getGroupText(selectedGroup.value, 'title');
+  const sourceVal = getGroupText(selectedGroup.value, 'title', primaryLocale.value);
+  return Boolean(sourceVal && !currentVal);
 });
 
 function openCountryListModal() {
@@ -288,24 +280,32 @@ const { isResizing, startResize } = useSidebarResize({
 });
 
 const headerBadgeText = computed(() => {
-  if (store.selectedType === 'page') return store.selectedId || t('prop.page');
+  if (store.selectedType === 'page') {
+    const idx = store.pages.findIndex(p => p.id === store.selectedId);
+    return idx >= 0 ? `P${idx + 1}` : t('prop.page');
+  }
   if (store.selectedType === 'group') {
     const idx = store.pages[0]?.groups?.findIndex(g => g.id === store.selectedId) ?? -1;
     if (idx !== -1) {
       return `Group ${String(idx + 1).padStart(2, '0')}`;
     }
-    return store.selectedId || 'Group';
+    return t('risk.cmpGroup');
   }
   if (store.selectedType === 'element') {
     if (isRisk.value && store.selectedId) {
       const idx = store.pages[0]?.fields?.findIndex(f => f.id === store.selectedId) ?? -1;
       if (idx !== -1) {
-        return `Question ${String(idx + 1).padStart(2, '0')}`;
+        return `Q${String(idx + 1).padStart(2, '0')}`;
       }
     }
-    return store.selectedId || t('prop.unselected');
+    const el = selectedElement.value;
+    const meta = el ? componentRegistry[el.type] : null;
+    if (meta) {
+      return store.currentLocale === 'en' ? meta.label_en : meta.label;
+    }
+    return el?.type || t('prop.element');
   }
-  return t('prop.unselected');
+  return '';
 });
 
 watch(

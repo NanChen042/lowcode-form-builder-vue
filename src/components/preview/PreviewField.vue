@@ -133,7 +133,7 @@
           :key="idx"
           :value="opt.value"
         >
-          {{ getLocalizedOptionLabel(opt) }}
+          {{ getLocalizedOptionLabel(opt, previewLoc) }}
         </a-option>
       </a-select>
 
@@ -152,7 +152,7 @@
           :key="idx"
           :value="opt.value"
         >
-          {{ getLocalizedOptionLabel(opt) }}
+          {{ getLocalizedOptionLabel(opt, previewLoc) }}
         </a-option>
       </a-select>
 
@@ -235,7 +235,7 @@
             >
               <span v-if="formData[field.key] === opt.value" class="w-1.5 h-1.5 rounded-full bg-white"></span>
             </span>
-            <span>{{ getLocalizedOptionLabel(opt) }}</span>
+            <span>{{ getLocalizedOptionLabel(opt, previewLoc) }}</span>
           </label>
         </div>
       </div>
@@ -264,7 +264,7 @@
                 <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
-            <span>{{ getLocalizedOptionLabel(opt) }}</span>
+            <span>{{ getLocalizedOptionLabel(opt, previewLoc) }}</span>
           </label>
         </div>
       </div>
@@ -338,7 +338,7 @@
                 </svg>
               </span>
               <span class="flex-1 text-[13px] leading-5 text-slate-700 break-words whitespace-normal font-normal">
-                {{ getLocalizedOptionLabel(opt) }}
+                {{ getLocalizedOptionLabel(opt, previewLoc) }}
               </span>
             </label>
           </div>
@@ -455,7 +455,7 @@
 import { ref, computed, watch } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { t, getLocalizedFieldText, getLocalizedOptionLabel } from '@/core/i18n';
-import { store } from '@/core/store';
+import { store, primaryLocale } from '@/core/store';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { Info, Mail, Eraser, PenLine, Calendar } from '@lucide/vue';
 import IntlTelInput from '@/components/common/IntlTelInput.vue';
@@ -470,8 +470,10 @@ const props = defineProps<{
   errors?: Record<string, string>;
 }>();
 
+const previewLoc = computed(() => store.previewLocale || primaryLocale.value);
+
 const localizedAlertContent = computed(() => {
-  return getLocalizedFieldText(props.field, 'content');
+  return getLocalizedFieldText(props.field, 'content', previewLoc.value);
 });
 
 const alertSegments = computed(() => {
@@ -487,7 +489,7 @@ const resolvedCountryOptions = computed(() => {
 
 const countrySelectOptions = computed(() => {
   return resolvedCountryOptions.value.map(opt => {
-    const label = getLocalizedOptionLabel(opt);
+    const label = getLocalizedOptionLabel(opt, previewLoc.value);
     return {
       value: opt.value,
       label: label,
@@ -711,11 +713,11 @@ function clearSignature() {
   props.formData[props.field.key] = '';
 }
 
-const localizedLabel = computed(() => getLocalizedFieldText(props.field, 'label'));
-const localizedHelp = computed(() => getLocalizedFieldText(props.field, 'help'));
-const localizedCustomErrorMessage = computed(() => getLocalizedFieldText(props.field, 'customErrorMessage'));
+const localizedLabel = computed(() => getLocalizedFieldText(props.field, 'label', previewLoc.value));
+const localizedHelp = computed(() => getLocalizedFieldText(props.field, 'help', previewLoc.value));
+const localizedCustomErrorMessage = computed(() => getLocalizedFieldText(props.field, 'customErrorMessage', previewLoc.value));
 const localizedPlaceholder = computed(() => {
-  const custom = getLocalizedFieldText(props.field, 'placeholder');
+  const custom = getLocalizedFieldText(props.field, 'placeholder', previewLoc.value);
   if (custom) return custom;
   if (props.field.type === 'email') return t('prop.emailPlaceholder');
   if (props.field.type === 'country') return t('prop.defaultCountryPlaceholder');

@@ -72,7 +72,7 @@
             {{ t('prop.pageTitleWithLang') }}
           </span>
           <a-tag v-if="isPageTitleMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-            {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+            {{ t('prop.untranslated') }}
           </a-tag>
         </div>
         <a-input
@@ -93,7 +93,7 @@
             {{ t('prop.pageDescWithLang') }}
           </span>
           <a-tag v-if="isPageDescMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-            {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+            {{ t('prop.untranslated') }}
           </a-tag>
         </div>
         <a-textarea
@@ -133,7 +133,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormPage, ProfileType } from '@/types/schema';
-import { store, markDirty, deletePage, isBilingual, isRisk } from '@/core/store';
+import { store, markDirty, deletePage, isBilingual, isRisk, primaryLocale } from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import {
   Building2,
@@ -177,18 +177,16 @@ const pageDescModel = computed({
 
 const isPageTitleMissing = computed(() => {
   if (!isBilingual.value) return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.page.title && !props.page.title_en);
-  }
-  return Boolean(props.page.title_en && !props.page.title);
+  const cur = getPageText(props.page, 'title');
+  const src = getPageText(props.page, 'title', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 const isPageDescMissing = computed(() => {
   if (!isBilingual.value) return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.page.description && !props.page.description_en);
-  }
-  return Boolean(props.page.description_en && !props.page.description);
+  const cur = getPageText(props.page, 'description');
+  const src = getPageText(props.page, 'description', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 function setPageFocus(field: 'title' | 'description') {

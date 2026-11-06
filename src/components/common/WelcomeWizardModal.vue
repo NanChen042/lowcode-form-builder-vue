@@ -186,7 +186,7 @@
 
                   <div class="flex items-center gap-2.5 shrink-0 pl-3">
                     <a-tag
-                      :color="tpl.arcoTagColor"
+                      :color="tpl.tagColor"
                       size="small"
                       class="rounded font-medium px-2"
                     >
@@ -247,12 +247,10 @@ import {
 } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
+import { SCENARIO_TEMPLATES_META } from '@/templates/recommend';
 import logoUrl from '@/assets/logo.png';
 import tplBlankHeroImg from '@/assets/templates/tpl-blank-hero.webp';
 import tplRiskHeroImg from '@/assets/templates/tpl-risk-hero.webp';
-import iconCustomer from '@/assets/templates/c.png';
-import iconIndividual from '@/assets/templates/u.png';
-import iconEntity from '@/assets/templates/e.png';
 import {
   LayoutGrid,
   FileText,
@@ -286,47 +284,7 @@ const modalVisible = computed({
   }
 });
 
-const scenarioTemplates = [
-  {
-    key: 'kyc-customer' as const,
-    type: 'customer' as const,
-    title: '客户案例 KYC 模板',
-    title_en: 'Customer KYC Template',
-    tag: '客户案例',
-    tag_en: 'Customer',
-    pages: 3,
-    fields: 9,
-    descKey: 'wizard.tplCustomerDesc',
-    image: iconCustomer,
-    arcoTagColor: 'purple'
-  },
-  {
-    key: 'kyc-individual' as const,
-    type: 'individual' as const,
-    title: '个人案例 KYC 模板',
-    title_en: 'Individual KYC Template',
-    tag: '个人成员',
-    tag_en: 'Individual',
-    pages: 5,
-    fields: 15,
-    descKey: 'wizard.tplIndividualDesc',
-    image: iconIndividual,
-    arcoTagColor: 'green'
-  },
-  {
-    key: 'kyc-entity' as const,
-    type: 'entity' as const,
-    title: '实体案例 KYC 模板',
-    title_en: 'Entity KYC Template',
-    tag: '实体成员',
-    tag_en: 'Entity',
-    pages: 3,
-    fields: 16,
-    descKey: 'wizard.tplEntityDesc',
-    image: iconEntity,
-    arcoTagColor: 'arcoblue'
-  }
-];
+const scenarioTemplates = SCENARIO_TEMPLATES_META;
 
 function getPagesText(tpl: (typeof scenarioTemplates)[number]) {
   return t('wizard.pagesCount', undefined, { count: tpl.pages });

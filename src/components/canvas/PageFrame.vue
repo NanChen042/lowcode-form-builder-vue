@@ -1,28 +1,29 @@
 <template>
   <div
-    :id="pageIndex === 0 ? 'tour-first-page-frame' : ('frame_' + page.id)"
+    :id="isTranslationFrame ? ('frame_trans_' + frameLocale + '_' + page.id) : (pageIndex === 0 ? 'tour-first-page-frame' : ('frame_' + page.id))"
     :data-page-id="page.id"
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
+    :data-translation-frame="isTranslationFrame ? 'true' : undefined"
     class="mobile-frame absolute min-h-[720px] bg-white flex flex-col"
     :class="[
       isRisk ? 'rounded-none shadow-[0_1px_4px_rgba(0,0,0,0.06),0_12px_32px_-6px_rgba(0,0,0,0.08)]' : 'w-[390px] rounded-2xl shadow-sm',
-      isPageSelected ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md') : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md',
+      !inTranslationWorkspace && isPageSelected && isCurrentLocaleFocused ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md') : (isTranslationFrame && !isReadOnlyReference ? 'ring-1 ring-blue-200/90 hover:ring-blue-300 hover:shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md'),
       isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
-      store.isDraggingComponent && !isSystemProfile ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
-      store.isDraggingComponent && isSystemProfile ? 'opacity-85' : '',
+      store.isDraggingComponent && !isSystemProfile && !isTranslationFrame ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
+      store.isDraggingComponent && (isSystemProfile || isTranslationFrame) ? 'opacity-85' : '',
       (store.isDraggingFrame && store.draggedFrameId === page.id) || isResizingCanvasWidth ? '!transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
     ]"
     :style="{
-      transform: `translate(${page.x}px, ${page.y}px)`,
-      width: isRisk ? `${store.riskPageWidth}px` : undefined
+      transform: `translate(${frameX}px, ${frameY}px)`,
+      width: isRisk ? (inTranslationWorkspace ? '540px' : `${store.riskPageWidth}px`) : undefined
     }"
     @mousedown="handleFrameMouseDown"
-    @click.stop="selectPage(page.id)"
+    @click.stop="handleSelectPage"
   >
 
     <div
-      v-if="isRisk"
+      v-if="isRisk && !isTranslationFrame && !inTranslationWorkspace"
       class="canvas-resize-handle absolute -left-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
       :title="t('risk.dragResizeWidth')"
       @mousedown.stop.prevent="startResizeCanvasWidth($event, 'left')"
@@ -33,7 +34,7 @@
       ></div>
     </div>
     <div
-      v-if="isRisk"
+      v-if="isRisk && !isTranslationFrame && !inTranslationWorkspace"
       class="canvas-resize-handle absolute -right-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
       :title="t('risk.dragResizeWidth')"
       @mousedown.stop.prevent="startResizeCanvasWidth($event, 'right')"
@@ -43,32 +44,53 @@
         :class="isResizingCanvasWidth ? 'bg-[#1677ff]' : 'bg-transparent group-hover:bg-[#1677ff]/60'"
       ></div>
     </div>
-    <div v-if="!isRisk" class="absolute -top-7 left-0 flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 cursor-grab active:cursor-grabbing hover:text-black/70 transition-colors select-none">
-      <Smartphone class="h-3.5 w-3.5" />
-      <template v-if="isSystemProfile">
-        <span class="font-mono font-medium text-slate-700">01 · {{ t('common.basicInfo') }}</span>
-        <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200/60 ml-0.5">
-          <Lock class="h-2.5 w-2.5" />
-          {{ t('common.systemPreset') }}
-        </span>
-        <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
-          {{ t('common.cannotDrop') }}
-        </span>
-      </template>
-      <template v-else>
-        <span class="font-mono font-bold text-slate-700 text-[13px] tracking-normal">{{ pageIndexString }}</span>
-        <span class="text-slate-400 font-normal">·</span>
+
+    <!-- 画板顶部信息栏 -->
+    <div class="absolute -top-8 left-0 right-0 flex items-center justify-between gap-2 select-none">
+      <div class="flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 transition-colors min-w-0" :class="inTranslationWorkspace ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:text-black/70'">
+        <Smartphone v-if="!isRisk" class="h-3.5 w-3.5 shrink-0" />
+        <template v-if="isSystemProfile">
+          <span class="font-mono font-medium text-slate-700">01 · {{ t('common.basicInfo') }}</span>
+          <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200/60 ml-0.5">
+            <Lock class="h-2.5 w-2.5" />
+            {{ t('common.systemPreset') }}
+          </span>
+          <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
+            {{ t('common.cannotDrop') }}
+          </span>
+        </template>
+        <template v-else>
+          <span v-if="!isRisk" class="font-mono font-bold text-slate-700 text-[13px] tracking-normal shrink-0">{{ pageIndexString }}</span>
+          <span v-if="!isRisk" class="text-slate-400 font-normal shrink-0">·</span>
+          <span
+            class="font-medium max-w-[160px] truncate"
+            :class="displayPageTitle ? 'text-slate-700' : 'text-slate-400 font-normal'"
+          >
+            {{ isRisk ? t('risk.pageTitle') : (displayPageTitle || t('common.untitledPage')) }}
+          </span>
+        </template>
+      </div>
+
+      <!-- 多语言对照模式下顶部语言标识 -->
+      <div v-if="inTranslationWorkspace" class="flex items-center gap-1.5 shrink-0">
         <span
-          class="font-medium max-w-[200px] truncate"
-          :class="displayPageTitle ? 'text-slate-700' : 'text-slate-400 font-normal'"
+          v-if="isReadOnlyReference"
+          class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200/90"
         >
-          {{ displayPageTitle || t('common.untitledPage') }}
+          <Lock class="w-2.5 h-2.5 text-slate-400" />
+          <span>{{ getLocaleNativeName(frameLocale) }} · {{ t('trans.readOnlyReference') }}</span>
         </span>
-      </template>
+        <span
+          v-else
+          class="inline-flex items-center gap-1 rounded bg-[#1677ff] px-2 py-0.5 text-[11px] font-semibold text-white shadow-2xs"
+        >
+          <span>{{ getLocaleNativeName(frameLocale) }} · {{ t('trans.clickToTranslate') }}</span>
+        </span>
+      </div>
     </div>
 
     <div
-      v-if="store.isDraggingComponent && !isSystemProfile"
+      v-if="store.isDraggingComponent && !isSystemProfile && !isTranslationFrame"
       class="absolute -top-7 right-0 flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs select-none pointer-events-none animate-pulse"
     >
       <ArrowDownToLine class="h-3 w-3 text-blue-500" />
@@ -91,11 +113,11 @@
         </p>
       </div>
 
-      <div class="page-header-area pb-4 shrink-0 bg-white" :class="isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl'" @click.stop="selectPage(page.id)">
+      <div class="page-header-area pb-4 shrink-0 bg-white" :class="isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl'" @click.stop="handleSelectPage">
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
-              {{ getPageText(page, 'title') || t('common.basicInfo') }}
+              {{ getPageText(page, 'title', frameLocale) || t('common.basicInfo') }}
             </h2>
             <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
               <Lock class="h-3 w-3" />
@@ -116,7 +138,7 @@
         <template v-else>
           <EditableText
             v-model="displayPageTitle"
-            :placeholder="t('prop.pageTitlePlaceholder')"
+            :placeholder="pageTitlePlaceholder"
             :element-id="page.id"
             field="title"
             tag="h2"
@@ -124,18 +146,18 @@
           />
           <EditableText
             v-model="displayPageDesc"
-            :placeholder="t('prop.pageDescPlaceholder')"
+            :placeholder="pageDescPlaceholder"
             :element-id="page.id"
             field="description"
             tag="p"
-            :allow-empty="true"
+            :allow-empty="!isTranslationFrame || !sourcePageDesc"
             multiline
             custom-class="page-desc-text mt-1.5 w-full text-[15px] leading-6 text-slate-500 block border-b-2 border-transparent pb-1"
           />
         </template>
       </div>
 
-      <div v-if="isSystemProfile" class="flex-1 bg-white p-3 rounded-b-2xl" @click="selectPage(page.id)">
+      <div v-if="isSystemProfile" class="flex-1 bg-white p-3 rounded-b-2xl" @click="handleSelectPage">
         <SystemProfileView
           :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
@@ -148,20 +170,21 @@
           <div
             v-for="(grp, gIdx) in page.groups"
             :key="grp.id"
-            :id="'risk_grp_' + grp.id"
+            :id="isTranslationFrame ? ('risk_grp_trans_' + grp.id) : ('risk_grp_' + grp.id)"
             :data-risk-group-id="grp.id"
             class="risk-group-section border rounded-[4px] bg-white transition-[border-color,box-shadow] duration-150"
             :class="
-              store.selectedType === 'group' && store.selectedId === grp.id
+              store.selectedType === 'group' && store.selectedId === grp.id && isCurrentLocaleFocused
                 ? 'border-[#1677ff] ring-2 ring-blue-500/20 shadow-xs'
                 : 'border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-slate-300'
             "
-            @click.stop="selectGroup(grp.id)"
+            @click.stop="handleSelectGroup(grp.id)"
           >
 
-            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-blue-100/90 bg-[#f0f6ff] rounded-t-[4px] cursor-grab active:cursor-grabbing">
+            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-blue-100/90 bg-[#f0f6ff] rounded-t-[4px]" :class="isTranslationFrame ? '' : 'cursor-grab active:cursor-grabbing'">
               <div class="flex items-center gap-2 flex-1 min-w-0">
                 <GripVertical
+                  v-if="!isTranslationFrame"
                   class="risk-group-drag-handle h-4 w-4 text-blue-300 hover:text-blue-600 shrink-0 cursor-grab active:cursor-grabbing transition-colors"
                   :title="t('risk.dragReorderTip')"
                 />
@@ -182,7 +205,7 @@
                 </span>
 
                 <a-popconfirm
-                  v-if="(page.groups?.length || 0) > 1"
+                  v-if="!isTranslationFrame && (page.groups?.length || 0) > 1"
                   :content="t('risk.deleteGroupConfirm')"
                   position="tr"
                   type="warning"
@@ -208,7 +231,7 @@
             <div
               :ref="(el) => setRiskGroupDropzoneRef(grp.id, el as HTMLElement | null)"
               class="risk-group-dropzone min-h-[48px] bg-white transition-colors"
-              :class="{ 'bg-blue-50/15': store.isDraggingComponent }"
+              :class="{ 'bg-blue-50/15': store.isDraggingComponent && !isTranslationFrame }"
               :data-page-id="page.id"
               :data-risk-group-id="grp.id"
             >
@@ -231,7 +254,7 @@
             </div>
 
 
-            <div class="px-4 py-2 bg-slate-50/40 border-t border-slate-100 flex items-center">
+            <div v-if="!isTranslationFrame" class="px-4 py-2 bg-slate-50/40 border-t border-slate-100 flex items-center">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-medium text-[#1677ff] hover:bg-blue-50/80 rounded transition-colors cursor-pointer"
@@ -246,6 +269,7 @@
 
         <!-- 规范化分组添加插槽：与卡片同宽、轻量虚线结构、稳重专业 -->
         <div
+          v-if="!isTranslationFrame"
           class="risk-add-group-slot group/slot flex items-center justify-center gap-2 py-3 px-4 rounded-[4px] border border-dashed border-slate-200/90 hover:border-[#1677ff] bg-slate-50/50 hover:bg-blue-50/30 text-slate-500 hover:text-[#1677ff] transition-all duration-150 cursor-pointer select-none"
           @click.stop="addQuestionGroup()"
         >
@@ -331,11 +355,11 @@
           class="canvas-dropzone relative z-10 flex-1 min-h-[520px] p-3 transition-colors duration-200"
           :class="{
             'has-elements': page.fields.length > 0,
-            'bg-blue-50/15': store.isDraggingComponent
+            'bg-blue-50/15': store.isDraggingComponent && !isTranslationFrame
           }"
           :data-page-id="page.id"
           :style="page.fields.some(f => f.linkage?.conditions?.length) ? { paddingLeft: '24px' } : undefined"
-          @click.self="selectPage(page.id)"
+          @click.self="handleSelectPage"
         >
           <div
             v-for="group in elementGroups"
@@ -354,7 +378,7 @@
       </div>
     </div>
 
-    <a-tooltip v-if="!isRisk" :content="t('canvas.addPageRight')" position="top">
+    <a-tooltip v-if="!isRisk && !inTranslationWorkspace" :content="t('canvas.addPageRight')" position="top">
       <div class="add-next-page-btn absolute -right-3 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1677ff] shadow-md border border-slate-200/90 transition hover:scale-110 hover:border-[#1677ff]" @click.stop="addPage(page.id)">
         <Plus class="h-4 w-4" />
       </div>
@@ -363,11 +387,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, provide } from 'vue';
 import type { FormPage, FormElement, FormQuestionGroup, ComponentType } from '@/types/schema';
 import {
   store,
   isRisk,
+  primaryLocale,
+  getPageWidth,
+  TRANSLATION_FRAME_GAP,
   addElement,
   selectPage,
   selectGroup,
@@ -376,9 +403,19 @@ import {
   addPage,
   createElement,
   selectElement,
-  markDirty
+  markDirty,
+  updatePageFields,
+  updatePageGroups,
+  setPagePosition
 } from '@/core/store';
-import { t, getPageText, setPageText } from '@/core/i18n';
+import {
+  t,
+  getPageText,
+  setPageText,
+  getGroupText,
+  setGroupText,
+  getLocaleNativeName
+} from '@/core/i18n';
 import { getConnectedLinkageGroup } from '@/utils/helpers';
 import Sortable from 'sortablejs';
 import CanvasElement from './CanvasElement.vue';
@@ -389,7 +426,63 @@ import { Smartphone, ArrowDownToLine, GripVertical, Trash2, Plus, Lock } from '@
 const props = defineProps<{
   page: FormPage;
   pageIndex: number;
+  isTranslationFrame?: boolean;
+  translationLocale?: string;
+  inTranslationWorkspace?: boolean;
+  isReadOnlyReference?: boolean;
+  customX?: number;
+  customY?: number;
 }>();
+
+const isTranslationFrameComputed = computed(() => Boolean(props.isTranslationFrame));
+const isReadOnlyReferenceComputed = computed(() => Boolean(props.isReadOnlyReference));
+const frameLocale = computed<string>(() => {
+  if (props.translationLocale) {
+    return props.translationLocale;
+  }
+  if (props.isTranslationFrame) {
+    return store.activeTargetLocale || (primaryLocale.value === 'zh' ? 'en' : 'zh');
+  }
+  return primaryLocale.value;
+});
+
+provide('frameLocale', frameLocale);
+provide('isTranslationFrame', isTranslationFrameComputed);
+provide('isReadOnlyFrame', isReadOnlyReferenceComputed);
+
+const isCurrentLocaleFocused = computed(() => {
+  const activeLoc = store.editingLocale || primaryLocale.value;
+  return activeLoc === frameLocale.value;
+});
+
+const frameX = computed(() => {
+  if (props.customX !== undefined) {
+    return props.customX;
+  }
+  if (props.isTranslationFrame && !props.inTranslationWorkspace) {
+    return props.page.x + getPageWidth() + TRANSLATION_FRAME_GAP;
+  }
+  return props.page.x;
+});
+
+const frameY = computed(() => {
+  if (props.customY !== undefined) {
+    return props.customY;
+  }
+  return props.page.y;
+});
+
+function handleSelectPage() {
+  if (props.isReadOnlyReference) return;
+  store.editingLocale = frameLocale.value;
+  selectPage(props.page.id);
+}
+
+function handleSelectGroup(groupId: string) {
+  if (props.isReadOnlyReference) return;
+  store.editingLocale = frameLocale.value;
+  selectGroup(groupId);
+}
 
 const isSystemProfile = computed(() => props.page.pageType === 'system_profile');
 
@@ -640,7 +733,7 @@ function startResizeCanvasWidth(e: MouseEvent, side: 'left' | 'right') {
       const nextWidth = Math.min(1360, Math.max(560, Math.round(startWidth - deltaWorldX)));
       const actualDiff = nextWidth - startWidth;
       store.riskPageWidth = nextWidth;
-      props.page.x = Math.round(startPageX - actualDiff);
+      setPagePosition(props.page.id, { x: Math.round(startPageX - actualDiff) });
     }
   };
 
@@ -665,20 +758,19 @@ function setRiskGroupDropzoneRef(groupId: string, el: HTMLElement | null) {
 }
 
 function getGroupTitle(grp: FormQuestionGroup, _idx?: number): string {
-  return store.currentLocale === 'en' ? (grp.title_en || '') : (grp.title || '');
+  return getGroupText(grp, 'title', frameLocale.value);
 }
 
-function getGroupTitlePlaceholder(_grp?: FormQuestionGroup, _idx?: number): string {
+function getGroupTitlePlaceholder(grp?: FormQuestionGroup, _idx?: number): string {
+  if (props.isTranslationFrame && grp) {
+    const srcTitle = getGroupText(grp, 'title', primaryLocale.value);
+    if (srcTitle) return srcTitle;
+  }
   return t('risk.groupNamePlaceholder');
 }
 
 function setGroupTitle(grp: FormQuestionGroup, val: string) {
-  if (store.currentLocale === 'en') {
-    grp.title_en = val;
-  } else {
-    grp.title = val;
-  }
-  markDirty();
+  setGroupText(grp, 'title', val, frameLocale.value);
 }
 
 function getGroupFields(groupId: string): FormElement[] {
@@ -702,11 +794,11 @@ function rebuildRiskFieldsOrder(targetGroupId: string, updatedGroupList: FormEle
         .forEach(el => newFields.push(el));
     }
   }
-  props.page.fields = newFields;
+  updatePageFields(props.page.id, newFields);
 }
 
 function syncRiskGroupSortables() {
-  if (!isRisk.value) return;
+  if (!isRisk.value || props.isTranslationFrame) return;
 
   if (riskGroupsContainerRef.value && !riskGroupsSortable) {
     riskGroupsSortable = new Sortable(riskGroupsContainerRef.value, {
@@ -774,10 +866,13 @@ function syncRiskGroupSortables() {
           const [movedGrp] = groups.splice(evt.oldIndex, 1);
           if (movedGrp) {
             groups.splice(evt.newIndex, 0, movedGrp);
-            props.page.groups = groups;
+            updatePageGroups(props.page.id, groups);
             const firstGroupId = groups[0]?.id;
-            props.page.fields = groups.flatMap(g =>
-              props.page.fields.filter(f => (f.groupId || firstGroupId) === g.id)
+            updatePageFields(
+              props.page.id,
+              groups.flatMap(g =>
+                props.page.fields.filter(f => (f.groupId || firstGroupId) === g.id)
+              )
             );
             selectGroup(movedGrp.id);
             markDirty();
@@ -865,7 +960,7 @@ function syncRiskGroupSortables() {
         if (movedId) {
           const movedEl = props.page.fields.find(f => f.id === movedId);
           if (movedEl) {
-            props.page.fields = props.page.fields.filter(f => f.id !== movedId);
+            updatePageFields(props.page.id, props.page.fields.filter(f => f.id !== movedId));
             movedEl.groupId = grpId;
             const targetList = [...getGroupFields(grpId)];
             targetList.splice(insertIdx, 0, movedEl);
@@ -913,20 +1008,37 @@ watch(
 
 const displayPageTitle = computed({
   get() {
-    return getPageText(props.page, 'title');
+    return getPageText(props.page, 'title', frameLocale.value);
   },
   set(val: string) {
-    setPageText(props.page, 'title', val);
+    setPageText(props.page, 'title', val, frameLocale.value);
   }
 });
 
 const displayPageDesc = computed({
   get() {
-    return getPageText(props.page, 'description');
+    return getPageText(props.page, 'description', frameLocale.value);
   },
   set(val: string) {
-    setPageText(props.page, 'description', val);
+    setPageText(props.page, 'description', val, frameLocale.value);
   }
+});
+
+const sourcePageTitle = computed(() => getPageText(props.page, 'title', primaryLocale.value));
+const sourcePageDesc = computed(() => getPageText(props.page, 'description', primaryLocale.value));
+
+const pageTitlePlaceholder = computed(() => {
+  if (props.isTranslationFrame && sourcePageTitle.value) {
+    return sourcePageTitle.value;
+  }
+  return t('prop.pageTitlePlaceholder');
+});
+
+const pageDescPlaceholder = computed(() => {
+  if (props.isTranslationFrame && sourcePageDesc.value) {
+    return sourcePageDesc.value;
+  }
+  return t('prop.pageDescPlaceholder');
 });
 
 const isPageSelected = computed(() => {
@@ -1018,7 +1130,7 @@ function applySamePageReorder(evt: Sortable.SortableEvent) {
     cleanupTempGroupDom(evt.from);
 
     if (newFields.length === props.page.fields.length) {
-      props.page.fields = newFields;
+      updatePageFields(props.page.id, newFields);
       selectElement(connectedEls[0]);
       markDirty();
     }
@@ -1032,7 +1144,7 @@ function applySamePageReorder(evt: Sortable.SortableEvent) {
     const [moved] = list.splice(evt.oldIndex, 1);
     if (moved) {
       list.splice(evt.newIndex, 0, moved);
-      props.page.fields = list;
+      updatePageFields(props.page.id, list);
       selectElement(moved);
       markDirty();
     }
@@ -1137,7 +1249,7 @@ function createGroupDragSvg(cardsContainer: HTMLElement, elements: FormElement[]
 let sortableInstance: Sortable | null = null;
 
 onMounted(() => {
-  if (dropzoneRef.value && !isSystemProfile.value) {
+  if (dropzoneRef.value && !isSystemProfile.value && !props.isTranslationFrame) {
     sortableInstance = new Sortable(dropzoneRef.value, {
       group: 'shared',
       animation: 200,
@@ -1287,7 +1399,7 @@ onMounted(() => {
             const newEl = createElement(type);
             const list = [...props.page.fields];
             list.splice(insertIdx, 0, newEl);
-            props.page.fields = list;
+            updatePageFields(props.page.id, list);
             selectElement(newEl);
             markDirty();
           }
@@ -1300,12 +1412,12 @@ onMounted(() => {
           const sourcePage = store.pages.find(p => p.id === sourcePageId);
           if (sourcePage) {
             const idsToRemove = new Set(group.elements.map(e => e.id));
-            sourcePage.fields = sourcePage.fields.filter(f => !idsToRemove.has(f.id));
+            updatePageFields(sourcePage.id, sourcePage.fields.filter(f => !idsToRemove.has(f.id)));
           }
 
           const list = [...props.page.fields];
           list.splice(insertIdx, 0, ...group.elements);
-          props.page.fields = list;
+          updatePageFields(props.page.id, list);
 
           selectElement(group.elements[0]);
           markDirty();
@@ -1371,11 +1483,18 @@ onBeforeUnmount(() => {
 });
 
 function handleFrameMouseDown(e: MouseEvent) {
+  if (props.inTranslationWorkspace) {
+    if (!props.isReadOnlyReference) {
+      store.editingLocale = frameLocale.value;
+    }
+    return;
+  }
   store.activePageId = props.page.id;
+  store.editingLocale = frameLocale.value;
 
   if (e.button === 0 && !store.isSpacePressed) {
     const isClickingElement = (e.target as HTMLElement).closest(
-      '.canvas-element, .risk-group-section, .canvas-resize-handle, .icon-btn, .add-next-page-btn'
+      '.canvas-element, .risk-group-section, .canvas-resize-handle, .icon-btn, .add-next-page-btn, .frame-lang-toolbar'
     );
     if (!isClickingElement) {
       selectPage(props.page.id);

@@ -19,6 +19,11 @@ import {
 } from '../templates/recommend';
 
 export const PAGE_WIDTH = 390;
+export const TRANSLATION_FRAME_GAP = 64;
+
+export function getPagePairWidth(_page?: FormPage): number {
+  return getPageWidth();
+}
 export const PAGE_HEIGHT = 720;
 export const PAGE_GAP = 160;
 const MIN_SCALE = 0.1;
@@ -56,7 +61,9 @@ export const store = reactive({
     description: '',
     description_en: '',
     profileType: 'customer' as ProfileType,
-    enabledLocales: undefined as ('zh' | 'en')[] | undefined,
+    baseLocale: '' as string,
+    enabledLocales: undefined as string[] | undefined,
+    i18n: undefined as Record<string, Record<string, string>> | undefined,
     source: 'diy' as 'template' | 'diy',
     templateKey: '' as string,
     formId: '' as string,
@@ -96,7 +103,12 @@ export const store = reactive({
   rightSidebarVisible: true,
   leftSidebarWidth: 320,
   rightSidebarWidth: 300,
-  sidebarTab: 'components' as 'templates' | 'components' | 'pages',
+  sidebarTab: 'components' as 'components' | 'templates' | 'pages' | 'languages',
+
+  activeTargetLocale: 'en' as string,
+  editingLocale: '' as string,
+  previewLocale: '' as string,
+  workspaceMode: 'builder' as 'builder' | 'translation',
 
   currentLocale: getInitialLocale() as 'zh' | 'en',
 
@@ -239,6 +251,9 @@ export function selectPage(pageId: string) {
   store.activePageId = pageId;
   if (!store.rightSidebarVisible) {
     store.rightSidebarVisible = true;
+  }
+  if (store.workspaceMode === 'translation') {
+    syncTranslationUrlParams();
   }
 }
 
@@ -669,6 +684,31 @@ export function deletePage(pageId: string) {
   markDirty();
 }
 
+export function updatePageFields(pageId: string, fields: FormElement[]) {
+  const target = store.pages.find(p => p.id === pageId);
+  if (target) {
+    target.fields = fields;
+    markDirty();
+  }
+}
+
+export function updatePageGroups(pageId: string, groups: FormQuestionGroup[]) {
+  const target = store.pages.find(p => p.id === pageId);
+  if (target) {
+    target.groups = groups;
+    markDirty();
+  }
+}
+
+export function setPagePosition(pageId: string, pos: { x?: number; y?: number }) {
+  const target = store.pages.find(p => p.id === pageId);
+  if (target) {
+    if (pos.x !== undefined) target.x = pos.x;
+    if (pos.y !== undefined) target.y = pos.y;
+    markDirty();
+  }
+}
+
 export function clampScale(scale: number): number {
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
 }
@@ -716,9 +756,95 @@ export interface FocusOnPageOptions {
   duration?: number;
 }
 
-export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
-  const page = store.pages.find(p => p.id === pageId);
+export function resetTranslationCanvasView(options?: { duration?: number }) {
+  const duration = options?.duration ?? 420;
+  if (duration > 0) {
+    animateCanvasTransition(duration);
+  } else {
+    store.isCanvasAnimating = false;
+  }
+
+  // 1. 获取真实可用画布视口尺寸
+  let viewportWidth = 0;
+  let viewportHeight = 0;
+  if (typeof document !== 'undefined') {
+    const canvasArea = document.getElementById('tour-canvas-area');
+    if (canvasArea && canvasArea.clientWidth > 0 && canvasArea.clientHeight > 0) {
+      viewportWidth = canvasArea.clientWidth;
+      viewportHeight = canvasArea.clientHeight;
+    }
+  }
+  if (!viewportWidth || !viewportHeight) {
+    const leftWidth = store.leftSidebarVisible ? store.leftSidebarWidth : 0;
+    const rightWidth = store.rightSidebarVisible ? store.rightSidebarWidth : 0;
+    viewportWidth = Math.max(320, (typeof window !== 'undefined' ? window.innerWidth : 1200) - leftWidth - rightWidth);
+    viewportHeight = Math.max(320, (typeof window !== 'undefined' ? window.innerHeight : 800) - 56);
+  }
+
+  // 2. 确定当前展示的翻译页面与内容尺寸
+  const activePage = store.pages.find(p => p.id === store.activePageId && p.pageType !== 'system_profile')
+    || store.pages.find(p => p.pageType !== 'system_profile')
+    || store.pages[0];
+
+  const singleWidth = isRisk.value ? (store.riskPageWidth || 540) : getPageWidth();
+  const pairWidth = singleWidth * 2 + 64;
+
+  let contentHeight = PAGE_HEIGHT;
+  if (typeof document !== 'undefined' && activePage) {
+    const srcEl = document.getElementById(`frame_trans_${primaryLocale.value}_${activePage.id}`);
+    const tgtEl = document.getElementById(`frame_trans_${store.activeTargetLocale}_${activePage.id}`);
+    const measuredHeight = Math.max(srcEl?.offsetHeight || 0, tgtEl?.offsetHeight || 0);
+    if (measuredHeight > 0) {
+      contentHeight = measuredHeight;
+    }
+  }
+
+  // 3. 计算自适应缩放比例 (Fit to Canvas)
+  const paddingX = 96;
+  const paddingY = 80;
+  const safeWidth = Math.max(200, viewportWidth - paddingX);
+  const safeHeight = Math.max(200, viewportHeight - paddingY);
+
+  const scaleX = safeWidth / pairWidth;
+  const referenceHeight = Math.max(PAGE_HEIGHT, Math.min(contentHeight, 920));
+  const scaleY = safeHeight / referenceHeight;
+
+  let targetScale = Math.min(scaleX, scaleY);
+
+  // 保证卡片在高分屏或大视口下保持 1:1 标准高保真（不超过 1.0，避免超大拉伸变形）
+  // 当视口能容纳 92%~105% 时，自动规整到 1.0，呈现最清晰的 1:1 像素
+  if (targetScale >= 0.92 && targetScale <= 1.08) {
+    targetScale = 1.0;
+  } else if (targetScale > 1.08) {
+    targetScale = 1.0;
+  } else {
+    targetScale = Math.max(0.45, targetScale);
+  }
+
+  const finalScale = clampScale(targetScale);
+  store.canvasState.scale = finalScale;
+
+  // 4. 水平居中
+  const contentCenterX = pairWidth / 2;
+  store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * finalScale);
+
+  // 5. 垂直居中 / 顶部合理边距
+  const scaledContentHeight = contentHeight * finalScale;
+  if (scaledContentHeight + 64 <= viewportHeight) {
+    store.canvasState.y = Math.max(36, Math.round((viewportHeight - scaledContentHeight) / 2));
+  } else {
+    store.canvasState.y = 40;
+  }
+}
+
+export function focusOnPage(pageOrId: string | FormPage, options?: FocusOnPageOptions) {
+  const page = typeof pageOrId === 'string' ? store.pages.find(p => p.id === pageOrId) : pageOrId;
   if (!page) return;
+
+  if (store.workspaceMode === 'translation') {
+    resetTranslationCanvasView(options);
+    return;
+  }
 
   const duration = options?.duration ?? 420;
   if (duration > 0) {
@@ -792,6 +918,11 @@ export function focusOnPage(pageId: string, options?: FocusOnPageOptions) {
 }
 
 export function resetCanvasView(options?: { duration?: number }) {
+  if (store.workspaceMode === 'translation') {
+    resetTranslationCanvasView(options);
+    return;
+  }
+
   const duration = options?.duration ?? 420;
   if (duration > 0) {
     animateCanvasTransition(duration);
@@ -1043,16 +1174,61 @@ export function buildSchema(): FormSchema {
   };
 }
 
+export function syncTranslationUrlParams() {
+  if (typeof window === 'undefined') return;
+  try {
+    const url = new URL(window.location.href);
+    if (store.workspaceMode === 'translation') {
+      url.searchParams.set('mode', 'translation');
+      if (store.activeTargetLocale) {
+        url.searchParams.set('target', store.activeTargetLocale);
+      } else {
+        url.searchParams.delete('target');
+      }
+      if (store.activePageId) {
+        url.searchParams.set('page', store.activePageId);
+      } else {
+        url.searchParams.delete('page');
+      }
+    } else {
+      if (url.searchParams.get('mode') === 'translation') {
+        if (isRisk.value && !url.pathname.includes('/risk')) {
+          url.searchParams.set('mode', 'risk');
+        } else {
+          url.searchParams.delete('mode');
+        }
+      }
+      url.searchParams.delete('target');
+      url.searchParams.delete('page');
+    }
+    window.history.replaceState({}, '', url.toString());
+  } catch (e) {
+    console.error('Failed to sync translation URL params', e);
+  }
+}
+
 export function syncUrlParams(id?: string) {
   if (typeof window === 'undefined') return;
   try {
     const url = new URL(window.location.href);
     url.searchParams.delete('type');
     url.searchParams.delete('profileType');
-    if (isRisk.value && !url.pathname.includes('/risk')) {
+    if (store.workspaceMode === 'translation') {
+      url.searchParams.set('mode', 'translation');
+      if (store.activeTargetLocale) {
+        url.searchParams.set('target', store.activeTargetLocale);
+      }
+      if (store.activePageId) {
+        url.searchParams.set('page', store.activePageId);
+      }
+    } else if (isRisk.value && !url.pathname.includes('/risk')) {
       url.searchParams.set('mode', 'risk');
+      url.searchParams.delete('target');
+      url.searchParams.delete('page');
     } else {
       url.searchParams.delete('mode');
+      url.searchParams.delete('target');
+      url.searchParams.delete('page');
     }
     url.searchParams.delete('source');
     url.searchParams.delete('tpl');
@@ -1457,29 +1633,64 @@ export function highlightPropertyField(
   }, 40);
 }
 
-export const isBilingual = computed<boolean>(() => {
-  return Boolean(store.meta.enabledLocales?.includes('zh') && store.meta.enabledLocales?.includes('en'));
+export const primaryLocale = computed<string>(() => {
+  return store.currentLocale || store.meta.baseLocale || 'zh';
 });
 
-export const primaryLocale = computed<'zh' | 'en'>(() => {
-  if (store.meta.enabledLocales && store.meta.enabledLocales.length === 1) {
-    return store.meta.enabledLocales[0];
+export const targetLocales = computed<string[]>(() => {
+  if (!store.meta.enabledLocales || store.meta.enabledLocales.length <= 1) {
+    return [];
   }
-  return store.currentLocale || 'zh';
+  return store.meta.enabledLocales.filter(l => l !== primaryLocale.value);
 });
 
-export const secondaryLocale = computed<'zh' | 'en'>(() => {
+export const isBilingual = computed<boolean>(() => {
+  return targetLocales.value.length > 0;
+});
+
+export const secondaryLocale = computed<string>(() => {
+  if (store.activeTargetLocale && targetLocales.value.includes(store.activeTargetLocale)) {
+    return store.activeTargetLocale;
+  }
+  if (targetLocales.value.length > 0) {
+    return targetLocales.value[0];
+  }
   return primaryLocale.value === 'zh' ? 'en' : 'zh';
 });
 
-export function enableBilingual() {
-  if (!store.meta.enabledLocales) {
-    store.meta.enabledLocales = [store.currentLocale || 'zh'];
+export function setActiveTargetLocale(locale: string) {
+  if (targetLocales.value.includes(locale)) {
+    store.activeTargetLocale = locale;
+    if (store.editingLocale && store.editingLocale !== primaryLocale.value) {
+      store.editingLocale = locale;
+    }
+    syncTranslationUrlParams();
   }
-  if (!store.meta.enabledLocales.includes('zh')) store.meta.enabledLocales.push('zh');
-  if (!store.meta.enabledLocales.includes('en')) store.meta.enabledLocales.push('en');
+}
 
-  // 对于系统预设页面（基本资料），确保系统标准双语标题完备
+export function addTargetLocale(locale?: string) {
+  const base = primaryLocale.value;
+  if (!store.meta.baseLocale) {
+    store.meta.baseLocale = base;
+  }
+  if (!store.meta.enabledLocales || store.meta.enabledLocales.length === 0) {
+    store.meta.enabledLocales = [base];
+  } else if (!store.meta.enabledLocales.includes(base)) {
+    store.meta.enabledLocales.unshift(base);
+  }
+
+  let nextLocale = locale;
+  if (!nextLocale) {
+    const candidates = ['zh', 'en', 'ja', 'ko', 'zh-TW', 'ms'];
+    nextLocale = candidates.find(c => !store.meta.enabledLocales!.includes(c)) || (base === 'zh' ? 'en' : 'zh');
+  }
+
+  if (!store.meta.enabledLocales.includes(nextLocale)) {
+    store.meta.enabledLocales.push(nextLocale);
+  }
+  store.activeTargetLocale = nextLocale;
+  store.editingLocale = nextLocale;
+
   store.pages.forEach(p => {
     if (p.pageType === 'system_profile') {
       if (!p.title) p.title = '基本资料';
@@ -1487,12 +1698,92 @@ export function enableBilingual() {
     }
   });
 
-  // 保持用户当前的语言模式，不随意篡改 store.currentLocale
   markDirty();
+  syncTranslationUrlParams();
+}
+
+export function removeTargetLocale(locale: string) {
+  if (!store.meta.enabledLocales) return;
+  const base = primaryLocale.value;
+  if (locale === base) return;
+  store.meta.enabledLocales = store.meta.enabledLocales.filter(l => l !== locale);
+  const remaining = store.meta.enabledLocales.filter(l => l !== base);
+  if (remaining.length > 0) {
+    if (!remaining.includes(store.activeTargetLocale)) {
+      store.activeTargetLocale = remaining[0];
+    }
+    if (store.editingLocale === locale) {
+      store.editingLocale = store.activeTargetLocale;
+    }
+  } else {
+    store.editingLocale = base;
+    if (store.workspaceMode === 'translation') {
+      closeTranslationWorkspace();
+    }
+  }
+  markDirty();
+  syncTranslationUrlParams();
+}
+
+export function enableBilingual() {
+  const base = primaryLocale.value;
+  const defaultTarget = base === 'zh' ? 'en' : 'zh';
+  addTargetLocale(defaultTarget);
 }
 
 export function disableMultiLanguage() {
-  const current = store.currentLocale || 'zh';
-  store.meta.enabledLocales = [current];
+  const base = primaryLocale.value;
+  store.meta.baseLocale = base;
+  store.meta.enabledLocales = [base];
+  store.editingLocale = base;
+  store.workspaceMode = 'builder';
   markDirty();
+  syncTranslationUrlParams();
+}
+
+export function openTranslationWorkspace(targetLocale?: string) {
+  if (targetLocales.value.length === 0) {
+    enableBilingual();
+  }
+  if (targetLocale && !targetLocales.value.includes(targetLocale)) {
+    addTargetLocale(targetLocale);
+  }
+  const activeTarget =
+    (targetLocale && targetLocales.value.includes(targetLocale) ? targetLocale : '') ||
+    (store.activeTargetLocale && targetLocales.value.includes(store.activeTargetLocale) ? store.activeTargetLocale : '') ||
+    targetLocales.value[0] ||
+    (primaryLocale.value === 'zh' ? 'en' : 'zh');
+
+  store.activeTargetLocale = activeTarget;
+  store.editingLocale = activeTarget;
+  store.workspaceMode = 'translation';
+  store.sidebarTab = 'languages';
+  store.leftSidebarVisible = true;
+  clearSelection();
+
+  const currentActivePage = store.pages.find(p => p.id === store.activePageId && p.pageType !== 'system_profile');
+  if (!currentActivePage) {
+    const firstFormPage = store.pages.find(p => p.pageType !== 'system_profile') || store.pages[0];
+    if (firstFormPage) {
+      store.activePageId = firstFormPage.id;
+    }
+  }
+
+  syncTranslationUrlParams();
+
+  setTimeout(() => {
+    resetCanvasView({ duration: 300 });
+  }, 20);
+}
+
+export function closeTranslationWorkspace() {
+  store.workspaceMode = 'builder';
+  store.editingLocale = primaryLocale.value;
+  if (store.sidebarTab === 'languages') {
+    store.sidebarTab = 'pages';
+  }
+  syncTranslationUrlParams();
+  setTimeout(() => {
+    resetCanvasView({ duration: 300 });
+  }, 20);
 }

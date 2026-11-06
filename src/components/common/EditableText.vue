@@ -2,16 +2,17 @@
   <component
     :is="tag"
     ref="textRef"
-    class="outline-none cursor-text hover:text-[#1677ff] editable-text-node"
+    class="outline-none editable-text-node"
     :class="[
       customClass,
+      isReadOnlyFrame ? 'cursor-default select-text' : 'cursor-text hover:text-[#1677ff]',
       {
-        'canvas-text-focus': isFocused,
+        'canvas-text-focus': !isReadOnlyFrame && isFocused,
         'is-placeholder': isShowingPlaceholder
       }
     ]"
     :data-placeholder="placeholder"
-    contenteditable="plaintext-only"
+    :contenteditable="isReadOnlyFrame ? false : 'plaintext-only'"
     spellcheck="false"
     style="user-select: text !important; -webkit-user-select: text !important; outline: none !important;"
     @mousedown="handleMouseDown"
@@ -24,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, inject, type ComputedRef } from 'vue';
 import { store, markDirty, highlightPropertyField, selectElement, selectPage, selectGroup } from '@/core/store';
 
 const props = withDefaults(
@@ -60,6 +61,8 @@ const emit = defineEmits<{
 
 const textRef = ref<HTMLElement | null>(null);
 const isEditing = ref(false);
+const injectedFrameLocale = inject<ComputedRef<string> | undefined>('frameLocale', undefined);
+const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
 const isShowingPlaceholder = computed(() => {
   if (isEditing.value) return false;
@@ -99,7 +102,7 @@ onMounted(() => {
 });
 
 watch(
-  () => [props.modelValue, props.placeholder, store.currentLocale],
+  () => [props.modelValue, props.placeholder, store.currentLocale, injectedFrameLocale?.value, store.editingLocale, store.activeTargetLocale],
   () => {
     if (isEditing.value || (typeof document !== 'undefined' && document.activeElement === textRef.value)) {
       return;
@@ -118,7 +121,14 @@ function handleMouseDown(e: MouseEvent) {
 }
 
 function handleFocus(e: FocusEvent) {
+  if (isReadOnlyFrame.value) {
+    textRef.value?.blur();
+    return;
+  }
   isEditing.value = true;
+  if (injectedFrameLocale?.value) {
+    store.editingLocale = injectedFrameLocale.value;
+  }
   if ((!props.modelValue || props.modelValue === '') && textRef.value) {
     textRef.value.textContent = '';
   }

@@ -21,7 +21,7 @@
               type="button"
               class="figma-activity-btn"
               :class="{ active: activeTab === 'templates' }"
-              @click="activeTab = 'templates'"
+              @click="switchToBuilderTab('templates')"
             >
               <LayoutTemplate class="h-4 w-4 shrink-0" />
               <span
@@ -36,7 +36,7 @@
               type="button"
               class="figma-activity-btn"
               :class="{ active: activeTab === 'components' }"
-              @click="activeTab = 'components'"
+              @click="switchToBuilderTab('components')"
             >
               <Component class="h-4 w-4 shrink-0" />
               <span
@@ -51,7 +51,7 @@
               type="button"
               class="figma-activity-btn relative"
               :class="{ active: activeTab === 'pages' }"
-              @click="activeTab = 'pages'"
+              @click="switchToBuilderTab('pages')"
             >
               <Files class="h-4 w-4 shrink-0" />
               <span
@@ -62,6 +62,24 @@
               </span>
               <span v-if="isRisk ? (store.pages[0]?.groups?.length || 0) > 0 : store.pages.length > 0" class="figma-page-count-badge">
                 {{ isRisk ? (store.pages[0]?.groups?.length || 0) : store.pages.length }}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="figma-activity-btn relative"
+              :class="{ active: activeTab === 'languages' || store.workspaceMode === 'translation' }"
+              @click="openTranslationWorkspace()"
+            >
+              <Languages class="h-4 w-4 shrink-0" />
+              <span
+                class="w-full text-center truncate px-0.5 leading-tight mt-0.5"
+                :class="store.currentLocale === 'en' ? 'text-[9.5px] tracking-tight' : 'text-[10px]'"
+              >
+                {{ t('trans.multilingual') }}
+              </span>
+              <span v-if="targetLocales.length > 0" class="figma-page-count-badge">
+                {{ targetLocales.length }}
               </span>
             </button>
           </div>
@@ -129,7 +147,7 @@
             </div>
 
             <div class="flex items-center gap-1 shrink-0 pt-0.5">
-              <a-tooltip v-if="activeTab !== 'pages'" :content="t('sidebar.searchTooltip')" position="bottom">
+              <a-tooltip v-if="activeTab !== 'pages' && activeTab !== 'languages'" :content="t('sidebar.searchTooltip')" position="bottom">
                 <button
                   type="button"
                   class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 cursor-pointer"
@@ -217,7 +235,7 @@
                 >
                   <img
                     :src="tpl.image"
-                    :alt="getFieldText(tpl, 'title')"
+                    :alt="getFieldText(tpl, 'title', store.currentLocale)"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 select-none pointer-events-none"
                     loading="lazy"
                   />
@@ -226,25 +244,25 @@
                     :color="tpl.tagColor"
                     class="absolute top-2 right-2 text-[10px] px-1.5 h-4.5 leading-none rounded shadow-2xs font-medium"
                   >
-                    {{ getFieldText(tpl, 'tag') }}
+                    {{ getFieldText(tpl, 'tag', store.currentLocale) }}
                   </a-tag>
                 </div>
 
                 <div class="p-3 flex flex-col flex-1 justify-between">
                   <div>
                     <div class="mb-1 text-[13px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors truncate">
-                      {{ getFieldText(tpl, 'title') }}
+                      {{ getFieldText(tpl, 'title', store.currentLocale) }}
                     </div>
 
                     <p class="text-[11.5px] text-slate-500 leading-[18px] m-0 mb-2 line-clamp-2 min-h-[36px]">
-                      {{ getFieldText(tpl, 'desc') }}
+                      {{ getFieldText(tpl, 'desc', store.currentLocale) }}
                     </p>
                   </div>
 
                   <div class="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100">
                     <div class="flex items-center gap-1.5 text-slate-400 font-medium">
                       <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>{{ getFieldText(tpl, 'stats') }}</span>
+                      <span>{{ getFieldText(tpl, 'stats', store.currentLocale) }}</span>
                     </div>
                     <div class="flex items-center gap-0.5 text-[#1677ff] font-medium opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-150">
                       <span class="text-[11px]">{{ t('sidebar.useTemplate') }}</span>
@@ -275,7 +293,7 @@
                   class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2.5 py-1.5 transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
                   :class="isRisk ? '!items-start !p-2.5' : 'h-[34px]'"
                   :data-type="item.type"
-                  :title="isRisk ? t('risk.cmpQuestion') : getFieldText(item, 'label')"
+                  :title="isRisk ? t('risk.cmpQuestion') : getFieldText(item, 'label', store.currentLocale)"
                   @click="handleComponentClick(item.type)"
                 >
                   <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden">
@@ -313,7 +331,7 @@
                       class="truncate font-medium text-slate-700 transition-colors group-hover:text-[#1677ff]"
                       :class="store.currentLocale === 'en' ? 'text-[11px] tracking-tight' : 'text-[11.5px]'"
                     >
-                      {{ getFieldText(item, 'label') }}
+                      {{ getFieldText(item, 'label', store.currentLocale) }}
                     </span>
                   </div>
                   <div class="canvas-ghost-skeleton pointer-events-none hidden w-full select-none text-left">
@@ -333,7 +351,7 @@
                   :key="item.type + '_' + store.currentLocale"
                   class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2 py-1.5 h-[34px] transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
                   :data-type="item.type"
-                  :title="getFieldText(item, 'label')"
+                  :title="getFieldText(item, 'label', store.currentLocale)"
                   @click="handleComponentClick(item.type)"
                 >
                   <div class="sidebar-btn-view flex w-full items-center gap-1.5 overflow-hidden">
@@ -342,7 +360,7 @@
                       class="truncate font-medium text-slate-700 transition-colors group-hover:text-[#1677ff]"
                       :class="store.currentLocale === 'en' ? 'text-[11px] tracking-tight' : 'text-[11.5px]'"
                     >
-                      {{ getFieldText(item, 'label') }}
+                      {{ getFieldText(item, 'label', store.currentLocale) }}
                     </span>
                   </div>
                   <div class="canvas-ghost-skeleton pointer-events-none hidden w-full select-none text-left">
@@ -527,6 +545,182 @@
               </button>
             </div>
           </div>
+
+          <div v-show="activeTab === 'languages'" class="space-y-4">
+            <!-- 语言设定区：遵循平台统一的分类标题与轻量行样式 -->
+            <section>
+              <div class="flex items-center justify-between mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
+                <span>{{ t('trans.sourceLeft') }}</span>
+                <span class="text-[10px] text-slate-400 font-normal">
+                  {{ t('trans.readOnlyShort') }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 rounded-md border border-slate-200/80 bg-slate-50/70 text-slate-700 select-none">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                  <span class="text-[12px] font-medium text-slate-800 truncate">
+                    {{ getLocaleNativeName(primaryLocale) }}
+                  </span>
+                </div>
+                <span class="text-[10px] text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200/60 leading-none">
+                  {{ t('trans.readOnlyShort') }}
+                </span>
+              </div>
+            </section>
+
+            <section>
+              <div class="flex items-center justify-between mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
+                <span>{{ t('trans.targetRight') }}</span>
+                <a-dropdown v-if="availableLocalesToAdd.length > 0" trigger="click" position="br">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1677ff] hover:text-blue-700 transition-colors cursor-pointer"
+                  >
+                    <Plus class="w-3 h-3 stroke-[2.5]" />
+                    <span>{{ t('trans.addLanguageShort') }}</span>
+                  </button>
+                  <template #content>
+                    <a-doption
+                      v-for="loc in availableLocalesToAdd"
+                      :key="loc.code"
+                      @click="handleAddTargetLanguage(loc.code)"
+                    >
+                      <div class="flex items-center justify-between gap-4 min-w-[140px] py-0.5">
+                        <span class="text-[12.5px] font-medium text-slate-700">{{ loc.nativeLabel }}</span>
+                        <span class="text-[11px] text-slate-400 font-mono">{{ loc.code.toUpperCase() }}</span>
+                      </div>
+                    </a-doption>
+                  </template>
+                </a-dropdown>
+              </div>
+
+              <div class="space-y-1.5">
+                <div
+                  v-for="loc in targetLocales"
+                  :key="loc"
+                  class="group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
+                  :class="[
+                    store.activeTargetLocale === loc
+                      ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25 text-[#1677ff]'
+                      : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 text-slate-700'
+                  ]"
+                  @click="handleSelectTargetLocale(loc)"
+                >
+                  <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full shrink-0 transition-colors"
+                      :class="store.activeTargetLocale === loc ? 'bg-[#1677ff]' : 'bg-slate-300 group-hover:bg-slate-400'"
+                    />
+                    <span
+                      class="text-[12px] truncate"
+                      :class="store.activeTargetLocale === loc ? 'font-semibold text-[#1677ff]' : 'font-medium text-slate-800'"
+                    >
+                      {{ getLocaleNativeName(loc) }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-1 shrink-0">
+                    <span
+                      class="text-[10px] font-medium px-1.5 py-0.5 rounded leading-none border"
+                      :class="
+                        getLocalePercent(loc) === 100
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200/60'
+                          : 'bg-amber-50 text-amber-600 border-amber-200/60'
+                      "
+                    >
+                      {{ getLocalePercent(loc) }}%
+                    </span>
+
+                    <button
+                      type="button"
+                      class="flex h-5 w-5 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer ml-0.5"
+                      :title="t('trans.removeLanguage')"
+                      @click.stop="handleRemoveTargetLanguage(loc)"
+                    >
+                      <Trash2 class="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 待翻译表单页面区：采用完全一致的 figma-page-row 规范 -->
+            <section>
+              <div class="flex items-center justify-between mb-2 pl-0.5 text-[11px] font-semibold tracking-wide text-slate-500">
+                <span>{{ t('trans.translatablePages') }}</span>
+                <span class="font-mono text-[10.5px] text-slate-500 bg-slate-100/90 px-1.5 py-0.5 rounded">
+                  {{ translatablePages.length }}
+                </span>
+              </div>
+
+              <div v-if="translatablePages.length > 0" class="space-y-1.5">
+                <div
+                  v-for="item in translatablePages"
+                  :key="item.page.id"
+                  class="figma-page-row group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
+                  :class="[
+                    activeTranslationPageId === item.page.id
+                      ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
+                      : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40'
+                  ]"
+                  @click="handleSelectTranslationPage(item.page.id)"
+                >
+                  <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                    <span
+                      class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
+                      :class="[
+                        activeTranslationPageId === item.page.id
+                          ? 'bg-[#1677ff] text-white shadow-2xs'
+                          : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-[#1677ff]'
+                      ]"
+                    >
+                      {{ item.index + 1 }}
+                    </span>
+
+                    <div class="min-w-0 flex-1">
+                      <div
+                        class="text-[12px] truncate leading-snug transition-colors"
+                        :class="[
+                          activeTranslationPageId === item.page.id
+                            ? 'font-bold text-[#1677ff]'
+                            : 'font-medium text-slate-700 group-hover:text-[#1677ff]'
+                        ]"
+                      >
+                        {{ getPageDisplayInfo(item.page, item.index).mainTitle }}
+                      </div>
+                      <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
+                        {{ getPageDisplayInfo(item.page, item.index).subtitle }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="shrink-0">
+                    <span
+                      v-if="getPageMissingCount(item.page.id) === 0"
+                      class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200/60"
+                    >
+                      <Check class="w-3 h-3 stroke-[2.5]" />
+                      <span>100%</span>
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-200/60"
+                    >
+                      {{ t('trans.countLeft', undefined, { count: getPageMissingCount(item.page.id) }) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="rounded-md border border-dashed border-slate-200 bg-white/70 px-3 py-5 text-center text-[12px] text-slate-400"
+              >
+                {{ t('trans.noPagesToTranslate') }}
+              </div>
+            </section>
+          </div>
         </main>
       </div>
     </div>
@@ -575,6 +769,15 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import {
   store,
   isRisk,
+  primaryLocale,
+  targetLocales,
+  openTranslationWorkspace,
+  closeTranslationWorkspace,
+  addTargetLocale,
+  removeTargetLocale,
+  setActiveTargetLocale,
+  syncTranslationUrlParams,
+  resetCanvasView,
   addElement,
   focusOnPage,
   addPage,
@@ -586,8 +789,9 @@ import {
   deletePage,
   markDirty
 } from '@/core/store';
-import { RISK_FIXED_OPTIONS } from '@/templates/recommend';
-import { t, getPageText, getFieldText } from '@/core/i18n';
+import { RISK_FIXED_OPTIONS, SCENARIO_TEMPLATES_META } from '@/templates/recommend';
+import { t, getPageText, getFieldText, SUPPORTED_FORM_LOCALES, getLocaleNativeName } from '@/core/i18n';
+import { translationStats } from '@/utils/translationHelper';
 import { componentRegistry, getComponentIcon } from '@/registry/components';
 import { syncDragPlaceholderHeight } from '@/utils/helpers';
 import type { ComponentType, FormElement } from '@/types/schema';
@@ -608,6 +812,7 @@ import {
   Component,
   LayoutTemplate,
   Files,
+  Languages,
   Search,
   PanelLeft,
   Plus,
@@ -621,9 +826,6 @@ import {
   ListOrdered,
   Check
 } from '@lucide/vue';
-import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
-import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
-import tplEntityImg from '@/assets/templates/tpl-entity.webp';
 import { Message } from '@arco-design/web-vue';
 import { useSidebarResize } from '@/utils/useSidebarResize';
 import { startAppTour } from '@/utils/useAppTour';
@@ -644,58 +846,70 @@ const activeTab = computed({
     }
     return store.sidebarTab;
   },
-  set: (val: 'templates' | 'components' | 'pages') => {
+  set: (val: 'templates' | 'components' | 'pages' | 'languages') => {
     store.sidebarTab = isRisk.value && val === 'templates' ? 'components' : val;
   }
 });
 
-const scenarioTemplates = [
-  {
-    key: 'kyc-customer' as const,
-    title: '客户案例 KYC 模板',
-    title_en: 'Customer KYC Template',
-    tag: '客户案例',
-    tag_en: 'Customer',
-    tagColor: 'purple',
-    image: tplCustomerImg,
-    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
-    desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
-    stats: '3 页面 · 9 字段',
-    stats_en: '3 Pages · 9 Fields',
-    code: 'SG_CDD_CUSTOMER',
-    bannerBgClass: 'bg-[#faf5ff]'
-  },
-  {
-    key: 'kyc-individual' as const,
-    title: '个人案例 KYC 模板',
-    title_en: 'Individual KYC Template',
-    tag: '个人案例',
-    tag_en: 'Individual',
-    tagColor: 'green',
-    image: tplIndividualImg,
-    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
-    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
-    stats: '5 页面 · 15 字段',
-    stats_en: '5 Pages · 15 Fields',
-    code: 'SG_CDD_INDIVIDUAL',
-    bannerBgClass: 'bg-[#f0fdf4]'
-  },
-  {
-    key: 'kyc-entity' as const,
-    title: '实体案例 KYC 模板',
-    title_en: 'Entity KYC Template',
-    tag: '实体案例',
-    tag_en: 'Entity',
-    tagColor: 'arcoblue',
-    image: tplEntityImg,
-    desc: '包含企业统一社会信用代码、经营地址、授权代表核验与法人签章。',
-    desc_en: 'Includes corporate UEN, business address, authorized rep verification and seal.',
-    stats: '3 页面 · 16 字段',
-    stats_en: '3 Pages · 16 Fields',
-    code: 'SG_CDD_ENTITY',
-    bannerBgClass: 'bg-[#eff6ff]'
+function switchToBuilderTab(tab: 'templates' | 'components' | 'pages') {
+  if (store.workspaceMode === 'translation') {
+    closeTranslationWorkspace();
   }
-];
+  activeTab.value = tab;
+}
+
+const availableLocalesToAdd = computed(() => {
+  const used = new Set([primaryLocale.value, ...targetLocales.value]);
+  return SUPPORTED_FORM_LOCALES.filter(l => !used.has(l.code));
+});
+
+const translatablePages = computed(() => {
+  return store.pages
+    .map((page, index) => ({ page, index }))
+    .filter(item => item.page.pageType !== 'system_profile');
+});
+
+const activeTranslationPageId = computed(() => {
+  const current = store.pages.find(p => p.id === store.activePageId && p.pageType !== 'system_profile');
+  if (current) return current.id;
+  const first = translatablePages.value[0];
+  return first ? first.page.id : (store.pages[0]?.id || '');
+});
+
+function getLocalePercent(locale: string): number {
+  return translationStats.value.localeStats?.[locale]?.percent ?? 100;
+}
+
+function getPageMissingCount(pageId: string): number {
+  const activeLoc = store.activeTargetLocale;
+  const entry = translationStats.value.localeStats?.[activeLoc];
+  if (!entry) return 0;
+  return entry.missingItems.filter(item => item.pageId === pageId).length;
+}
+
+function handleAddTargetLanguage(locale: string) {
+  addTargetLocale(locale);
+  Message.success(t('trans.addedLocaleSuccess', undefined, { name: getLocaleNativeName(locale) }));
+}
+
+function handleSelectTargetLocale(locale: string) {
+  setActiveTargetLocale(locale);
+  store.editingLocale = locale;
+}
+
+function handleRemoveTargetLanguage(locale: string) {
+  removeTargetLocale(locale);
+}
+
+function handleSelectTranslationPage(pageId: string) {
+  store.activePageId = pageId;
+  syncTranslationUrlParams();
+  nextTick(() => {
+    resetCanvasView({ duration: 280 });
+  });
+}
+
+const scenarioTemplates = SCENARIO_TEMPLATES_META;
 
 const { isResizing, startResize } = useSidebarResize({
   getWidth: () => store.leftSidebarWidth,
@@ -708,6 +922,9 @@ const { isResizing, startResize } = useSidebarResize({
 });
 
 const drawerTitle = computed(() => {
+  if (activeTab.value === 'languages') {
+    return t('trans.multilingualTitle');
+  }
   if (activeTab.value === 'templates') return t('sidebar.tabTemplates');
   if (activeTab.value === 'pages') {
     if (isRisk.value) {
@@ -719,6 +936,9 @@ const drawerTitle = computed(() => {
 });
 
 const drawerSubtitle = computed(() => {
+  if (activeTab.value === 'languages') {
+    return t('trans.sideBySideSubtitle');
+  }
   if (activeTab.value === 'templates') return t('sidebar.subTemplates');
   if (activeTab.value === 'pages') {
     if (isRisk.value) {

@@ -14,8 +14,11 @@
       :key="idx"
       :d="conn.pathD"
       class="connection-path"
-      :class="{ 'is-system-flow': conn.isSystemFlow }"
-      :marker-end="conn.isSystemFlow ? 'url(#arrowhead-blue)' : 'url(#arrowhead)'"
+      :class="{
+        'is-system-flow': conn.isSystemFlow,
+        'is-translation-link': conn.isTranslationLink
+      }"
+      :marker-end="conn.isTranslationLink ? undefined : (conn.isSystemFlow ? 'url(#arrowhead-blue)' : 'url(#arrowhead)')"
     />
   </svg>
 </template>
@@ -37,14 +40,19 @@ function getPageHeight(page: any): number {
 }
 
 const connections = computed(() => {
-  const result: { pathD: string; isSystemFlow: boolean }[] = [];
-  if (!store.pages || store.pages.length <= 1) return result;
+  const result: { pathD: string; isSystemFlow: boolean; isTranslationLink?: boolean }[] = [];
+  if (!store.pages || store.pages.length === 0) return result;
 
   for (let i = 0; i < store.pages.length - 1; i++) {
     const pageA = store.pages[i];
     const pageB = store.pages[i + 1];
 
-    const rectA: Rect = { x: pageA.x, y: pageA.y, w: PAGE_WIDTH, h: getPageHeight(pageA) };
+    const rectA: Rect = {
+      x: pageA.x,
+      y: pageA.y,
+      w: PAGE_WIDTH,
+      h: getPageHeight(pageA)
+    };
     const rectB: Rect = { x: pageB.x, y: pageB.y, w: PAGE_WIDTH, h: getPageHeight(pageB) };
 
     const { sourceEdge, targetEdge } = getSmartEdges(rectA, rectB);
@@ -77,5 +85,10 @@ const connections = computed(() => {
 }
 .is-system-flow:hover {
   stroke: #1677ff !important;
+}
+.is-translation-link {
+  stroke: #93c5fd !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 4 4 !important;
 }
 </style>

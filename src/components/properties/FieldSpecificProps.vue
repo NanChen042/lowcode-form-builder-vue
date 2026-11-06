@@ -247,7 +247,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, markDirty, isBilingual } from '@/core/store';
+import { store, markDirty, isBilingual, primaryLocale } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import { countryPhoneRules, getCountryPhoneRule } from '@/registry/phoneRules';
 import OptionsEditor from './OptionsEditor.vue';
@@ -350,10 +350,9 @@ const alertContentModel = computed({
 
 const isAlertContentMissing = computed(() => {
   if (!isBilingual.value || props.element.type !== 'alert') return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.element.content && !props.element.content_en);
-  }
-  return Boolean(props.element.content_en && !props.element.content);
+  const cur = getFieldText(props.element, 'content');
+  const src = getFieldText(props.element, 'content', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 const alertTextareaRef = ref<any>(null);

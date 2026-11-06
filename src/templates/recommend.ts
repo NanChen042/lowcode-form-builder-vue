@@ -1,4 +1,87 @@
 import type { FormSchema, ProfileType, ProfileFieldItem } from '@/types/schema';
+import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
+import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
+import tplEntityImg from '@/assets/templates/tpl-entity.webp';
+
+export interface ScenarioTemplateMeta {
+  key: 'kyc-customer' | 'kyc-individual' | 'kyc-entity';
+  type: ProfileType;
+  title: string;
+  title_en: string;
+  tag: string;
+  tag_en: string;
+  tagColor: string;
+  pages: number;
+  fields: number;
+  descKey: string;
+  desc: string;
+  desc_en: string;
+  stats: string;
+  stats_en: string;
+  image: string;
+  code: string;
+  bannerBgClass: string;
+}
+
+export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
+  {
+    key: 'kyc-customer',
+    type: 'customer',
+    title: '客户案例 KYC 模板',
+    title_en: 'Customer KYC Template',
+    tag: '客户案例',
+    tag_en: 'Customer',
+    tagColor: 'purple',
+    pages: 3,
+    fields: 9,
+    descKey: 'wizard.tplCustomerDesc',
+    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+    desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+    stats: '3 页面 · 9 字段',
+    stats_en: '3 Pages · 9 Fields',
+    image: tplCustomerImg,
+    code: 'SG_CDD_CUSTOMER',
+    bannerBgClass: 'bg-[#faf5ff]'
+  },
+  {
+    key: 'kyc-individual',
+    type: 'individual',
+    title: '个人案例 KYC 模板',
+    title_en: 'Individual KYC Template',
+    tag: '个人案例',
+    tag_en: 'Individual',
+    tagColor: 'green',
+    pages: 5,
+    fields: 15,
+    descKey: 'wizard.tplIndividualDesc',
+    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
+    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
+    stats: '5 页面 · 15 字段',
+    stats_en: '5 Pages · 15 Fields',
+    image: tplIndividualImg,
+    code: 'SG_CDD_INDIVIDUAL',
+    bannerBgClass: 'bg-[#f0fdf4]'
+  },
+  {
+    key: 'kyc-entity',
+    type: 'entity',
+    title: '实体案例 KYC 模板',
+    title_en: 'Entity KYC Template',
+    tag: '实体案例',
+    tag_en: 'Entity',
+    tagColor: 'arcoblue',
+    pages: 3,
+    fields: 16,
+    descKey: 'wizard.tplEntityDesc',
+    desc: '涵盖企业多类营业牌照、多持股比例穿透、控股关系声明及董事会决议签署。',
+    desc_en: 'Covers corporate business licenses, multi-tier shareholding structure, ownership declaration, and board resolution.',
+    stats: '3 页面 · 16 字段',
+    stats_en: '3 Pages · 16 Fields',
+    image: tplEntityImg,
+    code: 'SG_CDD_ENTITY',
+    bannerBgClass: 'bg-[#f0f9ff]'
+  }
+];
 
 export const presetCustomerProfileFields: ProfileFieldItem[] = [
   { label: '企业注册全称', label_en: 'Company Name', value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '65%' },

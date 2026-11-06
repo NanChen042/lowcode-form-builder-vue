@@ -195,10 +195,11 @@ const emit = defineEmits<{
   (e: 'published', data: { url: string }): void;
 }>();
 
+const localPublishLocale = ref<'zh' | 'en'>('zh');
 const activeLocale = computed<'zh' | 'en'>({
-  get: () => (isBilingual.value ? (store.currentLocale === 'en' ? 'en' : 'zh') : primaryLocale.value),
+  get: () => (isBilingual.value ? localPublishLocale.value : (primaryLocale.value === 'en' ? 'en' : 'zh')),
   set: (val: 'zh' | 'en') => {
-    store.currentLocale = val;
+    localPublishLocale.value = val;
   }
 });
 const formModel = reactive({

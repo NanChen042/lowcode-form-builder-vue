@@ -12,10 +12,10 @@
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
           <label for="prop-label-input" class="text-[12px] font-medium text-slate-700">
-            {{ isRisk ? t('risk.questionContent') : (store.currentLocale === 'en' ? t('prop.fieldLabelEn') : t('prop.fieldLabel')) }}
+            {{ isRisk ? t('risk.questionContent') : t('prop.fieldLabel') }}
           </label>
           <a-tag v-if="isFieldLabelMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-            {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+            {{ t('prop.untranslated') }}
           </a-tag>
         </div>
         <div v-if="!isRisk" class="flex items-center gap-1.5 font-normal select-none">
@@ -119,10 +119,10 @@
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
           <label for="prop-help-input" class="text-[12px] font-medium text-slate-700">
-            {{ store.currentLocale === 'en' ? t('prop.fieldHelpEn') : t('prop.fieldHelp') }}
+            {{ t('prop.fieldHelp') }}
           </label>
           <a-tag v-if="isFieldHelpMissing" color="orange" size="small" class="text-[10px] scale-90 origin-left">
-            {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+            {{ t('prop.untranslated') }}
           </a-tag>
         </div>
       </div>
@@ -184,7 +184,7 @@
       <div class="flex items-center justify-between mb-1">
         <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
         <a-tag v-if="isFieldPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
-          {{ store.currentLocale === 'en' ? t('prop.missingEnTag') : t('prop.missingZhTag') }}
+          {{ t('prop.untranslated') }}
         </a-tag>
       </div>
       <a-input
@@ -372,8 +372,8 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, isRisk, markDirty, isBilingual } from '@/core/store';
-import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText } from '@/core/i18n';
+import { store, isRisk, markDirty, isBilingual, primaryLocale } from '@/core/store';
+import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText, getEffectiveFormLocale } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
 import { HelpCircle, CornerDownRight, MessageSquare, Pencil, RotateCcw, Minus, Plus, ChevronUp } from '@lucide/vue';
@@ -441,10 +441,9 @@ const fieldLabelModel = computed({
 
 const isFieldLabelMissing = computed(() => {
   if (!isBilingual.value) return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.element.label && !props.element.label_en);
-  }
-  return Boolean(props.element.label_en && !props.element.label);
+  const cur = getFieldText(props.element, 'label');
+  const src = getFieldText(props.element, 'label', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 const fieldHelpModel = computed({
@@ -458,10 +457,9 @@ const fieldHelpModel = computed({
 
 const isFieldHelpMissing = computed(() => {
   if (!isBilingual.value) return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.element.help && !props.element.help_en);
-  }
-  return Boolean(props.element.help_en && !props.element.help);
+  const cur = getFieldText(props.element, 'help');
+  const src = getFieldText(props.element, 'help', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 const helpPositionValue = computed<'right' | 'bottom'>({
@@ -513,10 +511,9 @@ const fieldPlaceholderModel = computed({
 
 const isFieldPlaceholderMissing = computed(() => {
   if (!isBilingual.value) return false;
-  if (store.currentLocale === 'en') {
-    return Boolean(props.element.placeholder && !props.element.placeholder_en);
-  }
-  return Boolean(props.element.placeholder_en && !props.element.placeholder);
+  const cur = getFieldText(props.element, 'placeholder');
+  const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
+  return Boolean(src && !cur);
 });
 
 const isElementRequired = computed({
@@ -543,16 +540,12 @@ const isCustomErrorExpanded = ref(false);
 const isDeclarationCustomErrorExpanded = ref(false);
 
 watch(
-  () => [props.element.id, store.currentLocale],
+  () => [props.element.id, store.currentLocale, store.editingLocale],
   () => {
-    const hasCustomErr = store.currentLocale === 'en'
-      ? (typeof props.element.customErrorMessage_en === 'string' && props.element.customErrorMessage_en.trim().length > 0)
-      : (typeof props.element.customErrorMessage === 'string' && props.element.customErrorMessage.trim().length > 0);
+    const hasCustomErr = getFieldText(props.element, 'customErrorMessage').trim().length > 0;
     isCustomErrorExpanded.value = hasCustomErr;
 
-    const hasDeclErr = store.currentLocale === 'en'
-      ? (typeof props.element.declarationErrorMessage_en === 'string' && props.element.declarationErrorMessage_en.trim().length > 0)
-      : (typeof props.element.declarationErrorMessage === 'string' && props.element.declarationErrorMessage.trim().length > 0);
+    const hasDeclErr = getFieldText(props.element, 'declarationErrorMessage').trim().length > 0;
     isDeclarationCustomErrorExpanded.value = hasDeclErr;
   },
   { immediate: true }
@@ -562,7 +555,7 @@ const rawDefaultErrorMessage = computed(() => {
   return getFieldDefaultErrorMessage(
     props.element,
     props.element.type === 'signature' ? 'signature' : undefined,
-    store.currentLocale as 'zh' | 'en'
+    getEffectiveFormLocale()
   );
 });
 
@@ -570,7 +563,7 @@ const rawDeclarationErrorMessage = computed(() => {
   return getFieldDefaultErrorMessage(
     props.element,
     'declaration',
-    store.currentLocale as 'zh' | 'en'
+    getEffectiveFormLocale()
   );
 });
 

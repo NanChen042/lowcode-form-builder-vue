@@ -12,9 +12,12 @@ export type ComponentType =
   | 'email'
   | 'alert';
 
+export type FormLocale = 'zh' | 'en' | 'ja' | 'ko' | 'zh-TW' | 'ms' | string;
+
 export interface FormElementOption {
   label: string;
   label_en?: string;
+  i18n?: Record<string, string>;
   value: string;
 }
 
@@ -79,6 +82,8 @@ export interface FormElement {
   // 风险评估问题权重 (1-10，默认 1) 及所属分组 ID
   weight?: number;
   groupId?: string;
+  // 多语言扩展字典 (例如 ja, ko, zh-TW, ms 等)
+  i18n?: Record<string, Record<string, string>>;
 }
 
 export interface FormQuestionGroup {
@@ -87,6 +92,7 @@ export interface FormQuestionGroup {
   title_en?: string;
   description?: string;
   description_en?: string;
+  i18n?: Record<string, Record<string, string>>;
 }
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
@@ -141,6 +147,7 @@ export interface FormPageSchema {
   capitalTitle?: string;
   capitalTitle_en?: string;
   capitalList?: ProfileCapitalItem[];
+  i18n?: Record<string, Record<string, string>>;
 }
 
 export interface FormPage extends FormPageSchema {
@@ -160,7 +167,9 @@ export interface FormMeta {
   description_en?: string;
   profileType?: ProfileType;
   formType?: 'kyc' | 'risk';
-  enabledLocales?: ('zh' | 'en')[];
+  baseLocale?: FormLocale;
+  enabledLocales?: FormLocale[];
+  i18n?: Record<string, Record<string, string>>;
   // 内部创建模式：仅内部业务与后端识别，不在 URL 暴露明文
   source?: 'template' | 'diy';
   templateKey?: string;

@@ -826,3 +826,20 @@
 | 页面描述 | Page Description (EN) | | | |
 | 字段标签 | Field Label (EN) | | | |
 | 副标题 | Help Text (EN) | | | |
+| 退出翻译 | Exit Translation | | | |
+| 多语言 | Translate | | | |
+| 多语言翻译 | Multilingual | | | |
+| 多语言翻译 ({count}) | Multilingual ({count}) | | | |
+| 添加多语言 | Add Language | | | |
+| 移除语言 | Remove language | | | |
+| 基准语言 (左侧) | Source (Left) | | | |
+| 只读 | Read-only | | | |
+| 目标语言 (右侧) | Target (Right) | | | |
+| 可翻译页面 | Translatable Pages | | | |
+| 待译 {count} | {count} left | | | |
+| 暂无需要翻译的自定义页面 | No custom form pages to translate | | | |
+| 已添加 {name} 翻译版本 | Added {name} | | | |
+| 源语言只读对照 | Read-only Reference | | | |
+| 点击文字直接翻译 | Click text to translate | | | |
+| 左右对照配置表单多语言文案 | Side-by-side form translation | | | |
+| {count} 项{langName}未翻译 | {count} {langName} items untranslated | | | |

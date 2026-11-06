@@ -17,39 +17,42 @@
     >{{ element.weight ?? 1 }}</span>
 
     <EditableText
-      v-if="element.helpPosition !== 'bottom' && Boolean(getFieldText(element, 'help'))"
+      v-if="element.helpPosition !== 'bottom' && showHelpSlot"
       v-model="currentHelp"
-      :placeholder="t('prop.fieldHelpPlaceholder')"
+      :placeholder="helpPlaceholder"
       :element-id="element.id"
       field="help"
       custom-class="field-help text-[11px] text-slate-400 font-normal leading-4 ml-1.5 inline"
-      :allow-empty="true"
+      :allow-empty="!isTranslationFrame || !sourceHelp"
     />
 
     <div
-      v-if="element.helpPosition === 'bottom' && Boolean(getFieldText(element, 'help'))"
+      v-if="element.helpPosition === 'bottom' && showHelpSlot"
       class="mt-0.5 leading-4"
     >
       <EditableText
         v-model="currentHelp"
-        :placeholder="t('prop.fieldHelpPlaceholder')"
+        :placeholder="helpPlaceholder"
         :element-id="element.id"
         field="help"
         custom-class="field-help field-help-bottom text-[11px] text-slate-400 font-normal leading-4"
-        :allow-empty="true"
+        :allow-empty="!isTranslationFrame || !sourceHelp"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { isRisk } from '@/core/store';
+import { isRisk, primaryLocale } from '@/core/store';
 import { t, getFieldText, setFieldText } from '@/core/i18n';
 import EditableText from '@/components/common/EditableText.vue';
 
 const props = defineProps<{ element: FormElement }>();
+
+const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 
 const isRequired = computed(() => {
   if (props.element.type === 'signature') {
@@ -58,25 +61,45 @@ const isRequired = computed(() => {
   return Boolean(props.element.required);
 });
 
+const sourceLabel = computed(() => getFieldText(props.element, 'label', primaryLocale.value));
+const sourceHelp = computed(() => getFieldText(props.element, 'help', primaryLocale.value));
+
 const labelPlaceholder = computed(() => {
+  if (isTranslationFrame.value && sourceLabel.value) {
+    return sourceLabel.value;
+  }
   return t('prop.fieldLabelPlaceholder');
+});
+
+const helpPlaceholder = computed(() => {
+  if (isTranslationFrame.value && sourceHelp.value) {
+    return sourceHelp.value;
+  }
+  return t('prop.fieldHelpPlaceholder');
+});
+
+const showHelpSlot = computed(() => {
+  return Boolean(
+    getFieldText(props.element, 'help', frameLocale.value) ||
+    getFieldText(props.element, 'help', primaryLocale.value)
+  );
 });
 
 const currentLabel = computed({
   get() {
-    return getFieldText(props.element, 'label');
+    return getFieldText(props.element, 'label', frameLocale.value);
   },
   set(val: string) {
-    setFieldText(props.element, 'label', val);
+    setFieldText(props.element, 'label', val, frameLocale.value);
   }
 });
 
 const currentHelp = computed({
   get() {
-    return getFieldText(props.element, 'help');
+    return getFieldText(props.element, 'help', frameLocale.value);
   },
   set(val: string) {
-    setFieldText(props.element, 'help', val);
+    setFieldText(props.element, 'help', val, frameLocale.value);
   }
 });
 </script>

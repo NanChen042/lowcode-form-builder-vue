@@ -1,10 +1,53 @@
 import { computed } from 'vue';
-import { store, markDirty } from './store';
+import { store, markDirty, primaryLocale } from './store';
 import type { FormElement, FormElementOption } from '@/types/schema';
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
 
 export type Locale = 'zh' | 'en';
+export type FormContentLocale = string;
+
+export interface SupportedFormLocaleItem {
+  code: string;
+  labelZh: string;
+  labelEn: string;
+  nativeLabel: string;
+  shortBadge: string;
+}
+
+export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
+  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH' },
+  { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN' },
+  { code: 'ja', labelZh: '日语 (日本語)', labelEn: 'Japanese (日本語)', nativeLabel: '日本語', shortBadge: 'JA' },
+  { code: 'ko', labelZh: '韩语 (한국어)', labelEn: 'Korean (한국어)', nativeLabel: '한국어', shortBadge: 'KO' },
+  { code: 'zh-TW', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁' },
+  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Melayu', shortBadge: 'MS' }
+];
+
+export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  const currentUi = uiLocale || store.currentLocale || 'zh';
+  if (!item) return loc.toUpperCase();
+  return currentUi === 'en' ? item.labelEn : item.labelZh;
+}
+
+export function getLocaleNativeName(loc: string): string {
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  return item ? item.nativeLabel : loc.toUpperCase();
+}
+
+export function getLocaleShortBadge(loc: string): string {
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  return item ? item.shortBadge : loc.toUpperCase();
+}
+
+export function getEffectiveFormLocale(locale?: string): string {
+  if (locale) return locale;
+  if (store.workspaceMode === 'translation') {
+    return store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh';
+  }
+  return primaryLocale.value || 'zh';
+}
 
 /**
  * Arco 官方组件库全局当前语言包（响应式联动）
@@ -105,8 +148,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.switchedEn': '已切换至英文编辑模式',
     'header.bilingualTooltip': '开启后表单支持中英双语问卷，可向填表人提供中英文语言切换',
     'header.bilingualSwitch': '双语问卷',
-    'header.bilingualGuideTitle': '双语问卷说明',
-    'header.bilingualGuideDesc': '开启后，您可以在表单设计器中对照编辑中文与英文内容。填表人打开表单时，可通过右上角的语言切换按钮自由在中英双语间无缝切换。',
+    'header.bilingualGuideTitle': '翻译管理说明',
+    'header.bilingualGuideDesc': '管理表单各语言翻译内容。您可以在翻译工作台中对照编辑源语言与目标语言文案。填表人打开表单时，可通过语言切换按钮自由切换多语言。',
     'header.bilingualDisableTitle': '停用双语问卷模式',
     'header.bilingualDisableDesc': '确定停用双语问卷模式吗？停用后将仅保留主要语言并隐藏英文双语配置。',
     'header.bilingualDisableConfirm': '确认停用',
@@ -780,6 +823,43 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.helpText': '副标题',
     'trans.option': '选项',
     'trans.fieldDefault': '表单字段',
+    'trans.fieldLabel': '字段标签',
+    'trans.fieldPlaceholder': '输入提示',
+    'trans.fieldHelp': '帮助说明 / 副标题',
+    'trans.fieldContent': '提示内容',
+    'trans.exitWorkspace': '退出翻译',
+    'trans.multilingual': '翻译管理',
+    'trans.multilingualTitle': '翻译管理',
+    'trans.multilingualWithCount': '翻译管理 ({count})',
+    'trans.addLanguage': '翻译管理',
+    'trans.addLanguageShort': '添加语言',
+    'trans.removeLanguage': '移除语言',
+    'trans.sourceLeft': '基准语言 (左侧)',
+    'trans.readOnlyShort': '只读',
+    'trans.targetRight': '目标语言 (右侧)',
+    'trans.translatablePages': '可翻译页面',
+    'trans.countLeft': '待译 {count}',
+    'trans.noPagesToTranslate': '暂无需要翻译的自定义页面',
+    'trans.addedLocaleSuccess': '已添加 {name} 翻译版本',
+    'trans.readOnlyReference': '源语言只读对照',
+    'trans.clickToTranslate': '点击文字直接翻译',
+    'trans.sideBySideSubtitle': '管理各语言翻译内容',
+    'trans.pendingSummary': '{count} 项{langName}未翻译',
+    'trans.translationPair': '语言对照方向',
+    'trans.sourceRef': '源语言参考',
+    'trans.targetEdit': '译文配置',
+    'trans.noSourceText': '（暂无源文案）',
+    'trans.translated': '已填写',
+    'trans.pending': '待翻译',
+    'trans.quickTipTitle': '双向对照与联动',
+    'trans.quickTipDesc': '在中间画板点击任意组件或文本，可在此即时同步编辑译文。',
+    'trans.optionsTitle': '选项译文对照',
+    'trans.pageTitleLabel': '页面标题',
+    'trans.pageDescLabel': '页面副标题 / 描述',
+    'trans.backToPage': '查看页面译文',
+    'trans.source': '源语言',
+    'trans.target': '目标语言',
+    'trans.enterTarget': '输入目标语言译文...',
     'common.leaveConfirm': '您有未保存的更改，确定要离开吗？',
     'common.switchLanguage': '切换语言 / Switch Language',
     'common.localeZh': '中文',
@@ -880,8 +960,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.switchedEn': 'Switched to English editing mode',
     'header.bilingualTooltip': 'When enabled, the form supports bilingual questionnaire, allowing respondents to switch languages',
     'header.bilingualSwitch': 'Bilingual Questionnaire',
-    'header.bilingualGuideTitle': 'Bilingual Questionnaire Guide',
-    'header.bilingualGuideDesc': 'When enabled, you can edit Chinese and English contents side by side. Respondents can toggle languages via the top-right button.',
+    'header.bilingualGuideTitle': 'Translation Management Guide',
+    'header.bilingualGuideDesc': 'Manage form translations across languages. You can edit source and target language copies side-by-side in the translation workspace. Respondents can toggle languages via the top-right button.',
     'header.bilingualDisableTitle': 'Disable Bilingual Questionnaire',
     'header.bilingualDisableDesc': 'Are you sure you want to disable bilingual questionnaire? When disabled, only primary language will be retained.',
     'header.bilingualDisableConfirm': 'Confirm Disable',
@@ -1555,6 +1635,43 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.helpText': 'Help Text',
     'trans.option': 'Option',
     'trans.fieldDefault': 'Field',
+    'trans.fieldLabel': 'Field Label',
+    'trans.fieldPlaceholder': 'Placeholder',
+    'trans.fieldHelp': 'Help Text / Subtitle',
+    'trans.fieldContent': 'Notice Content',
+    'trans.exitWorkspace': 'Exit Translation',
+    'trans.multilingual': 'Translation Management',
+    'trans.multilingualTitle': 'Translation Management',
+    'trans.multilingualWithCount': 'Translation Management ({count})',
+    'trans.addLanguage': 'Translation Management',
+    'trans.addLanguageShort': 'Add Language',
+    'trans.removeLanguage': 'Remove language',
+    'trans.sourceLeft': 'Source (Left)',
+    'trans.readOnlyShort': 'Read-only',
+    'trans.targetRight': 'Target (Right)',
+    'trans.translatablePages': 'Translatable Pages',
+    'trans.countLeft': '{count} left',
+    'trans.noPagesToTranslate': 'No custom form pages to translate',
+    'trans.addedLocaleSuccess': 'Added {name}',
+    'trans.readOnlyReference': 'Read-only Reference',
+    'trans.clickToTranslate': 'Click text to translate',
+    'trans.sideBySideSubtitle': 'Manage translations across languages',
+    'trans.pendingSummary': '{count} {langName} items untranslated',
+    'trans.translationPair': 'Translation Direction',
+    'trans.sourceRef': 'Source Reference',
+    'trans.targetEdit': 'Target Translation',
+    'trans.noSourceText': '(No source text)',
+    'trans.translated': 'Filled',
+    'trans.pending': 'Pending',
+    'trans.quickTipTitle': 'Canvas Interactive Editing',
+    'trans.quickTipDesc': 'Click any element or text on the canvas to edit its translation here.',
+    'trans.optionsTitle': 'Options Translation',
+    'trans.pageTitleLabel': 'Page Title',
+    'trans.pageDescLabel': 'Page Description',
+    'trans.backToPage': 'Back to Page',
+    'trans.source': 'Source',
+    'trans.target': 'Target',
+    'trans.enterTarget': 'Enter target translation...',
     'common.leaveConfirm': 'You have unsaved changes. Are you sure you want to leave?',
     'common.switchLanguage': 'Switch Language / 切换语言',
     'common.localeZh': 'Chinese',
@@ -1586,10 +1703,16 @@ export function t(key: string, locale?: Locale, params?: Record<string, string |
  */
 const CHINESE_NUMS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
 
-export function formatOptionLabel(index: number, locale?: Locale): string {
-  const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
+export function formatOptionLabel(index: number, locale?: string): string {
+  const current = getEffectiveFormLocale(locale);
+  if (current === 'en' || current === 'ms') {
     return `Option ${index}`;
+  }
+  if (current === 'ja') {
+    return `選択肢 ${index}`;
+  }
+  if (current === 'ko') {
+    return `옵션 ${index}`;
   }
   if (index >= 1 && index <= 10) {
     return `选项${CHINESE_NUMS[index - 1]}`;
@@ -1597,28 +1720,61 @@ export function formatOptionLabel(index: number, locale?: Locale): string {
   return `选项${index}`;
 }
 
+function readI18nField(obj: any, field: string, loc: string): string {
+  if (!obj) return '';
+  if (loc === 'zh') {
+    const v = obj[field] ?? obj.i18n?.zh?.[field];
+    return v !== undefined && v !== null ? String(v) : '';
+  }
+  if (loc === 'en') {
+    const v = obj[`${field}_en`] ?? obj.i18n?.en?.[field];
+    return v !== undefined && v !== null ? String(v) : '';
+  }
+  const v = obj.i18n?.[loc]?.[field];
+  return v !== undefined && v !== null ? String(v) : '';
+}
+
+function writeI18nField(obj: any, field: string, val: string, loc: string) {
+  if (!obj) return;
+  if (loc === 'zh') {
+    obj[field] = val;
+    if (obj.i18n?.zh) obj.i18n.zh[field] = val;
+  } else if (loc === 'en') {
+    obj[`${field}_en`] = val;
+    if (obj.i18n?.en) obj.i18n.en[field] = val;
+  } else {
+    if (!obj.i18n) obj.i18n = {};
+    if (!obj.i18n[loc]) obj.i18n[loc] = {};
+    obj.i18n[loc][field] = val;
+  }
+}
+
 /**
  * 获取组件多语言文本
  * @param element 组件对象
  * @param field 属性名 (label, placeholder, help, customErrorMessage 等)
- * @param locale 指定语言，缺省时取当前激活语言
- * @param fallback 是否在当前语言未设置时回退另一语言（设计态为 false 保证所见即所得；预览态为 true）
+ * @param locale 指定语言，缺省时取当前表单编辑语言
+ * @param fallback 是否在当前语言未设置时回退主语言（设计态为 false 保证所见即所得；预览态为 true）
  */
 export function getFieldText(
   element: any,
   field: string,
-  locale?: Locale,
+  locale?: string,
   fallback = false
 ): string {
   if (!element) return '';
-  const current = locale || store.currentLocale || 'zh';
-  const val = current === 'en' ? element[`${field}_en`] : element[field];
-  if (val !== undefined && val !== null && val !== '') {
-    return String(val);
+  const current = getEffectiveFormLocale(locale);
+  const val = readI18nField(element, field, current);
+  if (val !== '') {
+    return val;
   }
   if (fallback) {
-    const fallbackVal = current === 'en' ? element[field] : element[`${field}_en`];
-    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+    const baseVal = readI18nField(element, field, primaryLocale.value);
+    if (baseVal !== '') return baseVal;
+    const zhVal = readI18nField(element, field, 'zh');
+    if (zhVal !== '') return zhVal;
+    const enVal = readI18nField(element, field, 'en');
+    if (enVal !== '') return enVal;
   }
   return '';
 }
@@ -1629,7 +1785,7 @@ export function getFieldText(
 export function getLocalizedFieldText(
   element: any,
   field: string,
-  locale?: Locale
+  locale?: string
 ): string {
   return getFieldText(element, field, locale, true);
 }
@@ -1642,18 +1798,28 @@ export function getLocalizedFieldText(
  */
 export function getOptionLabel(
   option: FormElementOption,
-  locale?: Locale,
+  locale?: string,
   fallback = false
 ): string {
   if (!option) return '';
-  const current = locale || store.currentLocale || 'zh';
-  const val = current === 'en' ? option.label_en : option.label;
+  const current = getEffectiveFormLocale(locale);
+  let val = '';
+  if (current === 'zh') {
+    val = option.label ?? option.i18n?.zh ?? '';
+  } else if (current === 'en') {
+    val = option.label_en ?? option.i18n?.en ?? '';
+  } else {
+    val = option.i18n?.[current] ?? '';
+  }
   if (val !== undefined && val !== null && val !== '') {
     return String(val);
   }
   if (fallback) {
-    const fallbackVal = current === 'en' ? option.label : option.label_en;
-    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+    const base = primaryLocale.value;
+    const baseVal = base === 'zh' ? option.label : base === 'en' ? option.label_en : option.i18n?.[base];
+    if (baseVal) return String(baseVal);
+    if (option.label) return String(option.label);
+    if (option.label_en) return String(option.label_en);
   }
   return '';
 }
@@ -1663,7 +1829,7 @@ export function getOptionLabel(
  */
 export function getLocalizedOptionLabel(
   option: FormElementOption,
-  locale?: Locale
+  locale?: string
 ): string {
   return getOptionLabel(option, locale, true);
 }
@@ -1676,20 +1842,24 @@ export function getLocalizedOptionLabel(
  * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
 export function getPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string },
+  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
   field: 'title' | 'description',
-  locale?: Locale,
+  locale?: string,
   fallback = false
 ): string {
   if (!page) return '';
-  const current = locale || store.currentLocale || 'zh';
-  const val = current === 'en' ? (page as any)[`${field}_en`] : (page as any)[field];
-  if (val !== undefined && val !== null && val !== '') {
-    return String(val);
+  const current = getEffectiveFormLocale(locale);
+  const val = readI18nField(page, field, current);
+  if (val !== '') {
+    return val;
   }
   if (fallback) {
-    const fallbackVal = current === 'en' ? (page as any)[field] : (page as any)[`${field}_en`];
-    return fallbackVal !== undefined && fallbackVal !== null ? String(fallbackVal) : '';
+    const baseVal = readI18nField(page, field, primaryLocale.value);
+    if (baseVal !== '') return baseVal;
+    const zhVal = readI18nField(page, field, 'zh');
+    if (zhVal !== '') return zhVal;
+    const enVal = readI18nField(page, field, 'en');
+    if (enVal !== '') return enVal;
   }
   return '';
 }
@@ -1698,11 +1868,77 @@ export function getPageText(
  * 预览态/只读态获取页面多语言文本（自动回退另一语言）
  */
 export function getLocalizedPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string },
+  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
   field: 'title' | 'description',
-  locale?: Locale
+  locale?: string
 ): string {
   return getPageText(page, field, locale, true);
+}
+
+export function getGroupText(
+  group: any,
+  field: 'title' | 'description',
+  locale?: string,
+  fallback = false
+): string {
+  if (!group) return '';
+  const current = getEffectiveFormLocale(locale);
+  const val = readI18nField(group, field, current);
+  if (val !== '') return val;
+  if (fallback) {
+    const baseVal = readI18nField(group, field, primaryLocale.value);
+    if (baseVal !== '') return baseVal;
+    const zhVal = readI18nField(group, field, 'zh');
+    if (zhVal !== '') return zhVal;
+    const enVal = readI18nField(group, field, 'en');
+    if (enVal !== '') return enVal;
+  }
+  return '';
+}
+
+export function setGroupText(
+  group: any,
+  field: 'title' | 'description',
+  val: string,
+  locale?: string
+) {
+  if (!group) return;
+  const current = getEffectiveFormLocale(locale);
+  writeI18nField(group, field, val, current);
+  markDirty();
+}
+
+export function getMetaText(
+  meta: any,
+  field: 'title' | 'description',
+  locale?: string,
+  fallback = false
+): string {
+  if (!meta) return '';
+  const current = getEffectiveFormLocale(locale);
+  const val = readI18nField(meta, field, current);
+  if (val !== '') return val;
+  if (fallback) {
+    const baseVal = readI18nField(meta, field, primaryLocale.value);
+    if (baseVal !== '') return baseVal;
+    const zhVal = readI18nField(meta, field, 'zh');
+    if (zhVal !== '') return zhVal;
+    const enVal = readI18nField(meta, field, 'en');
+    if (enVal !== '') return enVal;
+  }
+  return '';
+}
+
+export function setMetaText(
+  meta: any,
+  field: 'title' | 'description',
+  val: string,
+  locale?: string
+) {
+  if (!meta) return;
+  const current = getEffectiveFormLocale(locale);
+  writeI18nField(meta, field, val, current);
+  markDirty();
 }
 
 /**
@@ -1712,14 +1948,10 @@ export function setFieldText(
   element: FormElement,
   field: string,
   val: string,
-  locale?: Locale
+  locale?: string
 ) {
-  const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    (element as any)[`${field}_en`] = val;
-  } else {
-    (element as any)[field] = val;
-  }
+  const current = getEffectiveFormLocale(locale);
+  writeI18nField(element, field, val, current);
   markDirty();
 }
 
@@ -1727,17 +1959,13 @@ export function setFieldText(
  * 统一设置页面多语言文本并标记变更
  */
 export function setPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string },
+  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
   field: 'title' | 'description',
   val: string,
-  locale?: Locale
+  locale?: string
 ) {
-  const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    (page as any)[`${field}_en`] = val;
-  } else {
-    (page as any)[field] = val;
-  }
+  const current = getEffectiveFormLocale(locale);
+  writeI18nField(page, field, val, current);
   markDirty();
 }
 
@@ -1747,13 +1975,18 @@ export function setPageText(
 export function setOptionLabel(
   option: FormElementOption,
   val: string,
-  locale?: Locale
+  locale?: string
 ) {
-  const current = locale || store.currentLocale || 'zh';
-  if (current === 'en') {
-    option.label_en = val;
-  } else {
+  const current = getEffectiveFormLocale(locale);
+  if (current === 'zh') {
     option.label = val;
+    if (option.i18n) option.i18n.zh = val;
+  } else if (current === 'en') {
+    option.label_en = val;
+    if (option.i18n) option.i18n.en = val;
+  } else {
+    if (!option.i18n) option.i18n = {};
+    option.i18n[current] = val;
   }
   markDirty();
 }
@@ -1764,39 +1997,39 @@ export function setOptionLabel(
 export function getFieldDefaultErrorMessage(
   element: FormElement,
   subType?: 'declaration' | 'signature',
-  locale?: Locale
+  locale?: string
 ): string {
-  const current = locale || store.currentLocale || 'zh';
-  const isEn = current === 'en';
+  const current = getEffectiveFormLocale(locale);
+  const isZh = current === 'zh' || current === 'zh-TW';
 
   if (subType === 'declaration') {
-    return isEn ? 'Please agree to the declarations' : '请确认并同意声明条款';
+    return isZh ? '请确认并同意声明条款' : 'Please agree to the declarations';
   }
 
   if (subType === 'signature' || element.type === 'signature') {
-    return isEn ? 'Please complete handwritten signature' : '请完成手写签名';
+    return isZh ? '请完成手写签名' : 'Please complete handwritten signature';
   }
 
   switch (element.type) {
     case 'radio':
-      return isEn ? 'Please select an option' : '请选择一个选项';
+      return isZh ? '请选择一个选项' : 'Please select an option';
     case 'checkbox':
-      return isEn ? 'Please select at least one option' : '请至少选择一个选项';
+      return isZh ? '请至少选择一个选项' : 'Please select at least one option';
     case 'select':
     case 'country':
     case 'nationality':
       if (element.multiple) {
-        return isEn ? 'Please select at least one option' : '请至少选择一个选项';
+        return isZh ? '请至少选择一个选项' : 'Please select at least one option';
       }
-      return isEn ? 'Please select an option' : '请选择一个选项';
+      return isZh ? '请选择一个选项' : 'Please select an option';
     case 'date':
-      return isEn ? 'Please select a date' : '请选择日期';
+      return isZh ? '请选择日期' : 'Please select a date';
     case 'input':
     case 'textarea':
     case 'phone':
     case 'email':
     default:
-      return isEn ? 'This required field cannot be empty' : '必填项不能为空';
+      return isZh ? '必填项不能为空' : 'This required field cannot be empty';
   }
 }
 
@@ -1806,20 +2039,19 @@ export function getFieldDefaultErrorMessage(
 export function getFieldValidationMessage(
   element: FormElement,
   subType?: 'declaration' | 'signature',
-  locale?: Locale
+  locale?: string
 ): string {
-  const current = locale || store.currentLocale || 'zh';
-  const isEn = current === 'en';
+  const current = getEffectiveFormLocale(locale);
 
   if (subType === 'declaration') {
-    if (isEn && element.declarationErrorMessage_en) return element.declarationErrorMessage_en;
-    if (!isEn && element.declarationErrorMessage) return element.declarationErrorMessage;
+    const customDecl = readI18nField(element, 'declarationErrorMessage', current);
+    if (customDecl) return customDecl;
     return getFieldDefaultErrorMessage(element, 'declaration', current);
   }
 
   // 第一优先级：用户配置的自定义提示
-  if (isEn && element.customErrorMessage_en) return element.customErrorMessage_en;
-  if (!isEn && element.customErrorMessage) return element.customErrorMessage;
+  const customErr = readI18nField(element, 'customErrorMessage', current);
+  if (customErr) return customErr;
 
   // 第二优先级：组件语义化智能兜底
   return getFieldDefaultErrorMessage(element, subType, current);

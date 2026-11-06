@@ -54,7 +54,7 @@
             <a-input
               :model-value="getOptionLabel(option)"
               size="mini"
-              :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : formatOptionLabel(idx + 1, store.currentLocale)"
+              :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : formatOptionLabel(idx + 1)"
               class="flex-1"
               :class="{ 'prop-field-focused': isOptionFocused(idx) }"
               @focus="onFocus(idx)"

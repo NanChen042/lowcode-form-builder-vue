@@ -1,18 +1,19 @@
 <template>
   <div
-    :id="element.id"
+    :id="isTranslationFrame ? `${element.id}_trans_${frameLocale}` : element.id"
     :data-element-id="element.id"
     class="canvas-element"
     :class="{
-      'is-selected': isSelected,
+      'is-selected': !isReadOnlyFrame && isSelected,
       'is-branch-child': hasLinkage,
       'branch-depth-1': elementDepth === 1,
-      'branch-depth-2': elementDepth >= 2
+      'branch-depth-2': elementDepth >= 2,
+      'pointer-events-none select-none': isReadOnlyFrame
     }"
     :data-type="element.type"
     @click.stop="handleClick"
   >
-    <div class="element-actions">
+    <div v-if="!isTranslationFrame" class="element-actions">
       <button class="action-btn copy-btn" type="button" @click.stop="duplicateElement(element.id)">
         <Copy class="h-3.5 w-3.5" />
       </button>
@@ -45,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
+import { store, primaryLocale, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
 import { t, getOptionLabel, getFieldText } from '@/core/i18n';
 import { Copy, Trash2, Lock } from '@lucide/vue';
 
@@ -67,6 +68,10 @@ import EmailElement from './elements/EmailElement.vue';
 const props = defineProps<{
   element: FormElement;
 }>();
+
+const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
+const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
 const isSelected = computed(() => {
   return store.selectedType === 'element' && store.selectedId === props.element.id;
@@ -92,10 +97,8 @@ const triggerOptName = computed(() => {
   if (!conds || conds.length === 0) return '';
 
   const pageFields = currentPage.value?.fields || [];
-  // 计算当前子组件所属父组件链中的序号 (#1, #2...)
   const chainParentKeys: string[] = [];
   if (currentFieldIndex.value > 0) {
-    // 找到紧邻当前子组件块上方的所有被引用父组件
     let firstChildIdx = currentFieldIndex.value;
     while (firstChildIdx > 0 && pageFields[firstChildIdx - 1]?.linkage?.conditions?.length) {
       firstChildIdx--;
@@ -126,9 +129,9 @@ const triggerOptName = computed(() => {
       if (parentField) {
         const opt = parentField.options?.find(o => o.value === dep.value);
         if (opt) {
-          optLabel = getOptionLabel(opt, undefined, true) || opt.label || opt.value;
+          optLabel = getOptionLabel(opt, frameLocale.value, true) || opt.label || opt.value;
         }
-        const rawLabel = (getFieldText(parentField, 'label', undefined, true) || '').trim();
+        const rawLabel = (getFieldText(parentField, 'label', frameLocale.value, true) || '').trim();
         if (rawLabel && !DEFAULT_TITLES.has(rawLabel)) {
           customParentName = rawLabel.length > 8 ? `${rawLabel.slice(0, 8)}…` : rawLabel;
         }
@@ -221,6 +224,8 @@ const renderComponent = computed(() => {
 });
 
 function handleClick(e: MouseEvent) {
+  if (isReadOnlyFrame.value) return;
+  store.editingLocale = frameLocale.value;
   selectElement(props.element);
 
   const target = e.target as HTMLElement;

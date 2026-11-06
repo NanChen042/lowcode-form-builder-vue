@@ -11,17 +11,17 @@
           <a-checkbox :model-value="isChecked(opt.value)" class="pointer-events-none" />
         </span>
         <span v-if="isRisk" class="option-text text-sm text-slate-700">
-          {{ getOptionLabel(opt) }}
+          {{ getOptionLabel(opt, frameLocale) }}
         </span>
         <EditableText
           v-else
-          :model-value="getOptionLabel(opt)"
-          :placeholder="formatOptionLabel(idx + 1)"
+          :model-value="getOptionLabel(opt, frameLocale)"
+          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale)) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
           :element-id="element.id"
           field="option"
           :option-index="idx"
           custom-class="option-text text-sm text-slate-700"
-          @update:model-value="(val) => setOptionLabel(opt, val)"
+          @update:model-value="(val) => setOptionLabel(opt, val, frameLocale)"
         />
       </div>
     </div>
@@ -29,14 +29,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { isRisk, markDirty } from '@/core/store';
+import { isRisk, primaryLocale, markDirty } from '@/core/store';
 import { t, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
 const props = defineProps<{ element: FormElement }>();
+
+const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 
 function isChecked(val: string) {
   const vals = parseMultiValue(props.element.defaultValue);

@@ -131,32 +131,28 @@
                 <div v-if="isSubmitted" class="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center p-6 text-center animate-fade-in custom-scrollbar">
 
                   <div v-if="isBilingual" class="w-full flex justify-end mb-4 -mt-2">
-                    <div
-                      class="relative flex items-center bg-[#ebedf2] p-[2px] rounded-[7px] w-[64px] h-[26px] box-border shrink-0 select-none"
-                      style="box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 0.5px 1px rgba(0, 0, 0, 0.05);"
-                    >
-                      <div
-                        class="absolute top-[2px] bottom-[2px] left-[2px] w-[30px] bg-white rounded-[5px] pointer-events-none transition-transform duration-200 ease-out"
-                        style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0.5px 1px rgba(0, 0, 0, 0.06);"
-                        :style="{ transform: store.currentLocale === 'zh' ? 'translateX(0px)' : 'translateX(30px)' }"
-                      ></div>
+                    <a-dropdown trigger="click" position="br">
                       <button
                         type="button"
-                        class="relative z-10 w-[30px] h-[22px] flex items-center justify-center text-[12px] transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none leading-none"
-                        :style="{ color: store.currentLocale === 'zh' ? '#1677ff' : '#64748b', fontWeight: store.currentLocale === 'zh' ? '600' : '500' }"
-                        @click="store.currentLocale = 'zh'"
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11.5px] font-semibold border border-slate-200/80 cursor-pointer transition-colors"
                       >
-                        中
+                        <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
                       </button>
-                      <button
-                        type="button"
-                        class="relative z-10 w-[30px] h-[22px] flex items-center justify-center text-[12px] transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none font-sans leading-none"
-                        :style="{ color: store.currentLocale === 'en' ? '#1677ff' : '#64748b', fontWeight: store.currentLocale === 'en' ? '600' : '500' }"
-                        @click="store.currentLocale = 'en'"
-                      >
-                        EN
-                      </button>
-                    </div>
+                      <template #content>
+                        <a-doption
+                          v-for="loc in enabledPreviewLocales"
+                          :key="loc"
+                          @click="store.previewLocale = loc"
+                        >
+                          <div class="flex items-center justify-between gap-4 min-w-[110px] text-xs">
+                            <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
+                              {{ getLocaleNativeName(loc) }}
+                            </span>
+                            <span class="text-[10px] font-mono text-slate-400">{{ getLocaleShortBadge(loc) }}</span>
+                          </div>
+                        </a-doption>
+                      </template>
+                    </a-dropdown>
                   </div>
 
 
@@ -223,33 +219,28 @@
                         {{ currentStep + 1 }} / {{ pages.length }}
                       </span>
 
-                      <div
-                        v-if="isBilingual"
-                        class="relative flex items-center bg-[#ebedf2] p-[2px] rounded-[7px] w-[64px] h-[26px] box-border shrink-0 select-none"
-                        style="box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 0.5px 1px rgba(0, 0, 0, 0.05);"
-                      >
-                      <div
-                        class="absolute top-[2px] bottom-[2px] left-[2px] w-[30px] bg-white rounded-[5px] pointer-events-none transition-transform duration-200 ease-out"
-                        style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0.5px 1px rgba(0, 0, 0, 0.06);"
-                        :style="{ transform: store.currentLocale === 'zh' ? 'translateX(0px)' : 'translateX(30px)' }"
-                      ></div>
-                      <button
-                        type="button"
-                        class="relative z-10 w-[30px] h-[22px] flex items-center justify-center text-[12px] transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none leading-none"
-                        :style="{ color: store.currentLocale === 'zh' ? '#1677ff' : '#64748b', fontWeight: store.currentLocale === 'zh' ? '600' : '500' }"
-                        @click="store.currentLocale = 'zh'"
-                      >
-                        中
-                      </button>
-                      <button
-                        type="button"
-                        class="relative z-10 w-[30px] h-[22px] flex items-center justify-center text-[12px] transition-colors border-0 bg-transparent cursor-pointer p-0 select-none outline-none font-sans leading-none"
-                        :style="{ color: store.currentLocale === 'en' ? '#1677ff' : '#64748b', fontWeight: store.currentLocale === 'en' ? '600' : '500' }"
-                        @click="store.currentLocale = 'en'"
-                      >
-                        EN
-                      </button>
-                      </div>
+                      <a-dropdown v-if="isBilingual" trigger="click" position="br">
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 px-2 py-0.5 h-[24px] rounded-[6px] bg-[#ebedf2] hover:bg-slate-200/90 text-[#1677ff] text-[11.5px] font-semibold border-0 cursor-pointer transition-colors select-none"
+                        >
+                          <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
+                        </button>
+                        <template #content>
+                          <a-doption
+                            v-for="loc in enabledPreviewLocales"
+                            :key="loc"
+                            @click="store.previewLocale = loc"
+                          >
+                            <div class="flex items-center justify-between gap-4 min-w-[110px] text-xs">
+                              <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
+                                {{ getLocaleNativeName(loc) }}
+                              </span>
+                              <span class="text-[10px] font-mono text-slate-400">{{ getLocaleShortBadge(loc) }}</span>
+                            </div>
+                          </a-doption>
+                        </template>
+                      </a-dropdown>
                     </div>
                   </div>
 
@@ -341,8 +332,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
 import type { FormSchema, FormElement } from '@/types/schema';
-import { store, isBilingual } from '@/core/store';
-import { t, getLocalizedPageText, getFieldValidationMessage } from '@/core/i18n';
+import { store, isBilingual, primaryLocale, targetLocales } from '@/core/store';
+import {
+  t,
+  getLocalizedPageText,
+  getFieldValidationMessage,
+  getLocaleNativeName,
+  getLocaleShortBadge
+} from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
 import { validatePhoneNumber } from '@/registry/components';
@@ -408,10 +405,24 @@ function initFormData() {
   }
 }
 
+const enabledPreviewLocales = computed(() => {
+  return [primaryLocale.value, ...targetLocales.value];
+});
+
+const activePreviewLocale = computed(() => {
+  if (store.previewLocale && enabledPreviewLocales.value.includes(store.previewLocale)) {
+    return store.previewLocale;
+  }
+  return store.editingLocale && enabledPreviewLocales.value.includes(store.editingLocale)
+    ? store.editingLocale
+    : primaryLocale.value;
+});
+
 watch(
   () => props.visible,
   (val) => {
     if (val) {
+      store.previewLocale = activePreviewLocale.value;
       initFormData();
     }
   },
@@ -695,12 +706,12 @@ function getPageTitleDisplay(p: any, _idx?: number): string {
   if (p.pageType === 'system_profile') {
     return `${t('common.basicInfo')} [${t('common.systemPreset')}]`;
   }
-  return getLocalizedPageText(p, 'title') || t('common.untitledPage');
+  return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage');
 }
 
 const currentLocalizedTitle = computed(() => {
   if (currentPage.value) {
-    return getLocalizedPageText(currentPage.value, 'title') || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
+    return getLocalizedPageText(currentPage.value, 'title', activePreviewLocale.value) || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
   }
   return props.schema.meta?.title || t('header.untitledForm');
 });
@@ -711,7 +722,7 @@ const formBrandTitle = computed(() => {
 
 const currentLocalizedDesc = computed(() => {
   if (currentPage.value) {
-    const desc = getLocalizedPageText(currentPage.value, 'description');
+    const desc = getLocalizedPageText(currentPage.value, 'description', activePreviewLocale.value);
     return desc && desc.trim() ? desc.trim() : '';
   }
   const metaDesc = props.schema.meta?.description;

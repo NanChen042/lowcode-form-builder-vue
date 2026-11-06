@@ -3,8 +3,8 @@
     <!-- 第一行：序号 + 题干文字 + [Yes / No / Not Applicable 胶囊选项] + [复制/删除按钮] -->
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
       <div class="flex items-center gap-2 flex-1 min-w-[220px]">
-        <GripVertical class="risk-question-drag-handle h-4 w-4 text-slate-300 hover:text-slate-600 shrink-0 cursor-grab active:cursor-grabbing transition-colors" />
-        <span class="text-[14px] font-semibold text-slate-700 leading-none shrink-0 select-none cursor-grab">{{ questionIndex }}.</span>
+        <GripVertical v-if="!isTranslationFrame" class="risk-question-drag-handle h-4 w-4 text-slate-300 hover:text-slate-600 shrink-0 cursor-grab active:cursor-grabbing transition-colors" />
+        <span class="text-[14px] font-semibold text-slate-700 leading-none shrink-0 select-none" :class="isTranslationFrame ? '' : 'cursor-grab'">{{ questionIndex }}.</span>
         <div class="flex-1 min-w-0 pr-2">
           <div class="text-[14px] font-semibold text-slate-800 leading-normal">
             <EditableText
@@ -16,16 +16,16 @@
             /><span v-if="!isRisk && element.required" class="inline-block w-[10px] ml-1 -mr-[14px] text-[#ff4d4f] font-bold select-none">*</span>
           </div>
           <div
-            v-if="Boolean(getFieldText(element, 'help'))"
+            v-if="showHelpSlot"
             class="mt-0.5 text-[12px] text-slate-400 leading-normal font-normal"
           >
             <EditableText
               v-model="currentHelp"
-              :placeholder="t('prop.fieldHelpPlaceholder')"
+              :placeholder="helpPlaceholder"
               :element-id="element.id"
               field="help"
               custom-class="field-help text-[12px] text-slate-400 font-normal"
-              :allow-empty="true"
+              :allow-empty="!isTranslationFrame || !sourceHelp"
             />
           </div>
         </div>
@@ -59,6 +59,7 @@
         </div>
 
         <div
+          v-if="!isTranslationFrame"
           class="flex items-center gap-0.5 transition-opacity duration-150 pl-2 border-l border-slate-200/80"
           :class="isSelected ? 'opacity-100' : 'opacity-0 group-hover/risk-row:opacity-100'"
         >
@@ -84,6 +85,7 @@
 
     <!-- 第二行：权重分值微面板容器（气泡折角锚定上方 Yes，右对齐） -->
     <div
+      v-if="!isTranslationFrame"
       class="mt-1 flex justify-end select-none"
       @click.stop="selectElement(element)"
     >
@@ -172,13 +174,13 @@
           <a-radio :model-value="element.defaultValue === opt.value" class="pointer-events-none" />
         </span>
         <EditableText
-          :model-value="getOptionLabel(opt)"
-          :placeholder="formatOptionLabel(idx + 1)"
+          :model-value="getOptionLabel(opt, frameLocale)"
+          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale)) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
           :element-id="element.id"
           field="option"
           :option-index="idx"
           custom-class="option-text text-sm text-slate-700"
-          @update:model-value="(val) => setOptionLabel(opt, val)"
+          @update:model-value="(val) => setOptionLabel(opt, val, frameLocale)"
         />
       </div>
     </div>
@@ -186,15 +188,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, isRisk, selectElement, duplicateElement, deleteElement, markDirty } from '@/core/store';
+import { store, isRisk, primaryLocale, selectElement, duplicateElement, deleteElement, markDirty } from '@/core/store';
 import { t, getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
 import { GripVertical, Copy, Trash2, Check, HelpCircle } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
 const props = defineProps<{ element: FormElement }>();
+
+const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 
 const yesPillRef = ref<HTMLElement | null>(null);
 const sliderCardRef = ref<HTMLElement | null>(null);
@@ -239,22 +244,42 @@ const questionIndex = computed(() => {
   return idx !== -1 ? idx + 1 : 1;
 });
 
+const sourceLabel = computed(() => getFieldText(props.element, 'label', primaryLocale.value));
+const sourceHelp = computed(() => getFieldText(props.element, 'help', primaryLocale.value));
+
 const labelPlaceholder = computed(() => {
+  if (isTranslationFrame.value && sourceLabel.value) {
+    return sourceLabel.value;
+  }
   return t('risk.enterQuestionPlaceholder');
 });
 
+const helpPlaceholder = computed(() => {
+  if (isTranslationFrame.value && sourceHelp.value) {
+    return sourceHelp.value;
+  }
+  return t('prop.fieldHelpPlaceholder');
+});
+
+const showHelpSlot = computed(() => {
+  return Boolean(
+    getFieldText(props.element, 'help', frameLocale.value) ||
+    getFieldText(props.element, 'help', primaryLocale.value)
+  );
+});
+
 const currentLabel = computed({
-  get: () => getFieldText(props.element, 'label'),
+  get: () => getFieldText(props.element, 'label', frameLocale.value),
   set: (val: string) => {
-    setFieldText(props.element, 'label', val);
+    setFieldText(props.element, 'label', val, frameLocale.value);
     markDirty();
   }
 });
 
 const currentHelp = computed({
-  get: () => getFieldText(props.element, 'help'),
+  get: () => getFieldText(props.element, 'help', frameLocale.value),
   set: (val: string) => {
-    setFieldText(props.element, 'help', val);
+    setFieldText(props.element, 'help', val, frameLocale.value);
     markDirty();
   }
 });

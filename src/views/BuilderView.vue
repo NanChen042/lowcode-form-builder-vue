@@ -63,7 +63,8 @@ import {
   loadSchema,
   syncUrlParams,
   generateFormId,
-  establishBaseline
+  establishBaseline,
+  openTranslationWorkspace
 } from '@/core/store';
 import { currentArcoLocale, t } from '@/core/i18n';
 import { FormAPI, UserAPI } from '@/core/api';
@@ -411,6 +412,20 @@ onMounted(async () => {
 
   if (rawId || tplParam) {
     checkAutoStartTour();
+  }
+
+  const modeParam = urlParams.get('mode');
+  const targetParam = urlParams.get('target');
+  const pageParam = urlParams.get('page');
+
+  if (modeParam === 'translation') {
+    openTranslationWorkspace(targetParam || undefined);
+    if (pageParam) {
+      const targetPage = store.pages.find(p => p.id === pageParam && p.pageType !== 'system_profile');
+      if (targetPage) {
+        store.activePageId = targetPage.id;
+      }
+    }
   }
 
   setTimeout(() => {
