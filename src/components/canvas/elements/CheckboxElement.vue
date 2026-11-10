@@ -32,7 +32,7 @@
 import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
-import { isRisk, primaryLocale, markDirty } from '@/core/store';
+import { isRisk, primaryLocale, selectElement, markDirty } from '@/core/store';
 import { t, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -48,6 +48,10 @@ function isChecked(val: string) {
 }
 
 function toggleDefaultCheckbox(optValue: string) {
+  if (isTranslationFrame.value) {
+    selectElement(props.element);
+    return;
+  }
   if (isRisk.value) {
     props.element.defaultValue = isChecked(optValue) ? '' : optValue;
     markDirty();

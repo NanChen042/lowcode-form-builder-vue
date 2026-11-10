@@ -5,14 +5,22 @@
     :data-page-index="pageIndex"
     :data-page-type="page.pageType"
     :data-translation-frame="isTranslationFrame ? 'true' : undefined"
-    class="mobile-frame absolute min-h-[720px] bg-white flex flex-col"
+    :data-read-only-frame="isReadOnlyReference ? 'true' : undefined"
+    class="mobile-frame absolute min-h-[720px] flex flex-col"
     :class="[
+      isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white',
       isRisk ? 'rounded-none shadow-[0_1px_4px_rgba(0,0,0,0.06),0_12px_32px_-6px_rgba(0,0,0,0.08)]' : 'w-[390px] rounded-2xl shadow-sm',
-      !inTranslationWorkspace && isPageSelected && isCurrentLocaleFocused ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md') : (isTranslationFrame && !isReadOnlyReference ? 'ring-1 ring-blue-200/90 hover:ring-blue-300 hover:shadow-md' : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md'),
-      isFrameElevated ? '!z-20 is-active-frame' : 'z-10',
-      store.isDraggingComponent && !isSystemProfile && !isTranslationFrame ? 'ring-2 !ring-blue-500 ring-offset-2 !shadow-lg !border-blue-400' : '',
+      !inTranslationWorkspace && isPageSelected && isCurrentLocaleFocused
+        ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md')
+        : (inTranslationWorkspace
+          ? (isReadOnlyReference
+            ? 'ring-1 ring-slate-200/90 shadow-none'
+            : 'ring-2 ring-[#1677ff] shadow-[0_12px_32px_-6px_rgba(22,119,255,0.18),0_2px_10px_rgba(22,119,255,0.08)]')
+          : 'ring-1 ring-slate-200/90 hover:ring-slate-300 hover:shadow-md'),
+      isFrameElevated ? 'z-20 is-active-frame' : 'z-10',
+      store.isDraggingComponent && !isSystemProfile && !isTranslationFrame ? 'ring-2 ring-blue-500 ring-offset-2 shadow-lg border-blue-400' : '',
       store.isDraggingComponent && (isSystemProfile || isTranslationFrame) ? 'opacity-85' : '',
-      (store.isDraggingFrame && store.draggedFrameId === page.id) || isResizingCanvasWidth ? '!transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
+      (store.isDraggingFrame && store.draggedFrameId === page.id) || isResizingCanvasWidth ? 'transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
     ]"
     :style="{
       transform: `translate(${frameX}px, ${frameY}px)`,
@@ -60,13 +68,13 @@
           </span>
         </template>
         <template v-else>
-          <span v-if="!isRisk" class="font-mono font-bold text-slate-700 text-[13px] tracking-normal shrink-0">{{ pageIndexString }}</span>
+          <span v-if="!isRisk" class="font-mono font-bold text-[13px] tracking-normal shrink-0" :class="inTranslationWorkspace && !isReadOnlyReference ? 'text-[#1677ff]' : 'text-slate-700'">{{ pageIndexString }}</span>
           <span v-if="!isRisk" class="text-slate-400 font-normal shrink-0">·</span>
           <span
             class="font-medium max-w-[160px] truncate"
-            :class="displayPageTitle ? 'text-slate-700' : 'text-slate-400 font-normal'"
+            :class="inTranslationWorkspace && !isReadOnlyReference ? 'text-slate-800 font-semibold' : ((displayPageTitle || sourcePageTitle) ? 'text-slate-600' : 'text-slate-400 font-normal')"
           >
-            {{ isRisk ? t('risk.pageTitle') : (displayPageTitle || t('common.untitledPage')) }}
+            {{ isRisk ? t('risk.pageTitle') : (displayPageTitle || sourcePageTitle || t('common.untitledPage')) }}
           </span>
         </template>
       </div>
@@ -75,16 +83,15 @@
       <div v-if="inTranslationWorkspace" class="flex items-center gap-1.5 shrink-0">
         <span
           v-if="isReadOnlyReference"
-          class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200/90"
+          class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200/90"
         >
-          <Lock class="w-2.5 h-2.5 text-slate-400" />
-          <span>{{ getLocaleNativeName(frameLocale) }} · {{ t('trans.readOnlyReference') }}</span>
+          <span>{{ getLocaleNativeName(frameLocale) }}</span>
         </span>
         <span
           v-else
-          class="inline-flex items-center gap-1 rounded bg-[#1677ff] px-2 py-0.5 text-[11px] font-semibold text-white shadow-2xs"
+          class="inline-flex items-center rounded bg-[#1677ff] px-2 py-0.5 text-[11px] font-semibold text-white shadow-2xs"
         >
-          <span>{{ getLocaleNativeName(frameLocale) }} · {{ t('trans.clickToTranslate') }}</span>
+          <span>{{ getLocaleNativeName(frameLocale) }}</span>
         </span>
       </div>
     </div>
@@ -113,7 +120,7 @@
         </p>
       </div>
 
-      <div class="page-header-area pb-4 shrink-0 bg-white" :class="isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl'" @click.stop="handleSelectPage">
+      <div class="page-header-area pb-4 shrink-0" :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl']" @click.stop="handleSelectPage">
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
@@ -145,6 +152,7 @@
             custom-class="page-title-text text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full block border-b-2 border-transparent pb-1"
           />
           <EditableText
+            v-if="!inTranslationWorkspace || sourcePageDesc?.trim() || displayPageDesc?.trim()"
             v-model="displayPageDesc"
             :placeholder="pageDescPlaceholder"
             :element-id="page.id"
@@ -162,6 +170,7 @@
           :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
           :is-canvas="true"
+          :locale="frameLocale"
         />
       </div>
 
@@ -174,7 +183,7 @@
             :data-risk-group-id="grp.id"
             class="risk-group-section border rounded-[4px] bg-white transition-[border-color,box-shadow] duration-150"
             :class="
-              store.selectedType === 'group' && store.selectedId === grp.id && isCurrentLocaleFocused
+              store.selectedType === 'group' && store.selectedId === grp.id && (inTranslationWorkspace || isCurrentLocaleFocused)
                 ? 'border-[#1677ff] ring-2 ring-blue-500/20 shadow-xs'
                 : 'border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-slate-300'
             "
@@ -241,6 +250,7 @@
                 :data-group-id="element.id"
                 :data-element-id="element.id"
                 class="canvas-element-group relative"
+                @click.stop
               >
                 <CanvasElement :element="element" />
               </div>
@@ -282,7 +292,7 @@
         </div>
       </div>
 
-      <div v-else class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-b-2xl">
+      <div v-else class="canvas-pages-container relative flex-1 flex flex-col rounded-b-2xl" :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'">
         <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
           <div class="relative mb-6 grid h-20 w-24 grid-cols-2 gap-2">
             <div class="col-span-2 rounded-md border border-slate-200 bg-white shadow-sm"></div>
@@ -367,6 +377,7 @@
             :data-group-id="group.id"
             class="canvas-element-group relative"
             :class="{ 'is-multi-branch-group': group.elements.length > 1 }"
+            @click.stop
           >
             <CanvasElement
               v-for="element in group.elements"

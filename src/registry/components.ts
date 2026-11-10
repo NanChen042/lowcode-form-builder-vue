@@ -218,8 +218,10 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     defaultData: () => ({
       label: '电子签名',
       label_en: 'E-Signature',
-      placeholder: '请在此处手写签名',
-      placeholder_en: 'Please sign here',
+      placeholder: '请在下方指定区域签名',
+      placeholder_en: 'Please sign in the designated area below',
+      signPlaceholder: '请在此处手写签名',
+      signPlaceholder_en: 'Please sign here',
       help: '',
       help_en: '',
       showLabel: true,

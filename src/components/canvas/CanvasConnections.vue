@@ -1,5 +1,5 @@
 <template>
-  <svg id="canvas-connections" class="absolute inset-0 pointer-events-none" style="overflow: visible; z-index: 0">
+  <svg id="canvas-connections" class="absolute inset-0 pointer-events-none overflow-visible z-0">
     <defs>
       <marker id="arrowhead" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
         <path d="M 3 3 L 9 6 L 3 9" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />

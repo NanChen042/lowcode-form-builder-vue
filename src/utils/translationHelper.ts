@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { store, isRisk, primaryLocale, targetLocales, selectPage, selectElement, selectGroup, focusOnPage } from '@/core/store';
+import { store, isRisk, primaryLocale, targetLocales, selectPage, selectElement, selectGroup, focusOnPage, resetCanvasView, highlightPropertyField } from '@/core/store';
 import { componentRegistry } from '@/registry/components';
 import { t, getPageText, getGroupText, getFieldText, getOptionLabel } from '@/core/i18n';
 
@@ -59,6 +59,7 @@ export interface TranslationStats {
   untranslatedCount: number;
   untranslatedItems: UntranslatedItem[];
   groupedByPage: PageTranslationGroup[];
+  pageTotals: Record<string, number>;
 }
 
 /**
@@ -76,14 +77,25 @@ function getFieldDisplayLabel(element: any, locale: string): string {
   return t('trans.fieldDefault');
 }
 
-function isDefaultOptionPlaceholder(val: string, loc: string): boolean {
-  const trimmed = val.trim();
+export function isDefaultOptionPlaceholder(val: string, loc: string): boolean {
+  const trimmed = (val || '').trim();
   if (!trimmed) return true;
   if (loc === 'en' || loc === 'ms') return /^Option\s*\d+$/i.test(trimmed);
   if (loc === 'zh' || loc === 'zh-TW') return /^选项[一二三四五六七八九十\d]+$/.test(trimmed);
   if (loc === 'ja') return /^選択肢\s*\d+$/.test(trimmed);
   if (loc === 'ko') return /^옵션\s*\d+$/.test(trimmed);
   return false;
+}
+
+export function isOptionTranslated(opt: any, targetLoc: string, baseLoc: string): boolean {
+  const raw = (getOptionLabel(opt, targetLoc) || '').trim();
+  if (!raw) return false;
+  const baseOptText = (getOptionLabel(opt, baseLoc) || '').trim();
+  const isBaseCustomized = Boolean(baseOptText && !isDefaultOptionPlaceholder(baseOptText, baseLoc));
+  if (targetLoc !== baseLoc && isBaseCustomized && isDefaultOptionPlaceholder(raw, targetLoc)) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -104,6 +116,7 @@ export function calculateTranslationStats(): TranslationStats {
   }
 
   let total = 0;
+  const pageTotals: Record<string, number> = {};
 
   function registerItem(params: {
     id: string;
@@ -129,7 +142,13 @@ export function calculateTranslationStats(): TranslationStats {
 
     if (!hasAnyText) return;
 
+    // 若为副标题/帮助说明，且源基准语言并未配置该文案，则无需列入翻译指标考核与待办清单
+    if ((params.fieldType === 'field_help' || params.fieldType === 'page_desc') && !texts[baseLoc]) {
+      return;
+    }
+
     total++;
+    pageTotals[params.pageId] = (pageTotals[params.pageId] || 0) + 1;
     const sourceText = texts[baseLoc] || texts.zh || texts.en || Object.values(texts).find(Boolean) || '';
 
     for (const loc of allLocales) {
@@ -157,8 +176,10 @@ export function calculateTranslationStats(): TranslationStats {
     }
   }
 
-  store.pages.forEach((page, pageIdx) => {
+  let translatablePageCounter = 0;
+  store.pages.forEach((page) => {
     if (page.pageType === 'system_profile') return;
+    const pageIdx = translatablePageCounter++;
 
     const isRiskForm = isRisk.value;
     const defaultRiskTitle = store.currentLocale === 'en' ? 'Risk Assessment' : '风险评估';
@@ -235,7 +256,11 @@ export function calculateTranslationStats(): TranslationStats {
         });
       }
 
-      if (element.type !== 'alert') {
+      const supportsPlaceholder =
+        ['input', 'textarea', 'select', 'country', 'nationality', 'email', 'signature'].includes(element.type) ||
+        (element.type === 'date' && !element.defaultLongTerm);
+
+      if (supportsPlaceholder) {
         registerItem({
           id: `${element.id}_placeholder`,
           pageId: page.id,
@@ -245,10 +270,57 @@ export function calculateTranslationStats(): TranslationStats {
           elementLabel: elLabel,
           componentType: element.type,
           fieldType: 'field_placeholder',
-          fieldName: `${elLabel} · ${t('trans.placeholder')}`,
+          fieldName: `${elLabel} · ${element.type === 'signature' ? t('trans.sigPromptLabel') : (element.type === 'date' && element.dateMode === 'range' ? t('trans.startDatePlaceholder') : t('trans.placeholder'))}`,
           getTextByLocale: loc => getFieldText(element, 'placeholder', loc)
         });
+      }
 
+      if (element.type === 'date' && element.dateMode === 'range') {
+        registerItem({
+          id: `${element.id}_endPlaceholder`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_placeholder',
+          fieldName: `${elLabel} · ${t('trans.endDatePlaceholder')}`,
+          getTextByLocale: loc => getFieldText(element, 'endPlaceholder', loc)
+        });
+      }
+
+      if (element.type === 'date' && element.enableLongTerm) {
+        registerItem({
+          id: `${element.id}_longTermText`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_placeholder',
+          fieldName: `${elLabel} · ${t('trans.longTermOptionLabel')}`,
+          getTextByLocale: loc => getFieldText(element, 'longTermText', loc)
+        });
+      }
+
+      if (element.type === 'signature') {
+        registerItem({
+          id: `${element.id}_signPlaceholder`,
+          pageId: page.id,
+          pageIndex: pageIdx,
+          pageTitle,
+          elementId: element.id,
+          elementLabel: elLabel,
+          componentType: element.type,
+          fieldType: 'field_placeholder',
+          fieldName: `${elLabel} · ${t('trans.signWatermarkLabel')}`,
+          getTextByLocale: loc => getFieldText(element, 'signPlaceholder', loc)
+        });
+      }
+
+      if (element.type !== 'alert') {
         registerItem({
           id: `${element.id}_help`,
           pageId: page.id,
@@ -352,7 +424,8 @@ export function calculateTranslationStats(): TranslationStats {
     localeStats,
     untranslatedCount: currentUntranslatedItems.length,
     untranslatedItems: currentUntranslatedItems,
-    groupedByPage
+    groupedByPage,
+    pageTotals
   };
 }
 
@@ -362,11 +435,28 @@ export function calculateTranslationStats(): TranslationStats {
 export const translationStats = computed(() => calculateTranslationStats());
 
 /**
+ * 计算单个页面的翻译完成度百分比 (0 - 100)
+ */
+export function getPageTranslationProgress(pageId: string, locale?: string): number {
+  const activeLoc = locale || store.activeTargetLocale || 'en';
+  const entry = translationStats.value.localeStats?.[activeLoc];
+  const pageTotal = translationStats.value.pageTotals?.[pageId] || 0;
+  if (!entry || pageTotal === 0) return 100;
+  const missingInPage = entry.missingItems.filter(item => item.pageId === pageId).length;
+  if (missingInPage === 0) return 100;
+  const completed = Math.max(0, pageTotal - missingInPage);
+  return Math.round((completed / pageTotal) * 100);
+}
+
+/**
  * 一键点击定位：聚焦画布页面（源画板或右侧多语言画板）、选中目标组件/画板，绝不篡改平台 UI 语言 store.currentLocale
  */
 export function navigateToUntranslatedItem(item: UntranslatedItem) {
   const targetLoc = item.targetLocale || store.activeTargetLocale || 'en';
   const isTargetFrame = targetLoc !== primaryLocale.value;
+  const pageChanged = store.activePageId !== item.pageId;
+  const modeChanged = isTargetFrame && store.workspaceMode !== 'translation';
+
   if (isTargetFrame) {
     store.activeTargetLocale = targetLoc;
     store.workspaceMode = 'translation';
@@ -375,39 +465,50 @@ export function navigateToUntranslatedItem(item: UntranslatedItem) {
   store.editingLocale = targetLoc;
   store.activePageId = item.pageId;
 
+  if (!store.rightSidebarVisible) {
+    store.rightSidebarVisible = true;
+  }
+
   if (store.workspaceMode !== 'translation') {
     focusOnPage(item.pageId, { duration: 400 });
+  } else if (pageChanged || modeChanged) {
+    setTimeout(() => {
+      resetCanvasView({ duration: 280 });
+    }, 20);
   }
 
   if (item.groupId) {
     selectGroup(item.groupId);
-    setTimeout(() => {
-      document.getElementById('group-prop-title-input')?.focus();
-    }, 100);
+    store.focusedTarget = {
+      elementId: item.groupId,
+      field: 'title'
+    };
+    highlightPropertyField('title');
   } else if (!item.elementId) {
     selectPage(item.pageId);
+    const pageField = item.fieldType === 'page_title' ? 'title' : 'description';
     store.focusedTarget = {
       elementId: item.pageId,
-      field: item.fieldType === 'page_title' ? 'label' : 'help'
+      field: pageField
     };
+    highlightPropertyField(pageField);
   } else {
     const page = store.pages.find(p => p.id === item.pageId);
     const element = page?.fields.find(f => f.id === item.elementId);
     if (element) {
       selectElement(element);
+      const targetField =
+        item.fieldType === 'field_label' ? 'label'
+        : item.fieldType === 'field_placeholder' ? 'placeholder'
+        : item.fieldType === 'field_help' ? 'help'
+        : item.fieldType === 'field_content' ? 'content'
+        : 'option';
       store.focusedTarget = {
         elementId: element.id,
-        field: item.fieldType === 'field_label' ? 'label'
-             : item.fieldType === 'field_placeholder' ? 'placeholder'
-             : item.fieldType === 'field_help' ? 'help'
-             : item.fieldType === 'field_content' ? 'content'
-             : 'option',
+        field: targetField,
         optionIndex: item.optionIndex
       };
+      highlightPropertyField(targetField, item.optionIndex);
     }
-  }
-
-  if (store.workspaceMode !== 'translation' && !store.rightSidebarVisible) {
-    store.rightSidebarVisible = true;
   }
 }

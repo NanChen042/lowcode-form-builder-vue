@@ -229,15 +229,23 @@
           </div>
           <a-switch v-model="element.defaultLongTerm" size="small" @change="markDirty" />
         </div>
-        <div class="flex items-center justify-between py-1 pl-1">
+        <div class="mt-1 flex items-center justify-between py-1 pl-1">
           <div class="flex items-center gap-1.5">
             <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span class="text-[12px] font-medium text-slate-600">{{ t('prop.defaultLongTerm') }}</span>
-            <a-tooltip :content="t('prop.defaultLongTermTip')" position="top">
-              <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-            </a-tooltip>
+            <span class="text-[12px] font-medium text-slate-600">{{ t('prop.longTermOptionLabel') }}</span>
           </div>
-          <a-switch v-model="element.defaultLongTerm" size="small" @change="markDirty" />
+          <a-input
+            id="prop-long-term-text-input"
+            v-model="longTermTextModel"
+            size="small"
+            class="!w-[130px]"
+            :class="{ 'prop-field-focused': isFieldFocused('longTermText') }"
+            :placeholder="t('common.longTerm')"
+            allow-clear
+            @focus="setFocus('longTermText')"
+            @blur="clearFocus"
+            @input="markDirty"
+          />
         </div>
       </CollapseTransition>
     </div>
@@ -547,9 +555,47 @@ function setDateMode(mode: 'single' | 'range') {
   if (mode === 'range') {
     props.element.enableLongTerm = false;
     props.element.defaultLongTerm = false;
+    if (!getFieldText(props.element, 'placeholder') || getFieldText(props.element, 'placeholder') === '请选择日期') {
+      setFieldText(props.element, 'placeholder', '开始日期');
+    }
+    if (!getFieldText(props.element, 'endPlaceholder')) {
+      setFieldText(props.element, 'endPlaceholder', '截止日期');
+    }
+  } else {
+    if (getFieldText(props.element, 'placeholder') === '开始日期') {
+      setFieldText(props.element, 'placeholder', '请选择日期');
+    }
   }
   markDirty();
 }
+
+function isFieldFocused(field: 'longTermText') {
+  if (!store.focusedTarget) return false;
+  return (
+    store.focusedTarget.elementId === props.element.id &&
+    store.focusedTarget.field === field
+  );
+}
+
+function setFocus(field: 'longTermText') {
+  store.focusedTarget = {
+    elementId: props.element.id,
+    field
+  };
+}
+
+function clearFocus() {
+  store.focusedTarget = null;
+}
+
+const longTermTextModel = computed({
+  get() {
+    return getFieldText(props.element, 'longTermText');
+  },
+  set(val: string) {
+    setFieldText(props.element, 'longTermText', val);
+  }
+});
 
 function onEnableLongTermChange(val: any) {
   props.element.enableLongTerm = Boolean(val);

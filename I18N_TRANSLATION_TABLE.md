@@ -1,9 +1,8 @@
-# 系统多语言翻译对照表 (产品核对与替换模板)
+# 系统多语言翻译对照表
 
 > 说明：本表按系统功能模块顺序整理了系统当前正在使用的全部中英文文案。第三列【中文替换成】、第四列【英文替换成】及第五列【详情（截图）】预留为空白列，供产品直接查阅、评估并填写替换建议或贴入截图。
 
-## 通用与状态 (Common)
-
+## 通用与状态
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 未命名页面 | Untitled Page | | | |
@@ -52,8 +51,7 @@
 | 关闭 | Close | | | |
 | 默认： | Default:  | | | |
 
-## 顶部导航栏 (AppHeader)
-
+## 顶部导航栏
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 风险评估设计工作台 | Risk Assessment Workspace | | | |
@@ -108,8 +106,7 @@
 | 已开启双语问卷模式 | Bilingual questionnaire enabled | | | |
 | 已停用双语问卷模式 | Bilingual questionnaire disabled | | | |
 
-## 用户下拉菜单 (User Menu)
-
+## 用户下拉菜单
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 个人中心 | Profile | | | |
@@ -117,8 +114,7 @@
 | 退出登录 | Sign Out | | | |
 | 系统管理员 | System Administrator | | | |
 
-## 侧边栏物料库 (MaterialSidebar)
-
+## 侧边栏物料库
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 查找组件或模块... | Search components... | | | |
@@ -155,8 +151,7 @@
 | 当前画布已包含 {pages} 个画板页面，载入新预置模板将会完全覆盖当前画布内容。是否确认继续？ | The current canvas already contains {pages} artboard page(s). Loading a new template will overwrite current canvas contents. Are you sure you want to continue? | | | |
 | 确定覆盖 | Confirm Overwrite | | | |
 
-## 画布与画板交互 (InfiniteCanvas & PageFrame)
-
+## 画布与画板交互
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 请在此处手写签名 | Please sign here | | | |
@@ -218,8 +213,7 @@
 | 已复制所选组件 (Ctrl+D) | Component duplicated (Ctrl+D) | | | |
 | 请先在画布中选中要复制的组件 | Please select a component on canvas to duplicate | | | |
 
-## 右键上下文菜单 (ContextMenu)
-
+## 右键上下文菜单
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 复制组件 | Duplicate | | | |
@@ -235,8 +229,7 @@
 | 确定要删除当前画布及其所有内容吗？此操作不可撤销。 | Are you sure you want to delete this canvas and all its contents? This action cannot be undone. | | | |
 | 确认删除 | Delete | | | |
 
-## 属性面板：基础属性 (FieldBasicProps)
-
+## 属性面板：基础属性
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 属性配置 | Properties | | | |
@@ -351,8 +344,7 @@
 | 字 | chars | | | |
 | 未翻译 | Untranslated | | | |
 
-## 属性面板：特定组件属性 (FieldSpecificProps)
-
+## 属性面板：特定组件属性
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 签名板必填 | Signature Required | | | |
@@ -399,8 +391,7 @@
 | 数字列表 (有序) | Numbered List (Ordered) | | | |
 | 提示文字 | Link Text | | | |
 
-## 属性面板：页面属性 (PagePropsEditor)
-
+## 属性面板：页面属性
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 画布页面全局设置 | Page Canvas Settings | | | |
@@ -412,8 +403,7 @@
 | 页面描述 | Page Description | | | |
 | 显示在标题下方的副标题或补充说明 | Subtitle or description displayed below the title | | | |
 
-## 选项与级联联动 (OptionsEditor)
-
+## 选项与级联联动
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 选项配置 | Option Settings | | | |
@@ -441,8 +431,7 @@
 | 已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。 | Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability. | | | |
 | 已达最大追问层级（最多支持2级嵌套） | Max nesting depth reached (up to 2 levels) | | | |
 
-## 系统预设资料页 (SystemProfileView)
-
+## 系统预设资料页
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 根据合规监管要求，您需要完成KYC问卷填写。 | According to regulatory compliance requirements, you need to complete the KYC questionnaire. | | | |
@@ -484,8 +473,7 @@
 | 董事 / 高级管理人员 | Director / Senior Officer | | | |
 | NRIC(新加坡公民) | NRIC (Singapore Citizen) | | | |
 
-## 欢迎向导弹窗 (WelcomeWizardModal)
-
+## 欢迎向导弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | DIY 表单设计器 | DIY Form Builder | | | |
@@ -518,8 +506,7 @@
 | 个人成员 | Individual | | | |
 | 机构/实体 | Entity | | | |
 
-## 新建表单弹窗 (CreateFormModal)
-
+## 新建表单弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 新建表单画布 | New Form Canvas | | | |
@@ -539,8 +526,7 @@
 | 从空白画布创建的自定义表单 | Custom form created from blank canvas | | | |
 | 留空默认为：{title} | Default: {title} | | | |
 
-## 预览与发布 (PreviewModal & PublishModal)
-
+## 预览与发布
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 预览 | Preview | | | |
@@ -603,8 +589,7 @@
 | 点击在新窗口打开预览表单 | Click to open preview form in a new window | | | |
 | 完成 | Done | | | |
 
-## Schema 源码侧边栏 (SchemaSidebar)
-
+## Schema 源码侧边栏
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 表单结构 JSON Schema | JSON Schema Structure | | | |
@@ -612,8 +597,7 @@
 | 复制 JSON | Copy JSON | | | |
 | 已成功复制 Schema JSON 到剪贴板 | Schema JSON copied to clipboard | | | |
 
-## 新手漫游引导 (Product Tour)
-
+## 新手漫游引导
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 请先完成首张画布创建 | Please create a form canvas first. | | | |
@@ -654,7 +638,6 @@
 | 发布前将检查英文内容是否完整，中文翻译可后续补充。 | English content is checked before publishing; Chinese translations can be completed later. | | | |
 
 ## API 接口错误提示
-
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 请求参数错误 (400) | Bad request parameter (400) | | | |
@@ -669,8 +652,7 @@
 | 网络连接异常，请检查网络 | Network connection error, please check network | | | |
 | 操作失败 | Operation failed | | | |
 
-## 404 页面 (NotFoundView)
-
+## 404 页面
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 页面未找到 | Page Not Found | | | |
@@ -682,8 +664,7 @@
 | 返回表单列表 | Back to Form List | | | |
 | 将在 {countdown}s 后自动返回 | Auto redirecting in {countdown}s | | | |
 
-## 风险评估问卷 (Risk Assessment)
-
+## 风险评估问卷
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 风险评估 | Risk Assessment | | | |
@@ -731,8 +712,7 @@
 | 单选 | Radio | | | |
 | 已添加新问题分组 | New question group added | | | |
 
-## 标准组件类型名称 (Component Names)
-
+## 标准组件类型名称
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 单行文本 | Single Line Text | | | |
@@ -748,8 +728,7 @@
 | 电子签名 | Electronic Signature | | | |
 | 提示说明 | Alert / Notice | | | |
 
-## 风险评估扩展文案 (Risk Assessment Ext)
-
+## 风险评估扩展文案
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 复制问题 | Duplicate Question | | | |
@@ -768,8 +747,7 @@
 | 左右拖拽调整画布宽度 | Drag to resize canvas width | | | |
 | 分组名称 (中文) | Group Name (EN) | | | |
 
-## 发布校验与提示 (Publish & Validation)
-
+## 发布校验与提示
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 请至少添加一个表单页面后再发布 | Please add at least one form page before publishing | | | |
@@ -782,8 +760,7 @@
 | 必填项不能为空 | This required field cannot be empty | | | |
 | 请输入有效的手机号码 | Please enter a valid phone number | | | |
 
-## 预览与提交结果 (Preview & Submission)
-
+## 预览与提交结果
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 提交已完成 | Submission Completed | | | |
@@ -795,8 +772,7 @@
 | 重新体验填报 | Refill Form (Preview) | | | |
 | 签名区域 | Signature Area | | | |
 
-## 发布弹窗扩展 (Publish Modal Ext)
-
+## 发布弹窗扩展
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 复制失败，请手动复制链接 | Failed to copy, please copy the link manually | | | |
@@ -806,8 +782,7 @@
 | 空白画布新建自定义表单 | Create custom form from blank canvas | | | |
 | 涵盖全部12种低代码组件、属性测试及中英双语国际化验证 | Covers all 12 low-code components, property tests, and bilingual validation | | | |
 
-## 翻译抽屉与通用 (Translation Helper & Common)
-
+## 翻译抽屉与通用
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
 | 页面标题 | Page Title | | | |
@@ -843,3 +818,88 @@
 | 点击文字直接翻译 | Click text to translate | | | |
 | 左右对照配置表单多语言文案 | Side-by-side form translation | | | |
 | {count} 项{langName}未翻译 | {count} {langName} items untranslated | | | |
+
+## 移动端填报端
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 上一步 | Back | | | |
+| 下一步 | Next | | | |
+| 确认提交 | Submit Form | | | |
+| 提交中... | Submitting... | | | |
+| 确认 | Confirm | | | |
+| 取消 | Cancel | | | |
+| 确认提交表单？ | Confirm Submission? | | | |
+| 提交后表单资料将进入正式审核流程，无法撤回或修改，请确认所填信息真实有效。 | Once submitted, your information will be processed and cannot be edited. Please ensure all details are accurate. | | | |
+| 确认提交 | Confirm Submit | | | |
+| 再检查下 | Check Again | | | |
+| 请检查并完善标红的必填项 | Please check and complete the required fields | | | |
+| 回到第一页 (重新浏览) | Back to Step 1 | | | |
+| 已回到第一页 | Returned to Step 1 | | | |
+| 重新签名 | Clear Signature | | | |
+| 完成签名 | Done | | | |
+| 修改签名 | Edit | | | |
+| 请在此处手写签名 | Please sign here | | | |
+| 请在下方指定区域签名 | Please sign in the designated area below | | | |
+| 请在下方签名板完成电子手写签名 | Please sign in the signature pad below | | | |
+| 请点击选择 | Select an option | | | |
+| 请输入 | Enter here | | | |
+| 长期 | Long-term | | | |
+| 长期有效 | Permanent | | | |
+| 添加 | Add | | | |
+| 移除 | Remove | | | |
+| 撤销 | Undo | | | |
+| 确定 | Confirm | | | |
+| 已选 | Selected | | | |
+| 已选: | Selected: | | | |
+| 最多只能选择 {max} 项 | Up to {max} items allowed | | | |
+| 请输入关键字搜索... | Search options... | | | |
+| 未找到相关选项 | No matching options found | | | |
+| 搜索国家、地区或区号... | Search by country or dial code... | | | |
+| 搜索国家或地区名称... | Search country or region... | | | |
+| 暂无匹配国家、地区或区号 | No matching country, region or code found | | | |
+| 选择国家/地区 | Select Country/Region | | | |
+| 选择国家/地区区号 | Select Country/Region Code | | | |
+| 选择国籍 | Select Nationality | | | |
+| 请选择国籍 | Please select nationality | | | |
+| 请选择国家/地区 | Please select country/region | | | |
+| 点击在下方列表中定位 | Click to locate in list | | | |
+| 开始日期 | Start Date | | | |
+| 截止日期 | End Date | | | |
+| 必填项不能为空 | This field is required | | | |
+| 请输入有效的电子邮箱地址 | Please enter a valid email address | | | |
+| 请输入有效的手机号码 | Please enter a valid phone number | | | |
+| 请勾选并确认所有声明事项 | Please review and accept all declarations | | | |
+| 提交失败，请检查网络后重试 | Submission failed. Please check network and retry. | | | |
+| 获取表单数据失败，请检查链接有效性 | Failed to load form schema. Invalid link. | | | |
+| 表单已提交 | Form Submitted | | | |
+| 您的填报资料已成功送达，请勿重复提交。 | Your submission has been received. Please do not submit again. | | | |
+| 提交时间 | Submission Time | | | |
+| 当前状态 | Status | | | |
+| 已完成 | Completed | | | |
+| 关闭页面 | Close Page | | | |
+| 返回待办列表 | Back to Task List | | | |
+| 链接无效或已失效 | Link Invalid or Expired | | | |
+| 未找到对应的填报任务，该链接可能已过期或已被处理 | Task not found. The link may have expired or already been processed. | | | |
+| 当前为表单预览模式，所填内容仅供体验，不会被保存或提交。 | This is a form preview. Information entered here will not be saved or submitted. | | | |
+| 手机扫码预览 | Mobile Preview | | | |
+| 手机扫码即可体验 | Scan to preview | | | |
+| 选择语言 | Select Language | | | |
+| 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | | | |
+| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | | | |
+| 关联信息 | Relationship Information | | | |
+| 关联实体 | Associated Entity | | | |
+| 关联类型 | Relationship Type | | | |
+| 股份与出资信息 | Shareholding & Capital Information | | | |
+| 持有股份数 | Number of Shares Held | | | |
+| 对应已缴股本金额 | Allocated Paid-up Amount | | | |
+| 不支持电脑端及嵌入式Webview浏览器 | Unsupported on Desktop and Embedded Webview Browsers | | | |
+| 为保护您的身份验证安全，请在手机自带浏览器中完成操作。 | To ensure the security of your identity verification, please complete the process using your mobile native browser. | | | |
+| 我为什么会看这个错误？ | Why am I seeing this error? | | | |
+| 身份验证过程需要调用手机摄像头，在电脑端或应用内嵌浏览器中打开无法正常调用摄像头且存在安全隐患。 | The verification process requires mobile camera access, which is not properly supported or secure on desktop or in-app webviews. | | | |
+| 我接下来应该做什么？ | What should I do next? | | | |
+| 请点击下方按钮复制链接，并在手机自带浏览器中粘贴打开。或者从右上角系统菜单中复制链接到外部浏览器打开，或者选择从系统浏览器中打开。 | Please click the button below to copy the link and open it in your mobile browser, or open it from the top-right menu in your default browser. | | | |
+| 复制安全链接 | Copy Secure Link | | | |
+| 手机扫码打开 | Scan QR to Open | | | |
+| 当前表单安全地址： | Secure Form URL: | | | |
+| 仍在电脑端继续访问 (仅供调试预览) | Continue on Desktop (Debug Preview Only) | | | |
+| 已复制链接 | Link Copied | | | |

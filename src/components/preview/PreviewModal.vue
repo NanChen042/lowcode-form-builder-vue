@@ -38,8 +38,8 @@
           <h2 class="m-0 text-base font-semibold leading-6 text-slate-800">
             {{ mode === 'deploy' ? t('preview.deploySchema') : t('preview.preview') }}
           </h2>
-          <a-tag v-if="schema?.meta?.title || store.meta.title" color="arcoblue" size="small">
-            {{ schema?.meta?.title || store.meta.title }}
+          <a-tag v-if="currentLocalizedFormTitle" color="arcoblue" size="small">
+            {{ currentLocalizedFormTitle }}
           </a-tag>
         </div>
 
@@ -134,9 +134,11 @@
                     <a-dropdown trigger="click" position="br">
                       <button
                         type="button"
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11.5px] font-semibold border border-slate-200/80 cursor-pointer transition-colors"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11.5px] font-semibold border border-slate-200/80 cursor-pointer transition-colors"
                       >
+                        <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(activePreviewLocale)"></span>
                         <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
+                        <ChevronDown class="w-2.5 h-2.5 text-slate-400 stroke-[2.2]" />
                       </button>
                       <template #content>
                         <a-doption
@@ -144,10 +146,13 @@
                           :key="loc"
                           @click="store.previewLocale = loc"
                         >
-                          <div class="flex items-center justify-between gap-4 min-w-[110px] text-xs">
-                            <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
-                              {{ getLocaleNativeName(loc) }}
-                            </span>
+                          <div class="flex items-center justify-between gap-3 min-w-[120px] text-xs py-0.5">
+                            <div class="flex items-center gap-1.5">
+                              <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(loc)"></span>
+                              <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
+                                {{ getLocaleNativeName(loc) }}
+                              </span>
+                            </div>
                             <span class="text-[10px] font-mono text-slate-400">{{ getLocaleShortBadge(loc) }}</span>
                           </div>
                         </a-doption>
@@ -222,9 +227,11 @@
                       <a-dropdown v-if="isBilingual" trigger="click" position="br">
                         <button
                           type="button"
-                          class="inline-flex items-center gap-1 px-2 py-0.5 h-[24px] rounded-[6px] bg-[#ebedf2] hover:bg-slate-200/90 text-[#1677ff] text-[11.5px] font-semibold border-0 cursor-pointer transition-colors select-none"
+                          class="inline-flex items-center gap-1.5 px-2 py-0.5 h-[24px] rounded-[6px] bg-[#ebedf2] hover:bg-slate-200/90 text-[#1677ff] text-[11.5px] font-semibold border-0 cursor-pointer transition-colors select-none"
                         >
+                          <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(activePreviewLocale)"></span>
                           <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
+                          <ChevronDown class="w-2.5 h-2.5 text-[#1677ff]/70 stroke-[2.2]" />
                         </button>
                         <template #content>
                           <a-doption
@@ -232,10 +239,13 @@
                             :key="loc"
                             @click="store.previewLocale = loc"
                           >
-                            <div class="flex items-center justify-between gap-4 min-w-[110px] text-xs">
-                              <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
-                                {{ getLocaleNativeName(loc) }}
-                              </span>
+                            <div class="flex items-center justify-between gap-3 min-w-[120px] text-xs py-0.5">
+                              <div class="flex items-center gap-1.5">
+                                <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(loc)"></span>
+                                <span :class="activePreviewLocale === loc ? 'font-bold text-[#1677ff]' : 'text-slate-700'">
+                                  {{ getLocaleNativeName(loc) }}
+                                </span>
+                              </div>
                               <span class="text-[10px] font-mono text-slate-400">{{ getLocaleShortBadge(loc) }}</span>
                             </div>
                           </a-doption>
@@ -258,23 +268,24 @@
                         :profile-type="currentPage.profileType || schema?.meta?.profileType || 'customer'"
                         :show-skeleton="currentPage.showSkeleton !== false"
                         :is-canvas="false"
+                        :locale="activePreviewLocale"
                       />
 
                       <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
                         <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
-                          {{ t('common.prev') }}
+                          {{ t('common.prev', activePreviewLocale) }}
                         </a-button>
                         <div v-else class="flex-1"></div>
 
                         <a-button type="primary" class="h-9 px-6 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleProfileNext">
-                          {{ t('common.confirmNext') }}
+                          {{ t('common.confirmNext', activePreviewLocale) }}
                         </a-button>
                       </div>
                     </div>
 
                     <form v-else class="w-full flex flex-col" novalidate @submit.prevent>
                       <div v-if="!currentPage?.fields?.length" class="py-12 text-center text-slate-400 text-sm">
-                        {{ t('preview.noFields') }}
+                        {{ t('preview.noFields', activePreviewLocale) }}
                       </div>
 
                       <div v-for="(page, stepIdx) in pages" :key="page.id" v-show="stepIdx === currentStep && page.pageType !== 'system_profile'" class="w-full flex flex-col">
@@ -283,16 +294,16 @@
 
                       <div class="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-slate-100">
                         <a-button v-if="hasPrev" type="secondary" class="h-9 px-4 rounded-lg text-xs" @click="currentStep--">
-                          {{ t('common.prev') }}
+                          {{ t('common.prev', activePreviewLocale) }}
                         </a-button>
                         <div v-else class="flex-1"></div>
 
                         <a-button v-if="hasNext" type="primary" class="h-9 px-5 rounded-lg text-xs font-medium" @click="handleNextStep">
-                          {{ t('common.nextStep') }}
+                          {{ t('common.nextStep', activePreviewLocale) }}
                         </a-button>
 
                         <a-button v-else type="primary" class="h-9 px-5 rounded-lg text-xs font-semibold bg-[#1677ff]" @click="handleFormSubmit">
-                          {{ t('preview.validateForm') }}
+                          {{ t('preview.validateForm', activePreviewLocale) }}
                         </a-button>
                       </div>
                     </form>
@@ -335,10 +346,12 @@ import type { FormSchema, FormElement } from '@/types/schema';
 import { store, isBilingual, primaryLocale, targetLocales } from '@/core/store';
 import {
   t,
+  getMetaText,
   getLocalizedPageText,
   getFieldValidationMessage,
   getLocaleNativeName,
-  getLocaleShortBadge
+  getLocaleShortBadge,
+  getLocaleFlag
 } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import { parseMultiValue } from '@/utils/helpers';
@@ -351,7 +364,8 @@ import {
   X,
   CheckCircle,
   CloudUpload,
-  Info
+  Info,
+  ChevronDown
 } from '@lucide/vue';
 
 const props = defineProps<{
@@ -429,6 +443,26 @@ watch(
   { immediate: true }
 );
 
+// 语言切换联动：若表单当前已有校验报错，自动以目标语言刷新错误提示，消除陈旧语种残留
+watch(activePreviewLocale, (newLoc) => {
+  if (Object.keys(errors).length > 0 && currentPage.value) {
+    for (const field of currentPage.value.fields || []) {
+      if (errors[field.key]) {
+        const errMsg = validateField(field, newLoc);
+        if (errMsg) {
+          errors[field.key] = errMsg;
+        }
+      }
+      if (errors[`${field.key}_declaration`]) {
+        errors[`${field.key}_declaration`] = getFieldValidationMessage(field, 'declaration', newLoc);
+      }
+      if (errors[`${field.key}_signature`]) {
+        errors[`${field.key}_signature`] = getFieldValidationMessage(field, 'signature', newLoc);
+      }
+    }
+  }
+});
+
 function isFieldVisibleInForm(
   field: FormElement | undefined,
   allFields = pages.value.flatMap(p => p.fields || []),
@@ -460,7 +494,7 @@ function isFieldVisibleInForm(
     : conds.every(evaluateCondition);
 }
 
-function validateField(field: FormElement): string | null {
+function validateField(field: FormElement, loc = activePreviewLocale.value): string | null {
   if (field.type === 'alert') return null;
 
   if (field.linkage?.conditions?.length && !isFieldVisibleInForm(field)) {
@@ -476,34 +510,34 @@ function validateField(field: FormElement): string | null {
 
   if (field.type === 'input') {
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     if (strVal && field.inputType === 'number' && isNaN(Number(strVal))) {
-      return t('val.validNumber');
+      return t('val.validNumber', loc);
     }
     return null;
   }
 
   if (field.type === 'textarea') {
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     return null;
   }
 
   if (field.type === 'email') {
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     if (strVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(strVal)) {
-      return t('val.validEmail');
+      return t('val.validEmail', loc);
     }
     return null;
   }
 
   if (field.type === 'phone') {
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     if (strVal) {
       if (formData[`${field.key}_valid`] === true) {
@@ -516,7 +550,7 @@ function validateField(field: FormElement): string | null {
       const dialCode = formData[`${field.key}_areacode`] || field.dialCode || '+65';
       const res = validatePhoneNumber(countryCode || dialCode, strVal, true);
       if (!res.valid) {
-        return store.currentLocale === 'en' ? res.message_en : res.message;
+        return loc === 'en' ? res.message_en : res.message;
       }
     }
     return null;
@@ -526,14 +560,14 @@ function validateField(field: FormElement): string | null {
     if (field.multiple) {
       const arr = parseMultiValue(rawVal);
       if (isRequired && arr.length === 0) {
-        return getFieldValidationMessage(field);
+        return getFieldValidationMessage(field, undefined, loc);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
-        return t('val.maxOptions', undefined, { count: field.maxSelections });
+        return t('val.maxOptions', loc, { count: field.maxSelections });
       }
     } else {
       if (isRequired && !strVal) {
-        return getFieldValidationMessage(field);
+        return getFieldValidationMessage(field, undefined, loc);
       }
     }
     return null;
@@ -543,14 +577,14 @@ function validateField(field: FormElement): string | null {
     if (field.multiple) {
       const arr = parseMultiValue(rawVal);
       if (isRequired && arr.length === 0) {
-        return getFieldValidationMessage(field);
+        return getFieldValidationMessage(field, undefined, loc);
       }
       if (field.maxSelections && arr.length > field.maxSelections) {
-        return t('val.maxItems', undefined, { count: field.maxSelections });
+        return t('val.maxItems', loc, { count: field.maxSelections });
       }
     } else {
       if (isRequired && !strVal) {
-        return getFieldValidationMessage(field);
+        return getFieldValidationMessage(field, undefined, loc);
       }
     }
     return null;
@@ -558,7 +592,7 @@ function validateField(field: FormElement): string | null {
 
   if (field.type === 'radio') {
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     return null;
   }
@@ -566,10 +600,10 @@ function validateField(field: FormElement): string | null {
   if (field.type === 'checkbox') {
     const arr = parseMultiValue(rawVal);
     if (isRequired && arr.length === 0) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     if (field.maxSelections && arr.length > field.maxSelections) {
-      return t('val.maxOptions', undefined, { count: field.maxSelections });
+      return t('val.maxOptions', loc, { count: field.maxSelections });
     }
     return null;
   }
@@ -579,7 +613,7 @@ function validateField(field: FormElement): string | null {
       return null;
     }
     if (isRequired && !strVal) {
-      return getFieldValidationMessage(field);
+      return getFieldValidationMessage(field, undefined, loc);
     }
     return null;
   }
@@ -587,14 +621,14 @@ function validateField(field: FormElement): string | null {
   if (field.type === 'signature') {
     let hasSigErr = false;
     if (field.declarationRequired && !formData[`${field.key}_declared`]) {
-      const decMsg = getFieldValidationMessage(field, 'declaration', store.currentLocale);
+      const decMsg = getFieldValidationMessage(field, 'declaration', loc);
       errors[`${field.key}_declaration`] = decMsg;
       hasSigErr = true;
     } else {
       delete errors[`${field.key}_declaration`];
     }
     if (field.required && !strVal) {
-      const sigMsg = getFieldValidationMessage(field, 'signature', store.currentLocale);
+      const sigMsg = getFieldValidationMessage(field, 'signature', loc);
       errors[`${field.key}_signature`] = sigMsg;
       hasSigErr = true;
     } else {
@@ -704,28 +738,44 @@ function getStepNumber(idx: number): string {
 
 function getPageTitleDisplay(p: any, _idx?: number): string {
   if (p.pageType === 'system_profile') {
-    return `${t('common.basicInfo')} [${t('common.systemPreset')}]`;
+    const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
+    return `${t('profile.basicTitle', loc)} [${t('common.systemPreset', activePreviewLocale.value)}]`;
   }
-  return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage');
+  return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
 }
 
 const currentLocalizedTitle = computed(() => {
   if (currentPage.value) {
-    return getLocalizedPageText(currentPage.value, 'title', activePreviewLocale.value) || (currentPage.value.pageType === 'system_profile' ? t('common.basicInfo') : t('common.untitledPage'));
+    if (currentPage.value.pageType === 'system_profile') {
+      const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
+      return getLocalizedPageText(currentPage.value, 'title', loc) || t('profile.basicTitle', loc);
+    }
+    return getLocalizedPageText(currentPage.value, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
   }
-  return props.schema.meta?.title || t('header.untitledForm');
+  return getMetaText(props.schema.meta, 'title', activePreviewLocale.value) || store.meta.title || t('header.untitledForm', activePreviewLocale.value);
 });
 
+// 顶栏表单标题徽标
+const currentLocalizedFormTitle = computed(() => {
+  return getMetaText(props.schema?.meta, 'title', activePreviewLocale.value) || store.meta?.title || '';
+});
+
+// 模拟器顶栏机构名称：严格对齐移动端规范，展示机构名称 (AlgoCandy)
 const formBrandTitle = computed(() => {
-  return props.schema.meta?.title || t('preview.defaultCompanyTitle');
+  return 'AlgoCandy';
 });
 
 const currentLocalizedDesc = computed(() => {
   if (currentPage.value) {
+    if (currentPage.value.pageType === 'system_profile') {
+      const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
+      const desc = getLocalizedPageText(currentPage.value, 'description', loc);
+      return desc && desc.trim() ? desc.trim() : '';
+    }
     const desc = getLocalizedPageText(currentPage.value, 'description', activePreviewLocale.value);
     return desc && desc.trim() ? desc.trim() : '';
   }
-  const metaDesc = props.schema.meta?.description;
+  const metaDesc = getMetaText(props.schema.meta, 'description', activePreviewLocale.value);
   return metaDesc && metaDesc.trim() ? metaDesc.trim() : '';
 });
 

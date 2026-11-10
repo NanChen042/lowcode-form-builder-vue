@@ -4,6 +4,7 @@ import {
   kycCustomerTemplate,
   kycIndividualTemplate,
   kycEntityTemplate,
+  multilingualMockTemplate,
   createBlankTemplate,
   createRiskAssessmentTemplate
 } from '@/templates/recommend';
@@ -26,6 +27,12 @@ function initMockDatabase() {
   cusTpl.meta.formId = 'cus_tpl_20261013_demo';
   cusTpl.meta.serialNo = 'cus_tpl_20261013_demo';
   mockDatabase.set('cus_tpl_20261013_demo', cusTpl);
+
+  const multiTpl: FormSchema = JSON.parse(JSON.stringify(multilingualMockTemplate));
+  multiTpl.meta.formId = 'cus_tpl_20261013_multilang';
+  multiTpl.meta.serialNo = 'cus_tpl_20261013_multilang';
+  mockDatabase.set('cus_tpl_20261013_multilang', multiTpl);
+  mockDatabase.set('multilang_demo', multiTpl);
 }
 
 initMockDatabase();
@@ -162,7 +169,7 @@ Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
     } catch (_) {}
   }
   const formId = body?.schema?.meta?.formId || 'form_' + Date.now();
-  const formTitle = (body?.schema?.meta?.title || '').trim();
+  const formTitle = (body?.schema?.meta?.i18n?.zh?.title || body?.schema?.meta?.title || '').trim();
 
   if (formTitle.includes('重名') || formTitle.includes('已存在') || formTitle.toLowerCase().includes('duplicate')) {
     return {

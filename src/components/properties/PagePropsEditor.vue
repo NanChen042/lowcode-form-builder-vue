@@ -75,15 +75,17 @@
             {{ t('prop.untranslated') }}
           </a-tag>
         </div>
-        <a-input
+        <a-textarea
           id="page-prop-title-input"
           v-model="pageTitleModel"
+          :auto-size="{ minRows: 1, maxRows: 3 }"
           allow-clear
           :placeholder="t('prop.pageTitlePlaceholder')"
           class="w-full"
           @focus="setPageFocus('title')"
           @blur="clearFocus"
           @input="markDirty"
+          @clear="markDirty"
         />
       </div>
 
@@ -100,11 +102,13 @@
           id="page-prop-desc-input"
           v-model="pageDescModel"
           :auto-size="{ minRows: 3, maxRows: 6 }"
+          allow-clear
           :placeholder="t('prop.pageDescPlaceholder')"
           class="w-full"
           @focus="setPageFocus('description')"
           @blur="clearFocus"
           @input="markDirty"
+          @clear="markDirty"
         />
       </div>
 

@@ -155,7 +155,7 @@
           <span>{{ t('context.unlinkElement') }}</span>
         </a-doption>
 
-        <a-divider style="margin: 4px 0" />
+        <a-divider class="my-1" />
 
         <a-doption class="context-danger-option" @click="handleDeleteElement">
           <template #icon>
@@ -197,7 +197,7 @@
             <span>{{ t('risk.addGroup') }}</span>
           </a-doption>
 
-          <a-divider style="margin: 4px 0" />
+          <a-divider class="my-1" />
         </template>
 
         <a-doption v-if="!isRisk" @click="handleAddPage">
@@ -215,7 +215,7 @@
         </a-doption>
 
         <template v-if="!isRisk && !isTargetSystemProfilePage">
-          <a-divider style="margin: 4px 0" />
+          <a-divider class="my-1" />
 
           <a-doption class="context-danger-option" @click="handleDeletePage">
             <template #icon>
@@ -227,20 +227,22 @@
       </template>
 
       <template v-else>
-        <a-doption v-if="isRisk" @click="handleAddGroup">
-          <template #icon>
-            <FilePlus class="h-4 w-4 text-slate-500" />
-          </template>
-          <span>{{ t('risk.addGroup') }}</span>
-        </a-doption>
-        <a-doption v-else @click="handleAddPage">
-          <template #icon>
-            <FilePlus class="h-4 w-4 text-slate-500" />
-          </template>
-          <span>{{ t('context.newPage') }}</span>
-        </a-doption>
+        <template v-if="store.workspaceMode !== 'translation'">
+          <a-doption v-if="isRisk" @click="handleAddGroup">
+            <template #icon>
+              <FilePlus class="h-4 w-4 text-slate-500" />
+            </template>
+            <span>{{ t('risk.addGroup') }}</span>
+          </a-doption>
+          <a-doption v-else @click="handleAddPage">
+            <template #icon>
+              <FilePlus class="h-4 w-4 text-slate-500" />
+            </template>
+            <span>{{ t('context.newPage') }}</span>
+          </a-doption>
 
-        <a-divider style="margin: 4px 0" />
+          <a-divider class="my-1" />
+        </template>
 
         <a-doption @click="handleResetView">
           <template #icon>

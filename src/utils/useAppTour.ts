@@ -187,6 +187,7 @@ export function startAppTour(initialIndex = 0) {
   }
 
   driverInstance = driver({
+    popoverClass: 'figma-tour-popover',
     showProgress: true,
     animate: true,
     allowClose: true,

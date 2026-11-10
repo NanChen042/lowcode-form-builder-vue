@@ -30,7 +30,7 @@
             <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800 truncate">
               {{
                 store.workspaceMode === 'translation'
-                  ? t('trans.multilingualTitle')
+                  ? t('trans.propTitle')
                   : (store.selectedType === 'group'
                       ? t('risk.propGroupTitle')
                       : (isRisk && selectedElement ? t('risk.propQuestionTitle') : t('prop.title')))
@@ -39,7 +39,7 @@
             <p class="m-0 text-[11px] leading-4 text-slate-400 truncate">
               {{
                 store.workspaceMode === 'translation'
-                  ? t('trans.sideBySideSubtitle')
+                  ? t('trans.propSubtitle')
                   : (store.selectedType === 'group'
                       ? t('risk.propGroupSub')
                       : (store.selectedType === 'page' ? (isRisk ? t('risk.fixedRulesDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle'))))
@@ -312,42 +312,14 @@ watch(
   () => store.focusedTarget,
   (target) => {
     if (!target) return;
-    if (
-      typeof document !== 'undefined' &&
-      document.activeElement &&
-      document.activeElement.closest('#tour-canvas-viewport, .canvas-viewport, .canvas-world, [contenteditable], input, textarea')
-    ) {
-      nextTick(() => {
-        let targetInput: HTMLElement | null = null;
-        if (target.field === 'label') {
-          targetInput = document.getElementById('prop-label-input');
-        } else if (target.field === 'title') {
-          targetInput = document.getElementById('page-prop-title-input');
-        } else if (target.field === 'help') {
-          targetInput = document.getElementById('prop-help-input');
-        } else if (target.field === 'description') {
-          targetInput = document.getElementById('page-prop-desc-input');
-        } else if (target.field === 'placeholder') {
-          targetInput = document.getElementById('prop-placeholder-input');
-        } else if (target.field === 'option' && target.optionIndex !== undefined) {
-          const optionInputs = document.querySelectorAll('#options-editor input, #options-editor textarea');
-          if (optionInputs && optionInputs[target.optionIndex]) {
-            targetInput = optionInputs[target.optionIndex] as HTMLElement;
-          }
-        }
-        if (targetInput) {
-          targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          triggerHighlight(targetInput);
-        }
-      });
-      return;
-    }
     nextTick(() => {
       let targetInput: HTMLElement | null = null;
       if (target.field === 'label') {
         targetInput = document.getElementById('prop-label-input');
       } else if (target.field === 'title') {
-        targetInput = document.getElementById('page-prop-title-input');
+        targetInput = document.getElementById(
+          store.selectedType === 'group' ? 'group-prop-title-input' : 'page-prop-title-input'
+        );
       } else if (target.field === 'help') {
         targetInput = document.getElementById('prop-help-input');
       } else if (target.field === 'description') {
@@ -357,9 +329,11 @@ watch(
       } else if (target.field === 'content') {
         targetInput = document.getElementById('prop-alert-content-input');
       } else if (target.field === 'option' && target.optionIndex !== undefined) {
-        const optionInputs = document.querySelectorAll('#options-editor input, #options-editor textarea');
-        if (optionInputs && optionInputs[target.optionIndex]) {
-          targetInput = optionInputs[target.optionIndex] as HTMLElement;
+        const optionWrappers = document.querySelectorAll(
+          '#options-editor .arco-input-wrapper, #options-editor .arco-textarea-wrapper'
+        );
+        if (optionWrappers && optionWrappers[target.optionIndex]) {
+          targetInput = optionWrappers[target.optionIndex] as HTMLElement;
         }
       }
       if (targetInput) {

@@ -35,10 +35,10 @@ const router = createRouter({
 });
 
 // PC 端与 Algo 母系统互通：登录态强校验前置守卫
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to) => {
   // 1. 显式调试参数 (bypass_auth=1) 直接放行
   if (to.query.bypass_auth === '1') {
-    return next();
+    return;
   }
 
   // 2. 环境判定：本地开发调试环境 (localhost / 127.0.0.1 / DEV 模式) 不做强阻断重定向
@@ -58,7 +58,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // 4. 当前会话中已持有经过验真的合法 UID，直接放行
   if (store.user.isLoggedIn && store.user.uid > 0) {
-    return next();
+    return;
   }
 
   // 5. 调用 Algo 现有接口 /pc/user/authInfo 发起验真请求
@@ -78,7 +78,7 @@ router.beforeEach(async (to, _from, next) => {
         store.currentLocale = res.data.language;
       }
 
-      return next();
+      return;
     }
   } catch (error) {
     console.warn('[AuthGuard] 鉴权请求异常:', error);
@@ -86,12 +86,13 @@ router.beforeEach(async (to, _from, next) => {
 
   // 6. 本地开发环境：即使未登录或未连接后端，也优雅放行，不影响本地设计与调试
   if (isLocalDev) {
-    return next();
+    return;
   }
 
   // 7. 仅在正式服务器环境：验真不通过 (未登录或 Token 失效) 时坚决阻断进入，直接跳转到 Algo 登录页
   if (typeof window !== 'undefined') {
     window.location.href = '/pc/login/';
+    return false;
   }
 });
 

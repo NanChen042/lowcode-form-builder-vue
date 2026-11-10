@@ -4,11 +4,11 @@
     :data-element-id="element.id"
     class="canvas-element"
     :class="{
-      'is-selected': !isReadOnlyFrame && isSelected,
+      'is-selected': isSelected,
       'is-branch-child': hasLinkage,
       'branch-depth-1': elementDepth === 1,
       'branch-depth-2': elementDepth >= 2,
-      'pointer-events-none select-none': isReadOnlyFrame
+      'cursor-pointer select-none': isReadOnlyFrame
     }"
     :data-type="element.type"
     @click.stop="handleClick"
@@ -224,7 +224,10 @@ const renderComponent = computed(() => {
 });
 
 function handleClick(e: MouseEvent) {
-  if (isReadOnlyFrame.value) return;
+  if (isReadOnlyFrame.value) {
+    selectElement(props.element);
+    return;
+  }
   store.editingLocale = frameLocale.value;
   selectElement(props.element);
 

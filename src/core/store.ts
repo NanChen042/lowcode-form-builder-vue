@@ -31,7 +31,20 @@ const MAX_SCALE = 1.6;
 
 export interface FocusedTarget {
   elementId: string;
-  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'default' | 'content';
+  field:
+    | 'label'
+    | 'placeholder'
+    | 'help'
+    | 'option'
+    | 'title'
+    | 'description'
+    | 'default'
+    | 'content'
+    | 'signPlaceholder'
+    | 'endPlaceholder'
+    | 'longTermText'
+    | 'customErrorMessage'
+    | 'declarationErrorMessage';
   optionIndex?: number;
 }
 
@@ -800,10 +813,12 @@ export function resetTranslationCanvasView(options?: { duration?: number }) {
   }
 
   // 3. 计算自适应缩放比例 (Fit to Canvas)
+  const topBarHeight = 44;
   const paddingX = 96;
   const paddingY = 80;
+  const availableHeight = Math.max(200, viewportHeight - topBarHeight);
   const safeWidth = Math.max(200, viewportWidth - paddingX);
-  const safeHeight = Math.max(200, viewportHeight - paddingY);
+  const safeHeight = Math.max(200, availableHeight - paddingY);
 
   const scaleX = safeWidth / pairWidth;
   const referenceHeight = Math.max(PAGE_HEIGHT, Math.min(contentHeight, 920));
@@ -828,12 +843,12 @@ export function resetTranslationCanvasView(options?: { duration?: number }) {
   const contentCenterX = pairWidth / 2;
   store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * finalScale);
 
-  // 5. 垂直居中 / 顶部合理边距
+  // 5. 垂直居中 / 顶部合理边距 (预留顶部 44px 语言栏高度)
   const scaledContentHeight = contentHeight * finalScale;
-  if (scaledContentHeight + 64 <= viewportHeight) {
-    store.canvasState.y = Math.max(36, Math.round((viewportHeight - scaledContentHeight) / 2));
+  if (scaledContentHeight + 64 <= availableHeight) {
+    store.canvasState.y = topBarHeight + Math.max(36, Math.round((availableHeight - scaledContentHeight) / 2));
   } else {
-    store.canvasState.y = 40;
+    store.canvasState.y = topBarHeight + 42;
   }
 }
 
@@ -1021,9 +1036,31 @@ export function generateSerialNo(
   return generateFormId(profileType, source);
 }
 
+const TRANSLATABLE_FIELD_PROPS = [
+  'label',
+  'placeholder',
+  'endPlaceholder',
+  'signPlaceholder',
+  'longTermText',
+  'help',
+  'content',
+  'customErrorMessage',
+  'declarationErrorMessage'
+] as const;
+
 export function buildSchema(): FormSchema {
-  const isBilingualMode = Boolean(store.meta.enabledLocales?.includes('zh') && store.meta.enabledLocales?.includes('en'));
   const activeLocale = store.currentLocale || 'zh';
+  const rawLocales = store.meta.enabledLocales && store.meta.enabledLocales.length > 0
+    ? [...store.meta.enabledLocales]
+    : (activeLocale === 'zh' ? ['zh', 'en'] : ['en']);
+  if (!rawLocales.includes(activeLocale)) {
+    rawLocales.unshift(activeLocale);
+  }
+  if (activeLocale === 'zh' && !rawLocales.includes('en')) {
+    rawLocales.push('en');
+  }
+  const enabledLocales = Array.from(new Set(rawLocales));
+  const hasEn = enabledLocales.includes('en') || activeLocale === 'en';
 
   const ensuredId = store.meta.formId || store.meta.serialNo || generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
   if (!store.meta.formId) store.meta.formId = ensuredId;
@@ -1035,105 +1072,194 @@ export function buildSchema(): FormSchema {
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
     'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity'
   ];
-  const effectiveTitle = (store.meta.title || (isRisk.value ? '风险评估' : '未命名表单')).trim();
-  let effectiveTitleEn = (store.meta.title_en || '').trim();
+  const effectiveTitle = (
+    store.meta.title ||
+    store.meta.i18n?.zh?.title ||
+    (activeLocale === 'en' ? (store.meta.title_en || store.meta.i18n?.en?.title) : '') ||
+    (isRisk.value ? (activeLocale === 'en' ? 'Risk Assessment' : '风险评估') : (activeLocale === 'en' ? 'Untitled Form' : '未命名表单'))
+  ).trim();
+  let effectiveTitleEn = (store.meta.title_en || store.meta.i18n?.en?.title || '').trim();
 
   // 若英文标题仍为默认冲突模版名，且中文标题已被用户修改，则英文标题自动对齐中文标题，彻底杜绝后端 checkTitle 触发 409
   if (defaultTemplateTitles.includes(effectiveTitleEn) && !defaultTemplateTitles.includes(effectiveTitle)) {
     effectiveTitleEn = effectiveTitle;
     store.meta.title_en = effectiveTitle;
   }
-  if (!effectiveTitleEn && isBilingualMode) {
+  if (!effectiveTitleEn && hasEn) {
     effectiveTitleEn = effectiveTitle;
     store.meta.title_en = effectiveTitle;
+  }
+
+  const metaI18n: Record<string, Record<string, string>> = {};
+  for (const loc of enabledLocales) {
+    const entry: Record<string, string> = {};
+    const tVal = loc === 'zh'
+      ? effectiveTitle
+      : loc === 'en'
+        ? (effectiveTitleEn || effectiveTitle)
+        : (store.meta.i18n?.[loc]?.title || '').trim();
+    const dVal = loc === 'zh'
+      ? (store.meta.description || store.meta.i18n?.zh?.description || '').trim()
+      : loc === 'en'
+        ? (store.meta.description_en || store.meta.i18n?.en?.description || '').trim()
+        : (store.meta.i18n?.[loc]?.description || '').trim();
+    if (tVal) entry.title = tVal;
+    if (dVal) entry.description = dVal;
+    if (Object.keys(entry).length > 0) {
+      metaI18n[loc] = entry;
+    }
   }
 
   const metaCopy: any = isRisk.value
     ? {
         formId: ensuredId,
         serialNo: ensuredId,
-        title: effectiveTitle,
         profileType: store.meta.profileType || 'customer',
         formType: 'risk',
-        enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
-        ...(isBilingualMode && effectiveTitleEn ? { title_en: effectiveTitleEn } : {}),
-        ...(store.meta.description ? { description: store.meta.description } : {}),
-        ...(isBilingualMode && store.meta.description_en ? { description_en: store.meta.description_en } : {})
+        baseLocale: store.meta.baseLocale || activeLocale,
+        enabledLocales,
+        i18n: metaI18n
       }
     : {
-        title: effectiveTitle,
-        title_en: isBilingualMode ? effectiveTitleEn : '',
-        description: store.meta.description || '',
-        description_en: isBilingualMode ? (store.meta.description_en || '') : '',
-        profileType: store.meta.profileType || 'customer',
-        formType: 'kyc',
-        enabledLocales: isBilingualMode ? ['zh', 'en'] : [activeLocale],
-        source: store.meta.source || 'diy',
-        templateKey: store.meta.templateKey,
         formId: ensuredId,
         serialNo: ensuredId,
-        createdAt: store.meta.createdAt
+        profileType: store.meta.profileType || 'customer',
+        formType: 'kyc',
+        baseLocale: store.meta.baseLocale || activeLocale,
+        enabledLocales,
+        source: store.meta.source || 'diy',
+        ...(store.meta.templateKey ? { templateKey: store.meta.templateKey } : {}),
+        ...(store.meta.createdAt ? { createdAt: store.meta.createdAt } : {}),
+        i18n: metaI18n
       };
+
+  const buildUnifiedOptions = (options: any[] | undefined) => {
+    if (!Array.isArray(options)) return undefined;
+    return options.map((opt: any) => {
+      const optI18n: Record<string, string> = {};
+      for (const loc of enabledLocales) {
+        const rawI18n = opt.i18n?.[loc];
+        const fromI18n = typeof rawI18n === 'object' ? rawI18n?.label : rawI18n;
+        const val = loc === 'zh'
+          ? (fromI18n ?? opt.label ?? '')
+          : loc === 'en'
+            ? (fromI18n ?? opt.label_en ?? '')
+            : (fromI18n ?? '');
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+          optI18n[loc] = String(val);
+        }
+      }
+      return {
+        value: opt.value,
+        i18n: optI18n
+      };
+    });
+  };
 
   const pagesCopy = store.pages.map((p, idx) => {
     if (isRisk.value) {
-      // 风险评估模式：彻底剥离所有无用字段（pageType, showSkeleton, profileType, description, type, options, layout 等）
       const firstGroupId = p.groups?.[0]?.id || 'grp_risk_1';
+      const riskPageI18n: Record<string, Record<string, string>> = {};
+      for (const loc of enabledLocales) {
+        const tVal = loc === 'zh'
+          ? (p.i18n?.zh?.title || p.title || '风险评估').trim()
+          : loc === 'en'
+            ? (p.i18n?.en?.title || p.title_en || 'Risk Assessment').trim()
+            : (p.i18n?.[loc]?.title || '').trim();
+        if (tVal) {
+          riskPageI18n[loc] = { title: tVal };
+        }
+      }
+
       const cleanPage: any = {
         id: p.id || `page_risk_${idx}`,
-        title: p.title || '风险评估',
+        i18n: riskPageI18n,
         groups: p.groups && p.groups.length > 0
-          ? p.groups.map(g => ({
-              id: g.id,
-              title: g.title?.trim() || '',
-              title_en: g.title_en?.trim() || ''
-            }))
+          ? p.groups.map(g => {
+              const grpI18n: Record<string, Record<string, string>> = {};
+              for (const loc of enabledLocales) {
+                const gt = loc === 'zh'
+                  ? (g.i18n?.zh?.title ?? g.title ?? '').trim()
+                  : loc === 'en'
+                    ? (g.i18n?.en?.title ?? g.title_en ?? '').trim()
+                    : (g.i18n?.[loc]?.title ?? '').trim();
+                if (gt) grpI18n[loc] = { title: gt };
+              }
+              return {
+                id: g.id,
+                i18n: grpI18n
+              };
+            })
           : [],
         fields: p.fields.map(f => {
-          const cleanField: any = {
+          const rawOpts = f.options && f.options.length
+            ? JSON.parse(JSON.stringify(f.options))
+            : RISK_FIXED_OPTIONS.map(o => ({ ...o }));
+          const fieldI18n: Record<string, Record<string, string>> = {};
+          for (const loc of enabledLocales) {
+            const dict: Record<string, string> = {};
+            const lbl = loc === 'zh'
+              ? (f.i18n?.zh?.label ?? f.label ?? '').trim()
+              : loc === 'en'
+                ? (f.i18n?.en?.label ?? f.label_en ?? '').trim()
+                : (f.i18n?.[loc]?.label ?? '').trim();
+            const hlp = loc === 'zh'
+              ? (f.i18n?.zh?.help ?? f.help ?? '').trim()
+              : loc === 'en'
+                ? (f.i18n?.en?.help ?? f.help_en ?? '').trim()
+                : (f.i18n?.[loc]?.help ?? '').trim();
+            if (lbl) dict.label = lbl;
+            if (hlp) dict.help = hlp;
+            if (Object.keys(dict).length > 0) {
+              fieldI18n[loc] = dict;
+            }
+          }
+          return {
             id: f.id,
             key: f.key,
             type: 'radio',
             groupId: f.groupId || firstGroupId,
-            label: f.label || '',
             weight: f.weight ?? 1,
-            options: f.options && f.options.length
-              ? JSON.parse(JSON.stringify(f.options))
-              : RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+            i18n: fieldI18n,
+            options: buildUnifiedOptions(rawOpts)
           };
-          if (isBilingualMode) {
-            cleanField.label_en = f.label_en || '';
-          }
-          if (f.help?.trim()) {
-            cleanField.help = f.help.trim();
-            if (isBilingualMode && f.help_en?.trim()) {
-              cleanField.help_en = f.help_en.trim();
-            }
-          }
-          if (!isBilingualMode && Array.isArray(cleanField.options)) {
-            cleanField.options.forEach((opt: any) => {
-              delete opt.label_en;
-            });
-          }
-          return cleanField;
         })
       };
 
-      if (isBilingualMode) {
-        cleanPage.title_en = p.title_en || 'Risk Assessment';
-      }
-
       return cleanPage;
+    }
+
+    const pageI18n: Record<string, Record<string, string>> = {};
+    for (const loc of enabledLocales) {
+      const entry: Record<string, string> = {};
+      const pTitle = loc === 'zh'
+        ? (p.i18n?.zh?.title ?? p.title ?? '').trim()
+        : loc === 'en'
+          ? (p.i18n?.en?.title ?? p.title_en ?? '').trim()
+          : (p.i18n?.[loc]?.title ?? '').trim();
+      const pDesc = loc === 'zh'
+        ? (p.i18n?.zh?.description ?? p.description ?? '').trim()
+        : loc === 'en'
+          ? (p.i18n?.en?.description ?? p.description_en ?? '').trim()
+          : (p.i18n?.[loc]?.description ?? '').trim();
+      if (pTitle) entry.title = pTitle;
+      if (pDesc) entry.description = pDesc;
+      if (Object.keys(entry).length > 0) {
+        pageI18n[loc] = entry;
+      }
     }
 
     const pageCopy: any = {
       id: p.id,
       pageType: p.pageType || 'form',
-      profileType: p.pageType === 'system_profile' ? (store.meta.profileType || p.profileType || 'individual') : p.profileType,
-      showSkeleton: p.showSkeleton,
-      title: p.title,
-      description: p.description,
-      groups: p.groups && p.groups.length > 0 ? JSON.parse(JSON.stringify(p.groups)) : undefined,
+      ...(p.pageType === 'system_profile'
+        ? {
+            profileType: store.meta.profileType || p.profileType || 'individual',
+            ...(p.showSkeleton !== undefined ? { showSkeleton: p.showSkeleton } : {})
+          }
+        : {}),
+      i18n: pageI18n,
+      ...(p.groups && p.groups.length > 0 ? { groups: JSON.parse(JSON.stringify(p.groups)) } : {}),
       fields: p.fields.map(f => {
         const fieldCopy: any = JSON.parse(JSON.stringify(f));
         // 国家和国籍组件是系统内建预设字典，无需在 Schema JSON 中冗余序列化全部244个国家选项
@@ -1142,26 +1268,83 @@ export function buildSchema(): FormSchema {
             delete fieldCopy.options;
           }
         }
-        if (!isBilingualMode) {
-          // 纯净单语言模式：彻底剥离英文副语言键，绝不向后端提交未开启的第二语言脏数据
-          delete fieldCopy.label_en;
-          delete fieldCopy.placeholder_en;
-          delete fieldCopy.help_en;
-          delete fieldCopy.customErrorMessage_en;
-          if (fieldCopy.options && Array.isArray(fieldCopy.options)) {
-            fieldCopy.options.forEach((opt: any) => {
-              delete opt.label_en;
-            });
+        // 签名组件：规范化填充默认值
+        if (fieldCopy.type === 'signature') {
+          if (!fieldCopy.signPlaceholder && !fieldCopy.i18n?.zh?.signPlaceholder) {
+            fieldCopy.signPlaceholder = '请在此处手写签名';
+          }
+          if (hasEn && !fieldCopy.signPlaceholder_en && !fieldCopy.i18n?.en?.signPlaceholder) {
+            fieldCopy.signPlaceholder_en = 'Please sign here';
+          }
+          if (!fieldCopy.placeholder && !fieldCopy.i18n?.zh?.placeholder) {
+            fieldCopy.placeholder = '请在下方指定区域签名';
+          }
+          if (hasEn && !fieldCopy.placeholder_en && !fieldCopy.i18n?.en?.placeholder) {
+            fieldCopy.placeholder_en = 'Please sign in the designated area below';
           }
         }
+        // 日期组件：起止模式规范化默认占位符，长期有效规范化默认文案
+        if (fieldCopy.type === 'date') {
+          if (fieldCopy.dateMode === 'range') {
+            if (!fieldCopy.placeholder || fieldCopy.placeholder === '请选择日期') {
+              fieldCopy.placeholder = '开始日期';
+              if (hasEn && !fieldCopy.placeholder_en) fieldCopy.placeholder_en = 'Start Date';
+            }
+            if (!fieldCopy.endPlaceholder) {
+              fieldCopy.endPlaceholder = '截止日期';
+              if (hasEn && !fieldCopy.endPlaceholder_en) fieldCopy.endPlaceholder_en = 'End Date';
+            }
+          }
+          if (fieldCopy.enableLongTerm) {
+            if (!fieldCopy.longTermText) {
+              fieldCopy.longTermText = '长期';
+              if (hasEn && !fieldCopy.longTermText_en) fieldCopy.longTermText_en = 'Long-term';
+            }
+          }
+        }
+
+        // 构建统一的多语言对象 i18n: { zh: { ... }, en: { ... }, ja: { ... } }
+        const unifiedFieldI18n: Record<string, Record<string, string>> = {};
+        for (const loc of enabledLocales) {
+          const locDict: Record<string, string> = {};
+          for (const prop of TRANSLATABLE_FIELD_PROPS) {
+            const rawVal = loc === 'zh'
+              ? (fieldCopy.i18n?.zh?.[prop] ?? fieldCopy[prop])
+              : loc === 'en'
+                ? (fieldCopy.i18n?.en?.[prop] ?? fieldCopy[`${prop}_en`])
+                : fieldCopy.i18n?.[loc]?.[prop];
+            if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') {
+              locDict[prop] = String(rawVal);
+            }
+          }
+          if (Object.keys(locDict).length > 0) {
+            unifiedFieldI18n[loc] = locDict;
+          }
+        }
+
+        // 移除顶层散落的旧版单语言及 _en 冗余属性与空值属性
+        for (const prop of TRANSLATABLE_FIELD_PROPS) {
+          delete fieldCopy[prop];
+          delete fieldCopy[`${prop}_en`];
+        }
+        if (fieldCopy.defaultValue === '') delete fieldCopy.defaultValue;
+        if (fieldCopy.endValue === '') delete fieldCopy.endValue;
+        delete fieldCopy.i18n;
+
+        const savedOptions = fieldCopy.options;
+        delete fieldCopy.options;
+
+        fieldCopy.i18n = unifiedFieldI18n;
+
+        if (savedOptions && Array.isArray(savedOptions)) {
+          if (savedOptions.length > 0 || ['select', 'radio', 'checkbox', 'signature'].includes(fieldCopy.type)) {
+            fieldCopy.options = buildUnifiedOptions(savedOptions);
+          }
+        }
+
         return fieldCopy;
       })
     };
-
-    if (isBilingualMode) {
-      pageCopy.title_en = p.title_en;
-      pageCopy.description_en = p.description_en;
-    }
 
     return pageCopy;
   });
@@ -1314,7 +1497,18 @@ export function createNewCanvas(options: {
   loadSchema(schema);
   store.meta.title = initialTitle;
   store.meta.title_en = initialTitleEn;
-  store.meta.description = options.description !== undefined ? options.description : schema.meta.description;
+  store.meta.description = options.description !== undefined ? options.description : (schema.meta.description || '');
+  if (!store.meta.i18n) store.meta.i18n = {};
+  store.meta.i18n.zh = {
+    ...(store.meta.i18n.zh || {}),
+    title: initialTitle,
+    ...(store.meta.description ? { description: store.meta.description } : {})
+  };
+  store.meta.i18n.en = {
+    ...(store.meta.i18n.en || {}),
+    title: initialTitleEn,
+    ...(store.meta.description_en ? { description: store.meta.description_en } : {})
+  };
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
   store.meta.serialNo = formId;
@@ -1391,6 +1585,9 @@ export function applyTemplateKey(
 
   clonedSchema.meta.title = title;
   clonedSchema.meta.title_en = titleEn;
+  if (!clonedSchema.meta.i18n) clonedSchema.meta.i18n = {};
+  clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
+  clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
   clonedSchema.meta.profileType = pType;
   clonedSchema.meta.source = 'template';
   clonedSchema.meta.templateKey = tplKey;
@@ -1401,6 +1598,9 @@ export function applyTemplateKey(
   loadSchema(clonedSchema);
   store.meta.title = title;
   store.meta.title_en = titleEn;
+  if (!store.meta.i18n) store.meta.i18n = {};
+  store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
+  store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
   store.meta.profileType = pType;
   store.meta.source = 'template';
   store.meta.templateKey = tplKey;
@@ -1422,37 +1622,31 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   if (schema.meta?.formType === 'risk') {
     store.editorMode = 'risk';
   }
-  store.meta.title = schema.meta?.title || '未命名表单';
-  store.meta.title_en = schema.meta?.title_en || '';
-  store.meta.description = schema.meta?.description || '';
-  store.meta.description_en = schema.meta?.description_en || '';
-  if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
-    if (isRisk.value && schema.meta.enabledLocales.length === 1) {
-      store.meta.enabledLocales = [store.currentLocale || 'zh'];
-    } else {
-      store.meta.enabledLocales = [...schema.meta.enabledLocales];
-    }
-  } else if (isRisk.value) {
-    store.meta.enabledLocales = [store.currentLocale || 'zh'];
-  } else {
-    const hasExplicitEn = Boolean(
-      schema.meta?.title_en ||
-      schema.pages?.some(p => p.title_en || p.fields?.some(f => Boolean(f.label_en && f.label_en !== f.label)))
-    );
-    const hasExplicitZh = Boolean(
-      schema.meta?.title ||
-      schema.pages?.some(p => p.title || p.fields?.some(f => Boolean(f.label)))
-    );
+  const metaI18n = schema.meta?.i18n ? JSON.parse(JSON.stringify(schema.meta.i18n)) : undefined;
+  store.meta.title = metaI18n?.zh?.title || schema.meta?.title || '未命名表单';
+  store.meta.title_en = metaI18n?.en?.title || schema.meta?.title_en || '';
+  store.meta.description = metaI18n?.zh?.description || schema.meta?.description || '';
+  store.meta.description_en = metaI18n?.en?.description || schema.meta?.description_en || '';
+  store.meta.baseLocale = schema.meta?.baseLocale || store.currentLocale || 'zh';
+  store.meta.i18n = metaI18n;
 
-    if (hasExplicitEn && hasExplicitZh) {
-      store.meta.enabledLocales = ['zh', 'en'];
-    } else if (hasExplicitEn && !hasExplicitZh) {
-      store.meta.enabledLocales = ['en'];
-    } else if (hasExplicitZh && !hasExplicitEn) {
-      store.meta.enabledLocales = ['zh'];
-    } else {
-      store.meta.enabledLocales = [store.currentLocale || 'zh'];
+  const activeLoc = store.currentLocale || 'zh';
+  if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
+    const loadedLocales = [...schema.meta.enabledLocales];
+    if (!loadedLocales.includes(activeLoc)) {
+      loadedLocales.unshift(activeLoc);
     }
+    if (activeLoc === 'zh' && !loadedLocales.includes('en')) {
+      loadedLocales.push('en');
+    }
+    store.meta.enabledLocales = Array.from(new Set(loadedLocales));
+  } else if (activeLoc === 'zh') {
+    store.meta.enabledLocales = ['zh', 'en'];
+  } else {
+    const hasExplicitZh = Boolean(
+      schema.pages?.some(p => p.pageType !== 'system_profile' && (p.i18n?.zh?.title || p.title || p.fields?.some(f => Boolean(f.i18n?.zh?.label || f.label))))
+    );
+    store.meta.enabledLocales = hasExplicitZh ? ['en', 'zh'] : ['en'];
   }
   const rawProfileType = schema.meta?.profileType
     || (schema.pages?.[0]?.profileType)
@@ -1488,9 +1682,12 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
 
   if (schema.pages && schema.pages.length > 0) {
     store.pages = schema.pages.map((p, idx) => {
-      const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (p.title === '基本资料' || p.title_en === 'Basic Information'));
-      let pageTitle = p.title || '';
-      let pageTitleEn = p.title_en || '';
+      const pageI18n = p.i18n ? JSON.parse(JSON.stringify(p.i18n)) : undefined;
+      const rawTitleZh = pageI18n?.zh?.title || p.title || '';
+      const rawTitleEn = pageI18n?.en?.title || p.title_en || '';
+      const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (rawTitleZh === '基本资料' || rawTitleEn === 'Basic Information'));
+      let pageTitle = rawTitleZh;
+      let pageTitleEn = rawTitleEn;
       if (!isSystemProfile) {
         // 清理历史遗留纯数字序号残余（如 '02' / '2'），保持空状态以展示 placeholder
         if (/^0\d+$/.test(pageTitle.trim())) {
@@ -1501,7 +1698,11 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
         }
       }
       let hydratedGroups = p.groups && p.groups.length > 0
-        ? JSON.parse(JSON.stringify(p.groups))
+        ? JSON.parse(JSON.stringify(p.groups)).map((g: any) => ({
+            ...g,
+            title: g.i18n?.zh?.title ?? g.title ?? '',
+            title_en: g.i18n?.en?.title ?? g.title_en ?? ''
+          }))
         : undefined;
       if (isRisk.value && !isSystemProfile && (!hydratedGroups || hydratedGroups.length === 0)) {
         hydratedGroups = [
@@ -1519,23 +1720,55 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
         pageType: (isSystemProfile ? 'system_profile' : 'form') as 'form' | 'system_profile',
         profileType: isSystemProfile ? (store.meta.profileType || p.profileType || 'entity') : p.profileType,
         showSkeleton: p.showSkeleton !== false,
-        title: isSystemProfile ? (p.title || '基本资料') : pageTitle,
-        title_en: isSystemProfile ? (p.title_en || 'Basic Information') : pageTitleEn,
-        description: p.description || '',
-        description_en: p.description_en || '',
+        title: isSystemProfile ? (rawTitleZh || '基本资料') : pageTitle,
+        title_en: isSystemProfile ? (rawTitleEn || 'Basic Information') : pageTitleEn,
+        description: pageI18n?.zh?.description ?? p.description ?? '',
+        description_en: pageI18n?.en?.description ?? p.description_en ?? '',
+        i18n: pageI18n,
         groups: hydratedGroups,
         fields: isSystemProfile ? [] : (p.fields || []).map(f => {
           const resolvedType = isRisk.value ? 'radio' : f.type;
           const meta = componentRegistry[resolvedType];
           const defaultData = meta ? meta.defaultData() : {};
-          const fieldOptions = isRisk.value
+          const rawFieldOptions = isRisk.value
             ? RISK_FIXED_OPTIONS.map(o => ({ ...o }))
             : (f.options && f.options.length
                 ? f.options
                 : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined));
+          const fieldOptions = rawFieldOptions
+            ? rawFieldOptions.map((opt: any) => {
+                const optZh = typeof opt.i18n?.zh === 'string' ? opt.i18n.zh : (opt.i18n?.zh?.label ?? opt.label ?? '');
+                const optEn = typeof opt.i18n?.en === 'string' ? opt.i18n.en : (opt.i18n?.en?.label ?? opt.label_en ?? '');
+                return {
+                  ...opt,
+                  label: optZh,
+                  label_en: optEn
+                };
+              })
+            : undefined;
+          const fI18n = f.i18n ? JSON.parse(JSON.stringify(f.i18n)) : undefined;
           return {
             ...defaultData,
             ...f,
+            label: fI18n?.zh?.label ?? f.label ?? defaultData.label ?? '',
+            label_en: fI18n?.en?.label ?? f.label_en ?? defaultData.label_en ?? '',
+            placeholder: fI18n?.zh?.placeholder ?? f.placeholder ?? defaultData.placeholder ?? '',
+            placeholder_en: fI18n?.en?.placeholder ?? f.placeholder_en ?? defaultData.placeholder_en ?? '',
+            endPlaceholder: fI18n?.zh?.endPlaceholder ?? f.endPlaceholder ?? defaultData.endPlaceholder ?? '',
+            endPlaceholder_en: fI18n?.en?.endPlaceholder ?? f.endPlaceholder_en ?? defaultData.endPlaceholder_en ?? '',
+            longTermText: fI18n?.zh?.longTermText ?? f.longTermText ?? defaultData.longTermText ?? '',
+            longTermText_en: fI18n?.en?.longTermText ?? f.longTermText_en ?? defaultData.longTermText_en ?? '',
+            signPlaceholder: fI18n?.zh?.signPlaceholder ?? f.signPlaceholder ?? defaultData.signPlaceholder ?? '',
+            signPlaceholder_en: fI18n?.en?.signPlaceholder ?? f.signPlaceholder_en ?? defaultData.signPlaceholder_en ?? '',
+            help: fI18n?.zh?.help ?? f.help ?? defaultData.help ?? '',
+            help_en: fI18n?.en?.help ?? f.help_en ?? defaultData.help_en ?? '',
+            content: fI18n?.zh?.content ?? f.content ?? defaultData.content ?? '',
+            content_en: fI18n?.en?.content ?? f.content_en ?? defaultData.content_en ?? '',
+            customErrorMessage: fI18n?.zh?.customErrorMessage ?? f.customErrorMessage ?? defaultData.customErrorMessage ?? '',
+            customErrorMessage_en: fI18n?.en?.customErrorMessage ?? f.customErrorMessage_en ?? defaultData.customErrorMessage_en ?? '',
+            declarationErrorMessage: fI18n?.zh?.declarationErrorMessage ?? f.declarationErrorMessage ?? defaultData.declarationErrorMessage ?? '',
+            declarationErrorMessage_en: fI18n?.en?.declarationErrorMessage ?? f.declarationErrorMessage_en ?? defaultData.declarationErrorMessage_en ?? '',
+            i18n: fI18n,
             type: resolvedType,
             groupId: isRisk.value ? (f.groupId || fallbackGroupId) : f.groupId,
             options: (['country', 'nationality'].includes(resolvedType) && fieldOptions && fieldOptions.length >= 200)
@@ -1601,7 +1834,7 @@ export function triggerHighlight(input: HTMLElement | null) {
 }
 
 export function highlightPropertyField(
-  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'content',
+  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'content' | 'signPlaceholder' | 'endPlaceholder' | 'longTermText',
   optionIndex?: number
 ) {
   setTimeout(() => {
@@ -1612,6 +1845,12 @@ export function highlightPropertyField(
       targetInput = document.getElementById(store.selectedType === 'group' ? 'group-prop-title-input' : 'page-prop-title-input');
     } else if (field === 'placeholder') {
       targetInput = document.getElementById('prop-placeholder-input');
+    } else if (field === 'signPlaceholder') {
+      targetInput = document.getElementById('prop-sign-placeholder-input');
+    } else if (field === 'endPlaceholder') {
+      targetInput = document.getElementById('prop-end-placeholder-input');
+    } else if (field === 'longTermText') {
+      targetInput = document.getElementById('prop-long-term-text-input');
     } else if (field === 'help') {
       targetInput = document.getElementById('prop-help-input');
     } else if (field === 'content') {
@@ -1705,8 +1944,32 @@ export function addTargetLocale(locale?: string) {
 export function removeTargetLocale(locale: string) {
   if (!store.meta.enabledLocales) return;
   const base = primaryLocale.value;
-  if (locale === base) return;
+  // 基础语言（中文）与核心国际语言（英语）不允许删除
+  if (locale === base || locale === 'en' || locale === 'zh') return;
   store.meta.enabledLocales = store.meta.enabledLocales.filter(l => l !== locale);
+  if (store.meta.i18n && locale in store.meta.i18n) {
+    delete store.meta.i18n[locale];
+  }
+  store.pages.forEach(p => {
+    if (p.i18n && locale in p.i18n) {
+      delete p.i18n[locale];
+    }
+    p.groups?.forEach(g => {
+      if (g.i18n && locale in g.i18n) {
+        delete g.i18n[locale];
+      }
+    });
+    p.fields?.forEach(f => {
+      if (f.i18n && locale in f.i18n) {
+        delete f.i18n[locale];
+      }
+      f.options?.forEach(opt => {
+        if (opt.i18n && locale in opt.i18n) {
+          delete opt.i18n[locale];
+        }
+      });
+    });
+  });
   const remaining = store.meta.enabledLocales.filter(l => l !== base);
   if (remaining.length > 0) {
     if (!remaining.includes(store.activeTargetLocale)) {

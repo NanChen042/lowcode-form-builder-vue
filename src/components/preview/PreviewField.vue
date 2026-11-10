@@ -275,17 +275,16 @@
             <a-range-picker
               v-if="field.dateMode === 'range'"
               v-model="formData[field.key]"
-              style="width: 100%"
+              class="w-full"
               :error="Boolean(error)"
-              :placeholder="[t('common.startDate'), t('common.endDate')]"
+              :placeholder="[localizedPlaceholder || t('common.startDate'), localizedEndPlaceholder || t('common.endDate')]"
               @change="handleFieldInput"
             />
             <a-input
               v-else-if="isLongTermChecked"
-              :model-value="t('common.longTermValid')"
+              :model-value="localizedLongTermText || t('common.longTermValid')"
               disabled
-              style="width: 100%"
-              class="!bg-slate-50 !text-slate-600 font-medium select-none"
+              class="w-full !bg-slate-50 !text-slate-600 font-medium select-none"
             >
               <template #suffix>
                 <Calendar class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -294,7 +293,7 @@
             <a-date-picker
               v-else
               v-model="formData[field.key]"
-              style="width: 100%"
+              class="w-full"
               :error="Boolean(error)"
               :placeholder="localizedPlaceholder"
               @change="handleFieldInput"
@@ -308,7 +307,7 @@
               @change="onLongTermChange"
             >
               <span class="text-[13px] font-medium text-slate-700">
-                {{ t('common.longTerm') }}
+                {{ localizedLongTermText || t('common.longTerm') }}
               </span>
             </a-checkbox>
           </div>
@@ -399,7 +398,7 @@
                 :class="signatureError ? 'text-red-500 font-medium' : 'text-slate-400'"
               >
                 <PenLine class="w-3.5 h-3.5" :class="signatureError ? 'text-red-500' : 'opacity-60'" />
-                <span>{{ t('common.clickToSign') }}</span>
+                <span>{{ localizedSignPlaceholder || (previewLoc === 'zh' ? '请在此处手写签名' : 'Please sign here') }}</span>
               </span>
             </template>
           </div>
@@ -716,6 +715,9 @@ function clearSignature() {
 const localizedLabel = computed(() => getLocalizedFieldText(props.field, 'label', previewLoc.value));
 const localizedHelp = computed(() => getLocalizedFieldText(props.field, 'help', previewLoc.value));
 const localizedCustomErrorMessage = computed(() => getLocalizedFieldText(props.field, 'customErrorMessage', previewLoc.value));
+const localizedEndPlaceholder = computed(() => getLocalizedFieldText(props.field, 'endPlaceholder', previewLoc.value));
+const localizedLongTermText = computed(() => getLocalizedFieldText(props.field, 'longTermText', previewLoc.value));
+const localizedSignPlaceholder = computed(() => getLocalizedFieldText(props.field, 'signPlaceholder', previewLoc.value));
 const localizedPlaceholder = computed(() => {
   const custom = getLocalizedFieldText(props.field, 'placeholder', previewLoc.value);
   if (custom) return custom;

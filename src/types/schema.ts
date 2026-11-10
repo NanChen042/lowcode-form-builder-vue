@@ -15,7 +15,7 @@ export type ComponentType =
 export type FormLocale = 'zh' | 'en' | 'ja' | 'ko' | 'zh-TW' | 'ms' | string;
 
 export interface FormElementOption {
-  label: string;
+  label?: string;
   label_en?: string;
   i18n?: Record<string, string>;
   value: string;
@@ -34,13 +34,19 @@ export interface FieldLinkage {
 export interface FormElement {
   id: string;
   type: ComponentType;
-  label: string;
+  label?: string;
   label_en?: string;
   key: string;
   required: boolean;
   showLabel?: boolean;
   placeholder?: string;
   placeholder_en?: string;
+  endPlaceholder?: string;
+  endPlaceholder_en?: string;
+  signPlaceholder?: string;
+  signPlaceholder_en?: string;
+  longTermText?: string;
+  longTermText_en?: string;
   help?: string;
   help_en?: string;
   helpPosition?: 'right' | 'bottom';
@@ -133,9 +139,9 @@ export interface ProfileCapitalItem {
 
 export interface FormPageSchema {
   id: string;
-  title: string;
+  title?: string;
   title_en?: string;
-  description: string;
+  description?: string;
   description_en?: string;
   fields: FormElement[];
   groups?: FormQuestionGroup[];
@@ -161,9 +167,9 @@ export interface PageConnection {
 }
 
 export interface FormMeta {
-  title: string;
+  title?: string;
   title_en?: string;
-  description: string;
+  description?: string;
   description_en?: string;
   profileType?: ProfileType;
   formType?: 'kyc' | 'risk';

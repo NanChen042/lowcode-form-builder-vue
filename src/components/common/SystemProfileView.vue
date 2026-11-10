@@ -5,7 +5,7 @@
         <div class="flex items-center gap-2 mb-2.5">
           <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
           <span class="text-[14px] font-bold text-slate-800 leading-5">
-            {{ t('common.notice') }}
+            {{ t('common.notice', effectiveLocale) }}
           </span>
         </div>
 
@@ -51,7 +51,7 @@
         <div class="flex items-center gap-2">
           <User class="h-4 w-4 text-[#1677ff]" />
           <span class="text-[13px] font-bold text-slate-800">
-            {{ t('profile.authorizedRep') }}
+            {{ t('profile.authorizedRep', effectiveLocale) }}
           </span>
         </div>
       </div>
@@ -78,7 +78,7 @@
         <div class="flex items-center gap-2">
           <Link2 class="h-4 w-4 text-[#1677ff]" />
           <span class="text-[13px] font-bold text-slate-800">
-            {{ t('profile.associatedInfo') }}
+            {{ t('profile.associatedInfo', effectiveLocale) }}
           </span>
         </div>
       </div>
@@ -86,7 +86,7 @@
       <div class="space-y-3">
         <div class="border-b border-slate-50 pb-2.5">
           <div class="text-[11.5px] text-slate-400 font-medium">
-            {{ t('profile.associatedEntity') }}
+            {{ t('profile.associatedEntity', effectiveLocale) }}
           </div>
           <div class="mt-0.5">
             <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
@@ -100,7 +100,7 @@
 
         <div v-if="profileType === 'individual'">
           <div class="text-[11.5px] text-slate-400 font-medium mb-1.5">
-            {{ t('profile.relationshipType') }}
+            {{ t('profile.relationshipType', effectiveLocale) }}
           </div>
           <div v-if="showSkeleton" class="mt-0.5">
             <a-skeleton :animation="true" class="w-full">
@@ -109,13 +109,13 @@
           </div>
           <div v-else class="flex items-center gap-1.5 flex-wrap">
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-[#1677ff] border border-blue-100">
-              {{ t('profile.shareholder') }}
+              {{ t('profile.shareholder', effectiveLocale) }}
             </span>
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-[#1677ff] border border-blue-100">
-              {{ t('profile.director') }}
+              {{ t('profile.director', effectiveLocale) }}
             </span>
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-[#1677ff] border border-blue-100">
-              {{ t('profile.partner') }}
+              {{ t('profile.partner', effectiveLocale) }}
             </span>
           </div>
         </div>
@@ -128,7 +128,7 @@
         <div class="flex items-center gap-2">
           <CircleDollarSign class="h-4 w-4 text-[#1677ff]" />
           <span class="text-[13px] font-bold text-slate-800">
-            {{ t('profile.capitalTitle') }}
+            {{ t('profile.capitalTitle', effectiveLocale) }}
           </span>
         </div>
       </div>
@@ -136,21 +136,21 @@
       <div class="space-y-3">
         <div class="border-b border-slate-50 pb-2.5">
           <div class="text-[11.5px] text-slate-400 font-medium">
-            {{ t('profile.shareClass') }}
+            {{ t('profile.shareClass', effectiveLocale) }}
           </div>
           <div class="mt-0.5">
             <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
               <a-skeleton-line :rows="1" :widths="['45%']" />
             </a-skeleton>
             <div v-else class="text-[13.5px] font-bold text-slate-900 tracking-tight font-sans">
-              SGD · 普通股
+              {{ effectiveLocale === 'en' ? 'SGD · Ordinary Shares' : 'SGD · 普通股' }}
             </div>
           </div>
         </div>
 
         <div class="border-b border-slate-50 pb-2.5">
           <div class="text-[11.5px] text-slate-400 font-medium">
-            {{ t('profile.sharesHeld') }}
+            {{ t('profile.sharesHeld', effectiveLocale) }}
           </div>
           <div class="mt-0.5">
             <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
@@ -167,7 +167,7 @@
 
         <div>
           <div class="text-[11.5px] text-slate-400 font-medium">
-            {{ t('profile.paidUpAmount') }}
+            {{ t('profile.paidUpAmount', effectiveLocale) }}
           </div>
           <div class="mt-0.5">
             <a-skeleton v-if="showSkeleton" :animation="true" class="w-full">
@@ -186,7 +186,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ProfileType } from '@/types/schema';
-import { t } from '@/core/i18n';
+import { store } from '@/core/store';
+import { t, type Locale } from '@/core/i18n';
 import { formatInlineText } from '@/utils/alertParser';
 import {
   Info,
@@ -201,6 +202,7 @@ const props = withDefaults(
     profileType?: ProfileType;
     showSkeleton?: boolean;
     isCanvas?: boolean;
+    locale?: string;
   }>(),
   {
     profileType: 'entity',
@@ -209,65 +211,75 @@ const props = withDefaults(
   }
 );
 
+// 语言规则：除中英以外的语言统一第一页先用英语 (en)，后续会补充多语言的基本资料页
+const effectiveLocale = computed<Locale>(() => {
+  const raw = props.locale || store.previewLocale || (props.isCanvas ? store.currentLocale : 'zh');
+  const loc = (raw || 'zh').toLowerCase().trim();
+  if (loc === 'zh' || loc === 'zh-cn') return 'zh';
+  return 'en';
+});
+
 const noticeList = computed(() => {
   if (props.profileType === 'individual') {
     return [
-      t('profile.notice.ind1'),
-      t('profile.notice.common')
+      t('profile.notice.ind1', effectiveLocale.value),
+      t('profile.notice.common', effectiveLocale.value)
     ];
   }
   return [
-    t('profile.notice.ent1'),
-    t('profile.notice.common')
+    t('profile.notice.ent1', effectiveLocale.value),
+    t('profile.notice.common', effectiveLocale.value)
   ];
 });
 
 const mainInfoTitle = computed(() => {
   if (props.profileType === 'client' || props.profileType === 'customer') {
-    return t('profile.customerTitle');
+    return t('profile.customerTitle', effectiveLocale.value);
   }
   if (props.profileType === 'entity') {
-    return t('profile.entityTitle');
+    return t('profile.entityTitle', effectiveLocale.value);
   }
-  return t('profile.basicTitle');
+  return t('profile.basicTitle', effectiveLocale.value);
 });
 
 const mainFields = computed(() => {
+  const loc = effectiveLocale.value;
   if (props.profileType === 'individual') {
     return [
-      { label: t('profile.field.name'), value: 'Alexander Tan', skeletonWidth: '45%' },
-      { label: t('profile.field.nativeName'), value: '陈建国', skeletonWidth: '20%' },
-      { label: t('profile.field.nationality'), value: 'Singaporean', skeletonWidth: '35%' },
-      { label: t('profile.field.sgStatus'), value: t('profile.val.sgCitizen'), skeletonWidth: '45%' },
-      { label: t('profile.field.nricFin'), value: 'S1234567A', skeletonWidth: '25%' },
-      { label: t('profile.field.idType'), value: t('profile.val.idCardPassport'), skeletonWidth: '40%' },
-      { label: t('profile.field.idNumber'), value: 'S1234567A', skeletonWidth: '50%' },
-      { label: t('profile.field.dob'), value: '1988-06-18', skeletonWidth: '45%' },
-      { label: t('profile.field.gender'), value: t('profile.val.male'), skeletonWidth: '15%' },
-      { label: t('profile.field.phone'), value: '+65 9123 4567', skeletonWidth: '55%' },
-      { label: t('profile.field.email'), value: 'alexander.tan@example.com', skeletonWidth: '65%' },
-      { label: t('profile.field.resAddress'), value: '10 Marina Boulevard, #18-01, Singapore 018983', skeletonWidth: '70%' },
-      { label: t('profile.field.contactAddress'), value: '10 Marina Boulevard, #18-01, Singapore 018983', skeletonWidth: '70%' }
+      { label: t('profile.field.name', loc), value: 'Alexander Tan', skeletonWidth: '45%' },
+      { label: t('profile.field.nativeName', loc), value: '陈建国', skeletonWidth: '20%' },
+      { label: t('profile.field.nationality', loc), value: loc === 'en' ? 'Singaporean' : '新加坡 / Singapore', skeletonWidth: '35%' },
+      { label: t('profile.field.sgStatus', loc), value: t('profile.val.sgCitizen', loc), skeletonWidth: '45%' },
+      { label: t('profile.field.nricFin', loc), value: 'S1234567A', skeletonWidth: '25%' },
+      { label: t('profile.field.idType', loc), value: t('profile.val.idCardPassport', loc), skeletonWidth: '40%' },
+      { label: t('profile.field.idNumber', loc), value: 'S1234567A', skeletonWidth: '50%' },
+      { label: t('profile.field.dob', loc), value: '1988-06-18', skeletonWidth: '45%' },
+      { label: t('profile.field.gender', loc), value: t('profile.val.male', loc), skeletonWidth: '15%' },
+      { label: t('profile.field.phone', loc), value: '+65 9123 4567', skeletonWidth: '55%' },
+      { label: t('profile.field.email', loc), value: 'alexander.tan@example.com', skeletonWidth: '65%' },
+      { label: t('profile.field.resAddress', loc), value: '10 Marina Boulevard, #18-01, Singapore 018983', skeletonWidth: '70%' },
+      { label: t('profile.field.contactAddress', loc), value: '10 Marina Boulevard, #18-01, Singapore 018983', skeletonWidth: '70%' }
     ];
   }
   return [
-    { label: t('profile.field.entityName'), value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '50%' },
-    { label: t('profile.field.formerName'), value: '-', skeletonWidth: '20%' },
-    { label: t('profile.field.jurisdiction'), value: 'Singapore', skeletonWidth: '35%' },
-    { label: t('profile.field.entityRegNo'), value: '202412345K', skeletonWidth: '35%' },
-    { label: t('profile.field.registeredAddress'), value: '10 Anson Road, #23-07 International Plaza, Singapore 079903', skeletonWidth: '85%' }
+    { label: t('profile.field.entityName', loc), value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '50%' },
+    { label: t('profile.field.formerName', loc), value: '-', skeletonWidth: '20%' },
+    { label: t('profile.field.jurisdiction', loc), value: loc === 'en' ? 'Singapore' : '新加坡 / Singapore', skeletonWidth: '35%' },
+    { label: t('profile.field.entityRegNo', loc), value: '202412345K', skeletonWidth: '35%' },
+    { label: t('profile.field.registeredAddress', loc), value: '10 Anson Road, #23-07 International Plaza, Singapore 079903', skeletonWidth: '85%' }
   ];
 });
 
 const repFields = computed(() => {
+  const loc = effectiveLocale.value;
   return [
-    { label: t('profile.field.repCapacity'), value: t('profile.val.repCapacityVal'), skeletonWidth: '60%' },
-    { label: t('profile.field.repName'), value: 'Michael Wong', skeletonWidth: '35%' },
-    { label: t('profile.field.nationality'), value: 'Singaporean', skeletonWidth: '45%' },
-    { label: t('profile.field.idType'), value: t('profile.val.repIdTypeVal'), skeletonWidth: '55%' },
-    { label: t('profile.field.idNumber'), value: 'S7654321B', skeletonWidth: '50%' },
-    { label: t('profile.field.phone'), value: '+65 8123 1232', skeletonWidth: '55%' },
-    { label: t('profile.field.email'), value: 'compliance@example.com', skeletonWidth: '65%' }
+    { label: t('profile.field.repCapacity', loc), value: t('profile.val.repCapacityVal', loc), skeletonWidth: '60%' },
+    { label: t('profile.field.repName', loc), value: 'Michael Wong', skeletonWidth: '35%' },
+    { label: t('profile.field.nationality', loc), value: loc === 'en' ? 'Singaporean' : '新加坡 / Singapore', skeletonWidth: '45%' },
+    { label: t('profile.field.idType', loc), value: t('profile.val.repIdTypeVal', loc), skeletonWidth: '55%' },
+    { label: t('profile.field.idNumber', loc), value: 'S7654321B', skeletonWidth: '50%' },
+    { label: t('profile.field.phone', loc), value: '+65 8123 1232', skeletonWidth: '55%' },
+    { label: t('profile.field.email', loc), value: 'compliance@example.com', skeletonWidth: '65%' }
   ];
 });
 

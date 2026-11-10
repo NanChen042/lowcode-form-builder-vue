@@ -170,25 +170,33 @@
         <a-alert type="warning" class="rounded">
           <template #title>
             <span class="font-medium text-xs">
-              {{ t('header.warnCount', undefined, { count: translationStats.untranslatedCount }) }}
+              {{
+                translationStats.enMissingCount > 0
+                  ? t('header.warnCount', undefined, { count: translationStats.enMissingCount })
+                  : t('header.warnMultiCount', undefined, { count: translationStats.untranslatedCount })
+              }}
             </span>
           </template>
           <div class="text-[12px] text-slate-600 leading-relaxed mt-0.5">
-            {{ t('header.warnDesc') }}
+            {{
+              translationStats.enMissingCount > 0
+                ? t('header.warnEnRequiredDesc')
+                : t('header.warnMultiDesc')
+            }}
           </div>
         </a-alert>
 
 
         <div class="max-h-[160px] overflow-y-auto space-y-1.5 custom-scrollbar">
-          <div v-for="item in translationStats.untranslatedItems.slice(0, 10)" :key="item.id" class="flex items-center justify-between py-2 px-3 rounded border border-slate-200/80 bg-white hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer text-xs transition-colors" @click="handleJumpFromPublishCheck(item)">
+          <div v-for="item in publishWarningItems.slice(0, 10)" :key="item.id" class="flex items-center justify-between py-2 px-3 rounded border border-slate-200/80 bg-white hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer text-xs transition-colors" @click="handleJumpFromPublishCheck(item)">
             <span class="text-slate-700 font-medium truncate pr-3">{{ item.fieldName }}</span>
             <a-tag size="small" color="orange" class="shrink-0">
               P{{ item.pageIndex + 1 }} · {{ t('header.untranslatedTag') }}
             </a-tag>
           </div>
 
-          <div v-if="translationStats.untranslatedItems.length > 10" class="text-center text-[11px] text-slate-400 pt-1">
-            {{ t('header.warnMore', undefined, { count: translationStats.untranslatedItems.length - 10 }) }}
+          <div v-if="publishWarningItems.length > 10" class="text-center text-[11px] text-slate-400 pt-1">
+            {{ t('header.warnMore', undefined, { count: publishWarningItems.length - 10 }) }}
           </div>
         </div>
       </div>
@@ -198,7 +206,7 @@
           <a-button type="primary" class="bg-[#1677ff]" @click="handleGoToTranslate">
             {{ t('header.warnComplete') }}
           </a-button>
-          <a-button @click="handleProceedPublish">
+          <a-button v-if="translationStats.enMissingCount === 0" @click="handleProceedPublish">
             {{ t('header.warnPublishAnyway') }}
           </a-button>
         </div>
@@ -382,14 +390,17 @@ function validateFormBeforePublish(): boolean {
   return true;
 }
 
+const publishWarningItems = computed(() => {
+  if (translationStats.value.enMissingCount > 0) {
+    return translationStats.value.localeStats?.['en']?.missingItems || translationStats.value.untranslatedItems;
+  }
+  return translationStats.value.untranslatedItems;
+});
+
 function handleDeployClick() {
   if (!validateFormBeforePublish()) return;
-  if (isRisk.value) {
-    if (isBilingual.value && translationStats.value.enMissingCount > 0) {
-      publishCheckModalVisible.value = true;
-    } else {
-      emit('open-deploy');
-    }
+  if (primaryLocale.value === 'zh' && translationStats.value.enMissingCount > 0) {
+    publishCheckModalVisible.value = true;
     return;
   }
   if (isBilingual.value && translationStats.value.untranslatedCount > 0) {
@@ -406,8 +417,9 @@ function handleProceedPublish() {
 
 function handleGoToTranslate() {
   publishCheckModalVisible.value = false;
-  if (translationStats.value.untranslatedItems.length > 0) {
-    navigateToUntranslatedItem(translationStats.value.untranslatedItems[0]);
+  const items = publishWarningItems.value;
+  if (items.length > 0) {
+    navigateToUntranslatedItem(items[0]);
   }
 }
 

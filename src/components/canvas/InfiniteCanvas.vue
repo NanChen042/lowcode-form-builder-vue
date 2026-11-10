@@ -18,6 +18,123 @@
   >
     <div id="tour-canvas-viewport" class="absolute inset-0 pointer-events-none" />
 
+    <!-- 翻译管理模式顶部语言切换与进度栏 (紧凑高阶微圆角风格) -->
+    <div
+      v-if="store.workspaceMode === 'translation'"
+      class="translation-top-bar absolute top-0 left-0 right-0 z-30 h-10 px-3 bg-white/95 border-b border-slate-200/80 backdrop-blur-md flex items-center justify-between gap-3 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+      @mousedown.stop
+    >
+      <div class="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto custom-scrollbar py-1 pr-2">
+        <!-- 默认基准语言标签 (紧凑一体化卡片样式，参考图二) -->
+        <div class="inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] bg-white border border-slate-200/90 text-xs shadow-2xs shrink-0 select-none">
+          <span class="inline-flex items-center px-1.5 h-4.5 rounded-[3px] bg-[#f2f3f5] text-[#4e5969] text-xs font-medium leading-none select-none">
+            {{ t('trans.defaultLang') }}
+          </span>
+          <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(primaryLocale)"></span>
+          <span class="font-medium text-[#1d2129] text-xs leading-none">{{ getLocaleNativeName(primaryLocale) }}</span>
+        </div>
+
+        <div class="w-px h-3.5 bg-slate-200 shrink-0 mx-0.5"></div>
+
+        <!-- 目标翻译语言标签 (标准统一 h-7 高度、px-2 与 rounded-[4px] 微圆角) -->
+        <button
+          v-for="loc in targetLocales"
+          :key="loc"
+          type="button"
+          class="group/lang-tab relative inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] text-xs font-medium transition-all cursor-pointer shrink-0 border"
+          :class="
+            store.activeTargetLocale === loc
+              ? 'bg-[#165dff] text-white border-[#165dff] shadow-xs font-semibold'
+              : 'bg-white hover:bg-blue-50/35 text-slate-700 hover:text-[#165dff] border-slate-200/90 hover:border-blue-200 shadow-2xs'
+          "
+          @click="handleSelectTargetLocale(loc)"
+        >
+          <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(loc)"></span>
+          <span :class="store.activeTargetLocale === loc ? 'text-white' : 'text-[#1d2129] font-medium'" class="text-xs leading-none">
+            {{ getLocaleNativeName(loc) }}
+          </span>
+          <div
+            v-if="store.activeTargetLocale === loc"
+            class="inline-flex items-center gap-1 text-white font-medium text-xs leading-none ml-0.5"
+          >
+            <Check v-if="getLocalePercent(loc) === 100" class="w-3.5 h-3.5 stroke-[2.2]" />
+            <a-progress
+              v-else
+              type="circle"
+              size="mini"
+              :percent="getLocalePercent(loc) / 100"
+              :width="11"
+              :stroke-width="2.2"
+              color="#ffffff"
+              track-color="rgba(255, 255, 255, 0.35)"
+            />
+            <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
+          </div>
+          <template v-else>
+            <!-- 100% 完成：标准柔和翠绿图标 + 百分比（极简行内结构，完全匹配图二） -->
+            <span
+              v-if="getLocalePercent(loc) === 100"
+              class="inline-flex items-center gap-1 text-[#00b42a] font-medium text-xs leading-none ml-0.5"
+            >
+              <Check class="w-3.5 h-3.5 stroke-[2.2]" />
+              <span class="leading-none">100%</span>
+            </span>
+            <!-- 未完成：暖橙色行内进度标签 -->
+            <span
+              v-else
+              class="inline-flex items-center gap-1 text-[#ff7d00] font-medium text-xs leading-none ml-0.5"
+            >
+              <a-progress
+                type="circle"
+                size="mini"
+                :percent="getLocalePercent(loc) / 100"
+                status="normal"
+                color="#ff7d00"
+                track-color="rgba(255, 125, 0, 0.16)"
+                :width="11"
+                :stroke-width="2.2"
+              />
+              <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
+            </span>
+          </template>
+          <!-- 非英语且非主语言的目标语言才允许被删除 -->
+          <span
+            v-if="loc !== 'en' && loc !== primaryLocale"
+            class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-400 hover:bg-red-500 text-white flex items-center justify-center shadow-2xs ring-1 ring-white transition-colors cursor-pointer z-10"
+            :title="t('trans.removeLanguage')"
+            @click.stop="handleRemoveTargetLanguage(loc)"
+          >
+            <X class="w-2.5 h-2.5 stroke-[2.5]" />
+          </span>
+        </button>
+
+        <!-- 添加新语言下拉菜单 (统一 h-7 高度、px-2 与 rounded-[4px]) -->
+        <a-dropdown v-if="availableLocalesToAdd.length > 0" trigger="click" position="bl">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 h-7 px-2 rounded-[4px] text-xs font-medium text-slate-600 hover:text-[#165dff] bg-white hover:bg-blue-50/40 border border-dashed border-slate-300 hover:border-[#165dff] transition-all cursor-pointer shrink-0 shadow-2xs leading-none"
+          >
+            <Plus class="w-3.5 h-3.5 stroke-[2.2]" />
+            <span class="text-xs leading-none">{{ t('trans.addLanguageShort') }}</span>
+          </button>
+          <template #content>
+            <a-doption
+              v-for="loc in availableLocalesToAdd"
+              :key="loc.code"
+              class="!py-0.5 !px-2 !min-h-[28px] !leading-none text-xs"
+              @click="handleAddTargetLanguage(loc.code)"
+            >
+              <div class="flex items-center gap-2 min-w-[110px] py-0.5">
+                <span class="iti__flag shrink-0" :class="'iti__' + loc.flag"></span>
+                <span class="text-xs font-medium text-slate-700 flex-1">{{ loc.nativeLabel }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">{{ loc.code.toUpperCase() }}</span>
+              </div>
+            </a-doption>
+          </template>
+        </a-dropdown>
+      </div>
+    </div>
+
     <div
       class="canvas-world transition-opacity duration-300 ease-out"
       :class="{
@@ -32,7 +149,7 @@
         <PageFrame
           :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
           :page="activeTranslationPage"
-          :page-index="activeTranslationPageIndex"
+          :page-index="activeTranslationDisplayIndex"
           :is-translation-frame="true"
           :is-read-only-reference="true"
           :in-translation-workspace="true"
@@ -57,7 +174,7 @@
         <PageFrame
           :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
           :page="activeTranslationPage"
-          :page-index="activeTranslationPageIndex"
+          :page-index="activeTranslationDisplayIndex"
           :is-translation-frame="true"
           :in-translation-workspace="true"
           :translation-locale="store.activeTargetLocale"
@@ -81,7 +198,8 @@
     <transition name="fade">
       <div
         v-if="!store.leftSidebarVisible"
-        class="figma-floating-pill absolute left-4 top-3.5 z-30 flex items-center gap-2.5 px-3 py-1.5 bg-white/95 rounded-xl border border-slate-200/90 shadow-md backdrop-blur-md select-none transition-all duration-200 hover:shadow-lg hover:border-blue-300 cursor-pointer"
+        class="figma-floating-pill absolute left-4 z-30 flex items-center gap-2.5 px-3 py-1.5 bg-white/95 rounded-xl border border-slate-200/90 shadow-md backdrop-blur-md select-none transition-all duration-200 hover:shadow-lg hover:border-blue-300 cursor-pointer"
+        :class="store.workspaceMode === 'translation' ? 'top-14' : 'top-3.5'"
         @click="store.leftSidebarVisible = true"
       >
         <div class="flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 text-blue-600">
@@ -118,7 +236,8 @@
       >
         <button
           type="button"
-          class="absolute right-3.5 top-3.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
+          class="absolute right-3.5 z-30 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95 group"
+          :class="store.workspaceMode === 'translation' ? 'top-14' : 'top-3.5'"
           @click="store.rightSidebarVisible = true"
         >
           <PanelRight class="h-4 w-4 transition-transform duration-200 group-hover:scale-105" />
@@ -362,9 +481,13 @@ import {
   duplicateElement,
   deleteElement,
   isBilingual,
-  primaryLocale
+  primaryLocale,
+  targetLocales,
+  addTargetLocale,
+  removeTargetLocale,
+  setActiveTargetLocale
 } from '@/core/store';
-import { t, getLocaleDisplayName } from '@/core/i18n';
+import { t, getLocaleDisplayName, getLocaleNativeName, getLocaleFlag, SUPPORTED_FORM_LOCALES } from '@/core/i18n';
 import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
 import ContextMenu from './ContextMenu.vue';
@@ -376,7 +499,9 @@ import {
   Maximize2,
   ArrowRight,
   ChevronUp,
-  X
+  X,
+  Plus,
+  Check
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
@@ -384,6 +509,30 @@ import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } f
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
+
+const availableLocalesToAdd = computed(() => {
+  const used = new Set([primaryLocale.value, ...targetLocales.value]);
+  return SUPPORTED_FORM_LOCALES.filter(l => !used.has(l.code));
+});
+
+function getLocalePercent(locale: string): number {
+  return translationStats.value.localeStats?.[locale]?.percent ?? 100;
+}
+
+function handleAddTargetLanguage(locale: string) {
+  addTargetLocale(locale);
+  Message.success(t('trans.addedLocaleSuccess', undefined, { name: getLocaleNativeName(locale) }));
+}
+
+function handleSelectTargetLocale(locale: string) {
+  setActiveTargetLocale(locale);
+  store.editingLocale = locale;
+}
+
+function handleRemoveTargetLanguage(locale: string) {
+  if (locale === 'en' || locale === primaryLocale.value) return;
+  removeTargetLocale(locale);
+}
 
 const activeTranslationPageIndex = computed(() => {
   const idx = store.pages.findIndex(p => p.id === store.activePageId && p.pageType !== 'system_profile');
@@ -394,6 +543,12 @@ const activeTranslationPageIndex = computed(() => {
 
 const activeTranslationPage = computed(() => {
   return store.pages[activeTranslationPageIndex.value] || null;
+});
+
+const activeTranslationDisplayIndex = computed(() => {
+  const formPages = store.pages.filter(p => p.pageType !== 'system_profile');
+  const idx = formPages.findIndex(p => p.id === activeTranslationPage.value?.id);
+  return idx >= 0 ? idx : 0;
 });
 
 const translationFrameWidth = computed(() => getPageWidth());
@@ -705,7 +860,23 @@ function handleZoomAction(action: 'in' | 'out' | '100' | 'fit' | 'selection') {
   isZoomMenuOpen.value = false;
 }
 
+let isPendingTranslationPan = false;
+let hasDraggedDuringPan = false;
+let pendingPanEditableTarget: HTMLElement | null = null;
+
+function onCaptureClick(e: MouseEvent) {
+  if (hasDraggedDuringPan) {
+    e.stopPropagation();
+    e.preventDefault();
+    hasDraggedDuringPan = false;
+  }
+}
+
 function onMouseDown(e: MouseEvent) {
+  hasDraggedDuringPan = false;
+  isPendingTranslationPan = false;
+  pendingPanEditableTarget = null;
+
   if (isZoomMenuOpen.value) {
     isZoomMenuOpen.value = false;
   }
@@ -718,17 +889,39 @@ function onMouseDown(e: MouseEvent) {
   const isCtrlDrag = e.button === 0 && (e.ctrlKey || e.metaKey);
   const isMiddleDrag = e.button === 1;
   const targetEl = e.target as HTMLElement;
-  const isTranslationPan =
-    store.workspaceMode === 'translation' &&
-    e.button === 0 &&
-    !targetEl.closest('[contenteditable="plaintext-only"], input, textarea, button, a, .arco-dropdown');
   const isBackgroundDrag =
     e.button === 0 &&
     (e.target === canvasContainerRef.value ||
       targetEl.classList.contains('canvas-world') ||
       targetEl.id === 'canvas-connections');
 
-  if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag || isTranslationPan) {
+  // 翻译管理模式：在画布任意区域（含左右画板、标题区、组件卡片）按住左键拖拽均可平滑平移画布；
+  // 单击（位移 <= 4px）则正常触发卡片选中或原位内联文案编辑。
+  if (store.workspaceMode === 'translation' && e.button === 0 && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
+    if (isBackgroundDrag) {
+      e.preventDefault();
+      store.isPanning = true;
+      panStartX = e.clientX;
+      panStartY = e.clientY;
+      panStartCanvasX = store.canvasState.x;
+      panStartCanvasY = store.canvasState.y;
+      clearSelection();
+      return;
+    }
+    const editableEl = targetEl.closest('[contenteditable="plaintext-only"]') as HTMLElement | null;
+    const isAlreadyEditingThisText = Boolean(editableEl && document.activeElement === editableEl);
+    if (!isAlreadyEditingThisText && !targetEl.closest('button, a, .arco-dropdown, .translation-top-bar')) {
+      isPendingTranslationPan = true;
+      pendingPanEditableTarget = editableEl;
+      panStartX = e.clientX;
+      panStartY = e.clientY;
+      panStartCanvasX = store.canvasState.x;
+      panStartCanvasY = store.canvasState.y;
+      return;
+    }
+  }
+
+  if (isSpaceDrag || isCtrlDrag || isMiddleDrag || isBackgroundDrag) {
     e.preventDefault();
     store.isPanning = true;
     panStartX = e.clientX;
@@ -736,7 +929,7 @@ function onMouseDown(e: MouseEvent) {
     panStartCanvasX = store.canvasState.x;
     panStartCanvasY = store.canvasState.y;
 
-    if (e.button === 0 && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
+    if (isBackgroundDrag && !isSpaceDrag && !isCtrlDrag && !isMiddleDrag) {
       clearSelection();
     }
   } else if (store.isDraggingFrame && store.draggedFrameId) {
@@ -751,9 +944,23 @@ function onMouseDown(e: MouseEvent) {
 }
 
 function onMouseMove(e: MouseEvent) {
+  if (isPendingTranslationPan && !store.isPanning) {
+    if (Math.hypot(e.clientX - panStartX, e.clientY - panStartY) > 4) {
+      isPendingTranslationPan = false;
+      store.isPanning = true;
+      hasDraggedDuringPan = true;
+      document.body.classList.add('is-panning');
+      if (pendingPanEditableTarget && document.activeElement === pendingPanEditableTarget) {
+        pendingPanEditableTarget.blur();
+      }
+      window.getSelection()?.removeAllRanges();
+    }
+  }
+
   if (store.isPanning) {
     e.preventDefault();
     if (Math.hypot(e.clientX - panStartX, e.clientY - panStartY) > 3) {
+      hasDraggedDuringPan = true;
       document.body.classList.add('is-panning');
     }
     store.canvasState.x = panStartCanvasX + (e.clientX - panStartX);
@@ -775,10 +982,15 @@ function onMouseMove(e: MouseEvent) {
 }
 
 function onMouseUp() {
+  isPendingTranslationPan = false;
+  pendingPanEditableTarget = null;
   if (store.isPanning) {
     store.isPanning = false;
     document.body.classList.remove('is-panning');
     checkOffScreenStatus();
+    setTimeout(() => {
+      hasDraggedDuringPan = false;
+    }, 50);
   }
   if (store.isDraggingFrame) {
     store.isDraggingFrame = false;
@@ -823,6 +1035,15 @@ function onWheel(e: WheelEvent) {
 }
 
 function onContextMenu(e: MouseEvent) {
+  if (store.workspaceMode === 'translation') {
+    contextMenuTargetType.value = 'canvas';
+    contextMenuTargetElementId.value = null;
+    contextMenuTargetPageId.value = null;
+    contextMenuPos.value = { x: e.clientX, y: e.clientY };
+    contextMenuVisible.value = true;
+    return;
+  }
+
   const target = e.target as HTMLElement;
   const elementEl = target.closest('.canvas-element') as HTMLElement | null;
   const frameEl = target.closest('.mobile-frame') as HTMLElement | null;
@@ -882,6 +1103,7 @@ function handleKeyDown(e: KeyboardEvent) {
   if (isCtrlOrCmd && isKeyD) {
     e.preventDefault();
     e.stopPropagation();
+    if (store.workspaceMode === 'translation') return;
 
     if (store.selectedType === 'element' && store.selectedId) {
       duplicateElement(store.selectedId);
@@ -920,7 +1142,7 @@ function handleKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     handleZoomAction('selection');
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (store.selectedType === 'element' && store.selectedId) {
+    if (store.workspaceMode !== 'translation' && store.selectedType === 'element' && store.selectedId) {
       e.preventDefault();
       deleteElement(store.selectedId);
     }
@@ -942,6 +1164,7 @@ function handleWindowResize() {
 onMounted(() => {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
+  window.addEventListener('click', onCaptureClick, true);
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', handleWindowResize);
@@ -950,6 +1173,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove);
   window.removeEventListener('mouseup', onMouseUp);
+  window.removeEventListener('click', onCaptureClick, true);
   window.removeEventListener('keydown', handleKeyDown, true);
   window.removeEventListener('keyup', handleKeyUp, true);
   window.removeEventListener('resize', handleWindowResize);

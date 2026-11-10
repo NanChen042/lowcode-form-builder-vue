@@ -125,59 +125,67 @@
             {{ t('prop.untranslated') }}
           </a-tag>
         </div>
-      </div>
-      <a-textarea
-        id="prop-help-input"
-        v-model="fieldHelpModel"
-        :auto-size="{ minRows: 1, maxRows: 3 }"
-        allow-clear
-        :placeholder="t('prop.fieldHelpPlaceholder')"
-        class="w-full"
-        :class="{ 'prop-field-focused': isFieldFocused('help') }"
-        @focus="setFocus('help')"
-        @blur="clearFocus"
-        @input="markDirty"
-      />
-
-      <div class="mt-2 flex items-center justify-between py-1 pl-1">
-        <div class="flex items-center gap-1.5">
-          <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
-          <a-tooltip :content="t('prop.helpPositionTip')">
-            <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-          </a-tooltip>
-        </div>
-
-        <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
-          <button
-            type="button"
-            class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            :title="t('prop.helpPositionRightDesc')"
-            @click="helpPositionValue = 'right'"
-          >
-            <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-              <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
-              <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
-            </svg>
-            <span>{{ t('prop.helpPositionRight') }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-            :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-            :title="t('prop.helpPositionBottomDesc')"
-            @click="helpPositionValue = 'bottom'"
-          >
-            <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-              <rect x="2" y="3" width="12" height="4" rx="1.2" />
-              <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
-            </svg>
-            <span>{{ t('prop.helpPositionBottom') }}</span>
-          </button>
+        <div class="flex items-center gap-1.5 font-normal select-none">
+          <a-switch :model-value="isHelpEnabled" size="small" @change="handleHelpSwitchChange" />
         </div>
       </div>
+
+      <CollapseTransition :show="Boolean(isHelpEnabled)">
+        <div>
+          <a-textarea
+            id="prop-help-input"
+            v-model="fieldHelpModel"
+            :auto-size="{ minRows: 1, maxRows: 3 }"
+            allow-clear
+            :placeholder="t('prop.fieldHelpPlaceholder')"
+            class="w-full"
+            :class="{ 'prop-field-focused': isFieldFocused('help') }"
+            @focus="setFocus('help')"
+            @blur="clearFocus"
+            @input="markDirty"
+          />
+
+          <div class="mt-2 flex items-center justify-between py-1 pl-1">
+            <div class="flex items-center gap-1.5">
+              <CornerDownRight class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span class="text-[12px] font-medium text-slate-600">{{ t('prop.helpLayout') }}</span>
+              <a-tooltip :content="t('prop.helpPositionTip')">
+                <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+              </a-tooltip>
+            </div>
+
+            <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
+              <button
+                type="button"
+                class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                :title="t('prop.helpPositionRightDesc')"
+                @click="helpPositionValue = 'right'"
+              >
+                <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
+                  <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
+                </svg>
+                <span>{{ t('prop.helpPositionRight') }}</span>
+              </button>
+
+              <button
+                type="button"
+                class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
+                :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                :title="t('prop.helpPositionBottomDesc')"
+                @click="helpPositionValue = 'bottom'"
+              >
+                <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="2" y="3" width="12" height="4" rx="1.2" />
+                  <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
+                </svg>
+                <span>{{ t('prop.helpPositionBottom') }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </CollapseTransition>
     </div>
 
     <div v-if="hasPlaceholder" class="mb-3">
@@ -187,14 +195,59 @@
           {{ t('prop.untranslated') }}
         </a-tag>
       </div>
-      <a-input
+      <a-textarea
         id="prop-placeholder-input"
         v-model="fieldPlaceholderModel"
+        :auto-size="{ minRows: 1, maxRows: 4 }"
         allow-clear
         :placeholder="placeholderInputDefault"
         class="w-full"
         :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
         @focus="setFocus('placeholder')"
+        @blur="clearFocus"
+        @input="markDirty"
+      />
+    </div>
+
+    <!-- 额外占位符：起止日期的截止日期提示 -->
+    <div v-if="hasEndPlaceholder" class="mb-3">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[12px] font-medium text-slate-700">{{ t('prop.endDatePlaceholder') }}</span>
+        <a-tag v-if="isFieldEndPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+          {{ t('prop.untranslated') }}
+        </a-tag>
+      </div>
+      <a-textarea
+        id="prop-end-placeholder-input"
+        v-model="fieldEndPlaceholderModel"
+        :auto-size="{ minRows: 1, maxRows: 4 }"
+        allow-clear
+        :placeholder="t('common.endDate')"
+        class="w-full"
+        :class="{ 'prop-field-focused': isFieldFocused('endPlaceholder') }"
+        @focus="setFocus('endPlaceholder')"
+        @blur="clearFocus"
+        @input="markDirty"
+      />
+    </div>
+
+    <!-- 额外占位符：签名板手写区内提示文案 -->
+    <div v-if="hasSignWatermark" class="mb-3">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[12px] font-medium text-slate-700">{{ t('prop.signWatermarkPlaceholder') }}</span>
+        <a-tag v-if="isFieldSignPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+          {{ t('prop.untranslated') }}
+        </a-tag>
+      </div>
+      <a-textarea
+        id="prop-sign-placeholder-input"
+        v-model="fieldSignPlaceholderModel"
+        :auto-size="{ minRows: 1, maxRows: 4 }"
+        allow-clear
+        :placeholder="t('canvas.signatureArea')"
+        class="w-full"
+        :class="{ 'prop-field-focused': isFieldFocused('signPlaceholder') }"
+        @focus="setFocus('signPlaceholder')"
         @blur="clearFocus"
         @input="markDirty"
       />
@@ -217,51 +270,75 @@
       :key="`${element.id}-req`"
       :show="Boolean(isElementRequired)"
     >
-      <div class="pt-1.5 pb-0.5 space-y-1">
+      <div class="pt-2 pb-1 space-y-1.5">
         <div class="flex items-center justify-between text-[11.5px]">
           <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
             <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
             <span>{{ element.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg') }}</span>
           </div>
-          
-          <button
-            v-if="!isCustomErrorExpanded"
-            type="button"
-            class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
-            :title="t('prop.customizeError')"
-            @click="expandCustomError"
-          >
-            <Pencil class="w-3.5 h-3.5" />
-          </button>
-          <button
-            v-else
-            type="button"
-            class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
-            :title="t('prop.resetToDefaultError')"
-            @click="resetCustomError"
-          >
-            <RotateCcw class="w-3.5 h-3.5" />
-          </button>
+          <span class="text-[11px] text-slate-400 font-normal">
+            {{ fieldCustomErrorModel?.trim() ? t('prop.customized') : t('prop.defaultFallback') }}
+          </span>
         </div>
 
+        <!-- 1. 所见即所得报错效果预览态（真实表单错误提示风格） -->
         <div
-          v-if="!isCustomErrorExpanded"
-          class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
-          :title="rawDefaultErrorMessage"
+          v-if="!isEditingCustomError"
+          class="group/err-preview flex items-center justify-between px-2.5 py-1.5 rounded-[4px] bg-red-50/60 border border-red-200/70 transition-all hover:border-red-300"
         >
-          <span class="text-slate-400">{{ t('common.defaultColon') }}</span>“{{ rawDefaultErrorMessage }}”
+          <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1.5">
+            <svg class="h-3 w-3 text-[#f53f3f] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span class="text-[12px] font-medium text-[#f53f3f] break-words truncate" :title="currentDisplayError">
+              {{ currentDisplayError }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-0.5 shrink-0">
+            <button
+              type="button"
+              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-[#1677ff] hover:bg-white transition-colors cursor-pointer"
+              :title="t('prop.customizeError')"
+              @click="startEditingCustomError"
+            >
+              <Pencil class="w-3.5 h-3.5 stroke-[2]" />
+            </button>
+            <button
+              v-if="fieldCustomErrorModel?.trim()"
+              type="button"
+              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-white transition-colors cursor-pointer"
+              :title="t('prop.resetToDefaultError')"
+              @click="fieldCustomErrorModel = ''"
+            >
+              <RotateCcw class="w-3.5 h-3.5 stroke-[2]" />
+            </button>
+          </div>
         </div>
 
-        <div v-else class="mt-1">
+        <!-- 2. 点击图标后展开的编辑态 -->
+        <div v-else class="flex items-center gap-1.5">
           <a-input
-            id="prop-custom-error-input"
+            ref="customErrorInputRef"
             v-model="fieldCustomErrorModel"
-            size="mini"
+            size="small"
             allow-clear
-            class="w-full"
+            class="flex-1"
             :placeholder="rawDefaultErrorMessage"
             @input="markDirty"
+            @blur="isEditingCustomError = false"
+            @keydown.enter="isEditingCustomError = false"
           />
+          <button
+            type="button"
+            class="flex items-center justify-center w-7 h-7 rounded bg-[#1677ff] text-white hover:bg-blue-600 transition-colors cursor-pointer shrink-0 shadow-2xs"
+            :title="t('modal.confirm')"
+            @mousedown.prevent="isEditingCustomError = false"
+          >
+            <Check class="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
         </div>
       </div>
     </CollapseTransition>
@@ -281,51 +358,75 @@
       :key="`${element.id}-decl`"
       :show="Boolean(isDeclarationRequired)"
     >
-      <div class="pt-1.5 pb-0.5 space-y-1">
+      <div class="pt-2 pb-1 space-y-1.5">
         <div class="flex items-center justify-between text-[11.5px]">
           <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
             <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
             <span>{{ t('prop.declarationErrorMsg') }}</span>
           </div>
-          
-          <button
-            v-if="!isDeclarationCustomErrorExpanded"
-            type="button"
-            class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-[#1677ff] hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
-            :title="t('prop.customizeError')"
-            @click="expandDeclarationCustomError"
-          >
-            <Pencil class="w-3.5 h-3.5" />
-          </button>
-          <button
-            v-else
-            type="button"
-            class="inline-flex items-center justify-center w-5 h-5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
-            :title="t('prop.resetToDefaultError')"
-            @click="resetDeclarationCustomError"
-          >
-            <RotateCcw class="w-3.5 h-3.5" />
-          </button>
+          <span class="text-[11px] text-slate-400 font-normal">
+            {{ fieldDeclarationErrorModel?.trim() ? t('prop.customized') : t('prop.defaultFallback') }}
+          </span>
         </div>
 
+        <!-- 1. 所见即所得报错效果预览态 -->
         <div
-          v-if="!isDeclarationCustomErrorExpanded"
-          class="text-[11.5px] text-slate-400 truncate select-none mt-0.5"
-          :title="rawDeclarationErrorMessage"
+          v-if="!isEditingDeclarationError"
+          class="group/err-preview flex items-center justify-between px-2.5 py-1.5 rounded-[4px] bg-red-50/60 border border-red-200/70 transition-all hover:border-red-300"
         >
-          <span class="text-slate-400">{{ t('common.defaultColon') }}</span>“{{ rawDeclarationErrorMessage }}”
+          <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1.5">
+            <svg class="h-3 w-3 text-[#f53f3f] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span class="text-[12px] font-medium text-[#f53f3f] break-words truncate" :title="currentDisplayDeclarationError">
+              {{ currentDisplayDeclarationError }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-0.5 shrink-0">
+            <button
+              type="button"
+              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-[#1677ff] hover:bg-white transition-colors cursor-pointer"
+              :title="t('prop.customizeError')"
+              @click="startEditingDeclarationError"
+            >
+              <Pencil class="w-3.5 h-3.5 stroke-[2]" />
+            </button>
+            <button
+              v-if="fieldDeclarationErrorModel?.trim()"
+              type="button"
+              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-white transition-colors cursor-pointer"
+              :title="t('prop.resetToDefaultError')"
+              @click="fieldDeclarationErrorModel = ''"
+            >
+              <RotateCcw class="w-3.5 h-3.5 stroke-[2]" />
+            </button>
+          </div>
         </div>
 
-        <div v-else class="mt-1">
+        <!-- 2. 点击图标后展开的编辑态 -->
+        <div v-else class="flex items-center gap-1.5">
           <a-input
-            id="prop-declaration-error-input"
+            ref="declarationErrorInputRef"
             v-model="fieldDeclarationErrorModel"
-            size="mini"
+            size="small"
             allow-clear
-            class="w-full"
+            class="flex-1"
             :placeholder="rawDeclarationErrorMessage"
             @input="markDirty"
+            @blur="isEditingDeclarationError = false"
+            @keydown.enter="isEditingDeclarationError = false"
           />
+          <button
+            type="button"
+            class="flex items-center justify-center w-7 h-7 rounded bg-[#1677ff] text-white hover:bg-blue-600 transition-colors cursor-pointer shrink-0 shadow-2xs"
+            :title="t('modal.confirm')"
+            @mousedown.prevent="isEditingDeclarationError = false"
+          >
+            <Check class="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
         </div>
       </div>
     </CollapseTransition>
@@ -376,7 +477,7 @@ import { store, isRisk, markDirty, isBilingual, primaryLocale } from '@/core/sto
 import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText, getEffectiveFormLocale } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
-import { HelpCircle, CornerDownRight, MessageSquare, Pencil, RotateCcw, Minus, Plus, ChevronUp } from '@lucide/vue';
+import { HelpCircle, CornerDownRight, MessageSquare, Minus, Plus, ChevronUp, Pencil, RotateCcw, Check } from '@lucide/vue';
 
 const props = defineProps<{
   element: FormElement;
@@ -472,6 +573,29 @@ const helpPositionValue = computed<'right' | 'bottom'>({
   }
 });
 
+const isHelpEnabled = ref(false);
+
+watch(
+  () => [props.element.id, store.currentLocale, store.editingLocale],
+  () => {
+    isHelpEnabled.value = Boolean(fieldHelpModel.value && fieldHelpModel.value.trim().length > 0);
+  },
+  { immediate: true }
+);
+
+function handleHelpSwitchChange(val: any) {
+  const boolVal = Boolean(val);
+  isHelpEnabled.value = boolVal;
+  if (!boolVal) {
+    fieldHelpModel.value = '';
+    markDirty();
+  } else {
+    nextTick(() => {
+      document.getElementById('prop-help-input')?.focus();
+    });
+  }
+}
+
 const hasPlaceholder = computed(() => {
   return ['input', 'textarea', 'select', 'date', 'country', 'nationality', 'signature', 'email'].includes(
     props.element.type
@@ -480,12 +604,57 @@ const hasPlaceholder = computed(() => {
 
 const placeholderFieldLabel = computed(() => {
   if (props.element.type === 'signature') return t('prop.sigPadLabel');
-  if (props.element.type === 'date') return t('prop.datePickerLabel');
+  if (props.element.type === 'date') {
+    return props.element.dateMode === 'range' ? t('prop.startDatePlaceholder') : t('prop.datePickerLabel');
+  }
   if (props.element.type === 'email') return t('prop.emailPlaceholderLabel');
   return t('prop.placeholder');
 });
 
+const hasEndPlaceholder = computed(() => {
+  return props.element.type === 'date' && props.element.dateMode === 'range';
+});
+
+const fieldEndPlaceholderModel = computed({
+  get() {
+    return getFieldText(props.element, 'endPlaceholder');
+  },
+  set(val: string) {
+    setFieldText(props.element, 'endPlaceholder', val);
+  }
+});
+
+const isFieldEndPlaceholderMissing = computed(() => {
+  if (!isBilingual.value) return false;
+  const cur = getFieldText(props.element, 'endPlaceholder');
+  const src = getFieldText(props.element, 'endPlaceholder', primaryLocale.value);
+  return Boolean(src && !cur);
+});
+
+const hasSignWatermark = computed(() => {
+  return props.element.type === 'signature';
+});
+
+const fieldSignPlaceholderModel = computed({
+  get() {
+    return getFieldText(props.element, 'signPlaceholder');
+  },
+  set(val: string) {
+    setFieldText(props.element, 'signPlaceholder', val);
+  }
+});
+
+const isFieldSignPlaceholderMissing = computed(() => {
+  if (!isBilingual.value) return false;
+  const cur = getFieldText(props.element, 'signPlaceholder');
+  const src = getFieldText(props.element, 'signPlaceholder', primaryLocale.value);
+  return Boolean(src && !cur);
+});
+
 const placeholderInputDefault = computed(() => {
+  if (props.element.type === 'date' && props.element.dateMode === 'range') {
+    return t('common.startDate');
+  }
   if (props.element.type === 'email') {
     return t('prop.emailPlaceholder');
   }
@@ -536,21 +705,6 @@ const isDeclarationRequired = computed({
   }
 });
 
-const isCustomErrorExpanded = ref(false);
-const isDeclarationCustomErrorExpanded = ref(false);
-
-watch(
-  () => [props.element.id, store.currentLocale, store.editingLocale],
-  () => {
-    const hasCustomErr = getFieldText(props.element, 'customErrorMessage').trim().length > 0;
-    isCustomErrorExpanded.value = hasCustomErr;
-
-    const hasDeclErr = getFieldText(props.element, 'declarationErrorMessage').trim().length > 0;
-    isDeclarationCustomErrorExpanded.value = hasDeclErr;
-  },
-  { immediate: true }
-);
-
 const rawDefaultErrorMessage = computed(() => {
   return getFieldDefaultErrorMessage(
     props.element,
@@ -576,6 +730,38 @@ const fieldCustomErrorModel = computed({
   }
 });
 
+const isEditingCustomError = ref(false);
+const isEditingDeclarationError = ref(false);
+const customErrorInputRef = ref<any>(null);
+const declarationErrorInputRef = ref<any>(null);
+
+watch(() => props.element.id, () => {
+  isEditingCustomError.value = false;
+  isEditingDeclarationError.value = false;
+});
+
+function startEditingCustomError() {
+  isEditingCustomError.value = true;
+  nextTick(() => {
+    customErrorInputRef.value?.focus();
+  });
+}
+
+function startEditingDeclarationError() {
+  isEditingDeclarationError.value = true;
+  nextTick(() => {
+    declarationErrorInputRef.value?.focus();
+  });
+}
+
+const currentDisplayError = computed(() => {
+  return fieldCustomErrorModel.value?.trim() || rawDefaultErrorMessage.value;
+});
+
+const currentDisplayDeclarationError = computed(() => {
+  return fieldDeclarationErrorModel.value?.trim() || rawDeclarationErrorMessage.value;
+});
+
 const fieldDeclarationErrorModel = computed({
   get() {
     return getFieldText(props.element, 'declarationErrorMessage');
@@ -584,34 +770,6 @@ const fieldDeclarationErrorModel = computed({
     setFieldText(props.element, 'declarationErrorMessage', val);
   }
 });
-
-function expandCustomError() {
-  isCustomErrorExpanded.value = true;
-  nextTick(() => {
-    document.getElementById('prop-custom-error-input')?.focus();
-  });
-}
-
-function resetCustomError() {
-  props.element.customErrorMessage = '';
-  props.element.customErrorMessage_en = '';
-  markDirty();
-  isCustomErrorExpanded.value = false;
-}
-
-function expandDeclarationCustomError() {
-  isDeclarationCustomErrorExpanded.value = true;
-  nextTick(() => {
-    document.getElementById('prop-declaration-error-input')?.focus();
-  });
-}
-
-function resetDeclarationCustomError() {
-  props.element.declarationErrorMessage = '';
-  props.element.declarationErrorMessage_en = '';
-  markDirty();
-  isDeclarationCustomErrorExpanded.value = false;
-}
 
 const maxAllowedLimit = computed(() => {
   if (['country', 'nationality'].includes(props.element.type)) {
@@ -679,7 +837,9 @@ const currentMaxSelections = computed<number | undefined>({
   }
 });
 
-function isFieldFocused(field: 'label' | 'placeholder' | 'help' | 'default') {
+function isFieldFocused(
+  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder'
+) {
   if (!store.focusedTarget) return false;
   return (
     store.focusedTarget.elementId === props.element.id &&
@@ -687,7 +847,9 @@ function isFieldFocused(field: 'label' | 'placeholder' | 'help' | 'default') {
   );
 }
 
-function setFocus(field: 'label' | 'placeholder' | 'help' | 'default') {
+function setFocus(
+  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder'
+) {
   store.focusedTarget = {
     elementId: props.element.id,
     field

@@ -340,6 +340,10 @@ function startSliderDrag(e: MouseEvent) {
 }
 
 function toggleDefaultRadio(optValue: string) {
+  if (isTranslationFrame.value) {
+    selectElement(props.element);
+    return;
+  }
   if (props.element.defaultValue === optValue) {
     props.element.defaultValue = '';
   } else {

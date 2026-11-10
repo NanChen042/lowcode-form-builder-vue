@@ -15,12 +15,13 @@
             :model-value="getOptionLabel(option)"
             :auto-size="{ minRows: 1, maxRows: 5 }"
             size="small"
+            allow-clear
             :placeholder="t('options.noticePlaceholder')"
             class="w-full !rounded-md !text-[12px]"
             :class="{ 'prop-field-focused': isOptionFocused(idx) }"
             @focus="onFocus(idx)"
             @blur="onBlur"
-            @input="onOptionInput(option, idx, $event)"
+            @update:model-value="onOptionInput(option, idx, $event)"
           />
         </div>
 
@@ -43,23 +44,25 @@
           :key="option.value ? ((props.element?.id || '') + '_' + option.value) : ((props.element?.id || '') + '_' + idx)"
           class="option-row group flex flex-col gap-1 py-0.5"
         >
-          <div class="flex items-center gap-1.5 w-full">
+          <div class="flex items-start gap-1.5 w-full">
             <div
-              class="drag-handle flex items-center justify-center w-4 h-6 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
+              class="mt-0.5 drag-handle flex items-center justify-center w-4 h-6 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing transition-colors select-none shrink-0"
               :title="t('options.dragToReorderIndexed', undefined, { index: idx + 1 })"
             >
               <GripVertical class="h-3.5 w-3.5" />
             </div>
 
-            <a-input
+            <a-textarea
               :model-value="getOptionLabel(option)"
-              size="mini"
+              :auto-size="{ minRows: 1, maxRows: 5 }"
+              size="small"
+              allow-clear
               :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : formatOptionLabel(idx + 1)"
-              class="flex-1"
+              class="flex-1 rounded-[4px] text-[12px]"
               :class="{ 'prop-field-focused': isOptionFocused(idx) }"
               @focus="onFocus(idx)"
               @blur="onBlur"
-              @input="onOptionInput(option, idx, $event)"
+              @update:model-value="onOptionInput(option, idx, $event)"
               @keydown.enter.prevent="addOptionAt(idx + 1)"
             />
 

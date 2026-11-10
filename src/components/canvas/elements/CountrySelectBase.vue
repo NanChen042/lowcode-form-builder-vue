@@ -2,77 +2,40 @@
   <div class="w-full">
     <ElementLabel :element="element" />
 
+    <!-- 1. 可编辑模式（就地编辑占位提示） -->
     <div
-      v-if="isTranslationFrame"
-      class="w-full min-h-[32px] px-3 py-1.5 rounded-md border border-slate-200/90 bg-slate-50/60 flex items-center justify-between gap-2 text-[13px] transition-colors hover:border-blue-300"
+      v-if="!isReadOnlyFrame"
+      class="w-full h-[32px] px-3 rounded-[4px] border bg-white flex items-center justify-between gap-2 text-[13px] transition-all cursor-text"
+      :class="isFocusedPlaceholder ? 'canvas-control-focus border-[#1677ff] shadow-[0_0_0_2px_rgba(22,119,255,0.16)]' : 'border-[#d9d9d9] hover:border-[#4096ff]'"
+      @click="placeholderInputRef?.focus()"
     >
       <EditableText
+        ref="placeholderInputRef"
         v-model="currentPlaceholder"
         :placeholder="placeholderFallback"
         :element-id="element.id"
         field="placeholder"
-        custom-class="flex-1 min-w-0 block text-[13px] text-slate-600"
+        custom-class="component-placeholder-text flex-1 min-w-0 block text-[13px] text-slate-700 truncate"
       />
       <ChevronDown class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none" />
     </div>
 
-    <a-select
-      v-else-if="element.multiple"
-      class="w-full pointer-events-none"
-      :placeholder="placeholderText"
-      multiple
-      :max-tag-count="element.maxSelections || 3"
-      :model-value="parsedDefaultValue"
-      :options="countrySelectOptions"
-      :virtual-list-props="{ height: 240 }"
-      allow-clear
-    >
-      <template #label="{ data }">
-        <span class="inline-flex items-center gap-1.5">
-          <span class="iti__flag shrink-0" :class="'iti__' + (data.value ? String(data.value).toLowerCase() : 'sg')"></span>
-          <span>{{ data.label }}</span>
-        </span>
-      </template>
-      <template #option="{ data }">
-        <div class="flex items-center gap-2 w-full text-xs font-sans">
-          <span class="iti__flag shrink-0" :class="'iti__' + (data.value ? String(data.value).toLowerCase() : 'sg')"></span>
-          <span class="font-medium text-slate-800">{{ data.label }}</span>
-        </div>
-      </template>
-    </a-select>
-
-    <a-select
+    <!-- 2. 只读参照模式（如多语言翻译对照左侧栏） -->
+    <div
       v-else
-      class="w-full pointer-events-none"
-      :placeholder="placeholderText"
-      :model-value="element.defaultValue || undefined"
-      :options="countrySelectOptions"
-      :virtual-list-props="{ height: 240 }"
-      allow-clear
+      class="w-full h-[32px] px-3 rounded-[4px] border border-slate-200 bg-transparent flex items-center justify-between gap-2 text-[13px] select-none text-slate-500"
     >
-      <template #label="{ data }">
-        <span class="inline-flex items-center gap-1.5">
-          <span class="iti__flag shrink-0" :class="'iti__' + (data.value ? String(data.value).toLowerCase() : 'sg')"></span>
-          <span>{{ data.label }}</span>
-        </span>
-      </template>
-      <template #option="{ data }">
-        <div class="flex items-center gap-2 w-full text-xs font-sans">
-          <span class="iti__flag shrink-0" :class="'iti__' + (data.value ? String(data.value).toLowerCase() : 'sg')"></span>
-          <span class="font-medium text-slate-800">{{ data.label }}</span>
-        </div>
-      </template>
-    </a-select>
+      <span class="truncate">{{ placeholderText }}</span>
+      <ChevronDown class="w-3.5 h-3.5 text-slate-400 shrink-0 pointer-events-none" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, type ComputedRef } from 'vue';
+import { ref, computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { primaryLocale } from '@/core/store';
-import { parseMultiValue } from '@/utils/helpers';
-import { t, getFieldText, setFieldText, getOptionLabel } from '@/core/i18n';
-import { defaultCountryOptions, defaultNationalityOptions } from '@/registry/components';
+import { store, primaryLocale } from '@/core/store';
+import { t, getFieldText, setFieldText } from '@/core/i18n';
 import { ChevronDown } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -81,22 +44,16 @@ const props = defineProps<{
   element: FormElement;
 }>();
 
+const placeholderInputRef = ref<InstanceType<typeof EditableText> | null>(null);
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
-const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
+const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
-const resolvedOptions = computed(() => {
-  if (props.element.options && props.element.options.length > 0) {
-    return props.element.options;
-  }
-  return props.element.type === 'nationality' ? defaultNationalityOptions : defaultCountryOptions;
-});
-
-const countrySelectOptions = computed(() => {
-  return resolvedOptions.value.map(opt => ({
-    value: opt.value,
-    label: getOptionLabel(opt, frameLocale.value, true),
-    label_en: opt.label_en || opt.value
-  }));
+const isFocusedPlaceholder = computed(() => {
+  return (
+    !isReadOnlyFrame.value &&
+    store.focusedTarget?.elementId === props.element.id &&
+    store.focusedTarget?.field === 'placeholder'
+  );
 });
 
 const currentPlaceholder = computed({
@@ -121,9 +78,5 @@ const placeholderText = computed(() => {
     return t('prop.defaultNatPlaceholder');
   }
   return t('prop.defaultCountryPlaceholder');
-});
-
-const parsedDefaultValue = computed(() => {
-  return parseMultiValue(props.element.defaultValue);
 });
 </script>

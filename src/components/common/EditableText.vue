@@ -5,7 +5,7 @@
     class="outline-none editable-text-node"
     :class="[
       customClass,
-      isReadOnlyFrame ? 'cursor-default select-text' : 'cursor-text hover:text-[#1677ff]',
+      isReadOnlyFrame ? 'pointer-events-none select-none cursor-default' : 'cursor-text select-text hover:text-[#1677ff]',
       {
         'canvas-text-focus': !isReadOnlyFrame && isFocused,
         'is-placeholder': isShowingPlaceholder
@@ -14,7 +14,6 @@
     :data-placeholder="placeholder"
     :contenteditable="isReadOnlyFrame ? false : 'plaintext-only'"
     spellcheck="false"
-    style="user-select: text !important; -webkit-user-select: text !important; outline: none !important;"
     @mousedown="handleMouseDown"
     @dragstart.prevent
     @focus="handleFocus"
@@ -33,7 +32,7 @@ const props = withDefaults(
     modelValue?: string;
     placeholder?: string;
     elementId?: string;
-    field?: 'label' | 'help' | 'placeholder' | 'option' | 'title' | 'description' | 'content';
+    field?: 'label' | 'help' | 'placeholder' | 'option' | 'title' | 'description' | 'content' | 'signPlaceholder' | 'endPlaceholder' | 'longTermText';
     optionIndex?: number;
     customClass?: string;
     tag?: string;
@@ -63,6 +62,13 @@ const textRef = ref<HTMLElement | null>(null);
 const isEditing = ref(false);
 const injectedFrameLocale = inject<ComputedRef<string> | undefined>('frameLocale', undefined);
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
+
+const effectiveAllowEmpty = computed(() => {
+  if (props.allowEmpty) return true;
+  if (isTranslationFrame.value) return true;
+  return false;
+});
 
 const isShowingPlaceholder = computed(() => {
   if (isEditing.value) return false;
@@ -91,7 +97,7 @@ function getElementText(): string {
 function syncTextToDOM(val: string | undefined) {
   if (!textRef.value) return;
   const hasVal = val !== undefined && val !== null && val !== '';
-  const targetText = hasVal ? val : (props.allowEmpty ? '' : (props.placeholder || ''));
+  const targetText = hasVal ? val : (effectiveAllowEmpty.value ? '' : (props.placeholder || ''));
   if (getElementText() !== targetText) {
     textRef.value.textContent = targetText;
   }
@@ -167,7 +173,7 @@ function handleBlur(e: FocusEvent) {
 
   if (!finalVal) {
     if (textRef.value) {
-      textRef.value.textContent = props.allowEmpty ? '' : (props.placeholder || '');
+      textRef.value.textContent = effectiveAllowEmpty.value ? '' : (props.placeholder || '');
     }
   }
 

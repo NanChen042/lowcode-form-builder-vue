@@ -3,7 +3,7 @@
     <ElementLabel :element="element" />
     <div class="flex items-center gap-2 w-full pointer-events-none select-none">
       <div
-        class="h-8 px-2.5 min-w-[92px] rounded-md border border-slate-200 bg-white flex items-center justify-between gap-1.5 shadow-xs shrink-0"
+        class="h-8 px-2.5 min-w-[92px] rounded-[4px] border border-slate-200 bg-transparent flex items-center justify-between gap-1.5 shrink-0"
       >
         <div class="flex items-center gap-1.5">
           <div class="iti__flag shrink-0" :class="'iti__' + (currentOption.iso2 || 'sg')"></div>
@@ -13,7 +13,7 @@
       </div>
 
       <div
-        class="flex-1 min-w-0 h-8 px-3 rounded-md border border-slate-200 bg-white flex items-center text-[13px] text-slate-400 truncate shadow-xs font-mono"
+        class="flex-1 min-w-0 h-8 px-3 rounded-[4px] border border-slate-200 bg-transparent flex items-center text-[13px] text-slate-400 truncate font-mono"
       >
         {{ exampleNumber }}
       </div>

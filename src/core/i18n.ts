@@ -13,16 +13,29 @@ export interface SupportedFormLocaleItem {
   labelEn: string;
   nativeLabel: string;
   shortBadge: string;
+  flag: string;
 }
 
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
-  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH' },
-  { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN' },
-  { code: 'ja', labelZh: '日语 (日本語)', labelEn: 'Japanese (日本語)', nativeLabel: '日本語', shortBadge: 'JA' },
-  { code: 'ko', labelZh: '韩语 (한국어)', labelEn: 'Korean (한국어)', nativeLabel: '한국어', shortBadge: 'KO' },
-  { code: 'zh-TW', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁' },
-  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Melayu', shortBadge: 'MS' }
+  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH', flag: 'cn' },
+  { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
+  { code: 'ja', labelZh: '日语 (日本語)', labelEn: 'Japanese (日本語)', nativeLabel: '日本語', shortBadge: 'JA', flag: 'jp' },
+  { code: 'ko', labelZh: '韩语 (한국어)', labelEn: 'Korean (한국어)', nativeLabel: '한국어', shortBadge: 'KO', flag: 'kr' },
+  { code: 'zh-TW', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'tw' },
+  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Melayu', shortBadge: 'MS', flag: 'my' }
 ];
+
+export function getLocaleFlag(loc: string): string {
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  if (item?.flag) return item.flag;
+  if (loc === 'zh') return 'cn';
+  if (loc === 'en') return 'gb';
+  if (loc === 'ja') return 'jp';
+  if (loc === 'ko') return 'kr';
+  if (loc === 'zh-TW') return 'tw';
+  if (loc === 'ms') return 'my';
+  return 'sg';
+}
 
 export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
@@ -43,6 +56,7 @@ export function getLocaleShortBadge(loc: string): string {
 
 export function getEffectiveFormLocale(locale?: string): string {
   if (locale) return locale;
+  if (store.previewLocale) return store.previewLocale;
   if (store.workspaceMode === 'translation') {
     return store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh';
   }
@@ -63,7 +77,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'common.untitledPage': '未命名页面',
     'common.untitledField': '未命名字段',
     'common.notice': '提示',
-    'common.noticeItem': '提示说明项',
     'common.signed': '已签字',
     'common.clearSignature': '清除签名',
     'common.clickToSign': '点击此处手写签名',
@@ -77,17 +90,14 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'modal.confirm': '确定',
     'common.pagesUnit': '页',
     'common.fieldsUnit': '个字段',
-    'common.templatesUnit': '个',
     'common.optionsUnit': '项',
     'common.totalOptions': '共 {count} 项',
-    'common.passed': '通过',
     'common.prev': '上一步',
     'common.confirmNext': '确认 & 下一步',
     'common.nextStep': '下一步',
     'common.cancel': '取消',
     'common.singapore': '新加坡',
     'common.prefilledBaseline': '预置核验节点',
-    'common.unknownError': '未知错误',
     'common.startDate': '开始日期',
     'common.endDate': '结束日期',
     'val.validNumber': '请输入有效数字',
@@ -118,36 +128,21 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'app.settings': '面板布局设置',
     'app.leftSidebar': '左侧物料库',
     'app.rightSidebar': '右侧属性面板',
-    'header.back': '返回上一页',
     'header.formTitlePlaceholder': '请输入表单名称',
-    'header.confirmRename': '确认修改',
     'header.clickToRename': '点击修改表单名称',
     'header.renameForm': '修改表单名称',
     'header.tour': '操作指南',
     'header.saveSuccess': '已保存至草稿',
     'header.saveFailed': '保存失败，请检查网络或重试',
-    'header.saveError': '保存遇到异常，请重试',
-    'header.loggedOut': '已成功退出登录',
-    'header.profileOpened': '已进入个人中心',
-    'header.activityOpened': '已进入操作日志',
-    'header.settingsOpened': '已进入账号设置',
     'header.untitledForm': '未命名表单',
     'header.warnTitle': '多语言发布校验提醒',
     'header.warnCount': '当前表单还有 {count} 项内容尚未完成英文翻译。',
-    'header.warnDesc': '如果直接发布，英文环境下的用户将看到部分中文默认文案或留白，建议完善后再发布。',
     'header.warnMore': '...以及其他 {count} 项未翻译内容',
     'header.warnComplete': '前往完善翻译',
     'header.warnPublishAnyway': '仍然发布',
     'header.untranslatedTag': '未翻译',
-    'header.contentLang': '表单内容语言',
-    'header.clickToSwitchEn': '点击切换至英文编辑未翻译项',
-    'header.hasUntranslated': '当前语言尚有未填写项',
-    'header.itemsUntranslated': '还有 {count} 项内容未翻译',
-    'header.allTranslated': '多语言内容已填写完整',
     'header.switchedZh': '已切换至中文编辑模式',
     'header.switchedEn': '已切换至英文编辑模式',
-    'header.bilingualTooltip': '开启后表单支持中英双语问卷，可向填表人提供中英文语言切换',
-    'header.bilingualSwitch': '双语问卷',
     'header.bilingualGuideTitle': '翻译管理说明',
     'header.bilingualGuideDesc': '管理表单各语言翻译内容。您可以在翻译工作台中对照编辑源语言与目标语言文案。填表人打开表单时，可通过语言切换按钮自由切换多语言。',
     'header.bilingualDisableTitle': '停用双语问卷模式',
@@ -156,12 +151,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.bilingualDisableCancel': '取消',
     'header.bilingualVideoTitle': '双语问卷功能操作演示',
     'header.bilingualVideoTip': '温馨提示：开启双语问卷后，填表端右上角将自动提供语言切换胶囊。',
-    'header.bilingualEnabledMsg': '已开启双语问卷模式',
     'header.bilingualDisabledMsg': '已停用双语问卷模式',
 
     // 用户下拉菜单 (User Menu)
-    'user.profile': '个人中心',
-    'user.settings': '账号设置',
     'user.logout': '退出登录',
     'user.role': '系统管理员',
 
@@ -181,13 +173,11 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.createBlankDesc': '从零开始自由搭建表单',
     'sidebar.presetScenarios': '预置场景模板',
     'sidebar.addCanvasPage': '添加新画板页面',
-    'sidebar.confirmTitle': '提示',
     'sidebar.templateLoaded': '模板已载入',
     'sidebar.pageAdded': '已添加新画板页面',
     'sidebar.pageDeleted': '画板已删除',
     'sidebar.deletePagePrompt': '确定删除此画板页面？',
     'sidebar.systemPreset': '系统预置',
-    'sidebar.locatePage': '聚焦定位画板',
     'sidebar.componentAdded': '组件已添加到画布',
     'sidebar.tabComponents': '组件库',
     'sidebar.tabTemplates': '场景模板库',
@@ -202,8 +192,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.signatureArea': '请在此处手写签名',
-    'canvas.unnamed': '未命名字段',
-    'canvas.helpPlaceholder': '补充说明',
     'canvas.droppable': '可放置画布',
     'canvas.presetCannotDrop': '系统预设步骤 · 不可添加组件',
     'canvas.dragToFormCanvas': '请将组件拖拽至右侧常规表单画布中',
@@ -211,11 +199,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.emptyDesc': '拖拽左侧基础输入或业务组件即可在这里生成并预览表单',
     'canvas.addPageRight': '在右侧添加新页面',
     'canvas.initializing': '正在初始化画布...',
-    'canvas.preparingEnv': '正在准备表单设计环境',
-    'canvas.noPages': '暂无画布页面',
-    'canvas.noPagesDesc': '你的工作区准备就绪。创建一个画布来配置表单字段与布局。',
-    'canvas.newCanvas': '新建空白表单',
-    'canvas.browseTemplates': '选用场景模板',
     'canvas.expandSidebar': '展开侧边栏',
     'canvas.expandProperties': '展开右侧属性面板',
     'canvas.zoomIn': '放大画布',
@@ -223,23 +206,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.zoom100': '缩放到 100%',
     'canvas.zoomFit': '适应画布全貌',
     'canvas.zoomSelection': '缩放到选中项',
-    'canvas.helpTooltip': '操作指南与快捷键',
-    'canvas.helpModalTitle': '操作指南与快捷键',
-    'canvas.secCanvasZoom': '画布缩放与视口平移',
-    'canvas.panCanvas': '自由平移画布',
-    'canvas.leftDrag': '左键拖拽',
-    'canvas.smoothZoom': '滚轮平滑缩放',
-    'canvas.wheel': '滚轮',
-    'canvas.secFormEditing': '表单编辑与组件',
-    'canvas.searchComponents': '搜索物料组件',
-    'canvas.contextMenu': '画布右键快捷菜单',
-    'canvas.rightClick': '鼠标右键',
-    'canvas.inlineTextEdit': '就地直接编辑文字',
-    'canvas.clickText': '单击文字',
-    'canvas.duplicateElement': '复制选中组件',
-    'canvas.deleteElement': '删除选中组件',
-    'canvas.productTour': '查看操作指南',
-    'canvas.gotIt': '我知道了',
     'canvas.profileIndividual': '个人案例',
     'canvas.profileEntity': '实体案例',
     'canvas.profileCustomer': '母案例',
@@ -251,14 +217,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.todoZhCount': '{count} 项中文未填写',
     'canvas.todoEnCount': '{count} 项英文未翻译',
     'canvas.conditionPrefix': '若选「{option}」',
-    'canvas.multiConditionAndPrefix': '全部满足：{conditions}',
-    'canvas.multiConditionOrPrefix': '任一满足：{conditions}',
-    'canvas.linkageGroupTitle': '条件联动组',
-    'canvas.linkageGroupStats': '{parents} 父 · {children} 子',
-    'canvas.parentBadgeSingle': '触发父组件',
-    'canvas.parentBadgeIndexed': '触发父组件 #{index}',
-    'canvas.addGroupChild': '添加关联子组件',
-    'canvas.addGroupChildTip': '在此联动组内新增子组件，将自动继承当前组全部父组件触发条件',
     'canvas.yes': '是',
     'canvas.no': '否',
     'canvas.todoNextIndexed': '下一项 ({current}/{total})',
@@ -272,8 +230,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'context.duplicate': '复制组件',
     'context.insertBelow': '插入组件',
     'context.linkComponent': '关联组件',
-    'context.linkParent': '关联组件',
-    'context.linkChild': '关联组件',
     'context.unlinkElement': '解除关联',
     'context.deleteElement': '删除组件',
     'context.presetReadOnly': '系统预设资料',
@@ -293,20 +249,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.emptyDesc': '点击画布中的字段开始编辑',
     'prop.basicInfo': '基础信息',
     'prop.basicInfoDesc': '设置字段标题、展示与校验',
-    'prop.zhRef': '中文原文：',
-    'prop.zhPageTitleRef': '中文原标题：',
-    'prop.zhPageDescRef': '中文原描述：',
-    'prop.copyZh': '复制中文',
     'prop.canvasSettings': '画布设置',
     'prop.deletePage': '删除当前页面',
     'prop.fieldLabel': '字段标题',
-    'prop.fieldLabelEn': '字段标题',
     'prop.fieldLabelPlaceholder': '请输入字段标题',
     'prop.fieldHelp': '副标题',
-    'prop.fieldHelpEn': '副标题',
     'prop.fieldHelpPlaceholder': '请输入副标题或补充说明',
     'prop.helpLayout': '排布方式',
-    'prop.helpPosition': '排布方式',
     'prop.helpPositionRight': '标题右侧',
     'prop.helpPositionBottom': '标题下方',
     'prop.helpPositionRightDesc': '标题右侧显示（默认同排浅灰色小字）',
@@ -320,66 +269,40 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.declarationRequired': '声明条款必填',
     'prop.declarationRequiredTip': '开启后，用户必须勾选同意所有声明复选条款才能提交表单。',
     'prop.customErrorMsg': '未填校验提示',
-    'prop.customErrorMsgTip': '当用户未填写该必填项时展示的错误提示文字。留空则自动使用智能默认文案。',
-    'prop.defaultAutoErrorTip': '默认自动生成提示文案',
     'prop.customizeError': '自定义提示',
+    'prop.defaultFallback': '系统默认兜底',
+    'prop.customized': '已自定义',
     'prop.resetToDefaultError': '恢复默认',
     'prop.declarationErrorMsg': '未同意声明提示',
-    'prop.declarationErrorMsgTip': '当用户未勾选同意声明时的提示文字。留空则自动使用智能默认文案“请先同意声明”。',
     'prop.placeholder': '占位提示',
     'prop.enableLongTerm': '启用长期选项',
     'prop.enableLongTermTip': '开启后在单日期输入框右侧显示“长期”选项，勾选后免填截止时间（起止日期模式自动停用）。',
     'prop.defaultLongTerm': '默认勾选长期',
     'prop.defaultLongTermTip': '开启后用户填表时默认自动勾选长期有效，免填日期。',
-    'prop.longTermLabel': '长期',
     'prop.addOption': '添加选项',
-    'prop.noticeConfig': '提示内容',
-    'prop.noticeConfigTip': '配置展示给用户的提示条款与说明段落。',
-    'prop.addNoticeItem': '添加提示内容',
     'prop.addClauseItem': '添加条款内容',
     'prop.layoutInline': '并排',
     'prop.layoutStack': '堆叠',
-    'prop.unlimited': '不限制',
     'prop.allowMultiple': '开启多选',
     'prop.allowMultipleTip': '开启后支持在下拉框中选择多个选项。',
     'prop.defaultDialCode': '默认国际区号',
-    'prop.defaultDialCodeTip': '设置手机号输入框左侧默认选中的国际区域号码。',
-    'prop.strictPhoneValidation': '严格号码校验',
-    'prop.strictPhoneValidationTip': '开启后将按照所选国家的真实国际规则校验手机号位数与号段格式（如新加坡8位且8/9开头，中国11位且1开头等）。',
-    'prop.conditionalDisplay': '条件显隐联动',
-    'prop.conditionalDisplayTip': '仅当前置选项满足特定条件时才在表单中展示当前字段，其他情况自动隐藏并免除必填校验。',
-    'prop.dependsOnField': '关联前置字段',
-    'prop.selectParentField': '请选择前置单选/下拉组件',
-    'prop.selectTriggerValue': '请选择触发选项',
-    'prop.noEligibleParent': '当前页面前方无可供关联的单选/下拉组件',
     'prop.copy': '复制',
     'prop.delete': '删除',
     'prop.collapsePanel': '收起属性面板',
     'prop.systemPreset': '系统预设',
-    'prop.nodeType': '节点类型',
     'prop.systemBaseline': '系统前置 · 基础资料',
-    'prop.businessType': '业务类型',
     'prop.locked': '已锁定',
     'prop.deletePageConfirm': '确定要删除当前画布页面吗？此操作不可撤销。',
     'prop.presetNationalities': '预设国籍',
     'prop.presetCountries': '预设国家',
     'prop.viewDirectory': '查看',
-    'prop.unselected': '未选中',
     'prop.fieldFallback': '字段',
     'prop.clientCase': '客户案例',
     'prop.entityCase': '实体案例',
     'prop.individualCase': '个人案例',
-    'prop.missingZhTag': '待补中文',
-    'prop.missingEnTag': '待补英文',
-    'prop.origZh': '中文原文：',
-    'prop.origEn': '英文原文：',
-    'prop.sameAsZh': '同中文',
-    'prop.sameAsEn': '同英文',
     'prop.systemPresetAlert': '该节点为系统预置前置核验步骤，内容与逻辑由系统固化，不支持修改属性配置。',
     'prop.defaultCountryPlaceholder': '请选择国家/地区',
     'prop.defaultNatPlaceholder': '请选择国籍',
-    'prop.configuringZhMode': '当前正在配置：中文内容',
-    'prop.configuringEnMode': '当前正在配置：英文内容',
     'prop.linkageRuleTitle': '展开规则',
     'prop.linkageWhen': '当',
     'prop.linkageEquals': '选择',
@@ -394,11 +317,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.unlinkRuleConfirm': '确定解除与该选项的展开联动吗？解除后该组件将恢复为常驻显示。',
     'prop.unlink': '解除联动',
     'prop.resizeHandleTip': '拖拽拉伸属性面板宽度',
-    'prop.editLanguage': '编辑语言',
-    'prop.zhCompleteness': '中文完备率: {percent}%',
-    'prop.enCompleteness': '英文完备率: {percent}%',
-    'prop.singleLangZh': '单语言 (简体中文)',
-    'prop.singleLangEn': '单语言 (English)',
     'prop.rowRange': '行数范围',
     'prop.rowRangeTip': '设置多行文本框自适应行高区间（最小行数 ~ 最大行数）。初始呈现最小行数，内容增多时自动拉伸，超出最大行数后出现滚动条。',
     'prop.rowUnit': '行',
@@ -410,9 +328,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.signatureRequired': '签名板必填',
     'prop.signatureRequiredTip': '开启后，用户必须在手写感应板中签名。',
     'prop.signatureErrorMsg': '未签名提示',
-    'prop.signatureErrorMsgTip': '当用户未在签名板完成手写签名时的提示文字。留空则自动使用智能默认文案。',
     'prop.sigPadLabel': '签名提示文案',
+    'prop.signWatermarkPlaceholder': '手写区内提示文案',
     'prop.datePickerLabel': '日期选择提示',
+    'prop.startDatePlaceholder': '开始日期提示文案',
+    'prop.endDatePlaceholder': '截止日期提示文案',
+    'prop.longTermOptionLabel': '长期选项文案',
     'prop.dateMode': '日期模式',
     'prop.dateModeTip': '设置日期选择方式，可切换为单日期选择或起止日期范围选择。',
     'prop.dateModeSingle': '单日期',
@@ -421,26 +342,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.alertContentTip': '直接输入告示或说明文本，支持自然换行。行首以“- ”开头自动生成无序列表，支持 [文字](链接) 插入超链接。',
     'prop.alertContentPlaceholder': '请输入提示内容...\n- 以“- ”开头自动生成列表项\n- 支持 [链接文案](xxx.com) 插入超链接',
     'prop.alertEmptyContentPlaceholder': '请输入提示内容',
-    'prop.alertListStyle': '列表形式',
-    'prop.alertListStyleTip': '选择无序圆点列表或有序数字编号列表。',
-    'prop.alertListCircle': '圆点',
-    'prop.alertListNumber': '数字',
     'prop.alertInsertBullet': '列表项',
-    'prop.alertInsertBulletTip': '在当前光标或新行插入列表项标记',
     'prop.alertInsertLink': '超链接',
-    'prop.alertInsertLinkTip': '插入超链接 Markdown 语法 [链接文字](xxx.com)',
     'prop.maxSelections': '最大允许选择数',
-    'prop.maxSelectionsTip': '限制用户在多选时最多可选择的选项或标签数量，留空则不限制。',
     'prop.inputType': '格式类型',
     'prop.inputTypeTip': '设置单行文本的输入格式，可选择普通文本或纯数字。',
     'prop.inputTypeText': '文本',
     'prop.inputTypeNumber': '数字',
-    'prop.textareaRows': '行数与高度',
-    'prop.textareaRowsTip': '设置多行文本框的初始最小行数与内容增多时自适应扩展的最大行数。',
-    'prop.minRows': '最小行数',
-    'prop.minRowsTip': '输入框默认展示的最小行高（行数）。',
-    'prop.maxRows': '最大行数',
-    'prop.maxRowsTip': '内容超出时自动向上扩展的最大行数，超过后出现纵向滚动条。',
     'prop.emailPlaceholderLabel': '邮箱占位提示',
     'prop.emailPlaceholder': '请输入邮箱',
     'prop.maxSelectionsCountryTip': '国家/国籍组件最多允许选择 3 项',
@@ -454,11 +362,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 属性面板：页面属性 (PagePropsEditor)
     'prop.pageSubtitle': '画布页面全局设置',
     'prop.page': '页面',
-    'prop.pageTitle': '页面标题',
-    'prop.pageTitleEn': '页面标题',
     'prop.pageTitlePlaceholder': '请输入页面标题',
-    'prop.pageDesc': '页面描述',
-    'prop.pageDescEn': '页面描述',
     'prop.pageDescPlaceholder': '显示在标题下方的副标题或补充说明',
 
     // 选项与级联联动 (OptionsEditor)
@@ -467,12 +371,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.clauseConfig': '声明条款',
     'prop.clauseConfigTip': '配置要求用户阅读并确认的声明条款。',
     'prop.optionLayout': '排布方式',
-    'prop.triggerValue': '展开显示的触发选项',
     'options.deleteOption': '删除选项',
-    'options.optionNamePlaceholder': '选项名称',
     'options.noticePlaceholder': '请输入提示或声明内容...',
     'options.dragToReorderIndexed': '按住拖拽排序 (选项 {index})',
-    'options.optionIndex': '选项',
     'options.toggleDefaultRadio': '点击切换默认选中项',
     'options.toggleDefaultCheckbox': '点击切换默认勾选',
     'options.linkConfigTitle': '设置选择【{name}】时展开的表单组件',
@@ -483,7 +384,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.thisOption': '此项',
     'options.declarationPlaceholder': '请输入声明条款内容（条款 {index}）',
     'options.unlink': '解除关联',
-    'options.singleInputDefault': '单行输入',
     'options.maxDepthReached': '已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。',
     'options.maxDepthReachedShort': '已达最大追问层级（最多支持2级嵌套）',
 
@@ -534,7 +434,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 欢迎向导弹窗 (WelcomeWizardModal)
     'wizard.brandSubtitle': 'DIY 表单设计器',
     'wizard.brandSubtitleRisk': '风险评估表单设计器',
-    'wizard.createNewTag': 'Create NEW',
+    'wizard.createNewTag': '快捷新建',
     'wizard.createBlank': '新建空白画布',
     'wizard.createBlankDesc': '点击左下方立即创建按钮，开始创建您的第一个定制表单。',
     'wizard.createBlankRisk': '新建风险评估表单',
@@ -550,21 +450,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.confirmOverwriteBtn': '确定覆盖',
     'wizard.pagesCount': '{count} 页面',
     'wizard.fieldsCount': '{count} 字段',
-    'wizard.riskSelectTitle': '选择风险评估适用主体',
-    'wizard.riskSelectDesc': '请选择您要创建的风险评估表单适用的主体类型，点击即可快速初始化。',
-    'wizard.riskCustomerTitle': '客户案例风险评估',
-    'wizard.riskCustomerDesc': '适用于针对委托客户/主体的洗钱与合规风险评估，内置专属评分维度。',
-    'wizard.riskIndividualTitle': '个人成员风险评估',
-    'wizard.riskIndividualDesc': '适用于针对个人董事、股东或关键管理人员的风险评估与问卷采集。',
-    'wizard.riskEntityTitle': '机构/实体风险评估',
-    'wizard.riskEntityDesc': '适用于针对法人企业、机构成员实体的业务资质与合规风险评估。',
-    'wizard.tagCustomer': '客户案例',
-    'wizard.tagIndividual': '个人成员',
-    'wizard.tagEntity': '机构/实体',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': '新建表单画布',
-    'modal.createForm.lockedProfile': '已锁定主体：',
     'modal.createForm.profileType': '业务主体',
     'modal.createForm.formTitle': '表单名称',
     'modal.createForm.customer': '客户案例',
@@ -577,37 +465,24 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'modal.createForm.confirmOverwriteDesc': '当前画布已包含 {pages} 个画板页面，新建表单将完全覆盖当前画布内容。是否确认继续？',
     'modal.createForm.confirmOverwriteBtn': '确定覆盖',
     'modal.createForm.createdSuccess': '表单画布创建成功',
-    'modal.createForm.defaultDesc': '从空白画布创建的自定义表单',
     'modal.createForm.defaultPlaceholder': '留空默认为：{title}',
 
     // 预览与发布 (PreviewModal & PublishModal)
     'preview.preview': '预览',
     'preview.deploySchema': '发布结构',
-    'preview.previewDesc': '在手机设备模拟器中体验表单交互与验证',
-    'preview.deployDesc': '当前表单已生成可保存的结构数据',
     'preview.schemaJson': '结构 JSON',
     'preview.formSteps': '表单步骤列表',
     'preview.disclaimer': '预览效果仅供参考，实际显示可能因设备和浏览器不同而存在差异，请在移动端进行最终确认。',
     'preview.submitSuccess': '表单提交成功！',
-    'preview.submitSuccessDesc': '所有必填项已严格通过校验，数据格式完全合规。',
-    'preview.validationSummary': '校验结果汇总',
-    'preview.totalFieldsChecked': '校验字段总数',
-    'preview.mandatoryFields': '必填项目',
-    'preview.refillForm': '重新填写表单',
     'preview.noFields': '当前页面暂无字段',
     'preview.validateForm': '表单验证',
-    'preview.liveValidatorActive': '实时校验引擎已就绪（国际区号默认 +65 新加坡）',
     'preview.publishForm': '发布表单',
-    'preview.publishing': '发布中...',
     'preview.defaultCompanyTitle': '上海青墨信息技术有限公司北京分公司',
     'preview.fillRequiredFields': '请填写所有必填项并修正错误',
-    'preview.publishSuccess': '表单发布成功！',
     'preview.publishFailed': '发布失败',
     'publish.modalTitle': '发布表单',
     'publish.modalDesc': '核对并确认表单基本信息与发布介绍，确认无误后即可生成公网访问链接。',
     'publish.riskModalDesc': '核对并确认风险评估表单基本信息，确认无误后即可发布生效。',
-    'publish.modalBilingualDesc': '已开启双语填报：请核对中英文表单名称与描述，发布后填表端支持双语自由切换。',
-    'publish.editLocale': '编辑语言',
     'publish.formName': '表单名称',
     'publish.formNamePlaceholder': '请输入表单名称 (50字以内)',
     'publish.formNameEn': '英文表单名称',
@@ -616,30 +491,16 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'publish.formDescPlaceholder': '向填表人介绍该表单的用途、填表须知或隐私声明（将展示在表单首屏）...',
     'publish.formDescEn': '英文表单描述',
     'publish.formDescEnPlaceholder': 'Introduce the purpose of the form, guidelines, or notices...',
-    'publish.summaryTarget': '适用主体',
-    'publish.formScale': '表单体量',
-    'publish.summaryPages': '页',
-    'publish.summaryFields': '字段',
-    'publish.summaryTrans': '双语填报',
-    'publish.transComplete': '已翻译',
-    'publish.allCompleted': '全部齐备',
-    'publish.missingCount': '{count} 项待补齐',
     'publish.nameRequired': '表单名称不能为空',
     'publish.nameDuplicate': '表单名称已存在，请更换名称',
     'publish.confirmPublish': '确认发布',
-    'publish.publishing': '正在发布...',
     'publish.successTitle': '表单发布成功！',
     'publish.successDesc': '表单模板已发布生效。您可通过下方链接在新窗口预览移动端效果，或直接返回表单设置页面。',
     'publish.riskSuccessDesc': '风险评估表单已发布生效。您可以关闭当前页面后刷新列表，或直接返回表单管理页面。',
     'publish.backToRiskSetting': '返回表单设置',
     'publish.closePage': '关闭页面',
-    'publish.formUrl': '访问链接',
-    'publish.copyLink': '复制链接',
-    'publish.copied': '已复制',
-    'publish.copySuccess': '链接已复制到剪贴板',
     'publish.openPreview': '新窗口打开',
     'publish.openPreviewTip': '点击在新窗口打开预览表单',
-    'publish.done': '完成',
 
     // Schema 源码侧边栏 (SchemaSidebar)
     'schema.title': '表单结构 JSON Schema',
@@ -711,20 +572,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 风险评估问卷 (Risk Assessment)
     'risk.pageTitle': '风险评估',
     'risk.pageDesc': '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
-    'risk.pageDescIndividual': '设置个人成员的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
-    'risk.pageDescEntity': '设置实体机构的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
-    'risk.optYes': 'Yes',
-    'risk.optNo': 'No',
-    'risk.optNotApplicable': 'Not Applicable',
     'risk.catComponents': '风险评估组件',
     'risk.cmpQuestion': '风险评估问题',
-    'risk.cmpQuestionDesc': '包含 Yes / No / Not Applicable 与 1~10 权重滑轨',
     'risk.cmpGroup': '问题分组',
-    'risk.cmpGroupDesc': '划分评估维度模块（如客户、地域、业务风险）',
     'risk.groupOutlineTitle': '问题分组',
     'risk.groupTab': '分组',
     'risk.groupCount': '{count} 个分组',
-    'risk.groupCountUnit': '个分组',
     'risk.questionsCount': '{count} 个问题',
     'risk.questionUnit': '题',
     'risk.addGroup': '添加问题分组',
@@ -733,8 +586,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.deleteGroup': '删除分组',
     'risk.deleteGroupConfirm': '确定删除该分组及其包含的问题吗？',
     'risk.defaultGroupTitle': '分组 {index}',
-    'risk.groupNameZh': '分组名称 (中文)',
-    'risk.groupNameEn': '分组名称 (EN)',
     'risk.groupNamePlaceholder': '请输入分组名称...',
     'risk.groupInfo': '分组信息',
     'risk.groupInfoSub': '英文分组名称为必填项，中文翻译选填',
@@ -748,10 +599,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.fixedRulesDesc': '固定评估规范说明',
     'risk.fixedNoPropTip': '风险评估问卷由系统固定规则驱动，无需配置页面属性。',
     'risk.addSectionSlot': '添加新问题分组',
-    'risk.addSectionSlotDesc': '点击新建一个风险评估分组模块',
-    'risk.dragSectionHandle': '按住调整分组顺序',
-    'risk.tagStructure': '结构',
-    'risk.tagRadio': '单选',
     'risk.groupCreated': '已添加新问题分组',
 
     // 标准组件类型名称 (Component Names)
@@ -807,12 +654,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.signatureArea': '签名区域',
 
     // 发布弹窗扩展 (Publish Modal Ext)
-    'publish.copyFailed': '复制失败，请手动复制链接',
-    'publish.tplKycCustomerDesc': '客户母案例专用KYC问卷',
-    'publish.tplKycIndividualDesc': '个人成员专用KYC问卷',
-    'publish.tplKycEntityDesc': '实体成员专用KYC问卷',
-    'publish.tplBlankDesc': '空白画布新建自定义表单',
-    'publish.tplAllComponentsDesc': '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
 
     // 翻译抽屉与通用 (Translation Helper & Common)
     'trans.pageTitle': '页面标题',
@@ -834,40 +675,41 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.addLanguage': '翻译管理',
     'trans.addLanguageShort': '添加语言',
     'trans.removeLanguage': '移除语言',
-    'trans.sourceLeft': '基准语言 (左侧)',
-    'trans.readOnlyShort': '只读',
-    'trans.targetRight': '目标语言 (右侧)',
+    'trans.defaultLang': '默认',
     'trans.translatablePages': '可翻译页面',
     'trans.countLeft': '待译 {count}',
     'trans.noPagesToTranslate': '暂无需要翻译的自定义页面',
     'trans.addedLocaleSuccess': '已添加 {name} 翻译版本',
-    'trans.readOnlyReference': '源语言只读对照',
-    'trans.clickToTranslate': '点击文字直接翻译',
     'trans.sideBySideSubtitle': '管理各语言翻译内容',
+    'trans.navTitle': '翻译管理',
+    'trans.navSubtitle': '页面导航与翻译进度',
+    'trans.propTitle': '译文属性',
+    'trans.propSubtitle': '对照源语言编辑目标内容',
     'trans.pendingSummary': '{count} 项{langName}未翻译',
-    'trans.translationPair': '语言对照方向',
-    'trans.sourceRef': '源语言参考',
-    'trans.targetEdit': '译文配置',
-    'trans.noSourceText': '（暂无源文案）',
     'trans.translated': '已填写',
     'trans.pending': '待翻译',
-    'trans.quickTipTitle': '双向对照与联动',
-    'trans.quickTipDesc': '在中间画板点击任意组件或文本，可在此即时同步编辑译文。',
+    'trans.completed': '已完成',
     'trans.optionsTitle': '选项译文对照',
+    'trans.declarationOptionsTitle': '声明条款译文对照',
+    'trans.sigPromptLabel': '签名区提示文字',
+    'trans.signWatermarkLabel': '手写区内提示文字',
+    'trans.startDatePlaceholder': '开始日期提示',
+    'trans.endDatePlaceholder': '截止日期提示',
+    'trans.longTermOptionLabel': '长期选项文案',
+    'trans.pageTranslation': '页面译文',
     'trans.pageTitleLabel': '页面标题',
     'trans.pageDescLabel': '页面副标题 / 描述',
-    'trans.backToPage': '查看页面译文',
-    'trans.source': '源语言',
-    'trans.target': '目标语言',
-    'trans.enterTarget': '输入目标语言译文...',
+    'trans.groupTranslation': '问题分组译文',
+    'trans.groupTitleLabel': '分组名称',
+    'trans.enterTarget': '请输入译文...',
+    'header.warnEnRequiredDesc': '英文翻译为必填项，请完成全部英文翻译后再提交发布。',
+    'header.warnMultiCount': '当前表单还有 {count} 项多语言翻译尚未完成。',
+    'header.warnMultiDesc': '现在发布可能导致对应语言访问时显示默认原文或空白，建议补充完整后再发布。',
+    'prop.element': '组件属性',
     'common.leaveConfirm': '您有未保存的更改，确定要离开吗？',
     'common.switchLanguage': '切换语言 / Switch Language',
-    'common.localeZh': '中文',
-    'common.localeEn': '英文',
     'prop.pageTitleWithLang': '页面标题',
     'prop.pageDescWithLang': '页面描述',
-    'prop.fieldLabelWithLang': '字段标签',
-    'prop.fieldHelpWithLang': '副标题',
 
   },
   en: {
@@ -875,7 +717,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'common.untitledPage': 'Untitled Page',
     'common.untitledField': 'Untitled Field',
     'common.notice': 'Notice',
-    'common.noticeItem': 'Notice item',
     'common.signed': 'Signed',
     'common.clearSignature': 'Clear Signature',
     'common.clickToSign': 'Click to sign',
@@ -889,17 +730,14 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'modal.confirm': 'Confirm',
     'common.pagesUnit': 'Pages',
     'common.fieldsUnit': 'fields',
-    'common.templatesUnit': 'templates',
     'common.optionsUnit': 'options',
     'common.totalOptions': '{count} options',
-    'common.passed': 'Passed',
     'common.prev': 'Previous',
     'common.confirmNext': 'Confirm & Next',
     'common.nextStep': 'Next Step',
     'common.cancel': 'Cancel',
     'common.singapore': 'Singapore',
     'common.prefilledBaseline': 'Pre-filled Baseline',
-    'common.unknownError': 'Unknown error',
     'common.startDate': 'Start Date',
     'common.endDate': 'End Date',
     'val.validNumber': 'Please enter a valid number',
@@ -930,36 +768,21 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'app.settings': 'Panel Settings',
     'app.leftSidebar': 'Component Library',
     'app.rightSidebar': 'Properties Panel',
-    'header.back': 'Back',
     'header.formTitlePlaceholder': 'Enter form title',
-    'header.confirmRename': 'Confirm',
     'header.clickToRename': 'Click to rename form',
     'header.renameForm': 'Rename form',
     'header.tour': 'User Guide',
     'header.saveSuccess': 'Saved to draft',
     'header.saveFailed': 'Save failed, please check network or try again',
-    'header.saveError': 'Error during save, please try again',
-    'header.loggedOut': 'Logged out successfully',
-    'header.profileOpened': 'User profile opened',
-    'header.activityOpened': 'Activity log opened',
-    'header.settingsOpened': 'Account settings opened',
     'header.untitledForm': 'Untitled Form',
     'header.warnTitle': 'Translation Incomplete Warning',
     'header.warnCount': 'There are {count} items missing English translation.',
-    'header.warnDesc': 'English users may see default Chinese or blank fields if published now.',
     'header.warnMore': '...and {count} more items',
     'header.warnComplete': 'Complete Translations',
     'header.warnPublishAnyway': 'Publish Anyway',
     'header.untranslatedTag': 'Untranslated',
-    'header.contentLang': 'Content Language',
-    'header.clickToSwitchEn': 'Click to switch to English to edit untranslated items',
-    'header.hasUntranslated': 'Current language has untranslated items',
-    'header.itemsUntranslated': '{count} items untranslated',
-    'header.allTranslated': 'All content translated',
     'header.switchedZh': 'Switched to Chinese editing mode',
     'header.switchedEn': 'Switched to English editing mode',
-    'header.bilingualTooltip': 'When enabled, the form supports bilingual questionnaire, allowing respondents to switch languages',
-    'header.bilingualSwitch': 'Bilingual Questionnaire',
     'header.bilingualGuideTitle': 'Translation Management Guide',
     'header.bilingualGuideDesc': 'Manage form translations across languages. You can edit source and target language copies side-by-side in the translation workspace. Respondents can toggle languages via the top-right button.',
     'header.bilingualDisableTitle': 'Disable Bilingual Questionnaire',
@@ -968,12 +791,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.bilingualDisableCancel': 'Cancel',
     'header.bilingualVideoTitle': 'Bilingual Questionnaire Video Tutorial',
     'header.bilingualVideoTip': 'Tip: Once enabled, respondents can switch languages in the top-right corner.',
-    'header.bilingualEnabledMsg': 'Bilingual questionnaire enabled',
     'header.bilingualDisabledMsg': 'Bilingual questionnaire disabled',
 
     // 用户下拉菜单 (User Menu)
-    'user.profile': 'Profile',
-    'user.settings': 'Settings',
     'user.logout': 'Sign Out',
     'user.role': 'System Administrator',
 
@@ -993,13 +813,11 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.createBlankDesc': 'Build form from scratch',
     'sidebar.presetScenarios': 'Preset Scenarios',
     'sidebar.addCanvasPage': 'Add Canvas Page',
-    'sidebar.confirmTitle': 'Prompt',
     'sidebar.templateLoaded': 'Template loaded',
     'sidebar.pageAdded': 'New canvas page added',
     'sidebar.pageDeleted': 'Canvas page deleted',
     'sidebar.deletePagePrompt': 'Are you sure you want to delete this canvas page?',
     'sidebar.systemPreset': 'System Preset',
-    'sidebar.locatePage': 'Locate page',
     'sidebar.componentAdded': 'Component added to canvas',
     'sidebar.tabComponents': 'Component Library',
     'sidebar.tabTemplates': 'Templates',
@@ -1014,8 +832,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.signatureArea': 'Please sign here',
-    'canvas.unnamed': 'Untitled Field',
-    'canvas.helpPlaceholder': 'Description',
     'canvas.droppable': 'Droppable Canvas',
     'canvas.presetCannotDrop': 'System Preset · Cannot Drop',
     'canvas.dragToFormCanvas': 'Please drag components to subsequent form canvases',
@@ -1023,11 +839,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.emptyDesc': 'Drag and drop components from the left sidebar to start building',
     'canvas.addPageRight': 'Add new page to the right',
     'canvas.initializing': 'Initializing canvas...',
-    'canvas.preparingEnv': 'Preparing form environment',
-    'canvas.noPages': 'No Canvas Pages',
-    'canvas.noPagesDesc': 'Your workspace is ready. Create a canvas page to configure form fields.',
-    'canvas.newCanvas': 'New Blank Form',
-    'canvas.browseTemplates': 'Use Scenario Template',
     'canvas.expandSidebar': 'Expand Sidebar',
     'canvas.expandProperties': 'Expand Properties',
     'canvas.zoomIn': 'Zoom in',
@@ -1035,23 +846,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.zoom100': 'Zoom to 100%',
     'canvas.zoomFit': 'Zoom to Fit',
     'canvas.zoomSelection': 'Zoom to Selection',
-    'canvas.helpTooltip': 'User Guide & Shortcuts',
-    'canvas.helpModalTitle': 'User Guide & Shortcuts',
-    'canvas.secCanvasZoom': 'Canvas Zoom & Panning',
-    'canvas.panCanvas': 'Pan Canvas',
-    'canvas.leftDrag': 'Left Drag',
-    'canvas.smoothZoom': 'Smooth Zoom',
-    'canvas.wheel': 'Wheel',
-    'canvas.secFormEditing': 'Form & Editing',
-    'canvas.searchComponents': 'Search Components',
-    'canvas.contextMenu': 'Context Menu',
-    'canvas.rightClick': 'Right Click',
-    'canvas.inlineTextEdit': 'Inline Text Edit',
-    'canvas.clickText': 'Click Text',
-    'canvas.duplicateElement': 'Duplicate Element',
-    'canvas.deleteElement': 'Delete Element',
-    'canvas.productTour': 'View User Guide',
-    'canvas.gotIt': 'Got it',
     'canvas.profileIndividual': 'Individual',
     'canvas.profileEntity': 'Entity',
     'canvas.profileCustomer': 'Customer',
@@ -1063,14 +857,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'canvas.todoZhCount': '{count} Chinese field(s) empty',
     'canvas.todoEnCount': '{count} English translation(s) missing',
     'canvas.conditionPrefix': 'If "{option}" is selected',
-    'canvas.multiConditionAndPrefix': 'Match All: {conditions}',
-    'canvas.multiConditionOrPrefix': 'Match Any: {conditions}',
-    'canvas.linkageGroupTitle': 'Linkage Group',
-    'canvas.linkageGroupStats': '{parents}P · {children}C',
-    'canvas.parentBadgeSingle': 'Trigger Parent',
-    'canvas.parentBadgeIndexed': 'Trigger Parent #{index}',
-    'canvas.addGroupChild': 'Add Linked Field',
-    'canvas.addGroupChildTip': 'New child field will automatically inherit all parent conditions in this group',
     'canvas.yes': 'Yes',
     'canvas.no': 'No',
     'canvas.todoNextIndexed': 'Next ({current}/{total})',
@@ -1084,8 +870,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'context.duplicate': 'Duplicate',
     'context.insertBelow': 'Insert Component',
     'context.linkComponent': 'Link Component',
-    'context.linkParent': 'Link Component',
-    'context.linkChild': 'Link Component',
     'context.unlinkElement': 'Unlink Rule',
     'context.deleteElement': 'Delete Component',
     'context.presetReadOnly': 'System Preset',
@@ -1105,20 +889,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.emptyDesc': 'Click any field on the canvas to edit',
     'prop.basicInfo': 'Basic Information',
     'prop.basicInfoDesc': 'Configure field label, display and validation',
-    'prop.zhRef': 'Original (ZH): ',
-    'prop.zhPageTitleRef': 'Original Title (ZH): ',
-    'prop.zhPageDescRef': 'Original Description (ZH): ',
-    'prop.copyZh': 'Use ZH',
     'prop.canvasSettings': 'Canvas Settings',
     'prop.deletePage': 'Delete Page',
     'prop.fieldLabel': 'Field Label',
-    'prop.fieldLabelEn': 'Field Label',
     'prop.fieldLabelPlaceholder': 'Enter field label',
     'prop.fieldHelp': 'Subtitle',
-    'prop.fieldHelpEn': 'Subtitle',
     'prop.fieldHelpPlaceholder': 'Enter subtitle or explanation',
     'prop.helpLayout': 'Layout',
-    'prop.helpPosition': 'Layout',
     'prop.helpPositionRight': 'Inline',
     'prop.helpPositionBottom': 'Below',
     'prop.helpPositionRightDesc': 'Inline on right (default light gray text)',
@@ -1132,66 +909,40 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.declarationRequired': 'Declarations Required',
     'prop.declarationRequiredTip': 'When enabled, user must agree to all declarations.',
     'prop.customErrorMsg': 'Validation Message',
-    'prop.customErrorMsgTip': 'Error prompt displayed when this required field is empty. Leave blank to use smart default message.',
-    'prop.defaultAutoErrorTip': 'Auto prompt by label',
     'prop.customizeError': 'Customize',
+    'prop.defaultFallback': 'System Default',
+    'prop.customized': 'Customized',
     'prop.resetToDefaultError': 'Reset to Default',
     'prop.declarationErrorMsg': 'Declaration Error Message',
-    'prop.declarationErrorMsgTip': 'Error prompt displayed when declarations are not agreed. Leave blank to use smart default "Please agree to the declarations first".',
     'prop.placeholder': 'Placeholder',
     'prop.enableLongTerm': 'Enable Long-term Option',
     'prop.enableLongTermTip': 'Show a "Long-term" checkbox next to single date input (disabled in date range mode).',
     'prop.defaultLongTerm': 'Default to Long-term',
     'prop.defaultLongTermTip': 'Default to long-term checked when filling form, bypassing date requirement.',
-    'prop.longTermLabel': 'Long-term',
     'prop.addOption': 'Add Option',
-    'prop.noticeConfig': 'Notice Content',
-    'prop.noticeConfigTip': 'Configure notice paragraphs displayed to users.',
-    'prop.addNoticeItem': 'Add Notice Item',
     'prop.addClauseItem': 'Add Clause',
     'prop.layoutInline': 'Inline',
     'prop.layoutStack': 'Stacked',
-    'prop.unlimited': 'Unlimited',
     'prop.allowMultiple': 'Allow Multi-selection',
     'prop.allowMultipleTip': 'Allow selecting multiple choices from the dropdown.',
     'prop.defaultDialCode': 'Default Dial Code',
-    'prop.defaultDialCodeTip': 'Set default country dial code selected on the left of the phone input.',
-    'prop.strictPhoneValidation': 'Strict Validation',
-    'prop.strictPhoneValidationTip': 'Validate phone digits and prefix against official rules for the selected country (e.g., Singapore 8 digits starting with 8/9, China 11 digits starting with 1).',
-    'prop.conditionalDisplay': 'Conditional Display',
-    'prop.conditionalDisplayTip': 'Show this field only when a preceding choice field meets specific condition; otherwise auto-hide and bypass validation.',
-    'prop.dependsOnField': 'Depends On Field',
-    'prop.selectParentField': 'Select parent choice field',
-    'prop.selectTriggerValue': 'Select trigger option',
-    'prop.noEligibleParent': 'No preceding choice fields available on this page',
     'prop.copy': 'Duplicate',
     'prop.delete': 'Delete',
     'prop.collapsePanel': 'Collapse panel',
     'prop.systemPreset': 'System Preset',
-    'prop.nodeType': 'Node Type',
     'prop.systemBaseline': 'System Baseline · Basic Info',
-    'prop.businessType': 'Business Type',
     'prop.locked': 'Locked',
     'prop.deletePageConfirm': 'Are you sure you want to delete this canvas page? This cannot be undone.',
     'prop.presetNationalities': 'Preset Nationalities',
     'prop.presetCountries': 'Preset Countries',
     'prop.viewDirectory': 'View',
-    'prop.unselected': 'Unselected',
     'prop.fieldFallback': 'Field',
     'prop.clientCase': 'Client Case',
     'prop.entityCase': 'Entity Case',
     'prop.individualCase': 'Individual Case',
-    'prop.missingZhTag': 'Missing Chinese',
-    'prop.missingEnTag': 'Missing English',
-    'prop.origZh': 'Original ZH: ',
-    'prop.origEn': 'Original EN: ',
-    'prop.sameAsZh': 'Same as ZH',
-    'prop.sameAsEn': 'Same as EN',
     'prop.systemPresetAlert': 'This node is a system-level pre-check step with fixed logic. Property modification is not supported.',
     'prop.defaultCountryPlaceholder': 'Select Country/Region',
     'prop.defaultNatPlaceholder': 'Select Nationality',
-    'prop.configuringZhMode': 'Configuring: Chinese Content',
-    'prop.configuringEnMode': 'Configuring: English Content',
     'prop.linkageRuleTitle': 'Display Rule',
     'prop.linkageWhen': 'When',
     'prop.linkageEquals': 'selects',
@@ -1206,11 +957,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.unlinkRuleConfirm': 'Unlink this condition? The field will become permanently visible.',
     'prop.unlink': 'Unlink',
     'prop.resizeHandleTip': 'Drag to resize property panel',
-    'prop.editLanguage': 'Language',
-    'prop.zhCompleteness': 'Chinese completeness: {percent}%',
-    'prop.enCompleteness': 'English completeness: {percent}%',
-    'prop.singleLangZh': 'Single Language (Simplified Chinese)',
-    'prop.singleLangEn': 'Single Language (English)',
     'prop.rowRange': 'Row Range',
     'prop.rowRangeTip': 'Set textarea adaptive row height range (min rows ~ max rows). Initially renders min rows, automatically expands as content increases, and scrolls when exceeding max rows.',
     'prop.rowUnit': 'rows',
@@ -1222,9 +968,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.signatureRequired': 'Signature Required',
     'prop.signatureRequiredTip': 'When enabled, user must sign in the signature pad.',
     'prop.signatureErrorMsg': 'Missing Signature Message',
-    'prop.signatureErrorMsgTip': 'Error prompt displayed when signature is missing. Leave blank to use smart default message.',
     'prop.sigPadLabel': 'Signature Prompt Text',
+    'prop.signWatermarkPlaceholder': 'Signature Pad Placeholder',
     'prop.datePickerLabel': 'Date Picker Placeholder',
+    'prop.startDatePlaceholder': 'Start Date Placeholder',
+    'prop.endDatePlaceholder': 'End Date Placeholder',
+    'prop.longTermOptionLabel': 'Long-term Option Text',
     'prop.dateMode': 'Date Mode',
     'prop.dateModeTip': 'Configure date selection mode: single date or date range.',
     'prop.dateModeSingle': 'Single Date',
@@ -1233,26 +982,13 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.alertContentTip': 'Enter notice text directly. Lines starting with "- " create bullet points. Supports [Link](url) hyperlinks.',
     'prop.alertContentPlaceholder': 'Enter notice content...\n- Start with "- " for list items\n- Supports [Link Text](xxx.com) hyperlinks',
     'prop.alertEmptyContentPlaceholder': 'Please enter notice content',
-    'prop.alertListStyle': 'List Style',
-    'prop.alertListStyleTip': 'Select circle bullets or numbered list items.',
-    'prop.alertListCircle': 'Bullet',
-    'prop.alertListNumber': 'Number',
     'prop.alertInsertBullet': 'Bullet',
-    'prop.alertInsertBulletTip': 'Insert list item prefix',
     'prop.alertInsertLink': 'Link',
-    'prop.alertInsertLinkTip': 'Insert Markdown link [Text](xxx.com)',
     'prop.maxSelections': 'Max Allowed Selections',
-    'prop.maxSelectionsTip': 'Limit maximum number of choices allowed. Leave empty for unlimited.',
     'prop.inputType': 'Format Type',
     'prop.inputTypeTip': 'Set single line input format: normal text or number.',
     'prop.inputTypeText': 'Text',
     'prop.inputTypeNumber': 'Number',
-    'prop.textareaRows': 'Rows & Auto-size',
-    'prop.textareaRowsTip': 'Configure the initial minimum rows and maximum expanding rows for the textarea.',
-    'prop.minRows': 'Min Rows',
-    'prop.minRowsTip': 'The initial and minimum visible text line count.',
-    'prop.maxRows': 'Max Rows',
-    'prop.maxRowsTip': 'The maximum number of rows to expand to before scrolling.',
     'prop.emailPlaceholderLabel': 'Email Placeholder',
     'prop.emailPlaceholder': 'Please enter email',
     'prop.maxSelectionsCountryTip': 'Country/Nationality component allows up to 3 selections',
@@ -1266,11 +1002,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 属性面板：页面属性 (PagePropsEditor)
     'prop.pageSubtitle': 'Page Canvas Settings',
     'prop.page': 'Page',
-    'prop.pageTitle': 'Page Title',
-    'prop.pageTitleEn': 'Page Title',
     'prop.pageTitlePlaceholder': 'Enter page title',
-    'prop.pageDesc': 'Page Description',
-    'prop.pageDescEn': 'Page Description',
     'prop.pageDescPlaceholder': 'Subtitle or description displayed below the title',
 
     // 选项与级联联动 (OptionsEditor)
@@ -1279,12 +1011,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.clauseConfig': 'Declaration Clauses',
     'prop.clauseConfigTip': 'Configure legal declaration clauses for user acknowledgment.',
     'prop.optionLayout': 'Layout',
-    'prop.triggerValue': 'Trigger Option Value',
     'options.deleteOption': 'Delete Option',
-    'options.optionNamePlaceholder': 'Option Label',
     'options.noticePlaceholder': 'Enter notice or declaration text...',
     'options.dragToReorderIndexed': 'Drag to reorder Option {index}',
-    'options.optionIndex': 'Option',
     'options.toggleDefaultRadio': 'Click to toggle default selection',
     'options.toggleDefaultCheckbox': 'Click to toggle default check',
     'options.linkConfigTitle': 'Configure fields to reveal when choosing [{name}]',
@@ -1295,7 +1024,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.thisOption': 'This option',
     'options.declarationPlaceholder': 'Enter declaration terms (Clause {index})',
     'options.unlink': 'Unlink',
-    'options.singleInputDefault': 'Single-line Input',
     'options.maxDepthReached': 'Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability.',
     'options.maxDepthReachedShort': 'Max nesting depth reached (up to 2 levels)',
 
@@ -1362,21 +1090,9 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.confirmOverwriteBtn': 'Confirm Overwrite',
     'wizard.pagesCount': '{count} Pages',
     'wizard.fieldsCount': '{count} Fields',
-    'wizard.riskSelectTitle': 'Select Target Profile for Risk Assessment',
-    'wizard.riskSelectDesc': 'Please select the target profile type to initialize the new risk assessment form.',
-    'wizard.riskCustomerTitle': 'Customer Risk Assessment',
-    'wizard.riskCustomerDesc': 'Suitable for AML and compliance risk evaluation of customer accounts.',
-    'wizard.riskIndividualTitle': 'Individual Risk Assessment',
-    'wizard.riskIndividualDesc': 'Suitable for risk evaluation of individual directors, shareholders, or key persons.',
-    'wizard.riskEntityTitle': 'Entity Risk Assessment',
-    'wizard.riskEntityDesc': 'Suitable for compliance and operational risk evaluation of corporate entities.',
-    'wizard.tagCustomer': 'Customer',
-    'wizard.tagIndividual': 'Individual',
-    'wizard.tagEntity': 'Entity',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': 'New Form Canvas',
-    'modal.createForm.lockedProfile': 'Locked Profile: ',
     'modal.createForm.profileType': 'Profile Type',
     'modal.createForm.formTitle': 'Form Title',
     'modal.createForm.customer': 'Customer',
@@ -1389,37 +1105,24 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'modal.createForm.confirmOverwriteDesc': 'The current canvas already contains {pages} artboard page(s). Creating a new form will overwrite all current canvas contents. Are you sure you want to continue?',
     'modal.createForm.confirmOverwriteBtn': 'Confirm Overwrite',
     'modal.createForm.createdSuccess': 'Form canvas created successfully',
-    'modal.createForm.defaultDesc': 'Custom form created from blank canvas',
     'modal.createForm.defaultPlaceholder': 'Default: {title}',
 
     // 预览与发布 (PreviewModal & PublishModal)
     'preview.preview': 'Preview',
     'preview.deploySchema': 'Deploy Schema',
-    'preview.previewDesc': 'Experience responsive mobile form interactions and validations',
-    'preview.deployDesc': 'Form schema is ready for deployment',
     'preview.schemaJson': 'Schema JSON',
     'preview.formSteps': 'Form Steps',
     'preview.disclaimer': 'Preview is for reference only. Actual display may vary depending on device and browser. Please verify on mobile devices.',
     'preview.submitSuccess': 'Submitted successfully!',
-    'preview.submitSuccessDesc': 'All mandatory fields and rules have passed strict validation.',
-    'preview.validationSummary': 'Validation Summary',
-    'preview.totalFieldsChecked': 'Total Fields Checked',
-    'preview.mandatoryFields': 'Mandatory Fields',
-    'preview.refillForm': 'Refill Form',
     'preview.noFields': 'Current page has no fields',
     'preview.validateForm': 'Validate Form',
-    'preview.liveValidatorActive': 'Live Validator: Active (Singapore +65 default)',
     'preview.publishForm': 'Publish Form',
-    'preview.publishing': 'Publishing...',
     'preview.defaultCompanyTitle': 'Beijing Branch of Shanghai Qingmo Information Co., Ltd',
     'preview.fillRequiredFields': 'Please fill in all required fields',
-    'preview.publishSuccess': 'Form published successfully!',
     'preview.publishFailed': 'Publish failed',
     'publish.modalTitle': 'Publish Form',
     'publish.modalDesc': 'Confirm form name and description before generating public access link.',
     'publish.riskModalDesc': 'Verify and confirm risk assessment form details before publishing.',
-    'publish.modalBilingualDesc': 'Bilingual filing enabled: please verify Chinese and English titles & descriptions. Respondents can switch languages freely.',
-    'publish.editLocale': 'Language',
     'publish.formName': 'Form Name',
     'publish.formNamePlaceholder': 'Enter form name (up to 50 chars)',
     'publish.formNameEn': 'English Form Name',
@@ -1428,30 +1131,16 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'publish.formDescPlaceholder': 'Introduce the purpose of the form, guidelines, or notices (displayed on first screen)...',
     'publish.formDescEn': 'English Description',
     'publish.formDescEnPlaceholder': 'Introduce the purpose of the form, guidelines, or notices...',
-    'publish.summaryTarget': 'Target Entity',
-    'publish.formScale': 'Form Scale',
-    'publish.summaryPages': 'pages',
-    'publish.summaryFields': 'fields',
-    'publish.summaryTrans': 'Bilingual Filing',
-    'publish.transComplete': 'Complete',
-    'publish.allCompleted': 'All Completed',
-    'publish.missingCount': '{count} to complete',
     'publish.nameRequired': 'Form name is required',
     'publish.nameDuplicate': 'Form name already exists, please use another name',
     'publish.confirmPublish': 'Confirm Publish',
-    'publish.publishing': 'Publishing...',
     'publish.successTitle': 'Form Published Successfully!',
     'publish.successDesc': 'The form template is now live. You can preview the mobile experience via the link below, or return to form settings.',
     'publish.riskSuccessDesc': 'The risk assessment form has been published. You can close this page and refresh the list, or return to the form settings page.',
     'publish.backToRiskSetting': 'Back to Form Settings',
     'publish.closePage': 'Close Page',
-    'publish.formUrl': 'Public URL',
-    'publish.copyLink': 'Copy Link',
-    'publish.copied': 'Copied',
-    'publish.copySuccess': 'Link copied to clipboard',
     'publish.openPreview': 'Open in New Tab',
     'publish.openPreviewTip': 'Click to open preview form in a new window',
-    'publish.done': 'Done',
 
     // Schema 源码侧边栏 (SchemaSidebar)
     'schema.title': 'JSON Schema Structure',
@@ -1523,20 +1212,12 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     // 风险评估问卷 (Risk Assessment)
     'risk.pageTitle': 'Risk Assessment',
     'risk.pageDesc': 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight.',
-    'risk.pageDescIndividual': 'Configure individual risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.',
-    'risk.pageDescEntity': 'Configure corporate entity risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.',
-    'risk.optYes': 'Yes',
-    'risk.optNo': 'No',
-    'risk.optNotApplicable': 'Not Applicable',
     'risk.catComponents': 'Risk Assessment Components',
     'risk.cmpQuestion': 'Risk Question',
-    'risk.cmpQuestionDesc': 'Includes Yes / No / Not Applicable and 1-10 weight slider',
     'risk.cmpGroup': 'Question Group',
-    'risk.cmpGroupDesc': 'Section module for risk dimensions (e.g., Client, Country, Service risk)',
     'risk.groupOutlineTitle': 'Question Groups',
     'risk.groupTab': 'Groups',
     'risk.groupCount': '{count} groups',
-    'risk.groupCountUnit': 'groups',
     'risk.questionsCount': '{count} questions',
     'risk.questionUnit': 'questions',
     'risk.addGroup': 'Add Question Group',
@@ -1545,8 +1226,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.deleteGroup': 'Delete Group',
     'risk.deleteGroupConfirm': 'Delete this question group and all questions inside?',
     'risk.defaultGroupTitle': 'Section {index}',
-    'risk.groupNameZh': 'Section Name (ZH)',
-    'risk.groupNameEn': 'Section Name (EN)',
     'risk.groupNamePlaceholder': 'Enter group name...',
     'risk.groupInfo': 'Group Information',
     'risk.groupInfoSub': 'English group title is required; Chinese is optional',
@@ -1560,10 +1239,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.fixedRulesDesc': 'Fixed questionnaire rules',
     'risk.fixedNoPropTip': 'The risk questionnaire uses fixed system rules and requires no page configuration.',
     'risk.addSectionSlot': 'Add Question Group',
-    'risk.addSectionSlotDesc': 'Click to add a new assessment section module',
-    'risk.dragSectionHandle': 'Drag to reorder group',
-    'risk.tagStructure': 'Section',
-    'risk.tagRadio': 'Radio',
     'risk.groupCreated': 'New question group added',
 
     // 标准组件类型名称 (Component Names)
@@ -1619,12 +1294,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.signatureArea': 'Signature Area',
 
     // 发布弹窗扩展 (Publish Modal Ext)
-    'publish.copyFailed': 'Failed to copy, please copy the link manually',
-    'publish.tplKycCustomerDesc': 'KYC questionnaire for customer parent cases',
-    'publish.tplKycIndividualDesc': 'KYC questionnaire for individual members',
-    'publish.tplKycEntityDesc': 'KYC questionnaire for entity members',
-    'publish.tplBlankDesc': 'Create custom form from blank canvas',
-    'publish.tplAllComponentsDesc': 'Covers all 12 low-code components, property tests, and bilingual validation',
 
     // 翻译抽屉与通用 (Translation Helper & Common)
     'trans.pageTitle': 'Page Title',
@@ -1646,50 +1315,53 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.addLanguage': 'Translation Management',
     'trans.addLanguageShort': 'Add Language',
     'trans.removeLanguage': 'Remove language',
-    'trans.sourceLeft': 'Source (Left)',
-    'trans.readOnlyShort': 'Read-only',
-    'trans.targetRight': 'Target (Right)',
+    'trans.defaultLang': 'Default',
     'trans.translatablePages': 'Translatable Pages',
     'trans.countLeft': '{count} left',
     'trans.noPagesToTranslate': 'No custom form pages to translate',
     'trans.addedLocaleSuccess': 'Added {name}',
-    'trans.readOnlyReference': 'Read-only Reference',
-    'trans.clickToTranslate': 'Click text to translate',
     'trans.sideBySideSubtitle': 'Manage translations across languages',
+    'trans.navTitle': 'Translation Management',
+    'trans.navSubtitle': 'Page navigation & progress',
+    'trans.propTitle': 'Translation Properties',
+    'trans.propSubtitle': 'Edit target translation against source',
     'trans.pendingSummary': '{count} {langName} items untranslated',
-    'trans.translationPair': 'Translation Direction',
-    'trans.sourceRef': 'Source Reference',
-    'trans.targetEdit': 'Target Translation',
-    'trans.noSourceText': '(No source text)',
     'trans.translated': 'Filled',
     'trans.pending': 'Pending',
-    'trans.quickTipTitle': 'Canvas Interactive Editing',
-    'trans.quickTipDesc': 'Click any element or text on the canvas to edit its translation here.',
+    'trans.completed': 'Completed',
     'trans.optionsTitle': 'Options Translation',
+    'trans.declarationOptionsTitle': 'Declarations Translation',
+    'trans.sigPromptLabel': 'Signature Prompt Text',
+    'trans.signWatermarkLabel': 'Signature Pad Watermark',
+    'trans.startDatePlaceholder': 'Start Date Placeholder',
+    'trans.endDatePlaceholder': 'End Date Placeholder',
+    'trans.longTermOptionLabel': 'Long-term Option Text',
+    'trans.pageTranslation': 'Page Translation',
     'trans.pageTitleLabel': 'Page Title',
     'trans.pageDescLabel': 'Page Description',
-    'trans.backToPage': 'Back to Page',
-    'trans.source': 'Source',
-    'trans.target': 'Target',
-    'trans.enterTarget': 'Enter target translation...',
+    'trans.groupTranslation': 'Group Translation',
+    'trans.groupTitleLabel': 'Group Title',
+    'trans.enterTarget': 'Enter translation...',
+    'header.warnEnRequiredDesc': 'English translation is required. Please complete all English translations before publishing.',
+    'header.warnMultiCount': 'There are {count} untranslated items in target languages.',
+    'header.warnMultiDesc': 'Publishing now may result in fallback text or blank fields for those languages.',
+    'prop.element': 'Element Properties',
     'common.leaveConfirm': 'You have unsaved changes. Are you sure you want to leave?',
     'common.switchLanguage': 'Switch Language / 切换语言',
-    'common.localeZh': 'Chinese',
-    'common.localeEn': 'English',
     'prop.pageTitleWithLang': 'Page Title (EN)',
     'prop.pageDescWithLang': 'Page Description (EN)',
-    'prop.fieldLabelWithLang': 'Field Label (EN)',
-    'prop.fieldHelpWithLang': 'Help Text (EN)',
 
   }
 };
 
 /**
  * 获取系统 UI 文案（支持多语言与参数插值）
+ * 注意：系统 UI 界面仅维护中英双语；若指定了非 zh 语种（如 en, ja, ko, ms），UI 文案自动以 en 保底展示
  */
-export function t(key: string, locale?: Locale, params?: Record<string, string | number>): string {
-  const current = locale || store.currentLocale || 'zh';
-  let str = systemMessages[current]?.[key] || systemMessages.zh[key] || key;
+export function t(key: string, locale?: string, params?: Record<string, string | number>): string {
+  const targetLoc = locale || store.currentLocale || 'zh';
+  const resolvedLocale: Locale = (targetLoc === 'zh' || targetLoc === 'zh-TW') ? 'zh' : 'en';
+  let str = systemMessages[resolvedLocale]?.[key] || systemMessages.en?.[key] || systemMessages.zh[key] || key;
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
@@ -1722,30 +1394,30 @@ export function formatOptionLabel(index: number, locale?: string): string {
 
 function readI18nField(obj: any, field: string, loc: string): string {
   if (!obj) return '';
+  const fromI18n = obj.i18n?.[loc]?.[field];
+  if (fromI18n !== undefined && fromI18n !== null && String(fromI18n).trim() !== '') {
+    return String(fromI18n).trim();
+  }
   if (loc === 'zh') {
-    const v = obj[field] ?? obj.i18n?.zh?.[field];
-    return v !== undefined && v !== null ? String(v) : '';
+    const v = obj[field];
+    return v !== undefined && v !== null && String(v).trim() !== '' ? String(v).trim() : '';
   }
   if (loc === 'en') {
-    const v = obj[`${field}_en`] ?? obj.i18n?.en?.[field];
-    return v !== undefined && v !== null ? String(v) : '';
+    const v = obj[`${field}_en`];
+    return v !== undefined && v !== null && String(v).trim() !== '' ? String(v).trim() : '';
   }
-  const v = obj.i18n?.[loc]?.[field];
-  return v !== undefined && v !== null ? String(v) : '';
+  return '';
 }
 
 function writeI18nField(obj: any, field: string, val: string, loc: string) {
   if (!obj) return;
+  if (!obj.i18n) obj.i18n = {};
+  if (!obj.i18n[loc]) obj.i18n[loc] = {};
+  obj.i18n[loc][field] = val;
   if (loc === 'zh') {
     obj[field] = val;
-    if (obj.i18n?.zh) obj.i18n.zh[field] = val;
   } else if (loc === 'en') {
     obj[`${field}_en`] = val;
-    if (obj.i18n?.en) obj.i18n.en[field] = val;
-  } else {
-    if (!obj.i18n) obj.i18n = {};
-    if (!obj.i18n[loc]) obj.i18n[loc] = {};
-    obj.i18n[loc][field] = val;
   }
 }
 
@@ -1769,6 +1441,10 @@ export function getFieldText(
     return val;
   }
   if (fallback) {
+    if (current !== 'en') {
+      const enVal = readI18nField(element, field, 'en');
+      if (enVal !== '') return enVal;
+    }
     const baseVal = readI18nField(element, field, primaryLocale.value);
     if (baseVal !== '') return baseVal;
     const zhVal = readI18nField(element, field, 'zh');
@@ -1796,6 +1472,24 @@ export function getLocalizedFieldText(
  * @param locale 指定语言
  * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
+function readOptionI18n(option: any, loc: string): string {
+  if (!option) return '';
+  const rawI18n = option.i18n?.[loc];
+  if (rawI18n !== undefined && rawI18n !== null) {
+    const str = typeof rawI18n === 'object' ? rawI18n.label : rawI18n;
+    if (str !== undefined && str !== null && String(str).trim() !== '') {
+      return String(str).trim();
+    }
+  }
+  if (loc === 'zh' && option.label !== undefined && option.label !== null && String(option.label).trim() !== '') {
+    return String(option.label).trim();
+  }
+  if (loc === 'en' && option.label_en !== undefined && option.label_en !== null && String(option.label_en).trim() !== '') {
+    return String(option.label_en).trim();
+  }
+  return '';
+}
+
 export function getOptionLabel(
   option: FormElementOption,
   locale?: string,
@@ -1803,23 +1497,21 @@ export function getOptionLabel(
 ): string {
   if (!option) return '';
   const current = getEffectiveFormLocale(locale);
-  let val = '';
-  if (current === 'zh') {
-    val = option.label ?? option.i18n?.zh ?? '';
-  } else if (current === 'en') {
-    val = option.label_en ?? option.i18n?.en ?? '';
-  } else {
-    val = option.i18n?.[current] ?? '';
-  }
-  if (val !== undefined && val !== null && val !== '') {
-    return String(val);
+  const val = readOptionI18n(option, current);
+  if (val !== '') {
+    return val;
   }
   if (fallback) {
-    const base = primaryLocale.value;
-    const baseVal = base === 'zh' ? option.label : base === 'en' ? option.label_en : option.i18n?.[base];
-    if (baseVal) return String(baseVal);
-    if (option.label) return String(option.label);
-    if (option.label_en) return String(option.label_en);
+    if (current !== 'en') {
+      const enVal = readOptionI18n(option, 'en');
+      if (enVal !== '') return enVal;
+    }
+    const baseVal = readOptionI18n(option, primaryLocale.value);
+    if (baseVal !== '') return baseVal;
+    const zhVal = readOptionI18n(option, 'zh');
+    if (zhVal !== '') return zhVal;
+    const enVal = readOptionI18n(option, 'en');
+    if (enVal !== '') return enVal;
   }
   return '';
 }
@@ -1854,6 +1546,10 @@ export function getPageText(
     return val;
   }
   if (fallback) {
+    if (current !== 'en') {
+      const enVal = readI18nField(page, field, 'en');
+      if (enVal !== '') return enVal;
+    }
     const baseVal = readI18nField(page, field, primaryLocale.value);
     if (baseVal !== '') return baseVal;
     const zhVal = readI18nField(page, field, 'zh');
@@ -1886,6 +1582,10 @@ export function getGroupText(
   const val = readI18nField(group, field, current);
   if (val !== '') return val;
   if (fallback) {
+    if (current !== 'en') {
+      const enVal = readI18nField(group, field, 'en');
+      if (enVal !== '') return enVal;
+    }
     const baseVal = readI18nField(group, field, primaryLocale.value);
     if (baseVal !== '') return baseVal;
     const zhVal = readI18nField(group, field, 'zh');
@@ -1978,15 +1678,12 @@ export function setOptionLabel(
   locale?: string
 ) {
   const current = getEffectiveFormLocale(locale);
+  if (!option.i18n) option.i18n = {};
+  option.i18n[current] = val;
   if (current === 'zh') {
     option.label = val;
-    if (option.i18n) option.i18n.zh = val;
   } else if (current === 'en') {
     option.label_en = val;
-    if (option.i18n) option.i18n.en = val;
-  } else {
-    if (!option.i18n) option.i18n = {};
-    option.i18n[current] = val;
   }
   markDirty();
 }
@@ -1994,42 +1691,97 @@ export function setOptionLabel(
 /**
  * 获取字段在当前语言下的通用默认/兜底校验错误提示文字
  */
+const defaultValidationMessages: Record<string, Record<string, string>> = {
+  declaration: {
+    zh: '请确认并同意声明条款',
+    'zh-TW': '請確認並同意聲明條款',
+    en: 'Please agree to the declarations',
+    ja: '宣誓事項を確認し、同意してください',
+    ko: '선서 사항을 확인하고 동의해 주세요',
+    ms: 'Sila sahkan dan bersetuju dengan pengisytiharan'
+  },
+  signature: {
+    zh: '请完成手写签名',
+    'zh-TW': '請完成手寫簽名',
+    en: 'Please complete handwritten signature',
+    ja: '手書きで署名してください',
+    ko: '서명을 완료해 주세요',
+    ms: 'Sila lengkapkan tandatangan'
+  },
+  selectOne: {
+    zh: '请选择一个选项',
+    'zh-TW': '請選擇一個選項',
+    en: 'Please select an option',
+    ja: '選択してください',
+    ko: '항목을 선택해 주세요',
+    ms: 'Sila pilih satu pilihan'
+  },
+  selectAtLeastOne: {
+    zh: '请至少选择一个选项',
+    'zh-TW': '請至少選擇一個選項',
+    en: 'Please select at least one option',
+    ja: '1つ以上選択してください',
+    ko: '하나 이상 선택해 주세요',
+    ms: 'Sila pilih sekurang-kurangnya satu pilihan'
+  },
+  selectDate: {
+    zh: '请选择日期',
+    'zh-TW': '請選擇日期',
+    en: 'Please select a date',
+    ja: '日付を選択してください',
+    ko: '날짜를 선택해 주세요',
+    ms: 'Sila pilih tarikh'
+  },
+  required: {
+    zh: '必填项不能为空',
+    'zh-TW': '必填項不能為空',
+    en: 'This required field cannot be empty',
+    ja: '入力してください',
+    ko: '필수 입력 항목입니다',
+    ms: 'Medan ini diperlukan'
+  }
+};
+
+function resolveDefaultMsg(type: keyof typeof defaultValidationMessages, loc: string): string {
+  const dict = defaultValidationMessages[type];
+  return dict[loc] || dict[loc.split('-')[0]] || dict.en || dict.zh;
+}
+
 export function getFieldDefaultErrorMessage(
   element: FormElement,
   subType?: 'declaration' | 'signature',
   locale?: string
 ): string {
   const current = getEffectiveFormLocale(locale);
-  const isZh = current === 'zh' || current === 'zh-TW';
 
   if (subType === 'declaration') {
-    return isZh ? '请确认并同意声明条款' : 'Please agree to the declarations';
+    return resolveDefaultMsg('declaration', current);
   }
 
   if (subType === 'signature' || element.type === 'signature') {
-    return isZh ? '请完成手写签名' : 'Please complete handwritten signature';
+    return resolveDefaultMsg('signature', current);
   }
 
   switch (element.type) {
     case 'radio':
-      return isZh ? '请选择一个选项' : 'Please select an option';
+      return resolveDefaultMsg('selectOne', current);
     case 'checkbox':
-      return isZh ? '请至少选择一个选项' : 'Please select at least one option';
+      return resolveDefaultMsg('selectAtLeastOne', current);
     case 'select':
     case 'country':
     case 'nationality':
       if (element.multiple) {
-        return isZh ? '请至少选择一个选项' : 'Please select at least one option';
+        return resolveDefaultMsg('selectAtLeastOne', current);
       }
-      return isZh ? '请选择一个选项' : 'Please select an option';
+      return resolveDefaultMsg('selectOne', current);
     case 'date':
-      return isZh ? '请选择日期' : 'Please select a date';
+      return resolveDefaultMsg('selectDate', current);
     case 'input':
     case 'textarea':
     case 'phone':
     case 'email':
     default:
-      return isZh ? '必填项不能为空' : 'This required field cannot be empty';
+      return resolveDefaultMsg('required', current);
   }
 }
 

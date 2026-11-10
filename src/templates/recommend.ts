@@ -2,6 +2,9 @@ import type { FormSchema, ProfileType, ProfileFieldItem } from '@/types/schema';
 import tplCustomerImg from '@/assets/templates/tpl-customer.webp';
 import tplIndividualImg from '@/assets/templates/tpl-individual.webp';
 import tplEntityImg from '@/assets/templates/tpl-entity.webp';
+import tplCustomerIcon from '@/assets/templates/c.png';
+import tplIndividualIcon from '@/assets/templates/u.png';
+import tplEntityIcon from '@/assets/templates/e.png';
 
 export interface ScenarioTemplateMeta {
   key: 'kyc-customer' | 'kyc-individual' | 'kyc-entity';
@@ -19,6 +22,7 @@ export interface ScenarioTemplateMeta {
   stats: string;
   stats_en: string;
   image: string;
+  icon: string;
   code: string;
   bannerBgClass: string;
 }
@@ -40,6 +44,7 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     stats: '3 页面 · 9 字段',
     stats_en: '3 Pages · 9 Fields',
     image: tplCustomerImg,
+    icon: tplCustomerIcon,
     code: 'SG_CDD_CUSTOMER',
     bannerBgClass: 'bg-[#faf5ff]'
   },
@@ -59,6 +64,7 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     stats: '5 页面 · 15 字段',
     stats_en: '5 Pages · 15 Fields',
     image: tplIndividualImg,
+    icon: tplIndividualIcon,
     code: 'SG_CDD_INDIVIDUAL',
     bannerBgClass: 'bg-[#f0fdf4]'
   },
@@ -78,6 +84,7 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     stats: '3 页面 · 16 字段',
     stats_en: '3 Pages · 16 Fields',
     image: tplEntityImg,
+    icon: tplEntityIcon,
     code: 'SG_CDD_ENTITY',
     bannerBgClass: 'bg-[#f0f9ff]'
   }
@@ -143,16 +150,29 @@ export function createBlankTemplate(
     ? presetIndividualProfileFields
     : (normType === 'entity' ? presetEntityProfileFields : presetCustomerProfileFields);
 
+  const isEnEntry =
+    typeof window !== 'undefined' &&
+    (new URLSearchParams(window.location.search).get('lang')?.toLowerCase() === 'en' ||
+      (!new URLSearchParams(window.location.search).get('lang') &&
+        (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
+
   return {
     schemaVersion: '1.0.0',
     meta: {
-      title: resolvedTitle,
-      title_en: title_en || resolvedTitle,
-      description: resolvedDesc,
-      description_en: description_en || '',
       profileType: normType,
-      enabledLocales: ['zh', 'en'],
-      source: 'diy'
+      baseLocale: isEnEntry ? 'en' : 'zh',
+      enabledLocales: isEnEntry ? ['en'] : ['zh', 'en'],
+      source: 'diy',
+      i18n: {
+        zh: {
+          title: resolvedTitle,
+          ...(resolvedDesc ? { description: resolvedDesc } : {})
+        },
+        en: {
+          title: title_en || resolvedTitle,
+          ...(description_en ? { description: description_en } : {})
+        }
+      }
     },
     pages: [
       {
@@ -160,20 +180,17 @@ export function createBlankTemplate(
         pageType: 'system_profile',
         profileType: normType,
         showSkeleton: true,
-        title: '基本资料',
-        title_en: 'Basic Information',
-        description: '',
-        description_en: '',
+        i18n: {
+          zh: { title: '基本资料' },
+          en: { title: 'Basic Information' }
+        },
         fields: [],
         profileFields: defaultFields
       },
       {
         id: 'page_form_1',
         pageType: 'form',
-        title: '',
-        title_en: '',
-        description: '',
-        description_en: '',
+        i18n: {},
         fields: []
       }
     ],
@@ -186,9 +203,9 @@ export const blankTemplate: FormSchema = createBlankTemplate('customer');
 
 
 export const RISK_FIXED_OPTIONS = [
-  { label: 'Yes', label_en: 'Yes', value: 'yes' },
-  { label: 'No', label_en: 'No', value: 'no' },
-  { label: 'Not Applicable', label_en: 'Not Applicable', value: 'na' }
+  { value: 'yes', i18n: { zh: 'Yes', en: 'Yes' } },
+  { value: 'no', i18n: { zh: 'No', en: 'No' } },
+  { value: 'na', i18n: { zh: 'Not Applicable', en: 'Not Applicable' } }
 ];
 
 
@@ -228,27 +245,45 @@ export function createRiskAssessmentTemplate(
   const resolvedTitle = title || metaPreset.title;
 
   const presetGroups = [{ id: 'grp_risk_1', title: '', title_en: '' }];
+  const isEnEntry =
+    typeof window !== 'undefined' &&
+    (new URLSearchParams(window.location.search).get('lang')?.toLowerCase() === 'en' ||
+      (!new URLSearchParams(window.location.search).get('lang') &&
+        (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
 
   return {
     schemaVersion: '1.0.0',
     meta: {
-      title: resolvedTitle,
-      title_en: title_en || resolvedTitle,
-      description: description || '',
-      description_en: description_en || '',
       profileType: normType,
       formType: 'risk',
-      enabledLocales: ['zh'],
-      source: 'diy'
+      baseLocale: isEnEntry ? 'en' : 'zh',
+      enabledLocales: isEnEntry ? ['en'] : ['zh', 'en'],
+      source: 'diy',
+      i18n: {
+        zh: {
+          title: resolvedTitle,
+          ...(description ? { description } : {})
+        },
+        en: {
+          title: title_en || resolvedTitle,
+          ...(description_en ? { description: description_en } : {})
+        }
+      }
     },
     pages: [
       {
         id: 'page_risk_0',
         pageType: 'form',
-        title: metaPreset.pageTitle,
-        title_en: metaPreset.pageTitleEn,
-        description: metaPreset.pageDesc,
-        description_en: metaPreset.pageDescEn,
+        i18n: {
+          zh: {
+            title: metaPreset.pageTitle,
+            description: metaPreset.pageDesc
+          },
+          en: {
+            title: metaPreset.pageTitleEn,
+            description: metaPreset.pageDescEn
+          }
+        },
         groups: presetGroups,
         fields: []
       }
@@ -261,18 +296,23 @@ export function createRiskAssessmentTemplate(
 export const kycCustomerTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SG_CDD_CUSTOMER",
-    "title_en": "SG_CDD_CUSTOMER",
-    "description": "",
-    "description_en": "",
     "profileType": "customer",
     "formType": "kyc",
+    "baseLocale": "zh",
     "enabledLocales": [
       "zh",
       "en"
     ],
     "source": "template",
-    "templateKey": "kyc-customer"
+    "templateKey": "kyc-customer",
+    "i18n": {
+      "zh": {
+        "title": "SG_CDD_CUSTOMER"
+      },
+      "en": {
+        "title": "SG_CDD_CUSTOMER"
+      }
+    }
   },
   "pages": [
     {
@@ -280,219 +320,273 @@ export const kycCustomerTemplate: FormSchema = {
       "pageType": "system_profile",
       "profileType": "customer",
       "showSkeleton": true,
-      "title": "基本资料",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "基本资料"
+        },
+        "en": {
+          "title": "Basic Information"
+        }
+      },
       "fields": [],
-      "title_en": "Basic Information",
-      "description_en": "",
       "profileFields": presetCustomerProfileFields
     },
     {
       "id": "page_form_1",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "业务信息",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "业务信息"
+        },
+        "en": {
+          "title": "Business Information"
+        }
+      },
       "fields": [
         {
-          "label": "公司主营业务说明",
-          "label_en": "Description of Main Business Activity",
-          "placeholder": "请简述公司业务范围及经营模式。",
-          "placeholder_en": "Please briefly describe your business scope and operating model",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
+          "id": "cmp_1",
+          "type": "textarea",
+          "key": "textarea_1",
           "required": true,
           "showLabel": true,
           "minRows": 3,
           "maxRows": 6,
           "maxLength": 800,
-          "id": "cmp_1",
-          "type": "textarea",
-          "key": "textarea_1",
-          "helpPosition": "right"
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "公司主营业务说明",
+              "placeholder": "请简述公司业务范围及经营模式。"
+            },
+            "en": {
+              "label": "Description of Main Business Activity",
+              "placeholder": "Please briefly describe your business scope and operating model"
+            }
+          }
         },
         {
-          "label": "年销售额规模",
-          "label_en": "Annual Sales Volume",
-          "placeholder": "请选择选项",
-          "placeholder_en": "Please select an option",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "multiple": false,
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "SGD 100,000 以下",
-              "label_en": "Below SGD 100,000",
-              "value": "option_2"
-            },
-            {
-              "label": "SGD 100,000 – 1,000,000",
-              "label_en": "SGD 100,000 – 1,000,000",
-              "value": "option_4_mvudy41x"
-            },
-            {
-              "label": "SGD 1,000,000 – 5,000,000",
-              "label_en": "SGD 1,000,000 – 5,000,000",
-              "value": "option_5_mvuenpk9"
-            },
-            {
-              "label": "SGD 5,000,000 以上",
-              "label_en": "Above SGD 5,000,000",
-              "value": "option_6_mvuenxs6"
-            }
-          ],
           "id": "cmp_2",
           "type": "select",
           "key": "select_2",
-          "helpPosition": "right"
-        },
-        {
-          "label": "资金来源",
-          "label_en": "Source of Funds",
-          "placeholder": "请选择选项",
-          "placeholder_en": "Please select an option",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "multiple": false,
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "年销售额规模",
+              "placeholder": "请选择选项"
+            },
+            "en": {
+              "label": "Annual Sales Volume",
+              "placeholder": "Please select an option"
+            }
+          },
           "options": [
             {
-              "label": "银行贷款",
-              "label_en": "Bank Loans",
-              "value": "option_1"
+              "value": "option_2",
+              "i18n": {
+                "zh": "SGD 100,000 以下",
+                "en": "Below SGD 100,000"
+              }
             },
             {
-              "label": "营业收入",
-              "label_en": "Business Income",
-              "value": "option_2"
+              "value": "option_4_mvudy41x",
+              "i18n": {
+                "zh": "SGD 100,000 – 1,000,000",
+                "en": "SGD 100,000 – 1,000,000"
+              }
             },
             {
-              "label": "出资/股权投入",
-              "label_en": "Capital/Shareholding Contribution",
-              "value": "option_3_mvue6ypd"
+              "value": "option_5_mvuenpk9",
+              "i18n": {
+                "zh": "SGD 1,000,000 – 5,000,000",
+                "en": "SGD 1,000,000 – 5,000,000"
+              }
             },
             {
-              "label": "公司间资金/借贷",
-              "label_en": "Inter-company Funding/Loans",
-              "value": "option_4_mvuecgqw"
-            },
-            {
-              "label": "个人储蓄",
-              "label_en": "Personal Savings",
-              "value": "option_6_mvueciit"
-            },
-            {
-              "label": "资产出售（如商业地产、机器设备等）",
-              "label_en": "Sales of Assets (e.g., commercial properties, machineries)",
-              "value": "option_7_mvuecxqt"
-            },
-            {
-              "label": "其他",
-              "label_en": "Others",
-              "value": "option_7_mvuf55ap"
+              "value": "option_6_mvuenxs6",
+              "i18n": {
+                "zh": "SGD 5,000,000 以上",
+                "en": "Above SGD 5,000,000"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_3",
           "type": "select",
           "key": "select_3",
-          "helpPosition": "right"
-        },
-        {
-          "label": "主要客户所在国家/地区",
-          "label_en": "Main Client Country / Region",
-          "placeholder": "请选择国家",
-          "placeholder_en": "Please select a country",
-          "help": "(最多选3项)",
-          "help_en": "(Up to 3 items)",
-          "defaultValue": "",
+          "multiple": false,
           "required": true,
           "showLabel": true,
-          "multiple": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "资金来源",
+              "placeholder": "请选择选项"
+            },
+            "en": {
+              "label": "Source of Funds",
+              "placeholder": "Please select an option"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "银行贷款",
+                "en": "Bank Loans"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "营业收入",
+                "en": "Business Income"
+              }
+            },
+            {
+              "value": "option_3_mvue6ypd",
+              "i18n": {
+                "zh": "出资/股权投入",
+                "en": "Capital/Shareholding Contribution"
+              }
+            },
+            {
+              "value": "option_4_mvuecgqw",
+              "i18n": {
+                "zh": "公司间资金/借贷",
+                "en": "Inter-company Funding/Loans"
+              }
+            },
+            {
+              "value": "option_6_mvueciit",
+              "i18n": {
+                "zh": "个人储蓄",
+                "en": "Personal Savings"
+              }
+            },
+            {
+              "value": "option_7_mvuecxqt",
+              "i18n": {
+                "zh": "资产出售（如商业地产、机器设备等）",
+                "en": "Sales of Assets (e.g., commercial properties, machineries)"
+              }
+            },
+            {
+              "value": "option_7_mvuf55ap",
+              "i18n": {
+                "zh": "其他",
+                "en": "Others"
+              }
+            }
+          ]
+        },
+        {
           "id": "cmp_4",
           "type": "country",
           "key": "country_4",
-          "helpPosition": "right",
-          "maxSelections": 3
-        },
-        {
-          "label": "主要供应商所在国家/地区",
-          "label_en": "Main Supplier Country / Region",
-          "placeholder": "请选择国家",
-          "placeholder_en": "Please select a country",
-          "help": "(最多选3项)",
-          "help_en": "(Up to 3 items)",
-          "defaultValue": "",
           "required": true,
           "showLabel": true,
           "multiple": true,
+          "helpPosition": "right",
+          "maxSelections": 3,
+          "i18n": {
+            "zh": {
+              "label": "主要客户所在国家/地区",
+              "placeholder": "请选择国家",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Main Client Country / Region",
+              "placeholder": "Please select a country",
+              "help": "(Up to 3 items)"
+            }
+          }
+        },
+        {
           "id": "cmp_5",
           "type": "country",
           "key": "country_5",
+          "required": true,
+          "showLabel": true,
+          "multiple": true,
           "helpPosition": "right",
-          "maxSelections": 3
+          "maxSelections": 3,
+          "i18n": {
+            "zh": {
+              "label": "主要供应商所在国家/地区",
+              "placeholder": "请选择国家",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Main Supplier Country / Region",
+              "placeholder": "Please select a country",
+              "help": "(Up to 3 items)"
+            }
+          }
         },
         {
-          "label": "公司官网、网店或社交媒体主页链接(如有)",
-          "label_en": "Company website, e-commerce store, or social media homepage (if any)",
-          "placeholder": "请输入内容",
-          "placeholder_en": "Please enter content",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "required": false,
-          "showLabel": true,
           "id": "cmp_9",
           "type": "input",
           "key": "input_9",
-          "helpPosition": "right"
+          "inputType": "text",
+          "required": false,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "公司官网、网店或社交媒体主页链接(如有)",
+              "placeholder": "请输入内容"
+            },
+            "en": {
+              "label": "Company website, e-commerce store, or social media homepage (if any)",
+              "placeholder": "Please enter content"
+            }
+          }
         },
         {
-          "label": "是否是上市公司",
-          "label_en": "Is your company publicly listed?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "layout": "inline",
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
-            },
-            {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
-            }
-          ],
           "id": "cmp_11",
           "type": "radio",
           "key": "radio_11",
-          "helpPosition": "right"
-        },
-        {
-          "label": "请说明",
-          "label_en": "Please provide details",
-          "placeholder": "请输入股票代码(如适用)",
-          "placeholder_en": "Please enter stock ticker (if applicable)",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
+          "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "是否是上市公司"
+            },
+            "en": {
+              "label": "Is your company publicly listed?"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
+            }
+          ]
+        },
+        {
           "id": "cmp_12",
           "type": "input",
           "key": "input_12",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
           "helpPosition": "right",
           "linkage": {
             "logic": "and",
@@ -502,49 +596,71 @@ export const kycCustomerTemplate: FormSchema = {
                 "value": "option_1"
               }
             ]
+          },
+          "i18n": {
+            "zh": {
+              "label": "请说明",
+              "placeholder": "请输入股票代码(如适用)"
+            },
+            "en": {
+              "label": "Please provide details",
+              "placeholder": "Please enter stock ticker (if applicable)"
+            }
           }
         }
-      ],
-      "title_en": "Business Information",
-      "description_en": ""
+      ]
     },
     {
       "id": "page_1793331484329_13",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "声明及签名",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "声明及签名"
+        },
+        "en": {
+          "title": "Declaration and Signature"
+        }
+      },
       "fields": [
         {
-          "label": "声明",
-          "label_en": "Declaration",
-          "placeholder": "请在下方指定区域签名",
-          "placeholder_en": "Please sign in the designated area below",
-          "help": "",
-          "help_en": "",
-          "showLabel": false,
-          "required": true,
-          "declarationRequired": true,
-          "options": [
-            {
-              "label": "本人特此声明，公司已根据相关要求，完整、真实地披露其最终受益所有人(UBO)的全部信息，且不存在任何形式的隐瞒、遗漏或规避披露的情况。",
-              "label_en": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever.",
-              "value": "dec_1"
-            },
-            {
-              "label": "本人确认已获得该公司或实体的正式授权，代表其填写并提交本问卷及文件和声明。\n本人特此声明，以上所提供的信息、文件及声明均为真实、准确且完整。本人知悉，如存在任何虚假陈述、误导性陈述或故意隐瞒重要事实的行为，本人可能需承担相应的法律责任，包括刑事责任。",
-              "label_en": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability.",
-              "value": "option_2_mvufeei9"
-            }
-          ],
           "id": "cmp_15",
           "type": "signature",
           "key": "signature_15",
-          "helpPosition": "right"
+          "showLabel": false,
+          "required": true,
+          "declarationRequired": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "声明",
+              "placeholder": "请在下方指定区域签名",
+              "signPlaceholder": "请在此处手写签名"
+            },
+            "en": {
+              "label": "Declaration",
+              "placeholder": "Please sign in the designated area below",
+              "signPlaceholder": "Please sign here"
+            }
+          },
+          "options": [
+            {
+              "value": "dec_1",
+              "i18n": {
+                "zh": "本人特此声明，公司已根据相关要求，完整、真实地披露其最终受益所有人(UBO)的全部信息，且不存在任何形式的隐瞒、遗漏或规避披露的情况。",
+                "en": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever."
+              }
+            },
+            {
+              "value": "option_2_mvufeei9",
+              "i18n": {
+                "zh": "本人确认已获得该公司或实体的正式授权，代表其填写并提交本问卷及文件和声明。\n本人特此声明，以上所提供的信息、文件及声明均为真实、准确且完整。本人知悉，如存在任何虚假陈述、误导性陈述或故意隐瞒重要事实的行为，本人可能需承担相应的法律责任，包括刑事责任。",
+                "en": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability."
+              }
+            }
+          ]
         }
-      ],
-      "title_en": "Declaration and Signature",
-      "description_en": ""
+      ]
     }
   ],
   "pageConnections": []
@@ -556,12 +672,9 @@ export const kycClientTemplate: FormSchema = kycCustomerTemplate;
 export const kycIndividualTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SG_CDD_INDIVIDUAL",
-    "title_en": "SG_CDD_INDIVIDUAL",
-    "description": "",
-    "description_en": "",
     "profileType": "individual",
     "formType": "kyc",
+    "baseLocale": "zh",
     "enabledLocales": [
       "zh",
       "en"
@@ -570,7 +683,15 @@ export const kycIndividualTemplate: FormSchema = {
     "templateKey": "kyc-individual",
     "formId": "individual_diy_161456",
     "serialNo": "individual_diy_161456",
-    "createdAt": 1793347455387
+    "createdAt": 1793347455387,
+    "i18n": {
+      "zh": {
+        "title": "SG_CDD_INDIVIDUAL"
+      },
+      "en": {
+        "title": "SG_CDD_INDIVIDUAL"
+      }
+    }
   },
   "pages": [
     {
@@ -578,227 +699,301 @@ export const kycIndividualTemplate: FormSchema = {
       "pageType": "system_profile",
       "profileType": "individual",
       "showSkeleton": true,
-      "title": "基本资料",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "基本资料"
+        },
+        "en": {
+          "title": "Basic Information"
+        }
+      },
       "fields": [],
-      "title_en": "Basic Information",
-      "description_en": "",
       "profileFields": presetIndividualProfileFields
     },
     {
       "id": "page_form_1",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "最终受益所有人(UBO)",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "最终受益所有人(UBO)"
+        },
+        "en": {
+          "title": "Ultimate Beneficial Owner"
+        }
+      },
       "fields": [
         {
-          "label": "提示",
-          "label_en": "Note",
-          "required": false,
-          "showLabel": true,
-          "listStyle": "circle",
-          "content": "如果某一名自然人 直接或间接持有公司 25% 以上的股份，或 对公司拥有 重大影响力或实际控制权(即使不持股)，该自然人应被视为公司的 最终受益所有人(UBO)。",
-          "content_en": "If a natural person directly or indirectly holds more than 25% of the shares in the company, or has significant influence or actual control over the company (even if not holding shares), the natural person should be considered as the ultimate beneficial owner (UBO) of the company. ",
           "id": "cmp_1",
           "type": "alert",
           "key": "alert_1",
-          "helpPosition": "right"
+          "required": false,
+          "showLabel": true,
+          "listStyle": "circle",
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "提示",
+              "content": "如果某一名自然人 直接或间接持有公司 25% 以上的股份，或 对公司拥有 重大影响力或实际控制权(即使不持股)，该自然人应被视为公司的 最终受益所有人(UBO)。"
+            },
+            "en": {
+              "label": "Note",
+              "content": "If a natural person directly or indirectly holds more than 25% of the shares in the company, or has significant influence or actual control over the company (even if not holding shares), the natural person should be considered as the ultimate beneficial owner (UBO) of the company. "
+            }
+          }
         },
         {
-          "label": "个人是否持有公司超过25%的股份? ",
-          "label_en": "Does individual control more than 25% share of the company？",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "layout": "inline",
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
-            },
-            {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
-            }
-          ],
           "id": "cmp_2",
           "type": "radio",
           "key": "radio_2",
-          "helpPosition": "right"
-        },
-        {
-          "label": "个人是否对公司具有重大控制权？",
-          "label_en": "Does individual have significant control in the company?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "个人是否持有公司超过25%的股份? "
+            },
+            "en": {
+              "label": "Does individual control more than 25% share of the company？"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_3",
           "type": "radio",
           "key": "radio_3",
-          "helpPosition": "right"
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "个人是否对公司具有重大控制权？"
+            },
+            "en": {
+              "label": "Does individual have significant control in the company?"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
+            }
+          ]
         }
-      ],
-      "title_en": "Ultimate Beneficial Owner",
-      "description_en": ""
+      ]
     },
     {
       "id": "page_1793332682595_4",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "PEP声明",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "PEP声明"
+        },
+        "en": {
+          "title": "PEP Declaration"
+        }
+      },
       "fields": [
         {
-          "label": "提示",
-          "label_en": "Note",
-          "required": false,
-          "showLabel": true,
-          "listStyle": "circle",
-          "content": "政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n· 国家元首或政府首脑（如总统、总理）\n· 高级政治人物（如部长、副部长、议员）\n· 高级政府官员（如政府部门或重要监管机构高级官员）\n· 司法或军事机构的高级官员（如最高法院法官、将军）\n· 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n· 中央银行高级管理人员（如行长、副行长）\n· 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员（如执行董事、理事会成员）\n\n基于 AML/CFT 合规要求，PEP 还包括：\n· PEP 的直系家庭成员\n· PEP 的密切关联人士 ",
-          "content_en": "A Politically Exposed Person (PEP) refers to an individual who currently holds, or has previously held, a prominent public function in Singapore, another country, or an international organisation. This typically includes:\n· Head of state or government, such as President or Prime Minister\n· Senior political figure, such as Minister, Deputy Minister, or Member of Parliament\n· Senior government official, such as a senior official of a government department or key regulatory authority\n· Senior official of a judicial or military body, such as a Supreme Court Judge or General\n· Senior management of an important state-owned enterprise (SOE), such as Chairman or Chief Executive Officer\n· Senior executive of a central bank, such as Governor or Deputy Governor\n· Senior management of a major international organisation, such as Executive Director or Board Member of the United Nations, World Bank, or International Monetary Fund\n\nFor AML/CFT purposes, PEP also includes:\n· Immediate family members of a PEP\n· Close associates of a PEP ",
           "id": "cmp_4",
           "type": "alert",
           "key": "alert_4",
-          "helpPosition": "right"
+          "required": false,
+          "showLabel": true,
+          "listStyle": "circle",
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "提示",
+              "content": "政治公众人物（PEP）是指目前或曾经在新加坡、其他国家或国际组织中担任重要公共职务的人士，通常包括：\n· 国家元首或政府首脑（如总统、总理）\n· 高级政治人物（如部长、副部长、议员）\n· 高级政府官员（如政府部门或重要监管机构高级官员）\n· 司法或军事机构的高级官员（如最高法院法官、将军）\n· 重要国有企业（SOE）的高级管理人员（如董事长、首席执行官）\n· 中央银行高级管理人员（如行长、副行长）\n· 大型国际组织（如联合国、世界银行、国际货币基金组织）中的高级管理人员（如执行董事、理事会成员）\n\n基于 AML/CFT 合规要求，PEP 还包括：\n· PEP 的直系家庭成员\n· PEP 的密切关联人士 "
+            },
+            "en": {
+              "label": "Note",
+              "content": "A Politically Exposed Person (PEP) refers to an individual who currently holds, or has previously held, a prominent public function in Singapore, another country, or an international organisation. This typically includes:\n· Head of state or government, such as President or Prime Minister\n· Senior political figure, such as Minister, Deputy Minister, or Member of Parliament\n· Senior government official, such as a senior official of a government department or key regulatory authority\n· Senior official of a judicial or military body, such as a Supreme Court Judge or General\n· Senior management of an important state-owned enterprise (SOE), such as Chairman or Chief Executive Officer\n· Senior executive of a central bank, such as Governor or Deputy Governor\n· Senior management of a major international organisation, such as Executive Director or Board Member of the United Nations, World Bank, or International Monetary Fund\n\nFor AML/CFT purposes, PEP also includes:\n· Immediate family members of a PEP\n· Close associates of a PEP "
+            }
+          }
         },
         {
-          "label": "您是否目前在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职？",
-          "label_en": "Are you currently holding a prominent public position in Singapore, in any other country or under the mandate of an international organization?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "layout": "inline",
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
-            },
-            {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
-            }
-          ],
           "id": "cmp_5",
           "type": "radio",
           "key": "radio_5",
-          "helpPosition": "right"
-        },
-        {
-          "label": "您是否曾在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职，并已辞去该重要公职？",
-          "label_en": "Have you previously held a prominent public position in Singapore, overseas or under an international organization, and have since stepped down?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "您是否目前在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职？"
+            },
+            "en": {
+              "label": "Are you currently holding a prominent public position in Singapore, in any other country or under the mandate of an international organization?"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_7",
           "type": "radio",
           "key": "radio_7",
-          "helpPosition": "right"
-        },
-        {
-          "label": "您是否是现任或已卸任的政治人物的家庭成员或关系密切者？",
-          "label_en": "Are you a family member or close associate of a current or former political figure?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "您是否曾在新加坡、新加坡以外的国家或地区或受国际组织委托担任重要公职，并已辞去该重要公职？"
+            },
+            "en": {
+              "label": "Have you previously held a prominent public position in Singapore, overseas or under an international organization, and have since stepped down?"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_8",
           "type": "radio",
           "key": "radio_8",
-          "helpPosition": "right"
-        },
-        {
-          "label": "被识别的PEP是以下哪种类型？",
-          "label_en": "What type of PEP has been identified?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "您是否是现任或已卸任的政治人物的家庭成员或关系密切者？"
+            },
+            "en": {
+              "label": "Are you a family member or close associate of a current or former political figure?"
+            }
+          },
           "options": [
             {
-              "label": "新加坡敏感政治人物",
-              "label_en": "Singapore-sensitive political figure",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "外国敏感政治人物",
-              "label_en": "Foreign-sensitive political figure",
-              "value": "option_2"
-            },
-            {
-              "label": "国际组织敏感政治人物",
-              "label_en": "International organization PEP",
-              "value": "option_3_mw02dacj"
-            },
-            {
-              "label": "敏感政治人物的家庭成员",
-              "label_en": "Family member of a PEP",
-              "value": "option_4_mw02dju4"
-            },
-            {
-              "label": "敏感政治人物的亲密伙伴",
-              "label_en": "Close associate of a PEP",
-              "value": "option_5_mw02dr61"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_36",
           "type": "checkbox",
           "key": "checkbox_36",
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "被识别的PEP是以下哪种类型？"
+            },
+            "en": {
+              "label": "What type of PEP has been identified?"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "新加坡敏感政治人物",
+                "en": "Singapore-sensitive political figure"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "外国敏感政治人物",
+                "en": "Foreign-sensitive political figure"
+              }
+            },
+            {
+              "value": "option_3_mw02dacj",
+              "i18n": {
+                "zh": "国际组织敏感政治人物",
+                "en": "International organization PEP"
+              }
+            },
+            {
+              "value": "option_4_mw02dju4",
+              "i18n": {
+                "zh": "敏感政治人物的家庭成员",
+                "en": "Family member of a PEP"
+              }
+            },
+            {
+              "value": "option_5_mw02dr61",
+              "i18n": {
+                "zh": "敏感政治人物的亲密伙伴",
+                "en": "Close associate of a PEP"
+              }
+            }
+          ],
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -818,22 +1013,25 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "label": "与PEP(政界公众人士)的关系说明(如适用)",
-          "label_en": "Description of relationship with the PEP(Politically Exposed Person), if applicable",
-          "placeholder": "请输入详细描述...",
-          "placeholder_en": "Please enter detailed description...",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
+          "id": "cmp_37",
+          "type": "textarea",
+          "key": "textarea_37",
           "required": true,
           "showLabel": true,
           "minRows": 3,
           "maxRows": 6,
           "maxLength": 800,
-          "id": "cmp_37",
-          "type": "textarea",
-          "key": "textarea_37",
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "与PEP(政界公众人士)的关系说明(如适用)",
+              "placeholder": "请输入详细描述..."
+            },
+            "en": {
+              "label": "Description of relationship with the PEP(Politically Exposed Person), if applicable",
+              "placeholder": "Please enter detailed description..."
+            }
+          },
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -853,20 +1051,23 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "label": "PEP(政界公众人士)的姓名",
-          "label_en": "Name of the PEP (Politically Exposed Person)",
-          "placeholder": "请输入内容",
-          "placeholder_en": "Please enter content",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "required": true,
-          "showLabel": true,
           "id": "cmp_38",
           "type": "input",
           "key": "input_38",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "PEP(政界公众人士)的姓名",
+              "placeholder": "请输入内容"
+            },
+            "en": {
+              "label": "Name of the PEP (Politically Exposed Person)",
+              "placeholder": "Please enter content"
+            }
+          },
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -886,53 +1087,23 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "label": "PEP(政界公众人士)担任重要公职的国家或国际组织名称",
-          "label_en": "Name of the country or international\norganization where the PEP holds or held a\nprominent public position",
-          "placeholder": "请输入内容",
-          "placeholder_en": "Please enter content",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "required": true,
-          "showLabel": true,
           "id": "cmp_39",
           "type": "input",
           "key": "input_39",
-          "helpPosition": "right",
-          "linkage": {
-            "logic": "or",
-            "conditions": [
-              {
-                "fieldKey": "radio_5",
-                "value": "option_1"
-              },
-              {
-                "fieldKey": "radio_7",
-                "value": "option_1"
-              },
-              {
-                "fieldKey": "radio_8",
-                "value": "option_1"
-              }
-            ]
-          }
-        },
-        {
-          "label": "描述正在或曾经担任的重要公共职务",
-          "label_en": "Description of the prominent public position\ncurrently or previously held",
-          "placeholder": "请输入内容",
-          "placeholder_en": "Please enter content",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "inputType": "text",
           "required": true,
           "showLabel": true,
-          "id": "cmp_40",
-          "type": "input",
-          "key": "input_40",
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "PEP(政界公众人士)担任重要公职的国家或国际组织名称",
+              "placeholder": "请输入内容"
+            },
+            "en": {
+              "label": "Name of the country or international\norganization where the PEP holds or held a\nprominent public position",
+              "placeholder": "Please enter content"
+            }
+          },
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -952,13 +1123,45 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "label": "曾属于PEP(政界公众人士)身份的起止时间",
-          "label_en": "Period during which the individual was classified as a PEP",
-          "placeholder": "请选择日期",
-          "placeholder_en": "Please select a date",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
+          "id": "cmp_40",
+          "type": "input",
+          "key": "input_40",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "描述正在或曾经担任的重要公共职务",
+              "placeholder": "请输入内容"
+            },
+            "en": {
+              "label": "Description of the prominent public position\ncurrently or previously held",
+              "placeholder": "Please enter content"
+            }
+          },
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_5",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_7",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_8",
+                "value": "option_1"
+              }
+            ]
+          }
+        },
+        {
+          "id": "cmp_41",
+          "type": "date",
+          "key": "date_41",
           "endValue": "",
           "dateType": "date",
           "dateMode": "range",
@@ -966,10 +1169,19 @@ export const kycIndividualTemplate: FormSchema = {
           "defaultLongTerm": false,
           "required": true,
           "showLabel": true,
-          "id": "cmp_41",
-          "type": "date",
-          "key": "date_41",
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "曾属于PEP(政界公众人士)身份的起止时间",
+              "placeholder": "开始日期",
+              "endPlaceholder": "截止日期"
+            },
+            "en": {
+              "label": "Period during which the individual was classified as a PEP",
+              "placeholder": "Start Date",
+              "endPlaceholder": "End Date"
+            }
+          },
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -988,214 +1200,270 @@ export const kycIndividualTemplate: FormSchema = {
             ]
           }
         }
-      ],
-      "title_en": "PEP Declaration",
-      "description_en": ""
+      ]
     },
     {
       "id": "page_1793339330496_9",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "犯罪记录声明",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "犯罪记录声明"
+        },
+        "en": {
+          "title": "Criminal Record Declaration"
+        }
+      },
       "fields": [
         {
-          "label": "欺骗，金融诈骗，贿赂，受贿，伪造或逃税的行为",
-          "label_en": "Fraud, financial scams, bribery, acceptance of bribes, forgery, or tax evasion",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "layout": "inline",
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
-            },
-            {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
-            }
-          ],
           "id": "cmp_10",
           "type": "radio",
           "key": "radio_10",
-          "helpPosition": "right"
-        },
-        {
-          "label": "在规范市场或第三方国家的等价市场中进行交易的金融证券股票市场价格进行操控",
-          "label_en": "Manipulation of financial securities or stock prices in regulated or equivalent third-country markets",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "欺骗，金融诈骗，贿赂，受贿，伪造或逃税的行为"
+            },
+            "en": {
+              "label": "Fraud, financial scams, bribery, acceptance of bribes, forgery, or tax evasion"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_24",
           "type": "radio",
           "key": "radio_24",
-          "helpPosition": "right"
-        },
-        {
-          "label": "被判处有期徒刑罪行",
-          "label_en": "Criminal offenses resulting in imprisonment",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "在规范市场或第三方国家的等价市场中进行交易的金融证券股票市场价格进行操控"
+            },
+            "en": {
+              "label": "Manipulation of financial securities or stock prices in regulated or equivalent third-country markets"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_22",
           "type": "radio",
           "key": "radio_22",
-          "helpPosition": "right"
-        },
-        {
-          "label": "涉及使用机密信息的犯罪或违法行为",
-          "label_en": "Crimes or misconduct involving confidential information",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "被判处有期徒刑罪行"
+            },
+            "en": {
+              "label": "Criminal offenses resulting in imprisonment"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_32",
           "type": "radio",
           "key": "radio_32",
-          "helpPosition": "right"
-        },
-        {
-          "label": "涉及洗钱、恐怖分子资金筹集/扩大融资等违规及违法活动",
-          "label_en": "Offenses related to money laundering or terrorist financing",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "涉及使用机密信息的犯罪或违法行为"
+            },
+            "en": {
+              "label": "Crimes or misconduct involving confidential information"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_30",
           "type": "radio",
           "key": "radio_30",
-          "helpPosition": "right"
-        },
-        {
-          "label": "宣布破产",
-          "label_en": "Bankruptcy declaration",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "涉及洗钱、恐怖分子资金筹集/扩大融资等违规及违法活动"
+            },
+            "en": {
+              "label": "Offenses related to money laundering or terrorist financing"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_28",
           "type": "radio",
           "key": "radio_28",
-          "helpPosition": "right"
-        },
-        {
-          "label": "其他犯罪行为",
-          "label_en": "Other criminal offenses",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "宣布破产"
+            },
+            "en": {
+              "label": "Bankruptcy declaration"
+            }
+          },
           "options": [
             {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
             },
             {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_26",
           "type": "radio",
           "key": "radio_26",
-          "helpPosition": "right"
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "其他犯罪行为"
+            },
+            "en": {
+              "label": "Other criminal offenses"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
+            }
+          ]
         },
         {
-          "label": "说明",
-          "label_en": "Description",
-          "placeholder": "请说明",
-          "placeholder_en": "Please enter description",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "required": true,
-          "showLabel": false,
           "id": "cmp_27",
           "type": "input",
           "key": "input_27",
+          "inputType": "text",
+          "required": true,
+          "showLabel": false,
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "说明",
+              "placeholder": "请说明"
+            },
+            "en": {
+              "label": "Description",
+              "placeholder": "Please enter description"
+            }
+          },
           "linkage": {
             "logic": "or",
             "conditions": [
@@ -1230,42 +1498,52 @@ export const kycIndividualTemplate: FormSchema = {
             ]
           }
         }
-      ],
-      "title_en": "Criminal Record Declaration",
-      "description_en": ""
+      ]
     },
     {
       "id": "page_1793339759637_34",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "声明及签名",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "声明及签名"
+        },
+        "en": {
+          "title": "Declaration and Signature"
+        }
+      },
       "fields": [
         {
-          "label": "声明",
-          "label_en": "Applicant's Declaration",
-          "placeholder": "请在下方指定区域签名",
-          "placeholder_en": "Please sign in the designated area below",
-          "help": "",
-          "help_en": "",
-          "showLabel": false,
-          "required": true,
-          "declarationRequired": true,
-          "options": [
-            {
-              "label": "本人特此声明，以上所提供的信息均真实、准确且完整。本人知悉，如发现有任何虚假陈述或故意隐瞒重要事实的行为，本人可能会面临法律起诉及刑事处罚。",
-              "label_en": "I hereby declare that all information provided above is true, accurate and complete. I acknowledge that if I make any false statements or intentionally conceal material facts, I may bear corresponding legal liabilities, including criminal liability.",
-              "value": "dec_1"
-            }
-          ],
           "id": "cmp_35",
           "type": "signature",
           "key": "signature_35",
-          "helpPosition": "right"
+          "showLabel": false,
+          "required": true,
+          "declarationRequired": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "声明",
+              "placeholder": "请在下方指定区域签名",
+              "signPlaceholder": "请在此处手写签名"
+            },
+            "en": {
+              "label": "Applicant's Declaration",
+              "placeholder": "Please sign in the designated area below",
+              "signPlaceholder": "Please sign here"
+            }
+          },
+          "options": [
+            {
+              "value": "dec_1",
+              "i18n": {
+                "zh": "本人特此声明，以上所提供的信息均真实、准确且完整。本人知悉，如发现有任何虚假陈述或故意隐瞒重要事实的行为，本人可能会面临法律起诉及刑事处罚。",
+                "en": "I hereby declare that all information provided above is true, accurate and complete. I acknowledge that if I make any false statements or intentionally conceal material facts, I may bear corresponding legal liabilities, including criminal liability."
+              }
+            }
+          ]
         }
-      ],
-      "title_en": "Declaration and Signature",
-      "description_en": ""
+      ]
     }
   ],
   "pageConnections": []
@@ -1274,18 +1552,23 @@ export const kycIndividualTemplate: FormSchema = {
 export const kycEntityTemplate: FormSchema = {
   "schemaVersion": "1.0.0",
   "meta": {
-    "title": "SG_CDD_ENTITY",
-    "title_en": "SG_CDD_ENTITY",
-    "description": "",
-    "description_en": "",
     "profileType": "entity",
     "formType": "kyc",
+    "baseLocale": "zh",
     "enabledLocales": [
       "zh",
       "en"
     ],
     "source": "template",
-    "templateKey": "kyc-entity"
+    "templateKey": "kyc-entity",
+    "i18n": {
+      "zh": {
+        "title": "SG_CDD_ENTITY"
+      },
+      "en": {
+        "title": "SG_CDD_ENTITY"
+      }
+    }
   },
   "pages": [
     {
@@ -1293,220 +1576,284 @@ export const kycEntityTemplate: FormSchema = {
       "pageType": "system_profile",
       "profileType": "entity",
       "showSkeleton": true,
-      "title": "基本资料",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "基本资料"
+        },
+        "en": {
+          "title": "Basic Information"
+        }
+      },
       "fields": [],
-      "title_en": "Basic Information",
-      "description_en": "",
       "profileFields": presetEntityProfileFields
     },
     {
       "id": "page_form_1",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "业务信息",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "业务信息"
+        },
+        "en": {
+          "title": "Business Information"
+        }
+      },
       "fields": [
         {
-          "label": "公司主营业务说明",
-          "label_en": "Description of Main Business Activity",
-          "placeholder": "请简述公司业务范围及经营模式。",
-          "placeholder_en": "Please briefly describe your business scope and operating model",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
+          "id": "cmp_1",
+          "type": "textarea",
+          "key": "textarea_1",
           "required": true,
           "showLabel": true,
           "minRows": 3,
           "maxRows": 6,
           "maxLength": 800,
-          "id": "cmp_1",
-          "type": "textarea",
-          "key": "textarea_1",
-          "helpPosition": "right"
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "公司主营业务说明",
+              "placeholder": "请简述公司业务范围及经营模式。"
+            },
+            "en": {
+              "label": "Description of Main Business Activity",
+              "placeholder": "Please briefly describe your business scope and operating model"
+            }
+          }
         },
         {
-          "label": "年销售额规模",
-          "label_en": "Annual Sales Volume",
-          "placeholder": "请选择选项",
-          "placeholder_en": "Please select an option",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "multiple": false,
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "SGD 100,000 以下",
-              "label_en": "Below SGD 100,000",
-              "value": "option_2"
-            },
-            {
-              "label": "SGD 100,000 – 1,000,000",
-              "label_en": "SGD 100,000 – 1,000,000",
-              "value": "option_4_mvudy41x"
-            },
-            {
-              "label": "SGD 1,000,000 – 5,000,000",
-              "label_en": "SGD 1,000,000 – 5,000,000",
-              "value": "option_5_mvuenpk9"
-            },
-            {
-              "label": "SGD 5,000,000 以上",
-              "label_en": "Above SGD 5,000,000",
-              "value": "option_6_mvuenxs6"
-            }
-          ],
           "id": "cmp_2",
           "type": "select",
           "key": "select_2",
-          "helpPosition": "right"
-        },
-        {
-          "label": "资金来源",
-          "label_en": "Source of Funds",
-          "placeholder": "请选择选项",
-          "placeholder_en": "Please select an option",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
           "multiple": false,
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "年销售额规模",
+              "placeholder": "请选择选项"
+            },
+            "en": {
+              "label": "Annual Sales Volume",
+              "placeholder": "Please select an option"
+            }
+          },
           "options": [
             {
-              "label": "银行贷款",
-              "label_en": "Bank Loans",
-              "value": "option_1"
+              "value": "option_2",
+              "i18n": {
+                "zh": "SGD 100,000 以下",
+                "en": "Below SGD 100,000"
+              }
             },
             {
-              "label": "营业收入",
-              "label_en": "Business Income",
-              "value": "option_2"
+              "value": "option_4_mvudy41x",
+              "i18n": {
+                "zh": "SGD 100,000 – 1,000,000",
+                "en": "SGD 100,000 – 1,000,000"
+              }
             },
             {
-              "label": "出资/股权投入",
-              "label_en": "Capital/Shareholding Contribution",
-              "value": "option_3_mvue6ypd"
+              "value": "option_5_mvuenpk9",
+              "i18n": {
+                "zh": "SGD 1,000,000 – 5,000,000",
+                "en": "SGD 1,000,000 – 5,000,000"
+              }
             },
             {
-              "label": "公司间资金/借贷",
-              "label_en": "Inter-company Funding/Loans",
-              "value": "option_4_mvuecgqw"
-            },
-            {
-              "label": "个人储蓄",
-              "label_en": "Personal Savings",
-              "value": "option_6_mvueciit"
-            },
-            {
-              "label": "资产出售（如商业地产、机器设备等）",
-              "label_en": "Sales of Assets (e.g., commercial properties, machineries)",
-              "value": "option_7_mvuecxqt"
-            },
-            {
-              "label": "其他",
-              "label_en": "Others",
-              "value": "option_7_mvuf55ap"
+              "value": "option_6_mvuenxs6",
+              "i18n": {
+                "zh": "SGD 5,000,000 以上",
+                "en": "Above SGD 5,000,000"
+              }
             }
-          ],
+          ]
+        },
+        {
           "id": "cmp_3",
           "type": "select",
           "key": "select_3",
-          "helpPosition": "right"
-        },
-        {
-          "label": "主要客户所在国家/地区",
-          "label_en": "Main Client Country / Region",
-          "placeholder": "请选择国家",
-          "placeholder_en": "Please select a country",
-          "help": "(最多选3项)",
-          "help_en": "(Up to 3 items)",
-          "defaultValue": "",
+          "multiple": false,
           "required": true,
           "showLabel": true,
-          "multiple": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "资金来源",
+              "placeholder": "请选择选项"
+            },
+            "en": {
+              "label": "Source of Funds",
+              "placeholder": "Please select an option"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "银行贷款",
+                "en": "Bank Loans"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "营业收入",
+                "en": "Business Income"
+              }
+            },
+            {
+              "value": "option_3_mvue6ypd",
+              "i18n": {
+                "zh": "出资/股权投入",
+                "en": "Capital/Shareholding Contribution"
+              }
+            },
+            {
+              "value": "option_4_mvuecgqw",
+              "i18n": {
+                "zh": "公司间资金/借贷",
+                "en": "Inter-company Funding/Loans"
+              }
+            },
+            {
+              "value": "option_6_mvueciit",
+              "i18n": {
+                "zh": "个人储蓄",
+                "en": "Personal Savings"
+              }
+            },
+            {
+              "value": "option_7_mvuecxqt",
+              "i18n": {
+                "zh": "资产出售（如商业地产、机器设备等）",
+                "en": "Sales of Assets (e.g., commercial properties, machineries)"
+              }
+            },
+            {
+              "value": "option_7_mvuf55ap",
+              "i18n": {
+                "zh": "其他",
+                "en": "Others"
+              }
+            }
+          ]
+        },
+        {
           "id": "cmp_4",
           "type": "country",
           "key": "country_4",
-          "helpPosition": "right",
-          "maxSelections": 3
-        },
-        {
-          "label": "主要供应商所在国家/地区",
-          "label_en": "Main Supplier Country / Region",
-          "placeholder": "请选择国家",
-          "placeholder_en": "Please select a country",
-          "help": "(最多选3项)",
-          "help_en": "(Up to 3 items)",
-          "defaultValue": "",
           "required": true,
           "showLabel": true,
           "multiple": true,
+          "helpPosition": "right",
+          "maxSelections": 3,
+          "i18n": {
+            "zh": {
+              "label": "主要客户所在国家/地区",
+              "placeholder": "请选择国家",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Main Client Country / Region",
+              "placeholder": "Please select a country",
+              "help": "(Up to 3 items)"
+            }
+          }
+        },
+        {
           "id": "cmp_5",
           "type": "country",
           "key": "country_5",
+          "required": true,
+          "showLabel": true,
+          "multiple": true,
           "helpPosition": "right",
-          "maxSelections": 3
+          "maxSelections": 3,
+          "i18n": {
+            "zh": {
+              "label": "主要供应商所在国家/地区",
+              "placeholder": "请选择国家",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Main Supplier Country / Region",
+              "placeholder": "Please select a country",
+              "help": "(Up to 3 items)"
+            }
+          }
         },
         {
-          "label": "公司官网、网店或社交媒体主页链接(如有)",
-          "label_en": "Company website, e-commerce store, or social media homepage (if any)",
-          "placeholder": "请输入内容",
-          "placeholder_en": "Please enter content",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
-          "required": false,
-          "showLabel": true,
           "id": "cmp_9",
           "type": "input",
           "key": "input_9",
-          "helpPosition": "right"
+          "inputType": "text",
+          "required": false,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "公司官网、网店或社交媒体主页链接(如有)",
+              "placeholder": "请输入内容"
+            },
+            "en": {
+              "label": "Company website, e-commerce store, or social media homepage (if any)",
+              "placeholder": "Please enter content"
+            }
+          }
         },
         {
-          "label": "是否是上市公司",
-          "label_en": "Is your company publicly listed?",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "layout": "inline",
-          "required": true,
-          "showLabel": true,
-          "options": [
-            {
-              "label": "是",
-              "label_en": "Yes",
-              "value": "option_1"
-            },
-            {
-              "label": "否",
-              "label_en": "No",
-              "value": "option_2"
-            }
-          ],
           "id": "cmp_11",
           "type": "radio",
           "key": "radio_11",
-          "helpPosition": "right"
-        },
-        {
-          "label": "股票代码(如适用)",
-          "label_en": "Stock Ticker (if applicable)",
-          "placeholder": "请输入股票代码(如适用)",
-          "placeholder_en": "Please enter stock ticker (if applicable)",
-          "help": "",
-          "help_en": "",
-          "defaultValue": "",
-          "inputType": "text",
+          "layout": "inline",
           "required": true,
           "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "是否是上市公司"
+            },
+            "en": {
+              "label": "Is your company publicly listed?"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No"
+              }
+            }
+          ]
+        },
+        {
           "id": "cmp_12",
           "type": "input",
           "key": "input_12",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
           "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "股票代码(如适用)",
+              "placeholder": "请输入股票代码(如适用)"
+            },
+            "en": {
+              "label": "Stock Ticker (if applicable)",
+              "placeholder": "Please enter stock ticker (if applicable)"
+            }
+          },
           "linkage": {
             "logic": "and",
             "conditions": [
@@ -1517,47 +1864,493 @@ export const kycEntityTemplate: FormSchema = {
             ]
           }
         }
-      ],
-      "title_en": "Business Information",
-      "description_en": ""
+      ]
     },
     {
       "id": "page_1793331484329_13",
       "pageType": "form",
       "showSkeleton": true,
-      "title": "声明及签名",
-      "description": "",
+      "i18n": {
+        "zh": {
+          "title": "声明及签名"
+        },
+        "en": {
+          "title": "Declaration and Signature"
+        }
+      },
       "fields": [
         {
-          "label": "声明",
-          "label_en": "Declaration",
-          "placeholder": "请在下方指定区域签名",
-          "placeholder_en": "Please sign in the designated area below",
-          "help": "",
-          "help_en": "",
-          "showLabel": false,
-          "required": true,
-          "declarationRequired": true,
-          "options": [
-            {
-              "label": "本人特此声明，公司已根据相关要求，完整、真实地披露其最终受益所有人(UBO)的全部信息，且不存在任何形式的隐瞒、遗漏或规避披露的情况。",
-              "label_en": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever.",
-              "value": "dec_1"
-            },
-            {
-              "label": "本人确认已获得该公司或实体的正式授权，代表其填写并提交本问卷及文件和声明。\n本人特此声明，以上所提供的信息、文件及声明均为真实、准确且完整。本人知悉，如存在任何虚假陈述、误导性陈述或故意隐瞒重要事实的行为，本人可能需承担相应的法律责任，包括刑事责任。",
-              "label_en": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability.",
-              "value": "option_2_mvufeei9"
-            }
-          ],
           "id": "cmp_15",
           "type": "signature",
           "key": "signature_15",
-          "helpPosition": "right"
+          "showLabel": false,
+          "required": true,
+          "declarationRequired": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "声明",
+              "placeholder": "请在下方指定区域签名",
+              "signPlaceholder": "请在此处手写签名"
+            },
+            "en": {
+              "label": "Declaration",
+              "placeholder": "Please sign in the designated area below",
+              "signPlaceholder": "Please sign here"
+            }
+          },
+          "options": [
+            {
+              "value": "dec_1",
+              "i18n": {
+                "zh": "本人特此声明，公司已根据相关要求，完整、真实地披露其最终受益所有人(UBO)的全部信息，且不存在任何形式的隐瞒、遗漏或规避披露的情况。",
+                "en": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever."
+              }
+            },
+            {
+              "value": "option_2_mvufeei9",
+              "i18n": {
+                "zh": "本人确认已获得该公司或实体的正式授权，代表其填写并提交本问卷及文件和声明。\n本人特此声明，以上所提供的信息、文件及声明均为真实、准确且完整。本人知悉，如存在任何虚假陈述、误导性陈述或故意隐瞒重要事实的行为，本人可能需承担相应的法律责任，包括刑事责任。",
+                "en": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability."
+              }
+            }
+          ]
         }
-      ],
-      "title_en": "Declaration and Signature",
-      "description_en": ""
+      ]
+    }
+  ],
+  "pageConnections": []
+};
+
+export const multilingualMockTemplate: FormSchema = {
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "profileType": "customer",
+    "formType": "kyc",
+    "baseLocale": "zh",
+    "enabledLocales": [
+      "zh",
+      "en",
+      "ja"
+    ],
+    "source": "template",
+    "templateKey": "kyc-multilang-demo",
+    "formId": "cus_tpl_20261013_multilang",
+    "serialNo": "cus_tpl_20261013_multilang",
+    "i18n": {
+      "zh": {
+        "title": "企业客户多语言尽职调查问卷",
+        "description": "多语言企业客户尽职调查问卷示例"
+      },
+      "en": {
+        "title": "Multilingual Corporate CDD Questionnaire",
+        "description": "Multilingual Corporate CDD Questionnaire Demo"
+      }
+    }
+  },
+  "pages": [
+    {
+      "id": "page_profile_0",
+      "pageType": "system_profile",
+      "profileType": "customer",
+      "showSkeleton": true,
+      "i18n": {
+        "zh": {
+          "title": "基本资料"
+        },
+        "en": {
+          "title": "Basic Information"
+        },
+        "ja": {
+          "title": "基本情報"
+        }
+      },
+      "fields": [],
+      "profileFields": presetCustomerProfileFields
+    },
+    {
+      "id": "page_form_1",
+      "pageType": "form",
+      "showSkeleton": true,
+      "i18n": {
+        "zh": {
+          "title": "业务与合规信息",
+          "description": "请如实填写贵司主营业务、资金来源及合规联络信息。"
+        },
+        "en": {
+          "title": "Business & Compliance Information",
+          "description": "Please truthfully provide your core business activities, source of funds, and compliance contact details."
+        },
+        "ja": {
+          "title": "事業およびコンプライアンス情報",
+          "description": "貴社の主な事業内容、資金源、およびコンプライアンス連絡先を正確にご記入ください。"
+        }
+      },
+      "fields": [
+        {
+          "id": "cmp_alert_1",
+          "type": "alert",
+          "key": "alert_notice",
+          "required": false,
+          "showLabel": true,
+          "listStyle": "circle",
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "填报须知",
+              "content": "请在提交前确认以下事项：\n· 所有金额均以新加坡元 (SGD) 计价\n· 若涉及跨国业务，请完整披露前三大交易对手国家/地区"
+            },
+            "en": {
+              "label": "Filing Instructions",
+              "content": "Please confirm the following before submission:\n· All monetary amounts are denominated in Singapore Dollars (SGD)\n· If cross-border business is involved, please disclose your top 3 counterparty countries/regions"
+            },
+            "ja": {
+              "label": "記入上の注意",
+              "content": "提出前に以下の事項をご確認ください：\n· すべての金額はシンガポールドル（SGD）建てです\n· クロスボーダー取引がある場合は、上位3カ国の取引先国・地域を開示してください"
+            }
+          }
+        },
+        {
+          "id": "cmp_1",
+          "type": "textarea",
+          "key": "textarea_1",
+          "required": true,
+          "showLabel": true,
+          "minRows": 3,
+          "maxRows": 6,
+          "maxLength": 800,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "公司主营业务说明",
+              "placeholder": "请简述公司业务范围及经营模式。",
+              "help": "建议涵盖核心产品/服务及主要目标市场",
+              "customErrorMessage": "请填写公司主营业务说明"
+            },
+            "en": {
+              "label": "Description of Main Business Activity",
+              "placeholder": "Please briefly describe your business scope and operating model",
+              "help": "Recommended to cover core products/services and target markets",
+              "customErrorMessage": "Please provide a description of your main business activity"
+            },
+            "ja": {
+              "label": "主な事業内容の説明",
+              "placeholder": "事業範囲およびビジネスモデルを簡潔にご記入ください。",
+              "help": "主力製品・サービスおよび主要ターゲット市場を含めることを推奨します",
+              "customErrorMessage": "主な事業内容をご入力ください"
+            }
+          }
+        },
+        {
+          "id": "cmp_2",
+          "type": "select",
+          "key": "select_2",
+          "multiple": false,
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "年销售额规模",
+              "placeholder": "请选择选项"
+            },
+            "en": {
+              "label": "Annual Sales Volume",
+              "placeholder": "Please select an option"
+            },
+            "ja": {
+              "label": "年間売上高規模",
+              "placeholder": "選択してください"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "SGD 100,000 以下",
+                "en": "Below SGD 100,000",
+                "ja": "SGD 100,000 未満"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "SGD 100,000 – 1,000,000",
+                "en": "SGD 100,000 – 1,000,000",
+                "ja": "SGD 100,000 ～ 1,000,000"
+              }
+            },
+            {
+              "value": "option_3",
+              "i18n": {
+                "zh": "SGD 1,000,000 – 5,000,000",
+                "en": "SGD 1,000,000 – 5,000,000",
+                "ja": "SGD 1,000,000 ～ 5,000,000"
+              }
+            },
+            {
+              "value": "option_4",
+              "i18n": {
+                "zh": "SGD 5,000,000 以上",
+                "en": "Above SGD 5,000,000",
+                "ja": "SGD 5,000,000 以上"
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmp_3",
+          "type": "checkbox",
+          "key": "checkbox_funds",
+          "layout": "stack",
+          "required": true,
+          "showLabel": true,
+          "maxSelections": 3,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "主要资金来源渠道",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Primary Source of Funds",
+              "help": "(Up to 3 items)"
+            },
+            "ja": {
+              "label": "主な資金源チャネル",
+              "help": "（最大3つまで選択）"
+            }
+          },
+          "options": [
+            {
+              "value": "bank_loan",
+              "i18n": {
+                "zh": "银行贷款",
+                "en": "Bank Loans",
+                "ja": "銀行借入"
+              }
+            },
+            {
+              "value": "biz_income",
+              "i18n": {
+                "zh": "营业收入",
+                "en": "Business Income",
+                "ja": "事業収入"
+              }
+            },
+            {
+              "value": "capital_contribution",
+              "i18n": {
+                "zh": "出资/股权投入",
+                "en": "Capital/Shareholding Contribution",
+                "ja": "出資金・株式払込金"
+              }
+            },
+            {
+              "value": "intercompany",
+              "i18n": {
+                "zh": "公司间资金/借贷",
+                "en": "Inter-company Funding/Loans",
+                "ja": "グループ会社間資金・貸付"
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmp_4",
+          "type": "country",
+          "key": "country_4",
+          "required": true,
+          "showLabel": true,
+          "multiple": true,
+          "helpPosition": "right",
+          "maxSelections": 3,
+          "i18n": {
+            "zh": {
+              "label": "主要客户所在国家/地区",
+              "placeholder": "请选择国家",
+              "help": "(最多选3项)"
+            },
+            "en": {
+              "label": "Main Client Country / Region",
+              "placeholder": "Please select a country",
+              "help": "(Up to 3 items)"
+            },
+            "ja": {
+              "label": "主要顧客の所在国・地域",
+              "placeholder": "国・地域を選択してください",
+              "help": "（最大3つまで選択）"
+            }
+          }
+        },
+        {
+          "id": "cmp_date_1",
+          "type": "date",
+          "key": "date_license",
+          "dateType": "date",
+          "dateMode": "range",
+          "enableLongTerm": true,
+          "defaultLongTerm": false,
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "营业执照有效期限",
+              "placeholder": "开始日期",
+              "endPlaceholder": "截止日期",
+              "longTermText": "长期有效"
+            },
+            "en": {
+              "label": "Business License Validity Period",
+              "placeholder": "Start Date",
+              "endPlaceholder": "End Date",
+              "longTermText": "Long-term"
+            },
+            "ja": {
+              "label": "営業許可証の有効期間",
+              "placeholder": "開始日",
+              "endPlaceholder": "終了日",
+              "longTermText": "無期限（長期有効）"
+            }
+          }
+        },
+        {
+          "id": "cmp_11",
+          "type": "radio",
+          "key": "radio_11",
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "是否是上市公司"
+            },
+            "en": {
+              "label": "Is your company publicly listed?"
+            },
+            "ja": {
+              "label": "上場企業ですか？"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": "是",
+                "en": "Yes",
+                "ja": "はい"
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": "否",
+                "en": "No",
+                "ja": "いいえ"
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmp_12",
+          "type": "input",
+          "key": "input_12",
+          "inputType": "text",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "股票代码(如适用)",
+              "placeholder": "请输入股票代码(如适用)"
+            },
+            "en": {
+              "label": "Stock Ticker (if applicable)",
+              "placeholder": "Please enter stock ticker (if applicable)"
+            },
+            "ja": {
+              "label": "証券コード（該当する場合）",
+              "placeholder": "証券コードをご入力ください"
+            }
+          },
+          "linkage": {
+            "logic": "and",
+            "conditions": [
+              {
+                "fieldKey": "radio_11",
+                "value": "option_1"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "page_1793331484329_13",
+      "pageType": "form",
+      "showSkeleton": true,
+      "i18n": {
+        "zh": {
+          "title": "声明及签名"
+        },
+        "en": {
+          "title": "Declaration and Signature"
+        },
+        "ja": {
+          "title": "宣誓および署名"
+        }
+      },
+      "fields": [
+        {
+          "id": "cmp_15",
+          "type": "signature",
+          "key": "signature_15",
+          "showLabel": false,
+          "required": true,
+          "declarationRequired": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "声明",
+              "placeholder": "请在下方指定区域签名",
+              "signPlaceholder": "请在此处手写签名",
+              "declarationErrorMessage": "请先阅读并勾选全部法定声明条款"
+            },
+            "en": {
+              "label": "Declaration",
+              "placeholder": "Please sign in the designated area below",
+              "signPlaceholder": "Please sign here",
+              "declarationErrorMessage": "Please read and accept all statutory declaration terms first"
+            },
+            "ja": {
+              "label": "宣誓事項",
+              "placeholder": "下の指定エリアに署名してください",
+              "signPlaceholder": "ここに手書きで署名してください",
+              "declarationErrorMessage": "すべての法定宣誓事項をお読みの上、チェックを入れてください"
+            }
+          },
+          "options": [
+            {
+              "value": "dec_1",
+              "i18n": {
+                "zh": "本人特此声明，公司已根据相关要求，完整、真实地披露其最终受益所有人(UBO)的全部信息，且不存在任何形式的隐瞒、遗漏或规避披露的情况。",
+                "en": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever.",
+                "ja": "私は、当社が関連規制の要件に従い、実質的支配者（UBO）に関するすべての情報を完全かつ誠実に開示しており、いかなる隠蔽、脱漏、または開示回避も存在しないことをここに宣誓いたします。"
+              }
+            },
+            {
+              "value": "option_2_mvufeei9",
+              "i18n": {
+                "zh": "本人确认已获得该公司或实体的正式授权，代表其填写并提交本问卷及文件和声明。\n本人特此声明，以上所提供的信息、文件及声明均为真实、准确且完整。本人知悉，如存在任何虚假陈述、误导性陈述或故意隐瞒重要事实的行为，本人可能需承担相应的法律责任，包括刑事责任。",
+                "en": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability.",
+                "ja": "私は、当会社または法人から正式な権限を付与され、その代表として本質問票、書類、および宣誓書を作成・提出することを確認いたします。\nまた、上記で提供したすべての情報、書類、および宣誓事項が真実、正確かつ完全であることを宣誓いたします。虚偽の陳述、誤解を招く陳述、または重要な事実の意図的な隠蔽があった場合、刑事責任を含む法的責任を負う可能性があることを理解しています。"
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "pageConnections": []
@@ -1867,6 +2660,8 @@ export const allComponentsDemoTemplate: FormSchema = {
           type: 'date',
           dateMode: 'single',
           enableLongTerm: true,
+          longTermText: '长期',
+          longTermText_en: 'Long-term',
           label: '特许营业许可证有效截止日（可勾选长期）',
           label_en: 'Business License Expiry (Long-term Option)',
           key: 'date_license_expiry',
@@ -1884,8 +2679,10 @@ export const allComponentsDemoTemplate: FormSchema = {
           key: 'date_audit_range',
           required: true,
           showLabel: true,
-          placeholder: '请选择起始日期与截止日期',
-          placeholder_en: 'Select start date and end date'
+          placeholder: '开始日期',
+          placeholder_en: 'Start Date',
+          endPlaceholder: '截止日期',
+          endPlaceholder_en: 'End Date'
         }
       ]
     },
@@ -2093,6 +2890,10 @@ export const allComponentsDemoTemplate: FormSchema = {
           key: 'signature_representative_final',
           required: true,
           showLabel: true,
+          placeholder: '请在下方指定区域签名',
+          placeholder_en: 'Please sign in the designated area below',
+          signPlaceholder: '请在此处手写签名',
+          signPlaceholder_en: 'Please sign here',
           declarationRequired: true,
           declarationErrorMessage: '请务必仔细阅读并勾选上述法定声明后方可签署！',
           declarationErrorMessage_en: 'You must read and tick the legal declaration before signing!',
@@ -2114,3 +2915,117 @@ export const allComponentsDemoTemplate: FormSchema = {
   ],
   pageConnections: []
 };
+
+const TRANSLATABLE_PROPS = [
+  'label',
+  'placeholder',
+  'endPlaceholder',
+  'longTermText',
+  'signPlaceholder',
+  'help',
+  'content',
+  'customErrorMessage',
+  'declarationErrorMessage',
+  'customDeclarationErrorMessage'
+];
+
+export function normalizeSchemaToUnifiedI18n(schema: FormSchema): FormSchema {
+  if (!schema) return schema;
+  const meta = schema.meta as any;
+  if (meta) {
+    if (!meta.baseLocale) meta.baseLocale = 'zh';
+    if (!meta.i18n) meta.i18n = {};
+    const zhTitle = meta.i18n.zh?.title ?? meta.title ?? '';
+    const enTitle = meta.i18n.en?.title ?? meta.title_en ?? '';
+    const zhDesc = meta.i18n.zh?.description ?? meta.description ?? '';
+    const enDesc = meta.i18n.en?.description ?? meta.description_en ?? '';
+    if (zhTitle || zhDesc) {
+      meta.i18n.zh = {
+        ...(meta.i18n.zh || {}),
+        ...(zhTitle ? { title: zhTitle } : {}),
+        ...(zhDesc ? { description: zhDesc } : {})
+      };
+    }
+    if (enTitle || enDesc) {
+      meta.i18n.en = {
+        ...(meta.i18n.en || {}),
+        ...(enTitle ? { title: enTitle } : {}),
+        ...(enDesc ? { description: enDesc } : {})
+      };
+    }
+    delete meta.title;
+    delete meta.title_en;
+    delete meta.description;
+    delete meta.description_en;
+  }
+
+  for (const page of schema.pages || []) {
+    const p = page as any;
+    if (!p.i18n) p.i18n = {};
+    const pTitleZh = p.i18n.zh?.title ?? p.title ?? '';
+    const pTitleEn = p.i18n.en?.title ?? p.title_en ?? '';
+    const pDescZh = p.i18n.zh?.description ?? p.description ?? '';
+    const pDescEn = p.i18n.en?.description ?? p.description_en ?? '';
+    if (pTitleZh || pDescZh) {
+      p.i18n.zh = {
+        ...(p.i18n.zh || {}),
+        ...(pTitleZh ? { title: pTitleZh } : {}),
+        ...(pDescZh ? { description: pDescZh } : {})
+      };
+    }
+    if (pTitleEn || pDescEn) {
+      p.i18n.en = {
+        ...(p.i18n.en || {}),
+        ...(pTitleEn ? { title: pTitleEn } : {}),
+        ...(pDescEn ? { description: pDescEn } : {})
+      };
+    }
+    delete p.title;
+    delete p.title_en;
+    delete p.description;
+    delete p.description_en;
+
+    for (const f of p.fields || []) {
+      if (!f.i18n) f.i18n = {};
+      for (const prop of TRANSLATABLE_PROPS) {
+        const valZh = f.i18n.zh?.[prop] ?? f[prop];
+        const valEn = f.i18n.en?.[prop] ?? f[`${prop}_en`];
+        if (valZh !== undefined && valZh !== null && String(valZh).trim() !== '') {
+          if (!f.i18n.zh) f.i18n.zh = {};
+          f.i18n.zh[prop] = String(valZh);
+        }
+        if (valEn !== undefined && valEn !== null && String(valEn).trim() !== '') {
+          if (!f.i18n.en) f.i18n.en = {};
+          f.i18n.en[prop] = String(valEn);
+        }
+        delete f[prop];
+        delete f[`${prop}_en`];
+      }
+      if (f.defaultValue === '') delete f.defaultValue;
+      if (Array.isArray(f.options)) {
+        f.options = f.options.map((opt: any) => {
+          const optI18n: Record<string, string> = { ...(opt.i18n || {}) };
+          const oZh = typeof opt.i18n?.zh === 'object' ? opt.i18n.zh.label : (opt.i18n?.zh ?? opt.label);
+          const oEn = typeof opt.i18n?.en === 'object' ? opt.i18n.en.label : (opt.i18n?.en ?? opt.label_en);
+          if (oZh !== undefined && oZh !== null && String(oZh).trim() !== '') {
+            optI18n.zh = String(oZh);
+          }
+          if (oEn !== undefined && oEn !== null && String(oEn).trim() !== '') {
+            optI18n.en = String(oEn);
+          }
+          return {
+            value: opt.value,
+            i18n: optI18n
+          };
+        });
+      }
+    }
+  }
+  return schema;
+}
+
+normalizeSchemaToUnifiedI18n(kycCustomerTemplate);
+normalizeSchemaToUnifiedI18n(kycIndividualTemplate);
+normalizeSchemaToUnifiedI18n(kycEntityTemplate);
+normalizeSchemaToUnifiedI18n(allComponentsDemoTemplate);
+normalizeSchemaToUnifiedI18n(blankTemplate);
