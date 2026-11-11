@@ -20,38 +20,15 @@
       isFrameElevated ? 'z-20 is-active-frame' : 'z-10',
       store.isDraggingComponent && !isSystemProfile && !isTranslationFrame ? 'ring-2 ring-blue-500 ring-offset-2 shadow-lg border-blue-400' : '',
       store.isDraggingComponent && (isSystemProfile || isTranslationFrame) ? 'opacity-85' : '',
-      (store.isDraggingFrame && store.draggedFrameId === page.id) || isResizingCanvasWidth ? 'transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
+      (store.isDraggingFrame && store.draggedFrameId === page.id) ? 'transition-none is-dragging-frame' : 'transition-shadow transition-colors duration-200'
     ]"
     :style="{
       transform: `translate(${frameX}px, ${frameY}px)`,
-      width: isRisk ? (inTranslationWorkspace ? '540px' : `${store.riskPageWidth}px`) : undefined
+      width: inTranslationWorkspace ? `${getTranslationPageWidth()}px` : (isRisk ? `${store.riskPageWidth}px` : undefined)
     }"
     @mousedown="handleFrameMouseDown"
     @click.stop="handleSelectPage"
   >
-
-    <div
-      v-if="isRisk && !isTranslationFrame && !inTranslationWorkspace"
-      class="canvas-resize-handle absolute -left-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
-      :title="t('risk.dragResizeWidth')"
-      @mousedown.stop.prevent="startResizeCanvasWidth($event, 'left')"
-    >
-      <div
-        class="w-1 h-10 rounded-full transition-colors"
-        :class="isResizingCanvasWidth ? 'bg-[#1677ff]' : 'bg-transparent group-hover:bg-[#1677ff]/60'"
-      ></div>
-    </div>
-    <div
-      v-if="isRisk && !isTranslationFrame && !inTranslationWorkspace"
-      class="canvas-resize-handle absolute -right-1.5 top-4 bottom-4 w-3 cursor-ew-resize z-30 group flex items-center justify-center select-none"
-      :title="t('risk.dragResizeWidth')"
-      @mousedown.stop.prevent="startResizeCanvasWidth($event, 'right')"
-    >
-      <div
-        class="w-1 h-10 rounded-full transition-colors"
-        :class="isResizingCanvasWidth ? 'bg-[#1677ff]' : 'bg-transparent group-hover:bg-[#1677ff]/60'"
-      ></div>
-    </div>
 
     <!-- 画板顶部信息栏 -->
     <div class="absolute -top-8 left-0 right-0 flex items-center justify-between gap-2 select-none">
@@ -74,7 +51,7 @@
             class="font-medium max-w-[160px] truncate"
             :class="inTranslationWorkspace && !isReadOnlyReference ? 'text-slate-800 font-semibold' : ((displayPageTitle || sourcePageTitle) ? 'text-slate-600' : 'text-slate-400 font-normal')"
           >
-            {{ isRisk ? t('risk.pageTitle') : (displayPageTitle || sourcePageTitle || t('common.untitledPage')) }}
+            {{ isRisk ? ((inTranslationWorkspace ? (displayPageTitle || sourcePageTitle) : displayPageTitle) || t('risk.pageTitle')) : (displayPageTitle || sourcePageTitle || t('common.untitledPage')) }}
           </span>
         </template>
       </div>
@@ -132,16 +109,6 @@
             </span>
           </div>
         </template>
-        <template v-else-if="isRisk">
-          <div class="w-full select-none">
-            <h2 class="text-xl font-bold tracking-tight text-slate-800 leading-7">
-              {{ t('risk.pageTitle') }}
-            </h2>
-            <p class="mt-1.5 w-full text-[14px] leading-6 text-slate-500">
-              {{ t('risk.pageDesc') }}
-            </p>
-          </div>
-        </template>
         <template v-else>
           <EditableText
             v-model="displayPageTitle"
@@ -149,7 +116,7 @@
             :element-id="page.id"
             field="title"
             tag="h2"
-            custom-class="page-title-text text-xl font-semibold tracking-tight leading-7 text-slate-800 w-full block border-b-2 border-transparent pb-1"
+            :custom-class="`page-title-text text-xl ${isRisk ? 'font-bold' : 'font-semibold'} tracking-tight leading-7 text-slate-800 w-full block border-b-2 border-transparent pb-1`"
           />
           <EditableText
             v-if="!inTranslationWorkspace || sourcePageDesc?.trim() || displayPageDesc?.trim()"
@@ -160,7 +127,7 @@
             tag="p"
             :allow-empty="!isTranslationFrame || !sourcePageDesc"
             multiline
-            custom-class="page-desc-text mt-1.5 w-full text-[15px] leading-6 text-slate-500 block border-b-2 border-transparent pb-1"
+            :custom-class="`page-desc-text mt-1.5 w-full ${isRisk ? 'text-[14px]' : 'text-[15px]'} leading-6 text-slate-500 block border-b-2 border-transparent pb-1`"
           />
         </template>
       </div>
@@ -179,7 +146,7 @@
           <div
             v-for="(grp, gIdx) in page.groups"
             :key="grp.id"
-            :id="isTranslationFrame ? ('risk_grp_trans_' + grp.id) : ('risk_grp_' + grp.id)"
+            :id="isTranslationFrame ? ('risk_grp_trans_' + grp.id) : (gIdx === 0 ? 'tour-risk-first-group' : ('risk_grp_' + grp.id))"
             :data-risk-group-id="grp.id"
             class="risk-group-section border rounded-[4px] bg-white transition-[border-color,box-shadow] duration-150"
             :class="
@@ -217,11 +184,9 @@
                   v-if="!isTranslationFrame && (page.groups?.length || 0) > 1"
                   :content="t('risk.deleteGroupConfirm')"
                   position="tr"
-                  type="warning"
+                  type="error"
                   :ok-text="t('modal.confirm')"
                   :cancel-text="t('modal.cancel')"
-                  :ok-button-props="{ status: 'danger', size: 'small' }"
-                  :cancel-button-props="{ size: 'small' }"
                   @ok="deleteQuestionGroup(grp.id)"
                 >
                   <button
@@ -405,6 +370,7 @@ import {
   isRisk,
   primaryLocale,
   getPageWidth,
+  getTranslationPageWidth,
   TRANSLATION_FRAME_GAP,
   addElement,
   selectPage,
@@ -416,8 +382,7 @@ import {
   selectElement,
   markDirty,
   updatePageFields,
-  updatePageGroups,
-  setPagePosition
+  updatePageGroups
 } from '@/core/store';
 import {
   t,
@@ -720,45 +685,6 @@ const linkageSvgRuns = computed<LinkageSvgRun[]>(() => {
 
   return runs;
 });
-
-const isResizingCanvasWidth = ref(false);
-
-function startResizeCanvasWidth(e: MouseEvent, side: 'left' | 'right') {
-  if (!isRisk.value) return;
-  isResizingCanvasWidth.value = true;
-  store.isRiskPageWidthCustomized = true;
-  const startX = e.clientX;
-  const startWidth = store.riskPageWidth;
-  const startPageX = props.page.x;
-  const scale = store.canvasState.scale || 1;
-  document.body.style.cursor = 'ew-resize';
-  document.body.style.userSelect = 'none';
-
-  const onMouseMove = (moveEvt: MouseEvent) => {
-    const deltaScreenX = moveEvt.clientX - startX;
-    const deltaWorldX = deltaScreenX / scale;
-    if (side === 'right') {
-      const nextWidth = Math.min(1360, Math.max(560, Math.round(startWidth + deltaWorldX)));
-      store.riskPageWidth = nextWidth;
-    } else {
-      const nextWidth = Math.min(1360, Math.max(560, Math.round(startWidth - deltaWorldX)));
-      const actualDiff = nextWidth - startWidth;
-      store.riskPageWidth = nextWidth;
-      setPagePosition(props.page.id, { x: Math.round(startPageX - actualDiff) });
-    }
-  };
-
-  const onMouseUp = () => {
-    isResizingCanvasWidth.value = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
-}
 
 function setRiskGroupDropzoneRef(groupId: string, el: HTMLElement | null) {
   if (el) {

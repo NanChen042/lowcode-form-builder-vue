@@ -41,9 +41,9 @@
           </span>
         </div>
 
-        <!-- 右上角关闭按钮 -->
+        <!-- 右上角关闭按钮：风险评估模式或强制引导时不展示关闭按钮 -->
         <button
-          v-if="!mandatory"
+          v-if="!mandatory && !isRisk"
           type="button"
           class="flex h-7 w-7 items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           :title="t('common.close') || '关闭'"

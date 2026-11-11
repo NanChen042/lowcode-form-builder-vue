@@ -20,6 +20,11 @@ import {
 
 export const PAGE_WIDTH = 390;
 export const TRANSLATION_FRAME_GAP = 64;
+export const TRANSLATION_RISK_PAGE_WIDTH = 540;
+
+export function getTranslationPageWidth(): number {
+  return isRisk.value ? TRANSLATION_RISK_PAGE_WIDTH : PAGE_WIDTH;
+}
 
 export function getPagePairWidth(_page?: FormPage): number {
   return getPageWidth();
@@ -756,7 +761,7 @@ export function adjustZoom(delta: number, clientX?: number, clientY?: number, vi
   }
 }
 
-export function animateCanvasTransition(duration = 420) {
+export function animateCanvasTransition(duration = 380) {
   store.isCanvasAnimating = true;
   setTimeout(() => {
     store.isCanvasAnimating = false;
@@ -770,7 +775,7 @@ export interface FocusOnPageOptions {
 }
 
 export function resetTranslationCanvasView(options?: { duration?: number }) {
-  const duration = options?.duration ?? 420;
+  const duration = options?.duration ?? 380;
   if (duration > 0) {
     animateCanvasTransition(duration);
   } else {
@@ -799,13 +804,14 @@ export function resetTranslationCanvasView(options?: { duration?: number }) {
     || store.pages.find(p => p.pageType !== 'system_profile')
     || store.pages[0];
 
-  const singleWidth = isRisk.value ? (store.riskPageWidth || 540) : getPageWidth();
-  const pairWidth = singleWidth * 2 + 64;
+  const hasTargetLocale = targetLocales.value.length > 0 && !!store.activeTargetLocale;
+  const singleWidth = getTranslationPageWidth();
+  const contentWidth = hasTargetLocale ? (singleWidth * 2 + TRANSLATION_FRAME_GAP) : singleWidth;
 
   let contentHeight = PAGE_HEIGHT;
   if (typeof document !== 'undefined' && activePage) {
     const srcEl = document.getElementById(`frame_trans_${primaryLocale.value}_${activePage.id}`);
-    const tgtEl = document.getElementById(`frame_trans_${store.activeTargetLocale}_${activePage.id}`);
+    const tgtEl = hasTargetLocale ? document.getElementById(`frame_trans_${store.activeTargetLocale}_${activePage.id}`) : null;
     const measuredHeight = Math.max(srcEl?.offsetHeight || 0, tgtEl?.offsetHeight || 0);
     if (measuredHeight > 0) {
       contentHeight = measuredHeight;
@@ -814,20 +820,20 @@ export function resetTranslationCanvasView(options?: { duration?: number }) {
 
   // 3. 计算自适应缩放比例 (Fit to Canvas)
   const topBarHeight = 44;
-  const paddingX = 96;
+  const paddingX = hasTargetLocale ? 96 : 120;
   const paddingY = 80;
   const availableHeight = Math.max(200, viewportHeight - topBarHeight);
   const safeWidth = Math.max(200, viewportWidth - paddingX);
   const safeHeight = Math.max(200, availableHeight - paddingY);
 
-  const scaleX = safeWidth / pairWidth;
+  const scaleX = safeWidth / contentWidth;
   const referenceHeight = Math.max(PAGE_HEIGHT, Math.min(contentHeight, 920));
   const scaleY = safeHeight / referenceHeight;
 
   let targetScale = Math.min(scaleX, scaleY);
 
   // 保证卡片在高分屏或大视口下保持 1:1 标准高保真（不超过 1.0，避免超大拉伸变形）
-  // 当视口能容纳 92%~105% 时，自动规整到 1.0，呈现最清晰的 1:1 像素
+  // 当视口能容纳 92%~108% 时，自动规整到 1.0，呈现最清晰的 1:1 像素
   if (targetScale >= 0.92 && targetScale <= 1.08) {
     targetScale = 1.0;
   } else if (targetScale > 1.08) {
@@ -840,7 +846,7 @@ export function resetTranslationCanvasView(options?: { duration?: number }) {
   store.canvasState.scale = finalScale;
 
   // 4. 水平居中
-  const contentCenterX = pairWidth / 2;
+  const contentCenterX = contentWidth / 2;
   store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * finalScale);
 
   // 5. 垂直居中 / 顶部合理边距 (预留顶部 44px 语言栏高度)
@@ -938,7 +944,7 @@ export function resetCanvasView(options?: { duration?: number }) {
     return;
   }
 
-  const duration = options?.duration ?? 420;
+  const duration = options?.duration ?? 380;
   if (duration > 0) {
     animateCanvasTransition(duration);
   } else {
@@ -998,7 +1004,12 @@ export function resetCanvasView(options?: { duration?: number }) {
     store.canvasState.scale = clampScale(targetScale);
     const contentCenterX = minX + totalWidth / 2;
     store.canvasState.x = Math.round(viewportWidth / 2 - contentCenterX * store.canvasState.scale);
-    store.canvasState.y = 36;
+
+    const visualCenterY = (minY + maxY) / 2;
+    const viewportCenterY = viewportHeight / 2;
+    const centeredY = Math.round(viewportCenterY - visualCenterY * store.canvasState.scale);
+    const minTopMargin = 56;
+    store.canvasState.y = Math.max(minTopMargin, centeredY);
     return;
   }
 
@@ -1049,18 +1060,16 @@ const TRANSLATABLE_FIELD_PROPS = [
 ] as const;
 
 export function buildSchema(): FormSchema {
-  const activeLocale = store.currentLocale || 'zh';
+  const baseLoc = primaryLocale.value;
+  const activeLocale = baseLoc;
   const rawLocales = store.meta.enabledLocales && store.meta.enabledLocales.length > 0
     ? [...store.meta.enabledLocales]
-    : (activeLocale === 'zh' ? ['zh', 'en'] : ['en']);
-  if (!rawLocales.includes(activeLocale)) {
-    rawLocales.unshift(activeLocale);
-  }
-  if (activeLocale === 'zh' && !rawLocales.includes('en')) {
-    rawLocales.push('en');
+    : [baseLoc];
+  if (!rawLocales.includes(baseLoc)) {
+    rawLocales.unshift(baseLoc);
   }
   const enabledLocales = Array.from(new Set(rawLocales));
-  const hasEn = enabledLocales.includes('en') || activeLocale === 'en';
+  const hasEn = enabledLocales.includes('en') || baseLoc === 'en';
 
   const ensuredId = store.meta.formId || store.meta.serialNo || generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
   if (!store.meta.formId) store.meta.formId = ensuredId;
@@ -1070,7 +1079,10 @@ export function buildSchema(): FormSchema {
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
-    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity'
+    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
+    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment',
+    '企业客户尽职调查问卷', '个人客户尽职调查问卷', '实体企业尽职调查问卷',
+    'Corporate Customer CDD Questionnaire', 'Individual CDD Questionnaire', 'Corporate Entity CDD Questionnaire'
   ];
   const effectiveTitle = (
     store.meta.title ||
@@ -1466,11 +1478,13 @@ export function createNewCanvas(options: {
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
     'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
-    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment'
+    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment',
+    '企业客户尽职调查问卷', '个人客户尽职调查问卷', '实体企业尽职调查问卷',
+    'Corporate Customer CDD Questionnaire', 'Individual CDD Questionnaire', 'Corporate Entity CDD Questionnaire'
   ];
   const defaultTitle = isRisk.value
     ? (profileType === 'individual' ? 'SG_RISK_INDIVIDUAL' : profileType === 'entity' ? 'SG_RISK_ENTITY' : 'SG_RISK_CUSTOMER')
-    : (profileType === 'individual' ? 'SG_CDD_INDIVIDUAL' : profileType === 'entity' ? 'SG_CDD_ENTITY' : 'SG_CDD_CUSTOMER');
+    : (profileType === 'individual' ? '个人客户尽职调查问卷' : profileType === 'entity' ? '实体企业尽职调查问卷' : '企业客户尽职调查问卷');
   const persistedUrlId = typeof window !== 'undefined'
     ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
     : '';
@@ -1499,16 +1513,20 @@ export function createNewCanvas(options: {
   store.meta.title_en = initialTitleEn;
   store.meta.description = options.description !== undefined ? options.description : (schema.meta.description || '');
   if (!store.meta.i18n) store.meta.i18n = {};
-  store.meta.i18n.zh = {
-    ...(store.meta.i18n.zh || {}),
-    title: initialTitle,
-    ...(store.meta.description ? { description: store.meta.description } : {})
-  };
-  store.meta.i18n.en = {
-    ...(store.meta.i18n.en || {}),
-    title: initialTitleEn,
-    ...(store.meta.description_en ? { description: store.meta.description_en } : {})
-  };
+  if (primaryLocale.value === 'en') {
+    store.meta.i18n.en = {
+      ...(store.meta.i18n.en || {}),
+      title: initialTitleEn,
+      ...(store.meta.description_en ? { description: store.meta.description_en } : {})
+    };
+    delete store.meta.i18n.zh;
+  } else {
+    store.meta.i18n.zh = {
+      ...(store.meta.i18n.zh || {}),
+      title: initialTitle,
+      ...(store.meta.description ? { description: store.meta.description } : {})
+    };
+  }
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
   store.meta.serialNo = formId;
@@ -1532,28 +1550,34 @@ export function applyTemplateKey(
 ) {
   let templateSource: FormSchema = kycCustomerTemplate;
   let pType: ProfileType = 'customer';
-  let defaultTitle = 'SG_CDD_CUSTOMER';
+  let defaultTitle = '企业客户尽职调查问卷';
+  let defaultTitleEn = 'Corporate Customer CDD Questionnaire';
 
   if (tplKey === 'kyc-individual') {
     templateSource = kycIndividualTemplate;
     pType = 'individual';
-    defaultTitle = 'SG_CDD_INDIVIDUAL';
+    defaultTitle = '个人客户尽职调查问卷';
+    defaultTitleEn = 'Individual CDD Questionnaire';
   } else if (tplKey === 'kyc-entity') {
     templateSource = kycEntityTemplate;
     pType = 'entity';
-    defaultTitle = 'SG_CDD_ENTITY';
+    defaultTitle = '实体企业尽职调查问卷';
+    defaultTitleEn = 'Corporate Entity CDD Questionnaire';
   } else if (tplKey === 'risk-individual') {
     templateSource = createRiskAssessmentTemplate('individual', 'SG_RISK_INDIVIDUAL');
     pType = 'individual';
     defaultTitle = 'SG_RISK_INDIVIDUAL';
+    defaultTitleEn = 'SG_RISK_INDIVIDUAL';
   } else if (tplKey === 'risk-entity') {
     templateSource = createRiskAssessmentTemplate('entity', 'SG_RISK_ENTITY');
     pType = 'entity';
     defaultTitle = 'SG_RISK_ENTITY';
+    defaultTitleEn = 'SG_RISK_ENTITY';
   } else if (tplKey === 'risk-customer') {
     templateSource = createRiskAssessmentTemplate('customer', 'SG_RISK_CUSTOMER');
     pType = 'customer';
     defaultTitle = 'SG_RISK_CUSTOMER';
+    defaultTitleEn = 'SG_RISK_CUSTOMER';
   }
 
   const defaultTemplateTitles = [
@@ -1561,7 +1585,9 @@ export function applyTemplateKey(
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
     'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
-    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment'
+    '未命名表单', 'Untitled Form', '风险评估', 'Risk Assessment',
+    '企业客户尽职调查问卷', '个人客户尽职调查问卷', '实体企业尽职调查问卷',
+    'Corporate Customer CDD Questionnaire', 'Individual CDD Questionnaire', 'Corporate Entity CDD Questionnaire'
   ];
   const persistedUrlId = typeof window !== 'undefined'
     ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
@@ -1580,14 +1606,22 @@ export function applyTemplateKey(
   const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
 
   // 若用户已手动修改过标题或表单已保存，则保留原标题；否则随模板切换自动同步为新模板默认名称
-  const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : defaultTitle);
-  const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : title);
+  const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : (store.currentLocale === 'en' ? defaultTitleEn : defaultTitle));
+  const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : defaultTitleEn);
 
   clonedSchema.meta.title = title;
   clonedSchema.meta.title_en = titleEn;
+  const isEnEntry = store.currentLocale === 'en';
+  clonedSchema.meta.baseLocale = isEnEntry ? 'en' : 'zh';
+  clonedSchema.meta.enabledLocales = isEnEntry ? ['en'] : ['zh', 'en'];
   if (!clonedSchema.meta.i18n) clonedSchema.meta.i18n = {};
-  clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
-  clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
+  if (isEnEntry) {
+    clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
+    delete clonedSchema.meta.i18n.zh;
+  } else {
+    clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
+    clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
+  }
   clonedSchema.meta.profileType = pType;
   clonedSchema.meta.source = 'template';
   clonedSchema.meta.templateKey = tplKey;
@@ -1599,8 +1633,13 @@ export function applyTemplateKey(
   store.meta.title = title;
   store.meta.title_en = titleEn;
   if (!store.meta.i18n) store.meta.i18n = {};
-  store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
-  store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
+  if (isEnEntry) {
+    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
+    delete store.meta.i18n.zh;
+  } else {
+    store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
+    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
+  }
   store.meta.profileType = pType;
   store.meta.source = 'template';
   store.meta.templateKey = tplKey;
@@ -1627,26 +1666,52 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   store.meta.title_en = metaI18n?.en?.title || schema.meta?.title_en || '';
   store.meta.description = metaI18n?.zh?.description || schema.meta?.description || '';
   store.meta.description_en = metaI18n?.en?.description || schema.meta?.description_en || '';
-  store.meta.baseLocale = schema.meta?.baseLocale || store.currentLocale || 'zh';
+  const baseLoc = schema.meta?.baseLocale || (store.currentLocale === 'en' ? 'en' : 'zh');
+  store.meta.baseLocale = baseLoc;
   store.meta.i18n = metaI18n;
 
-  const activeLoc = store.currentLocale || 'zh';
   if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
     const loadedLocales = [...schema.meta.enabledLocales];
-    if (!loadedLocales.includes(activeLoc)) {
-      loadedLocales.unshift(activeLoc);
+    if (!loadedLocales.includes(baseLoc)) {
+      loadedLocales.unshift(baseLoc);
     }
-    if (activeLoc === 'zh' && !loadedLocales.includes('en')) {
+    // 中文基准下强制默认追加英文版
+    if (baseLoc === 'zh' && !loadedLocales.includes('en')) {
       loadedLocales.push('en');
     }
+    // 自动扫描 schema 中表单内容实际包含的多语言（排除 system_profile 固有中英文骨架，避免仅有系统骨架导致非启用语种自动冒出）
+    schema.pages?.forEach(p => {
+      if (p.pageType === 'system_profile') return;
+      if (p.i18n) {
+        Object.entries(p.i18n).forEach(([loc, content]: [string, any]) => {
+          if (!loadedLocales.includes(loc)) {
+            if (content && (content.title?.trim() || content.description?.trim())) {
+              loadedLocales.push(loc);
+            }
+          }
+        });
+      }
+      p.fields?.forEach(f => {
+        if (f.i18n) {
+          Object.entries(f.i18n).forEach(([loc, content]: [string, any]) => {
+            if (!loadedLocales.includes(loc)) {
+              const hasText = content && (
+                content.label?.trim() ||
+                content.placeholder?.trim() ||
+                content.help?.trim() ||
+                content.content?.trim()
+              );
+              if (hasText) {
+                loadedLocales.push(loc);
+              }
+            }
+          });
+        }
+      });
+    });
     store.meta.enabledLocales = Array.from(new Set(loadedLocales));
-  } else if (activeLoc === 'zh') {
-    store.meta.enabledLocales = ['zh', 'en'];
   } else {
-    const hasExplicitZh = Boolean(
-      schema.pages?.some(p => p.pageType !== 'system_profile' && (p.i18n?.zh?.title || p.title || p.fields?.some(f => Boolean(f.i18n?.zh?.label || f.label))))
-    );
-    store.meta.enabledLocales = hasExplicitZh ? ['en', 'zh'] : ['en'];
+    store.meta.enabledLocales = baseLoc === 'zh' ? ['zh', 'en'] : ['en'];
   }
   const rawProfileType = schema.meta?.profileType
     || (schema.pages?.[0]?.profileType)
@@ -1790,6 +1855,19 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
     store.activePageId = null;
   }
 
+  // 确保目标语言与编辑语言与新 Schema 对齐，绝不残留上一模板或之前会话的未启用语言
+  if (targetLocales.value.length > 0) {
+    if (!store.activeTargetLocale || !targetLocales.value.includes(store.activeTargetLocale)) {
+      store.activeTargetLocale = targetLocales.value[0];
+    }
+    if (store.editingLocale && store.editingLocale !== primaryLocale.value && !targetLocales.value.includes(store.editingLocale)) {
+      store.editingLocale = store.activeTargetLocale;
+    }
+  } else {
+    store.activeTargetLocale = '';
+    store.editingLocale = primaryLocale.value;
+  }
+
   establishBaseline();
 }
 
@@ -1834,7 +1912,7 @@ export function triggerHighlight(input: HTMLElement | null) {
 }
 
 export function highlightPropertyField(
-  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'content' | 'signPlaceholder' | 'endPlaceholder' | 'longTermText',
+  field: 'label' | 'placeholder' | 'help' | 'option' | 'title' | 'description' | 'content' | 'signPlaceholder' | 'endPlaceholder' | 'longTermText' | 'customErrorMessage' | 'declarationErrorMessage',
   optionIndex?: number
 ) {
   setTimeout(() => {
@@ -1850,9 +1928,13 @@ export function highlightPropertyField(
     } else if (field === 'endPlaceholder') {
       targetInput = document.getElementById('prop-end-placeholder-input');
     } else if (field === 'longTermText') {
-      targetInput = document.getElementById('prop-long-term-text-input');
+      targetInput = document.getElementById('prop-long-term-text-input') || document.getElementById('prop-longterm-input');
     } else if (field === 'help') {
       targetInput = document.getElementById('prop-help-input');
+    } else if (field === 'customErrorMessage') {
+      targetInput = document.getElementById('prop-custom-error-input');
+    } else if (field === 'declarationErrorMessage') {
+      targetInput = document.getElementById('prop-declaration-error-input');
     } else if (field === 'content') {
       targetInput = document.getElementById('prop-alert-content-input');
     } else if (field === 'description') {
@@ -1873,7 +1955,7 @@ export function highlightPropertyField(
 }
 
 export const primaryLocale = computed<string>(() => {
-  return store.currentLocale || store.meta.baseLocale || 'zh';
+  return store.meta.baseLocale || store.currentLocale || 'zh';
 });
 
 export const targetLocales = computed<string[]>(() => {
@@ -1920,7 +2002,7 @@ export function addTargetLocale(locale?: string) {
 
   let nextLocale = locale;
   if (!nextLocale) {
-    const candidates = ['zh', 'en', 'ja', 'ko', 'zh-TW', 'ms'];
+    const candidates = ['zh', 'en', 'zh-HK', 'ms'];
     nextLocale = candidates.find(c => !store.meta.enabledLocales!.includes(c)) || (base === 'zh' ? 'en' : 'zh');
   }
 
@@ -1944,8 +2026,8 @@ export function addTargetLocale(locale?: string) {
 export function removeTargetLocale(locale: string) {
   if (!store.meta.enabledLocales) return;
   const base = primaryLocale.value;
-  // 基础语言（中文）与核心国际语言（英语）不允许删除
-  if (locale === base || locale === 'en' || locale === 'zh') return;
+  // 英文版是合规法定核心语言，永远不允许被删除；主语言也不允许删除
+  if (locale === base || locale === 'en') return;
   store.meta.enabledLocales = store.meta.enabledLocales.filter(l => l !== locale);
   if (store.meta.i18n && locale in store.meta.i18n) {
     delete store.meta.i18n[locale];
@@ -1979,10 +2061,8 @@ export function removeTargetLocale(locale: string) {
       store.editingLocale = store.activeTargetLocale;
     }
   } else {
+    store.activeTargetLocale = '';
     store.editingLocale = base;
-    if (store.workspaceMode === 'translation') {
-      closeTranslationWorkspace();
-    }
   }
   markDirty();
   syncTranslationUrlParams();
@@ -2005,9 +2085,6 @@ export function disableMultiLanguage() {
 }
 
 export function openTranslationWorkspace(targetLocale?: string) {
-  if (targetLocales.value.length === 0) {
-    enableBilingual();
-  }
   if (targetLocale && !targetLocales.value.includes(targetLocale)) {
     addTargetLocale(targetLocale);
   }
@@ -2015,10 +2092,10 @@ export function openTranslationWorkspace(targetLocale?: string) {
     (targetLocale && targetLocales.value.includes(targetLocale) ? targetLocale : '') ||
     (store.activeTargetLocale && targetLocales.value.includes(store.activeTargetLocale) ? store.activeTargetLocale : '') ||
     targetLocales.value[0] ||
-    (primaryLocale.value === 'zh' ? 'en' : 'zh');
+    '';
 
   store.activeTargetLocale = activeTarget;
-  store.editingLocale = activeTarget;
+  store.editingLocale = activeTarget || primaryLocale.value;
   store.workspaceMode = 'translation';
   store.sidebarTab = 'languages';
   store.leftSidebarVisible = true;
@@ -2034,9 +2111,9 @@ export function openTranslationWorkspace(targetLocale?: string) {
 
   syncTranslationUrlParams();
 
-  setTimeout(() => {
-    resetCanvasView({ duration: 300 });
-  }, 20);
+  requestAnimationFrame(() => {
+    resetCanvasView({ duration: 380 });
+  });
 }
 
 export function closeTranslationWorkspace() {
@@ -2046,7 +2123,7 @@ export function closeTranslationWorkspace() {
     store.sidebarTab = 'pages';
   }
   syncTranslationUrlParams();
-  setTimeout(() => {
-    resetCanvasView({ duration: 300 });
-  }, 20);
+  requestAnimationFrame(() => {
+    resetCanvasView({ duration: 380 });
+  });
 }

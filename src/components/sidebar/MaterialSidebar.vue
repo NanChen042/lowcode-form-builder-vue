@@ -290,6 +290,7 @@
                 <div
                   v-for="item in filteredBasicComponents"
                   :key="item.type + '_' + store.currentLocale"
+                  :id="isRisk ? 'tour-risk-component-item' : undefined"
                   class="component-item select-none group flex cursor-pointer items-center rounded-lg border border-slate-200/90 shadow-2xs bg-white px-2.5 py-1.5 transition-all hover:border-[#1677ff]/60 hover:bg-blue-50/40 hover:shadow-sm active:bg-blue-50/70 active:border-[#1677ff]"
                   :class="isRisk ? '!items-start !p-2.5' : 'h-[34px]'"
                   :data-type="item.type"
@@ -386,7 +387,7 @@
                     ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
                     : store.activeGroupId === grp.id
                       ? 'border-blue-200/90 bg-blue-50/25 shadow-2xs'
-                      : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40'
+                      : 'border-slate-200/80 bg-white shadow-2xs hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-xs'
                 ]"
                 @click="selectGroup(grp.id)"
               >
@@ -425,11 +426,9 @@
                   v-if="store.pages[0].groups.length > 1"
                   :content="t('risk.deleteGroupConfirm')"
                   position="tr"
-                  type="warning"
+                  type="error"
                   :ok-text="t('modal.confirm')"
                   :cancel-text="t('modal.cancel')"
-                  :ok-button-props="{ status: 'danger', size: 'small' }"
-                  :cancel-button-props="{ size: 'small' }"
                   @ok="deleteQuestionGroup(grp.id)"
                 >
                   <button
@@ -467,7 +466,7 @@
                   ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
                   : store.activePageId === page.id
                     ? 'border-blue-200/90 bg-blue-50/25 shadow-2xs'
-                    : 'border-slate-200/80 bg-white shadow-2xs hover:border-slate-300 hover:bg-slate-50/40 hover:shadow-xs'
+                    : 'border-slate-200/80 bg-white shadow-2xs hover:border-blue-200 hover:bg-blue-50/30 hover:shadow-xs'
               ]"
               @click="focusPage(page.id)"
             >
@@ -513,11 +512,9 @@
                   v-if="idx > 0"
                   :content="t('sidebar.deletePagePrompt')"
                   position="tr"
-                  type="warning"
+                  type="error"
                   :ok-text="t('modal.confirm')"
                   :cancel-text="t('modal.cancel')"
-                  :ok-button-props="{ status: 'danger', size: 'small' }"
-                  :cancel-button-props="{ size: 'small' }"
                   @ok="handleDeletePage(page.id)"
                 >
                   <button
@@ -560,7 +557,7 @@
                 <div
                   v-for="(item, tIdx) in translatablePages"
                   :key="item.page.id"
-                  class="figma-page-row group relative flex flex-col gap-1.5 p-2.5 rounded-lg border cursor-pointer transition-all duration-150 select-none"
+                  class="figma-page-row group relative flex flex-col gap-1.5 p-2 rounded-md border cursor-pointer transition-all duration-150 select-none"
                   :class="[
                     activeTranslationPageId === item.page.id
                       ? 'border-[#165dff] bg-blue-50/40 shadow-xs ring-1 ring-[#165dff]/20'
@@ -970,6 +967,9 @@ function initSidebarRiskGroupsSortable() {
     animation: 180,
     ghostClass: 'sortable-ghost',
     chosenClass: 'drag-chosen',
+    fallbackClass: 'sidebar-group-drag-fallback',
+    forceFallback: true,
+    fallbackOnBody: true,
     draggable: '.sidebar-risk-group-item',
     filter: 'button',
     preventOnFilter: false,

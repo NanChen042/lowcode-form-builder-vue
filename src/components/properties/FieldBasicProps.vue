@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3.5">
-    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+    <div v-if="!isRisk" class="flex items-center justify-between border-b border-slate-100 pb-2">
       <div>
         <span class="text-[12px] font-semibold text-slate-700">{{ t('prop.basicInfo') }}</span>
         <span class="block text-[11px] text-slate-400">{{ t('prop.basicInfoDesc') }}</span>
@@ -45,73 +45,52 @@
     </div>
 
     <template v-if="isRisk">
-      <div class="pt-4 mt-2 border-t border-slate-100">
-
-        <div
-          class="flex items-center justify-between cursor-pointer select-none mb-3.5"
-          @click="isWeightExpanded = !isWeightExpanded"
-        >
+      <div class="pt-3 mt-1 border-t border-slate-100">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
-            <span class="text-[13px] font-bold text-slate-800">
+            <span class="text-[12px] font-medium text-slate-700">
               {{ t('risk.weightSettings') }}
             </span>
             <a-tooltip
               :content="t('risk.weightSettingsDesc')"
               position="top"
             >
-              <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" @click.stop />
+              <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
             </a-tooltip>
           </div>
-          <ChevronUp
-            class="w-4 h-4 text-slate-400 transition-transform duration-200"
-            :class="{ 'rotate-180': !isWeightExpanded }"
-          />
+
+          <!-- 紧凑加减器 -->
+          <div class="inline-flex items-center h-7 rounded border border-slate-200 bg-slate-50/60 overflow-hidden select-none">
+            <button
+              type="button"
+              class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              :disabled="questionWeightModel <= 1"
+              @click="questionWeightModel = Math.max(1, questionWeightModel - 1)"
+            >
+              <Minus class="w-3 h-3 stroke-[2.2]" />
+            </button>
+            <input
+              type="number"
+              :value="questionWeightModel"
+              min="1"
+              max="10"
+              class="w-11 h-full bg-white border-x border-slate-200 text-center text-[13px] font-semibold text-slate-700 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              @change="onWeightInputChange"
+            />
+            <button
+              type="button"
+              class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              :disabled="questionWeightModel >= 10"
+              @click="questionWeightModel = Math.min(10, questionWeightModel + 1)"
+            >
+              <Plus class="w-3 h-3 stroke-[2.2]" />
+            </button>
+          </div>
         </div>
 
-        <CollapseTransition :show="isWeightExpanded">
-          <div class="space-y-3.5">
-            <div>
-              <label class="block text-[12px] font-medium text-slate-600 mb-2">
-                {{ t('risk.weightScore') }}
-              </label>
-
-              <!-- 属性配置中的加减器（精简紧凑型尺寸） -->
-              <div class="inline-flex items-center h-7 rounded border border-slate-200 bg-slate-50/60 overflow-hidden select-none">
-                <button
-                  type="button"
-                  class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                  :disabled="questionWeightModel <= 1"
-                  @click="questionWeightModel = Math.max(1, questionWeightModel - 1)"
-                >
-                  <Minus class="w-3 h-3 stroke-[2.2]" />
-                </button>
-                <input
-                  type="number"
-                  :value="questionWeightModel"
-                  min="1"
-                  max="10"
-                  class="w-11 h-full bg-white border-x border-slate-200 text-center text-[13px] font-semibold text-slate-700 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  @change="onWeightInputChange"
-                />
-                <button
-                  type="button"
-                  class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                  :disabled="questionWeightModel >= 10"
-                  @click="questionWeightModel = Math.min(10, questionWeightModel + 1)"
-                >
-                  <Plus class="w-3 h-3 stroke-[2.2]" />
-                </button>
-              </div>
-            </div>
-
-            <div class="rounded bg-[#f0f6ff] px-2.5 py-1.5 flex items-center gap-2">
-              <span class="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-[#1677ff] text-white text-[9px] font-bold">i</span>
-              <span class="text-[11.5px] text-[#1677ff] font-medium leading-tight">
-                {{ t('risk.weightScoreTip') }}
-              </span>
-            </div>
-          </div>
-        </CollapseTransition>
+        <p class="mt-1.5 text-[11px] text-slate-400 leading-normal">
+          {{ t('risk.yesDeductionTip') }}
+        </p>
       </div>
     </template>
 
@@ -154,33 +133,33 @@
               </a-tooltip>
             </div>
 
-            <div class="inline-flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/80 shadow-xs shrink-0 select-none">
+            <div class="inline-flex items-center p-0.5 rounded-[5px] bg-slate-100 border border-slate-200/80 shadow-2xs shrink-0 select-none h-6.5">
               <button
                 type="button"
-                class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                class="flex items-center gap-1 h-5.5 px-2 rounded-[3.5px] transition-all cursor-pointer whitespace-nowrap !text-[11px]"
+                :class="helpPositionValue === 'right' ? 'bg-[#1677ff] text-white shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
                 :title="t('prop.helpPositionRightDesc')"
                 @click="helpPositionValue = 'right'"
               >
-                <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                <svg class="h-2.5 w-2.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
                   <rect x="1.5" y="4" width="5.8" height="8" rx="1.2" />
                   <rect x="8.7" y="4" width="5.8" height="8" rx="1.2" :opacity="helpPositionValue === 'right' ? 0.7 : 0.45" />
                 </svg>
-                <span>{{ t('prop.helpPositionRight') }}</span>
+                <span class="!text-[11px] leading-none">{{ t('prop.helpPositionRight') }}</span>
               </button>
 
               <button
                 type="button"
-                class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium leading-none transition-all cursor-pointer whitespace-nowrap"
-                :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
+                class="flex items-center gap-1 h-5.5 px-2 rounded-[3.5px] transition-all cursor-pointer whitespace-nowrap !text-[11px]"
+                :class="helpPositionValue === 'bottom' ? 'bg-[#1677ff] text-white shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
                 :title="t('prop.helpPositionBottomDesc')"
                 @click="helpPositionValue = 'bottom'"
               >
-                <svg class="h-3 w-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                <svg class="h-2.5 w-2.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
                   <rect x="2" y="3" width="12" height="4" rx="1.2" />
                   <rect x="2" y="9" width="12" height="4" rx="1.2" :opacity="helpPositionValue === 'bottom' ? 0.7 : 0.45" />
                 </svg>
-                <span>{{ t('prop.helpPositionBottom') }}</span>
+                <span class="!text-[11px] leading-none">{{ t('prop.helpPositionBottom') }}</span>
               </button>
             </div>
           </div>
@@ -270,76 +249,16 @@
       :key="`${element.id}-req`"
       :show="Boolean(isElementRequired)"
     >
-      <div class="pt-2 pb-1 space-y-1.5">
-        <div class="flex items-center justify-between text-[11.5px]">
-          <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
-            <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
-            <span>{{ element.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg') }}</span>
-          </div>
-          <span class="text-[11px] text-slate-400 font-normal">
-            {{ fieldCustomErrorModel?.trim() ? t('prop.customized') : t('prop.defaultFallback') }}
-          </span>
-        </div>
-
-        <!-- 1. 所见即所得报错效果预览态（真实表单错误提示风格） -->
-        <div
-          v-if="!isEditingCustomError"
-          class="group/err-preview flex items-center justify-between px-2.5 py-1.5 rounded-[4px] bg-red-50/60 border border-red-200/70 transition-all hover:border-red-300"
-        >
-          <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1.5">
-            <svg class="h-3 w-3 text-[#f53f3f] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span class="text-[12px] font-medium text-[#f53f3f] break-words truncate" :title="currentDisplayError">
-              {{ currentDisplayError }}
-            </span>
-          </div>
-
-          <div class="flex items-center gap-0.5 shrink-0">
-            <button
-              type="button"
-              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-[#1677ff] hover:bg-white transition-colors cursor-pointer"
-              :title="t('prop.customizeError')"
-              @click="startEditingCustomError"
-            >
-              <Pencil class="w-3.5 h-3.5 stroke-[2]" />
-            </button>
-            <button
-              v-if="fieldCustomErrorModel?.trim()"
-              type="button"
-              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-white transition-colors cursor-pointer"
-              :title="t('prop.resetToDefaultError')"
-              @click="fieldCustomErrorModel = ''"
-            >
-              <RotateCcw class="w-3.5 h-3.5 stroke-[2]" />
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. 点击图标后展开的编辑态 -->
-        <div v-else class="flex items-center gap-1.5">
-          <a-input
-            ref="customErrorInputRef"
-            v-model="fieldCustomErrorModel"
-            size="small"
-            allow-clear
-            class="flex-1"
-            :placeholder="rawDefaultErrorMessage"
-            @input="markDirty"
-            @blur="isEditingCustomError = false"
-            @keydown.enter="isEditingCustomError = false"
-          />
-          <button
-            type="button"
-            class="flex items-center justify-center w-7 h-7 rounded bg-[#1677ff] text-white hover:bg-blue-600 transition-colors cursor-pointer shrink-0 shadow-2xs"
-            :title="t('modal.confirm')"
-            @mousedown.prevent="isEditingCustomError = false"
-          >
-            <Check class="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
-        </div>
+      <div class="pt-2 pb-1">
+        <ValidationErrorItem
+          :label="element.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg')"
+          v-model="fieldCustomErrorModel"
+          :default-text="rawDefaultErrorMessage"
+          input-id="prop-custom-error-input"
+          :is-focused="isFieldFocused('customErrorMessage')"
+          @focus="setFocus('customErrorMessage')"
+          @blur="clearFocus"
+        />
       </div>
     </CollapseTransition>
 
@@ -358,76 +277,16 @@
       :key="`${element.id}-decl`"
       :show="Boolean(isDeclarationRequired)"
     >
-      <div class="pt-2 pb-1 space-y-1.5">
-        <div class="flex items-center justify-between text-[11.5px]">
-          <div class="flex items-center gap-1.5 text-slate-600 font-medium overflow-hidden pr-2">
-            <MessageSquare class="w-3.5 h-3.5 text-[#1677ff] shrink-0" />
-            <span>{{ t('prop.declarationErrorMsg') }}</span>
-          </div>
-          <span class="text-[11px] text-slate-400 font-normal">
-            {{ fieldDeclarationErrorModel?.trim() ? t('prop.customized') : t('prop.defaultFallback') }}
-          </span>
-        </div>
-
-        <!-- 1. 所见即所得报错效果预览态 -->
-        <div
-          v-if="!isEditingDeclarationError"
-          class="group/err-preview flex items-center justify-between px-2.5 py-1.5 rounded-[4px] bg-red-50/60 border border-red-200/70 transition-all hover:border-red-300"
-        >
-          <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1.5">
-            <svg class="h-3 w-3 text-[#f53f3f] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span class="text-[12px] font-medium text-[#f53f3f] break-words truncate" :title="currentDisplayDeclarationError">
-              {{ currentDisplayDeclarationError }}
-            </span>
-          </div>
-
-          <div class="flex items-center gap-0.5 shrink-0">
-            <button
-              type="button"
-              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-[#1677ff] hover:bg-white transition-colors cursor-pointer"
-              :title="t('prop.customizeError')"
-              @click="startEditingDeclarationError"
-            >
-              <Pencil class="w-3.5 h-3.5 stroke-[2]" />
-            </button>
-            <button
-              v-if="fieldDeclarationErrorModel?.trim()"
-              type="button"
-              class="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:text-red-500 hover:bg-white transition-colors cursor-pointer"
-              :title="t('prop.resetToDefaultError')"
-              @click="fieldDeclarationErrorModel = ''"
-            >
-              <RotateCcw class="w-3.5 h-3.5 stroke-[2]" />
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. 点击图标后展开的编辑态 -->
-        <div v-else class="flex items-center gap-1.5">
-          <a-input
-            ref="declarationErrorInputRef"
-            v-model="fieldDeclarationErrorModel"
-            size="small"
-            allow-clear
-            class="flex-1"
-            :placeholder="rawDeclarationErrorMessage"
-            @input="markDirty"
-            @blur="isEditingDeclarationError = false"
-            @keydown.enter="isEditingDeclarationError = false"
-          />
-          <button
-            type="button"
-            class="flex items-center justify-center w-7 h-7 rounded bg-[#1677ff] text-white hover:bg-blue-600 transition-colors cursor-pointer shrink-0 shadow-2xs"
-            :title="t('modal.confirm')"
-            @mousedown.prevent="isEditingDeclarationError = false"
-          >
-            <Check class="w-3.5 h-3.5 stroke-[2.5]" />
-          </button>
-        </div>
+      <div class="pt-2 pb-1">
+        <ValidationErrorItem
+          :label="t('prop.declarationErrorMsg')"
+          v-model="fieldDeclarationErrorModel"
+          :default-text="rawDeclarationErrorMessage"
+          input-id="prop-declaration-error-input"
+          :is-focused="isFieldFocused('declarationErrorMessage')"
+          @focus="setFocus('declarationErrorMessage')"
+          @blur="clearFocus"
+        />
       </div>
     </CollapseTransition>
 
@@ -477,13 +336,12 @@ import { store, isRisk, markDirty, isBilingual, primaryLocale } from '@/core/sto
 import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText, getEffectiveFormLocale } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
-import { HelpCircle, CornerDownRight, MessageSquare, Minus, Plus, ChevronUp, Pencil, RotateCcw, Check } from '@lucide/vue';
+import ValidationErrorItem from './ValidationErrorItem.vue';
+import { HelpCircle, CornerDownRight, Minus, Plus } from '@lucide/vue';
 
 const props = defineProps<{
   element: FormElement;
 }>();
-
-const isWeightExpanded = ref(true);
 
 const questionWeightModel = computed<number>({
   get() {
@@ -730,38 +588,6 @@ const fieldCustomErrorModel = computed({
   }
 });
 
-const isEditingCustomError = ref(false);
-const isEditingDeclarationError = ref(false);
-const customErrorInputRef = ref<any>(null);
-const declarationErrorInputRef = ref<any>(null);
-
-watch(() => props.element.id, () => {
-  isEditingCustomError.value = false;
-  isEditingDeclarationError.value = false;
-});
-
-function startEditingCustomError() {
-  isEditingCustomError.value = true;
-  nextTick(() => {
-    customErrorInputRef.value?.focus();
-  });
-}
-
-function startEditingDeclarationError() {
-  isEditingDeclarationError.value = true;
-  nextTick(() => {
-    declarationErrorInputRef.value?.focus();
-  });
-}
-
-const currentDisplayError = computed(() => {
-  return fieldCustomErrorModel.value?.trim() || rawDefaultErrorMessage.value;
-});
-
-const currentDisplayDeclarationError = computed(() => {
-  return fieldDeclarationErrorModel.value?.trim() || rawDeclarationErrorMessage.value;
-});
-
 const fieldDeclarationErrorModel = computed({
   get() {
     return getFieldText(props.element, 'declarationErrorMessage');
@@ -838,7 +664,7 @@ const currentMaxSelections = computed<number | undefined>({
 });
 
 function isFieldFocused(
-  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder'
+  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder' | 'customErrorMessage' | 'declarationErrorMessage'
 ) {
   if (!store.focusedTarget) return false;
   return (
@@ -848,7 +674,7 @@ function isFieldFocused(
 }
 
 function setFocus(
-  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder'
+  field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder' | 'customErrorMessage' | 'declarationErrorMessage'
 ) {
   store.focusedTarget = {
     elementId: props.element.id,

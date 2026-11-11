@@ -35,23 +35,87 @@
       </div>
     </div>
 
-    <div v-else-if="isRisk" id="risk-page-prop-editor" class="space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-        <div>
-          <span class="text-[12px] font-semibold text-slate-700">
-            {{ t('prop.canvasSettings') }}
-          </span>
-          <span class="block text-[11px] text-slate-400">
-            {{ t('risk.pageTitle') }}
-          </span>
+    <div v-else-if="isRisk" id="risk-page-prop-editor" class="space-y-4">
+      <!-- 页面大标题 -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[12px] font-medium text-slate-700 flex items-center gap-1">
+            <span>{{ t('prop.pageTitle') }}</span>
+          </label>
+          <span class="text-[10px] text-slate-400 font-mono">H2</span>
         </div>
-        <a-tag color="arcoblue" size="small" class="text-[11px] font-normal">
-          {{ t('risk.systemFixed') }}
-        </a-tag>
+        <a-input
+          id="page-prop-title-input"
+          v-model="pageTitleModel"
+          allow-clear
+          :placeholder="t('prop.pageTitlePlaceholder')"
+          class="w-full !rounded-[4px] !text-xs"
+          @focus="setPageFocus('title')"
+          @blur="clearFocus"
+          @input="markDirty"
+          @clear="markDirty"
+        />
       </div>
 
-      <div class="text-xs text-slate-500 leading-relaxed py-2 px-0.5">
-        {{ t('risk.fixedNoPropTip') }}
+      <!-- 页面引导/说明文案 -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[12px] font-medium text-slate-700">
+            <span>{{ t('prop.pageDesc') }}</span>
+          </label>
+        </div>
+        <a-textarea
+          id="page-prop-desc-input"
+          v-model="pageDescModel"
+          :auto-size="{ minRows: 2, maxRows: 4 }"
+          allow-clear
+          :placeholder="t('prop.pageDescPlaceholder')"
+          class="w-full !rounded-[4px] !text-xs"
+          @focus="setPageFocus('description')"
+          @blur="clearFocus"
+          @input="markDirty"
+          @clear="markDirty"
+        />
+      </div>
+
+      <!-- 问卷概览与快捷操作 -->
+      <div class="space-y-2 pt-2 border-t border-slate-100">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] font-medium text-slate-700">{{ t('risk.overviewStats') }}</span>
+          <span class="text-[11px] text-slate-400">
+            {{ (page.groups?.length || 1) }} {{ t('risk.groupUnit') }} · {{ page.fields?.length || 0 }} {{ t('risk.questionUnit') }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            class="h-7.5 px-2 rounded-[4px] !text-xs font-medium border border-dashed border-slate-300 hover:border-[#1677ff] hover:text-[#1677ff] bg-white hover:bg-blue-50/40 text-slate-600 transition cursor-pointer flex items-center justify-center gap-1 min-w-0"
+            @click="handleAddQuestion"
+          >
+            <Plus class="w-3.5 h-3.5 stroke-[2] shrink-0" />
+            <span class="truncate whitespace-nowrap">{{ t('risk.addQuestion') }}</span>
+          </button>
+          <button
+            type="button"
+            class="h-7.5 px-2 rounded-[4px] !text-xs font-medium border border-dashed border-slate-300 hover:border-[#1677ff] hover:text-[#1677ff] bg-white hover:bg-blue-50/40 text-slate-600 transition cursor-pointer flex items-center justify-center gap-1 min-w-0"
+            @click="handleAddGroup"
+          >
+            <FolderPlus class="w-3.5 h-3.5 stroke-[2] shrink-0" />
+            <span class="truncate whitespace-nowrap">{{ t('risk.addGroupBtn') }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 评分机制说明卡片 -->
+      <div class="rounded-lg bg-slate-50 border border-slate-200/80 p-3 text-xs space-y-1.5 text-slate-600 leading-relaxed">
+        <div class="flex items-center gap-1.5 font-semibold text-slate-700">
+          <Scale class="w-3.5 h-3.5 text-blue-500" />
+          <span>{{ t('risk.rulesCardTitle') }}</span>
+        </div>
+        <p class="text-[11.5px] text-slate-500 m-0 leading-normal">
+          {{ t('risk.rulesCardDesc') }}
+        </p>
       </div>
     </div>
 
@@ -115,11 +179,9 @@
       <div class="pt-3 border-t border-slate-100">
         <a-popconfirm
           :content="t('prop.deletePageConfirm')"
-          type="warning"
+          type="error"
           :ok-text="t('modal.confirm')"
           :cancel-text="t('modal.cancel')"
-          :ok-button-props="{ status: 'danger', size: 'small' }"
-          :cancel-button-props="{ size: 'small' }"
           @ok="handleDeletePage"
         >
           <a-button status="danger" long size="small">
@@ -137,14 +199,26 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { FormPage, ProfileType } from '@/types/schema';
-import { store, markDirty, deletePage, isBilingual, isRisk, primaryLocale } from '@/core/store';
+import {
+  store,
+  markDirty,
+  deletePage,
+  isBilingual,
+  isRisk,
+  primaryLocale,
+  addElement,
+  addQuestionGroup
+} from '@/core/store';
 import { t, getPageText, setPageText } from '@/core/i18n';
 import {
   Building2,
   User,
   Users,
   Lock,
-  Trash2
+  Trash2,
+  Plus,
+  FolderPlus,
+  Scale
 } from '@lucide/vue';
 
 const props = defineProps<{
@@ -206,5 +280,14 @@ function clearFocus() {
 
 function handleDeletePage() {
   deletePage(props.page.id);
+}
+
+function handleAddQuestion() {
+  const firstGrp = props.page.groups?.[0]?.id || 'grp_risk_1';
+  addElement('radio', props.page.id, firstGrp);
+}
+
+function handleAddGroup() {
+  addQuestionGroup();
 }
 </script>

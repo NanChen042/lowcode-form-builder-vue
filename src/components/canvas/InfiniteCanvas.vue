@@ -97,9 +97,9 @@
               <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
             </span>
           </template>
-          <!-- 非英语且非主语言的目标语言才允许被删除 -->
+          <!-- 英文版是法定合规核心语言，永远不允许被删除；主语言也不允许删除 -->
           <span
-            v-if="loc !== 'en' && loc !== primaryLocale"
+            v-if="loc !== primaryLocale && loc !== 'en'"
             class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-400 hover:bg-red-500 text-white flex items-center justify-center shadow-2xs ring-1 ring-white transition-colors cursor-pointer z-10"
             :title="t('trans.removeLanguage')"
             @click.stop="handleRemoveTargetLanguage(loc)"
@@ -146,41 +146,60 @@
       }"
     >
       <template v-if="store.workspaceMode === 'translation' && activeTranslationPage">
-        <PageFrame
-          :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
-          :page="activeTranslationPage"
-          :page-index="activeTranslationDisplayIndex"
-          :is-translation-frame="true"
-          :is-read-only-reference="true"
-          :in-translation-workspace="true"
-          :translation-locale="primaryLocale"
-          :custom-x="0"
-          :custom-y="0"
-        />
+        <!-- 存在目标翻译语言：双画布对照排布 -->
+        <template v-if="targetLocales.length > 0 && store.activeTargetLocale">
+          <PageFrame
+            :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
+            :page="activeTranslationPage"
+            :page-index="activeTranslationDisplayIndex"
+            :is-translation-frame="true"
+            :is-read-only-reference="true"
+            :in-translation-workspace="true"
+            :translation-locale="primaryLocale"
+            :custom-x="0"
+            :custom-y="0"
+          />
 
-        <div
-          class="absolute flex flex-col items-center justify-center pointer-events-none select-none z-20"
-          :style="{
-            left: `${translationFrameWidth}px`,
-            top: '140px',
-            width: '64px'
-          }"
-        >
-          <div class="w-8 h-8 rounded-full bg-white border border-blue-200/90 shadow-xs flex items-center justify-center text-[#1677ff]">
-            <ArrowRight class="w-4 h-4" />
+          <div
+            class="translation-target-frame absolute flex flex-col items-center justify-center pointer-events-none select-none z-20"
+            :style="{
+              left: `${translationFrameWidth}px`,
+              top: '140px',
+              width: `${TRANSLATION_FRAME_GAP}px`
+            }"
+          >
+            <div class="w-8 h-8 rounded-full bg-white border border-blue-200/90 shadow-xs flex items-center justify-center text-[#1677ff]">
+              <ArrowRight class="w-4 h-4" />
+            </div>
           </div>
-        </div>
 
-        <PageFrame
-          :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
-          :page="activeTranslationPage"
-          :page-index="activeTranslationDisplayIndex"
-          :is-translation-frame="true"
-          :in-translation-workspace="true"
-          :translation-locale="store.activeTargetLocale"
-          :custom-x="translationFrameWidth + 64"
-          :custom-y="0"
-        />
+          <PageFrame
+            :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
+            class="translation-target-frame"
+            :page="activeTranslationPage"
+            :page-index="activeTranslationDisplayIndex"
+            :is-translation-frame="true"
+            :in-translation-workspace="true"
+            :translation-locale="store.activeTargetLocale"
+            :custom-x="translationFrameWidth + TRANSLATION_FRAME_GAP"
+            :custom-y="0"
+          />
+        </template>
+
+        <!-- 仅剩单一主语言：作为只读参考基准画板展示，不可直接编辑，提示用户添加目标语言 -->
+        <template v-else>
+          <PageFrame
+            :key="`single_${activeTranslationPage.id}_${primaryLocale}`"
+            :page="activeTranslationPage"
+            :page-index="activeTranslationDisplayIndex"
+            :is-translation-frame="true"
+            :is-read-only-reference="true"
+            :in-translation-workspace="true"
+            :translation-locale="primaryLocale"
+            :custom-x="0"
+            :custom-y="0"
+          />
+        </template>
       </template>
 
       <template v-else>
@@ -464,11 +483,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import {
   store,
   isRisk,
-  getPageWidth,
+  getTranslationPageWidth,
+  TRANSLATION_FRAME_GAP,
   getPagePairWidth,
   PAGE_HEIGHT,
   adjustZoom,
@@ -511,8 +531,9 @@ defineEmits(['open-template-gallery', 'open-create-canvas']);
 const canvasContainerRef = ref<HTMLElement | null>(null);
 
 const availableLocalesToAdd = computed(() => {
+  const allowed = isRisk.value ? ['en', 'zh'] : SUPPORTED_FORM_LOCALES.map(l => l.code);
   const used = new Set([primaryLocale.value, ...targetLocales.value]);
-  return SUPPORTED_FORM_LOCALES.filter(l => !used.has(l.code));
+  return SUPPORTED_FORM_LOCALES.filter(l => allowed.includes(l.code) && !used.has(l.code));
 });
 
 function getLocalePercent(locale: string): number {
@@ -531,7 +552,14 @@ function handleSelectTargetLocale(locale: string) {
 
 function handleRemoveTargetLanguage(locale: string) {
   if (locale === 'en' || locale === primaryLocale.value) return;
+  const name = getLocaleNativeName(locale);
   removeTargetLocale(locale);
+  Message.success(t('trans.removedLocaleSuccess', undefined, { name }));
+  if (targetLocales.value.length === 0) {
+    nextTick(() => {
+      resetCanvasView({ duration: 250 });
+    });
+  }
 }
 
 const activeTranslationPageIndex = computed(() => {
@@ -551,7 +579,7 @@ const activeTranslationDisplayIndex = computed(() => {
   return idx >= 0 ? idx : 0;
 });
 
-const translationFrameWidth = computed(() => getPageWidth());
+const translationFrameWidth = computed(() => getTranslationPageWidth());
 
 
 const isPillDismissed = ref(false);
@@ -718,10 +746,11 @@ const allPagesWorldBox = computed(() => {
   if (store.pages.length === 0) return null;
   if (store.workspaceMode === 'translation') {
     const w = translationFrameWidth.value;
+    const hasTarget = targetLocales.value.length > 0 && !!store.activeTargetLocale;
     return {
       minX: 0,
       minY: 0,
-      maxX: w * 2 + 64,
+      maxX: hasTarget ? (w * 2 + TRANSLATION_FRAME_GAP) : w,
       maxY: PAGE_HEIGHT
     };
   }

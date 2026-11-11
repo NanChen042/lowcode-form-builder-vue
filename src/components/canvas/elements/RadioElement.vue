@@ -31,8 +31,8 @@
         </div>
       </div>
 
-      <!-- 文字右侧：固定 Yes 选中态 + 静态不可选 No / Not Applicable + 复制删除操作按钮 -->
-      <div class="shrink-0 flex items-center gap-3 select-none ml-auto">
+      <!-- 文字右侧：固定 Yes 选中态 + 静态不可选 No / Not Applicable + 复制删除操作按钮（翻译模式下因不可编辑无需展示） -->
+      <div v-if="!isTranslationFrame" class="shrink-0 flex items-center gap-3 select-none ml-auto">
         <div class="flex items-center gap-1.5">
           <!-- Yes：固定唯一选中的风险项，配白勾与高亮蓝底 -->
           <div

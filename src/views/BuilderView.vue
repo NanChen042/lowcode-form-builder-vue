@@ -276,7 +276,8 @@ onMounted(async () => {
         title: '',
         description: '',
         formType: isRisk.value ? 'risk' : 'kyc',
-        enabledLocales: [store.currentLocale || 'zh'],
+        baseLocale: store.currentLocale === 'en' ? 'en' : 'zh',
+        enabledLocales: store.currentLocale === 'en' ? ['en'] : ['zh', 'en'],
         source: 'diy'
       },
       pages: []

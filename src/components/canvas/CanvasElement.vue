@@ -13,7 +13,7 @@
     :data-type="element.type"
     @click.stop="handleClick"
   >
-    <div v-if="!isTranslationFrame" class="element-actions">
+    <div v-if="!isTranslationFrame && !isRisk" class="element-actions">
       <button class="action-btn copy-btn" type="button" @click.stop="duplicateElement(element.id)">
         <Copy class="h-3.5 w-3.5" />
       </button>
@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
-import { store, primaryLocale, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
+import { store, isRisk, primaryLocale, selectElement, duplicateElement, deleteElement, highlightPropertyField } from '@/core/store';
 import { t, getOptionLabel, getFieldText } from '@/core/i18n';
 import { Copy, Trash2, Lock } from '@lucide/vue';
 

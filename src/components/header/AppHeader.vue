@@ -42,57 +42,7 @@
 
     <div class="flex items-center gap-2.5">
 
-      <div class="flex items-center gap-1.5 select-none shrink-0">
-        <a-button
-          :type="store.workspaceMode === 'translation' ? 'primary' : 'secondary'"
-          @click="handleToggleTranslationWorkspace"
-        >
-          <template #icon>
-            <Languages class="h-4 w-4" />
-          </template>
-          <span>
-            {{
-              store.workspaceMode === 'translation'
-                ? t('trans.exitWorkspace')
-                : isBilingual
-                  ? t('trans.multilingualWithCount', undefined, { count: targetLocales.length + 1 })
-                  : t('trans.addLanguage')
-            }}
-          </span>
-          <span
-            v-if="isBilingual && translationStats.untranslatedCount > 0 && store.workspaceMode !== 'translation'"
-            class="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"
-          />
-        </a-button>
-
-        <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }">
-          <button type="button" class="flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer" :title="t('header.bilingualGuideTitle')">
-            <HelpCircle class="w-3.5 h-3.5" />
-          </button>
-          <template #content>
-            <div class="space-y-2.5 antialiased" style="transform: translateZ(0); backface-visibility: hidden;">
-              <div class="flex items-center gap-1.5 text-[13px] font-semibold text-slate-800">
-                <Languages class="w-4 h-4 text-blue-500 shrink-0" />
-                <span>{{ t('header.bilingualGuideTitle') }}</span>
-              </div>
-              <p class="text-[12px] text-slate-600 leading-relaxed m-0 break-words">
-                {{ t('header.bilingualGuideDesc') }}
-              </p>
-
-
-              <div class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900" @click="handleOpenVideoModal">
-                <img :src="currentGuideCover" alt="Video Guide Cover" width="1024" height="576" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block" />
-                <div class="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors pointer-events-none"></div>
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div class="w-11 h-11 rounded-full bg-white/95 text-[#1677ff] flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all duration-200">
-                    <Play class="w-4 h-4 fill-current ml-0.5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </a-popover>
-      </div>
+      <TranslationEntry @open-video="handleOpenVideoModal" />
 
       <a-divider direction="vertical" class="mx-0.5 h-5 border-slate-300/40" />
 
@@ -171,15 +121,15 @@
           <template #title>
             <span class="font-medium text-xs">
               {{
-                translationStats.enMissingCount > 0
-                  ? t('header.warnCount', undefined, { count: translationStats.enMissingCount })
+                isEnBlocked
+                  ? t('header.warnCount', undefined, { count: enMissingCount })
                   : t('header.warnMultiCount', undefined, { count: translationStats.untranslatedCount })
               }}
             </span>
           </template>
           <div class="text-[12px] text-slate-600 leading-relaxed mt-0.5">
             {{
-              translationStats.enMissingCount > 0
+              isEnBlocked
                 ? t('header.warnEnRequiredDesc')
                 : t('header.warnMultiDesc')
             }}
@@ -206,7 +156,7 @@
           <a-button type="primary" class="bg-[#1677ff]" @click="handleGoToTranslate">
             {{ t('header.warnComplete') }}
           </a-button>
-          <a-button v-if="translationStats.enMissingCount === 0" @click="handleProceedPublish">
+          <a-button v-if="!isEnBlocked" @click="handleProceedPublish">
             {{ t('header.warnPublishAnyway') }}
           </a-button>
         </div>
@@ -260,12 +210,11 @@ import {
   establishBaseline,
   markDirty,
   syncUrlParams,
-  isBilingual,
   primaryLocale,
   targetLocales,
+  addTargetLocale,
   disableMultiLanguage,
   openTranslationWorkspace,
-  closeTranslationWorkspace,
   selectPage,
   selectElement,
   selectGroup,
@@ -283,10 +232,7 @@ import {
   CloudUpload,
   Check,
   Loader2,
-  Pencil,
-  HelpCircle,
-  Languages,
-  Play
+  Pencil
 } from '@lucide/vue';
 import {
   translationStats,
@@ -297,12 +243,7 @@ import {
 import logoUrl from '@/assets/logo.png';
 import companyIcon from '@/assets/gs.png';
 import helpVideoUrl from '@/help.mp4';
-import guideCoverZh from '@/assets/guide-cover-zh.webp';
-import guideCoverEn from '@/assets/guide-cover-en.webp';
-
-const currentGuideCover = computed(() => {
-  return store.currentLocale === 'en' ? guideCoverEn : guideCoverZh;
-});
+import TranslationEntry from './TranslationEntry.vue';
 
 const emit = defineEmits(['open-preview', 'open-deploy']);
 
@@ -390,8 +331,20 @@ function validateFormBeforePublish(): boolean {
   return true;
 }
 
+const enMissingCount = computed(() => {
+  if (primaryLocale.value !== 'zh') return 0;
+  if (!targetLocales.value.includes('en')) {
+    return translationStats.value.total || 1;
+  }
+  return translationStats.value.enMissingCount;
+});
+
+const isEnBlocked = computed(() => {
+  return primaryLocale.value === 'zh' && enMissingCount.value > 0;
+});
+
 const publishWarningItems = computed(() => {
-  if (translationStats.value.enMissingCount > 0) {
+  if (isEnBlocked.value) {
     return translationStats.value.localeStats?.['en']?.missingItems || translationStats.value.untranslatedItems;
   }
   return translationStats.value.untranslatedItems;
@@ -399,15 +352,16 @@ const publishWarningItems = computed(() => {
 
 function handleDeployClick() {
   if (!validateFormBeforePublish()) return;
-  if (primaryLocale.value === 'zh' && translationStats.value.enMissingCount > 0) {
+
+  // 1. 中文版缺少英文或英文未完成：强拦截提示（不可无视）
+  // 2. 启用了任何其他多语言且未翻译完整：弹窗提示未翻译项，但允许无视后继续发布
+  if (isEnBlocked.value || translationStats.value.untranslatedCount > 0) {
     publishCheckModalVisible.value = true;
     return;
   }
-  if (isBilingual.value && translationStats.value.untranslatedCount > 0) {
-    publishCheckModalVisible.value = true;
-  } else {
-    emit('open-deploy');
-  }
+
+  // 3. 所有启用的多语言均已 100% 完成或没有未翻译项：直接发布
+  emit('open-deploy');
 }
 
 function handleProceedPublish() {
@@ -417,9 +371,19 @@ function handleProceedPublish() {
 
 function handleGoToTranslate() {
   publishCheckModalVisible.value = false;
+  if (primaryLocale.value === 'zh' && !targetLocales.value.includes('en')) {
+    addTargetLocale('en');
+  }
+  const targetLoc = isEnBlocked.value
+    ? 'en'
+    : (publishWarningItems.value[0]?.targetLocale || targetLocales.value[0] || 'en');
+
+  openTranslationWorkspace(targetLoc);
   const items = publishWarningItems.value;
   if (items.length > 0) {
-    navigateToUntranslatedItem(items[0]);
+    setTimeout(() => {
+      navigateToUntranslatedItem(items[0]);
+    }, 200);
   }
 }
 
@@ -510,14 +474,6 @@ function handleCloseVideoModal() {
     videoPlayerRef.value.pause();
   }
   isVideoModalVisible.value = false;
-}
-
-function handleToggleTranslationWorkspace() {
-  if (store.workspaceMode === 'translation') {
-    closeTranslationWorkspace();
-  } else {
-    openTranslationWorkspace();
-  }
 }
 
 function handleConfirmDisableBilingual() {

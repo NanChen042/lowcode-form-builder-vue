@@ -1,6 +1,6 @@
 import { driver, type Driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { store, isRisk, focusOnPage, resetCanvasView } from '@/core/store';
+import { store, isRisk, focusOnPage, resetCanvasView, closeTranslationWorkspace } from '@/core/store';
 import { t, type Locale } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 
@@ -9,7 +9,7 @@ let driverInstance: Driver | null = null;
 export function getRiskTourSteps(locale?: Locale): DriveStep[] {
   const steps: DriveStep[] = [
     {
-      element: '#components-basic',
+      element: '#tour-risk-component-item',
       popover: {
         title: t('tour.risk.step1Title', locale),
         description: t('tour.risk.step1Desc', locale),
@@ -18,46 +18,37 @@ export function getRiskTourSteps(locale?: Locale): DriveStep[] {
       }
     },
     {
-      element: '#tour-risk-groups',
+      element: '#tour-first-page-frame',
       popover: {
         title: t('tour.risk.step2Title', locale),
         description: t('tour.risk.step2Desc', locale),
-        side: 'right',
-        align: 'start'
-      }
-    },
-    {
-      element: '#tour-first-page-frame',
-      popover: {
-        title: t('tour.risk.step3Title', locale),
-        description: t('tour.risk.step3Desc', locale),
         side: 'right',
         align: 'center'
       }
     },
     {
-      element: '.risk-weight-selector',
+      element: '#tour-risk-first-group',
       popover: {
-        title: t('tour.risk.step4Title', locale),
-        description: t('tour.risk.step4Desc', locale),
-        side: 'top',
+        title: t('tour.risk.step3Title', locale),
+        description: t('tour.risk.step3Desc', locale),
+        side: 'right',
         align: 'start'
       }
     },
     {
-      element: '#tour-property-panel',
+      element: '#tour-translation-btn',
       popover: {
-        title: t('tour.risk.step5Title', locale),
-        description: t('tour.risk.step5Desc', locale),
-        side: 'left',
-        align: 'start'
+        title: t('tour.risk.step4Title', locale),
+        description: t('tour.risk.step4Desc', locale),
+        side: 'bottom',
+        align: 'end'
       }
     },
     {
       element: '#tour-deploy-btn',
       popover: {
-        title: t('tour.risk.step6Title', locale),
-        description: t('tour.risk.step6Desc', locale),
+        title: t('tour.risk.step5Title', locale),
+        description: t('tour.risk.step5Desc', locale),
         side: 'bottom',
         align: 'end'
       }
@@ -158,6 +149,9 @@ export function cleanupTour() {
   }
   sessionStorage.setItem('diy_form_tour_shown_session', 'true');
   localStorage.setItem('diy_form_tour_shown', 'true');
+  if (isRisk.value && store.workspaceMode === 'translation') {
+    closeTranslationWorkspace();
+  }
   store.sidebarTab = 'components';
   if (driverInstance) {
     try {
@@ -204,10 +198,23 @@ export function startAppTour(initialIndex = 0) {
     steps: getTourSteps(),
     onHighlightStarted: (_el, _step, opts) => {
       if (isRisk.value) {
-        const stepEl = _step?.element;
-        if (stepEl === '#tour-risk-groups') {
-          store.sidebarTab = 'pages';
-        } else if (stepEl === '#components-basic') {
+        const activeIdx = opts.state.activeIndex;
+        if (activeIdx === 0) {
+          // 第 1 步：选中组件里的风险评估组件
+          if (store.workspaceMode === 'translation') closeTranslationWorkspace();
+          store.sidebarTab = 'components';
+          if (!store.leftSidebarVisible) store.leftSidebarVisible = true;
+        } else if (activeIdx === 1 || activeIdx === 2) {
+          // 第 2 步画布编辑 & 第 3 步分组功能
+          if (store.workspaceMode === 'translation') closeTranslationWorkspace();
+          resetCanvasView({ duration: 150 });
+        } else if (activeIdx === 3) {
+          // 第 4 步翻译管理
+        } else if (activeIdx === 4) {
+          // 第 5 步：退出翻译管理，切回标准组件页面，聚焦发布
+          if (store.workspaceMode === 'translation') {
+            closeTranslationWorkspace();
+          }
           store.sidebarTab = 'components';
         }
         requestAnimationFrame(() => {

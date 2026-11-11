@@ -30,30 +30,40 @@
             <h2 class="m-0 text-sm font-semibold leading-5 text-slate-800 truncate">
               {{
                 store.workspaceMode === 'translation'
-                  ? t('trans.propTitle')
+                  ? (targetLocales.length === 0 ? t('trans.singleLocaleTitle') : t('trans.propTitle'))
                   : (store.selectedType === 'group'
                       ? t('risk.propGroupTitle')
-                      : (isRisk && selectedElement ? t('risk.propQuestionTitle') : t('prop.title')))
+                      : (isRisk && selectedElement
+                          ? t('risk.propQuestionTitle')
+                          : (isRisk && store.selectedType === 'page' ? t('prop.canvasSettings') : t('prop.title'))))
               }}
             </h2>
-            <p class="m-0 text-[11px] leading-4 text-slate-400 truncate">
+            <p v-if="!isRisk" class="m-0 text-[11px] leading-4 text-slate-400 truncate">
               {{
                 store.workspaceMode === 'translation'
-                  ? t('trans.propSubtitle')
+                  ? (targetLocales.length === 0 ? t('trans.singleLocaleDesc') : t('trans.propSubtitle'))
                   : (store.selectedType === 'group'
                       ? t('risk.propGroupSub')
-                      : (store.selectedType === 'page' ? (isRisk ? t('risk.fixedRulesDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle'))))
+                      : (store.selectedType === 'page' ? (isRisk ? t('risk.canvasSettingsDesc') : t('prop.pageSubtitle')) : (selectedElement ? (isRisk ? t('risk.propQuestionSub') : t('prop.elementSubtitle')) : t('prop.emptyTitle'))))
               }}
             </p>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <a-tag
-              v-if="store.workspaceMode === 'translation'"
+              v-if="store.workspaceMode === 'translation' && store.activeTargetLocale"
               color="arcoblue"
               size="small"
               class="text-[11px] font-medium"
             >
               {{ getLocaleNativeName(store.activeTargetLocale) }}
+            </a-tag>
+            <a-tag
+              v-else-if="store.workspaceMode === 'translation'"
+              color="gray"
+              size="small"
+              class="text-[11px] font-medium"
+            >
+              {{ getLocaleNativeName(primaryLocale) }}
             </a-tag>
             <a-tag
               v-else-if="store.selectedType && isBilingual"
@@ -97,7 +107,7 @@
 
           <div v-else-if="store.selectedType === 'group' && selectedGroup" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-5">
             <div class="space-y-3.5">
-              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div v-if="!isRisk" class="flex items-center justify-between border-b border-slate-100 pb-2">
                 <div>
                   <span class="text-[12px] font-semibold text-slate-700">
                     {{ t('risk.groupInfo') }}
@@ -218,7 +228,8 @@ import {
   triggerHighlight,
   markDirty,
   isBilingual,
-  primaryLocale
+  primaryLocale,
+  targetLocales
 } from '@/core/store';
 import {
   t,
@@ -326,6 +337,16 @@ watch(
         targetInput = document.getElementById('page-prop-desc-input');
       } else if (target.field === 'placeholder') {
         targetInput = document.getElementById('prop-placeholder-input');
+      } else if (target.field === 'signPlaceholder') {
+        targetInput = document.getElementById('prop-sign-placeholder-input');
+      } else if (target.field === 'endPlaceholder') {
+        targetInput = document.getElementById('prop-end-placeholder-input');
+      } else if (target.field === 'longTermText') {
+        targetInput = document.getElementById('prop-long-term-text-input') || document.getElementById('prop-longterm-input');
+      } else if (target.field === 'customErrorMessage') {
+        targetInput = document.getElementById('prop-custom-error-input');
+      } else if (target.field === 'declarationErrorMessage') {
+        targetInput = document.getElementById('prop-declaration-error-input');
       } else if (target.field === 'content') {
         targetInput = document.getElementById('prop-alert-content-input');
       } else if (target.field === 'option' && target.optionIndex !== undefined) {

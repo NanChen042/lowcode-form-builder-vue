@@ -27,11 +27,11 @@
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
-        <div class="flex items-center gap-1.5 select-none">
-          <a-input-number v-model="textareaMinRows" :min="1" :max="10" size="small" style="width: 66px" />
-          <span class="text-slate-400 text-xs font-mono">~</span>
-          <a-input-number v-model="textareaMaxRows" :min="textareaMinRows || 1" :max="20" size="small" style="width: 66px" />
-          <span class="text-slate-500 text-[11px] min-w-[14px]">{{ t('prop.rowUnit') }}</span>
+        <div class="flex items-center gap-1 select-none">
+          <a-input-number v-model="textareaMinRows" :min="1" :max="10" size="mini" class="!w-[48px] !rounded-[4px] !text-[12px]" />
+          <span class="text-slate-400 text-xs font-mono px-0.5">~</span>
+          <a-input-number v-model="textareaMaxRows" :min="textareaMinRows || 1" :max="20" size="mini" class="!w-[48px] !rounded-[4px] !text-[12px]" />
+          <span class="text-slate-500 text-[11px] min-w-[14px] ml-0.5">{{ t('prop.rowUnit') }}</span>
         </div>
       </div>
 
@@ -44,7 +44,7 @@
           </a-tooltip>
         </div>
         <div class="flex items-center gap-1.5 select-none">
-          <a-input-number v-model="textareaMaxLength" :min="1" :max="5000" :placeholder="t('prop.defaultMaxLengthPlaceholder')" size="small" allow-clear style="width: 148px">
+          <a-input-number v-model="textareaMaxLength" :min="1" :max="5000" :placeholder="t('prop.defaultMaxLengthPlaceholder')" size="mini" allow-clear class="!w-[104px] !rounded-[4px] !text-[12px]">
             <template #suffix>
               <span class="text-slate-400 text-[11px] select-none">{{ t('prop.charUnit') }}</span>
             </template>

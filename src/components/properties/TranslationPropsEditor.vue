@@ -1,7 +1,54 @@
 <template>
   <div id="prop-editor" class="custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4 space-y-4 select-none bg-white">
-    <!-- 组件文案翻译 -->
-    <div v-if="selectedElement" class="space-y-4">
+    <!-- 当未启用任何目标语言（纯单语言模式）时展示引导卡片 -->
+    <div v-if="targetLocales.length === 0" class="flex flex-col items-center justify-center py-10 px-2 text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100/80 flex items-center justify-center text-[#1677ff] shadow-xs">
+        <Languages class="w-6 h-6 stroke-[1.8]" />
+      </div>
+
+      <div class="space-y-1.5 max-w-[240px]">
+        <h3 class="text-[13px] font-semibold text-slate-800 m-0">
+          {{ t('trans.singleLocaleTitle') }}
+        </h3>
+        <p class="text-[11.5px] text-slate-500 leading-relaxed m-0">
+          {{ t('trans.singleLocaleDesc') }}
+        </p>
+      </div>
+
+      <div class="w-full pt-2 flex flex-col gap-2">
+        <a-dropdown trigger="click" position="bottom" class="w-full">
+          <a-button type="outline" size="small" class="w-full !rounded-[4px] !text-xs !border-blue-300 !text-[#1677ff] hover:!bg-blue-50">
+            <template #icon>
+              <Plus class="w-3.5 h-3.5" />
+            </template>
+            {{ t('trans.addLanguage') }}
+          </a-button>
+          <template #content>
+            <a-doption
+              v-for="loc in availableLocalesToAdd"
+              :key="loc.code"
+              class="!py-0.5 !px-2 !min-h-[28px] !leading-none text-xs"
+              @click="handleAddTargetLanguage(loc.code)"
+            >
+              <div class="flex items-center gap-2 min-w-[120px] py-0.5">
+                <span class="iti__flag shrink-0" :class="'iti__' + loc.flag"></span>
+                <span class="text-xs font-medium text-slate-700 flex-1">{{ loc.nativeLabel }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">{{ loc.code.toUpperCase() }}</span>
+              </div>
+            </a-doption>
+          </template>
+        </a-dropdown>
+
+        <a-button type="secondary" size="small" class="w-full !rounded-[4px] !text-xs text-slate-600" @click="closeTranslationWorkspace()">
+          {{ t('trans.backToNormalDesign') }}
+        </a-button>
+      </div>
+    </div>
+
+    <!-- 正常存在目标语言时的对照翻译编辑 -->
+    <template v-else>
+      <!-- 组件文案翻译 -->
+      <div v-if="selectedElement" class="space-y-4">
       <!-- 选中的组件信息栏 -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="min-w-0 flex-1 pr-2">
@@ -43,17 +90,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="prop-label-input"
           :model-value="targetLabel"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: isRisk ? 2 : 1, maxRows: 5 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('label') }"
           @focus="setFocus('label')"
           @blur="clearFocus"
-          @update:model-value="handleTargetLabelInput"
+          @input="handleTargetLabelInput"
         />
       </div>
 
@@ -85,17 +132,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="prop-placeholder-input"
           :model-value="targetPlaceholder"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
           @focus="setFocus('placeholder')"
           @blur="clearFocus"
-          @update:model-value="handleTargetPlaceholderInput"
+          @input="handleTargetPlaceholderInput"
         />
       </div>
 
@@ -127,17 +174,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="prop-end-placeholder-input"
           :model-value="targetEndPlaceholder"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('endPlaceholder') }"
           @focus="setFocus('endPlaceholder')"
           @blur="clearFocus"
-          @update:model-value="handleTargetEndPlaceholderInput"
+          @input="handleTargetEndPlaceholderInput"
         />
       </div>
 
@@ -169,17 +216,17 @@
           </div>
         </div>
 
-        <a-textarea
-          id="prop-longterm-input"
+        <a-input
+          id="prop-long-term-text-input"
           :model-value="targetLongTermText"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 3 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('longTermText') }"
           @focus="setFocus('longTermText')"
           @blur="clearFocus"
-          @update:model-value="handleTargetLongTermTextInput"
+          @input="handleTargetLongTermTextInput"
         />
       </div>
 
@@ -211,17 +258,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="prop-sign-placeholder-input"
           :model-value="targetSignPlaceholder"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('signPlaceholder') }"
           @focus="setFocus('signPlaceholder')"
           @blur="clearFocus"
-          @update:model-value="handleTargetSignPlaceholderInput"
+          @input="handleTargetSignPlaceholderInput"
         />
       </div>
 
@@ -253,59 +300,53 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="prop-help-input"
           :model-value="targetHelp"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('help') }"
           @focus="setFocus('help')"
           @blur="clearFocus"
-          @update:model-value="handleTargetHelpInput"
+          @input="handleTargetHelpInput"
         />
       </div>
 
-      <!-- 自定义校验提示 (仅当存在自定义校验文案时支持多语言翻译) -->
-      <div v-if="selectedElement.type !== 'alert' && (sourceCustomError?.trim() || targetCustomError?.trim())" class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label for="prop-custom-error-input" class="text-[12px] font-medium text-slate-700">
-            {{ t('prop.customErrorMsg') }}
-          </label>
-          <span
-            v-if="targetCustomError?.trim()"
-            class="text-[10.5px] text-[#00b42a] font-medium inline-flex items-center gap-1"
-          >
-            <CheckCircle2 class="w-3.5 h-3.5 stroke-[2] shrink-0" />
-            {{ t('trans.translated') }}
-          </span>
-          <span v-else-if="sourceCustomError?.trim()" class="text-[10.5px] text-[#ff7d00] font-medium inline-flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#ff7d00] shrink-0"></span>
-            {{ t('trans.pending') }}
-          </span>
-        </div>
-
-        <div v-if="sourceCustomError" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
-          <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
-          </div>
-          <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
-            {{ sourceCustomError }}
-          </div>
-        </div>
-
-        <a-textarea
-          id="prop-custom-error-input"
+      <!-- 未填/必填校验提示 (支持多语言翻译，未配置自定义文案时自动透传系统默认提示) -->
+      <div v-if="supportsCustomError">
+        <ValidationErrorItem
+          :label="selectedElement.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg')"
+          :is-translation-mode="true"
+          :source-lang-name="getLocaleNativeName(primaryLocale)"
+          :source-text="effectiveSourceCustomError"
+          :is-source-default="isSourceCustomErrorDefault"
           :model-value="targetCustomError"
-          :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
-          allow-clear
-          class="w-full"
-          :class="{ 'prop-field-focused': isFieldFocused('customErrorMessage') }"
+          :default-text="defaultTargetCustomError"
+          input-id="prop-custom-error-input"
+          :is-focused="isFieldFocused('customErrorMessage')"
+          @update:model-value="handleTargetCustomErrorInput"
           @focus="setFocus('customErrorMessage')"
           @blur="clearFocus"
-          @update:model-value="handleTargetCustomErrorInput"
+        />
+      </div>
+
+      <!-- 签名声明条款未勾选校验提示 (签名开启声明必填时支持多语言翻译) -->
+      <div v-if="supportsDeclarationError">
+        <ValidationErrorItem
+          :label="t('prop.declarationErrorMsg')"
+          :is-translation-mode="true"
+          :source-lang-name="getLocaleNativeName(primaryLocale)"
+          :source-text="effectiveSourceDeclarationError"
+          :is-source-default="isSourceDeclarationErrorDefault"
+          :model-value="targetDeclarationError"
+          :default-text="defaultTargetDeclarationError"
+          input-id="prop-declaration-error-input"
+          :is-focused="isFieldFocused('declarationErrorMessage')"
+          @update:model-value="handleTargetDeclarationErrorInput"
+          @focus="setFocus('declarationErrorMessage')"
+          @blur="clearFocus"
         />
       </div>
 
@@ -343,11 +384,11 @@
           :placeholder="t('trans.enterTarget')"
           :auto-size="{ minRows: 3, maxRows: 8 }"
           allow-clear
-          class="w-full"
+          class="w-full !rounded-[4px]"
           :class="{ 'prop-field-focused': isFieldFocused('content') }"
           @focus="setFocus('content')"
           @blur="clearFocus"
-          @update:model-value="handleTargetContentInput"
+          @input="handleTargetContentInput"
         />
       </div>
 
@@ -362,14 +403,14 @@
           </span>
         </div>
 
-        <div id="options-editor" class="space-y-2">
+        <div id="options-editor" class="space-y-2.5">
           <div
             v-for="(opt, optIdx) in selectedElement.options"
             :key="optIdx"
-            class="p-2.5 rounded-[4px] border border-slate-200/80 bg-white space-y-1.5 transition-all hover:border-blue-200 hover:shadow-xs"
+            class="space-y-1.5"
           >
-            <div class="flex items-center justify-between text-[11.5px]">
-              <span class="text-[12px] font-medium text-slate-800 break-words truncate flex-1 min-w-0 pr-2" :title="getOptionLabel(opt, primaryLocale)">
+            <div class="flex items-center justify-between text-[11.5px] px-0.5">
+              <span class="text-[12px] font-medium text-slate-700 break-words truncate flex-1 min-w-0 pr-2" :title="getOptionLabel(opt, primaryLocale)">
                 {{ getOptionLabel(opt, primaryLocale) || `Option ${optIdx + 1}` }}
               </span>
               <span
@@ -385,16 +426,16 @@
               </span>
             </div>
 
-            <a-textarea
-              :model-value="isOptionTranslated(opt, store.activeTargetLocale, primaryLocale) ? getOptionLabel(opt, store.activeTargetLocale) : ''"
+            <a-input
+              :model-value="getOptionLabel(opt, store.activeTargetLocale)"
               :placeholder="getOptionLabel(opt, primaryLocale) || t('trans.enterTarget')"
-              :auto-size="{ minRows: 1, maxRows: 5 }"
+              size="small"
               allow-clear
-              class="w-full"
-              :class="{ 'prop-field-focused': isFieldFocused('option', optIdx) }"
-              @focus="setFocus('option', optIdx)"
+              class="w-full !rounded-[4px]"
+              :class="{ 'prop-field-focused': isOptionFocused(optIdx) }"
+              @focus="setOptionFocus(optIdx)"
               @blur="clearFocus"
-              @update:model-value="(val: any) => handleOptionLabelInput(opt, val)"
+              @input="(val) => handleOptionLabelInput(opt, val)"
             />
           </div>
         </div>
@@ -438,17 +479,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="group-prop-title-input"
           :model-value="targetGroupTitle"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
-          :class="{ 'prop-field-focused': isGroupTitleFocused }"
-          @focus="setGroupFocus"
+          class="w-full !rounded-[4px]"
+          :class="{ 'prop-field-focused': isGroupFocused('title') }"
+          @focus="setGroupFocus('title')"
           @blur="clearFocus"
-          @update:model-value="handleTargetGroupTitleInput"
+          @input="handleTargetGroupTitleInput"
         />
       </div>
     </div>
@@ -495,17 +536,17 @@
           </div>
         </div>
 
-        <a-textarea
+        <a-input
           id="page-prop-title-input"
           :model-value="targetPageTitle"
           :placeholder="t('trans.enterTarget')"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
+          size="small"
           allow-clear
-          class="w-full"
-          :class="{ 'prop-field-focused': isPageFieldFocused('title') }"
+          class="w-full !rounded-[4px]"
+          :class="{ 'prop-field-focused': isPageFocused('title') }"
           @focus="setPageFocus('title')"
           @blur="clearFocus"
-          @update:model-value="handleTargetPageTitleInput"
+          @input="handleTargetPageTitleInput"
         />
       </div>
 
@@ -542,26 +583,32 @@
           :model-value="targetPageDesc"
           :placeholder="t('trans.enterTarget')"
           :auto-size="{ minRows: 2, maxRows: 5 }"
+          size="small"
           allow-clear
-          class="w-full"
-          :class="{ 'prop-field-focused': isPageFieldFocused('description') }"
+          class="w-full !rounded-[4px]"
+          :class="{ 'prop-field-focused': isPageFocused('description') }"
           @focus="setPageFocus('description')"
           @blur="clearFocus"
-          @update:model-value="handleTargetPageDescInput"
+          @input="handleTargetPageDescInput"
         />
       </div>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 import {
   store,
   isRisk,
   selectedElement,
   selectedGroup,
-  primaryLocale
+  primaryLocale,
+  targetLocales,
+  addTargetLocale,
+  closeTranslationWorkspace,
+  resetCanvasView
 } from '@/core/store';
 import {
   t,
@@ -573,11 +620,27 @@ import {
   setGroupText,
   getOptionLabel,
   setOptionLabel,
-  getLocaleNativeName
+  getLocaleNativeName,
+  getFieldDefaultErrorMessage,
+  SUPPORTED_FORM_LOCALES
 } from '@/core/i18n';
 import { isOptionTranslated } from '@/utils/translationHelper';
 import type { FormElementOption } from '@/types/schema';
-import { CheckCircle2 } from '@lucide/vue';
+import ValidationErrorItem from './ValidationErrorItem.vue';
+import { CheckCircle2, Languages, Plus } from '@lucide/vue';
+
+const availableLocalesToAdd = computed(() => {
+  const allowed = isRisk.value ? ['en', 'zh'] : SUPPORTED_FORM_LOCALES.map(l => l.code);
+  const enabled = store.meta.enabledLocales || [primaryLocale.value];
+  return SUPPORTED_FORM_LOCALES.filter(loc => allowed.includes(loc.code) && !enabled.includes(loc.code));
+});
+
+function handleAddTargetLanguage(locale: string) {
+  addTargetLocale(locale);
+  nextTick(() => {
+    resetCanvasView({ duration: 300 });
+  });
+}
 
 const activePageIndex = computed(() => {
   const idx = store.pages.findIndex(p => p.id === store.activePageId && p.pageType !== 'system_profile');
@@ -692,7 +755,19 @@ function handleTargetHelpInput(val: string) {
   setFieldText(selectedElement.value, 'help', val, store.activeTargetLocale);
 }
 
-// 自定义校验提示
+// 未填/必填校验提示
+const supportsCustomError = computed(() => {
+  if (!selectedElement.value) return false;
+  const el = selectedElement.value;
+  if (el.type === 'alert') return false;
+  const hasAnyCustom = Boolean(
+    el.customErrorMessage?.trim() ||
+    el.customErrorMessage_en?.trim() ||
+    Object.values(el.i18n || {}).some(loc => loc?.customErrorMessage?.trim())
+  );
+  return Boolean(el.required || el.type === 'signature' || hasAnyCustom);
+});
+
 const sourceCustomError = computed(() => {
   if (!selectedElement.value) return '';
   return getFieldText(selectedElement.value, 'customErrorMessage', primaryLocale.value);
@@ -705,6 +780,82 @@ function handleTargetCustomErrorInput(val: string) {
   if (!selectedElement.value) return;
   setFieldText(selectedElement.value, 'customErrorMessage', val, store.activeTargetLocale);
 }
+
+const isSourceCustomErrorDefault = computed(() => {
+  return !sourceCustomError.value?.trim();
+});
+
+const effectiveSourceCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  const custom = sourceCustomError.value?.trim();
+  if (custom) return custom;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    selectedElement.value.type === 'signature' ? 'signature' : undefined,
+    primaryLocale.value
+  );
+});
+
+const defaultTargetCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    selectedElement.value.type === 'signature' ? 'signature' : undefined,
+    store.activeTargetLocale
+  );
+});
+
+// 签名声明条款未勾选校验提示
+const supportsDeclarationError = computed(() => {
+  if (!selectedElement.value) return false;
+  const el = selectedElement.value;
+  if (el.type !== 'signature') return false;
+  const hasAnyDecl = Boolean(
+    el.declarationErrorMessage?.trim() ||
+    el.declarationErrorMessage_en?.trim() ||
+    Object.values(el.i18n || {}).some(loc => loc?.declarationErrorMessage?.trim())
+  );
+  return Boolean(el.declarationRequired || hasAnyDecl);
+});
+
+const sourceDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'declarationErrorMessage', primaryLocale.value);
+});
+
+const targetDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'declarationErrorMessage', store.activeTargetLocale);
+});
+
+function handleTargetDeclarationErrorInput(val: string) {
+  if (!selectedElement.value) return;
+  setFieldText(selectedElement.value, 'declarationErrorMessage', val, store.activeTargetLocale);
+}
+
+const isSourceDeclarationErrorDefault = computed(() => {
+  return !sourceDeclarationError.value?.trim();
+});
+
+const effectiveSourceDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  const custom = sourceDeclarationError.value?.trim();
+  if (custom) return custom;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    'declaration',
+    primaryLocale.value
+  );
+});
+
+const defaultTargetDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    'declaration',
+    store.activeTargetLocale
+  );
+});
 
 // 提示框内容
 const sourceContent = computed(() => {
@@ -767,84 +918,46 @@ function handleTargetPageDescInput(val: string) {
   setPageText(activePage.value, 'description', val, store.activeTargetLocale);
 }
 
-function isFieldFocused(
-  field:
-    | 'label'
-    | 'placeholder'
-    | 'help'
-    | 'content'
-    | 'option'
-    | 'endPlaceholder'
-    | 'longTermText'
-    | 'signPlaceholder'
-    | 'customErrorMessage'
-    | 'declarationErrorMessage',
-  optionIndex?: number
-) {
+function isFieldFocused(field: string): boolean {
   if (!store.focusedTarget || !selectedElement.value) return false;
-  if (store.focusedTarget.elementId !== selectedElement.value.id) return false;
-  if (store.focusedTarget.field !== field) return false;
-  if (optionIndex !== undefined) {
-    return store.focusedTarget.optionIndex === optionIndex;
-  }
-  return true;
+  return store.focusedTarget.elementId === selectedElement.value.id && store.focusedTarget.field === field;
 }
 
-function setFocus(
-  field:
-    | 'label'
-    | 'placeholder'
-    | 'help'
-    | 'content'
-    | 'option'
-    | 'endPlaceholder'
-    | 'longTermText'
-    | 'signPlaceholder'
-    | 'customErrorMessage'
-    | 'declarationErrorMessage',
-  optionIndex?: number
-) {
-  if (!selectedElement.value) return;
-  store.editingLocale = store.activeTargetLocale;
-  store.focusedTarget = {
-    elementId: selectedElement.value.id,
-    field,
-    optionIndex
-  };
+function isOptionFocused(idx: number): boolean {
+  if (!store.focusedTarget || !selectedElement.value) return false;
+  return store.focusedTarget.elementId === selectedElement.value.id &&
+         store.focusedTarget.field === 'option' &&
+         store.focusedTarget.optionIndex === idx;
 }
 
-const isGroupTitleFocused = computed(() => {
+function isGroupFocused(field: string): boolean {
   if (!store.focusedTarget || !selectedGroup.value) return false;
-  return (
-    store.focusedTarget.elementId === selectedGroup.value.id &&
-    store.focusedTarget.field === 'title'
-  );
-});
-
-function setGroupFocus() {
-  if (!selectedGroup.value) return;
-  store.editingLocale = store.activeTargetLocale;
-  store.focusedTarget = {
-    elementId: selectedGroup.value.id,
-    field: 'title'
-  };
+  return store.focusedTarget.elementId === selectedGroup.value.id && store.focusedTarget.field === field;
 }
 
-function isPageFieldFocused(field: 'title' | 'description') {
+function isPageFocused(field: string): boolean {
   if (!store.focusedTarget || !activePage.value) return false;
-  return (
-    store.focusedTarget.elementId === activePage.value.id &&
-    store.focusedTarget.field === field
-  );
+  return store.focusedTarget.elementId === activePage.value.id && store.focusedTarget.field === field;
+}
+
+function setFocus(field: 'label' | 'placeholder' | 'endPlaceholder' | 'longTermText' | 'signPlaceholder' | 'help' | 'customErrorMessage' | 'declarationErrorMessage' | 'content') {
+  if (!selectedElement.value) return;
+  store.focusedTarget = { elementId: selectedElement.value.id, field };
+}
+
+function setOptionFocus(idx: number) {
+  if (!selectedElement.value) return;
+  store.focusedTarget = { elementId: selectedElement.value.id, field: 'option', optionIndex: idx };
+}
+
+function setGroupFocus(field: 'title') {
+  if (!selectedGroup.value) return;
+  store.focusedTarget = { elementId: selectedGroup.value.id, field };
 }
 
 function setPageFocus(field: 'title' | 'description') {
   if (!activePage.value) return;
-  store.editingLocale = store.activeTargetLocale;
-  store.focusedTarget = {
-    elementId: activePage.value.id,
-    field
-  };
+  store.focusedTarget = { elementId: activePage.value.id, field };
 }
 
 function clearFocus() {

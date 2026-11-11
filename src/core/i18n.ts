@@ -19,38 +19,43 @@ export interface SupportedFormLocaleItem {
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
   { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH', flag: 'cn' },
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
-  { code: 'ja', labelZh: '日语 (日本語)', labelEn: 'Japanese (日本語)', nativeLabel: '日本語', shortBadge: 'JA', flag: 'jp' },
-  { code: 'ko', labelZh: '韩语 (한국어)', labelEn: 'Korean (한국어)', nativeLabel: '한국어', shortBadge: 'KO', flag: 'kr' },
-  { code: 'zh-TW', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'tw' },
-  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Melayu', shortBadge: 'MS', flag: 'my' }
+  { code: 'zh-HK', labelZh: '繁体中文 (香港)', labelEn: 'Traditional Chinese (HK)', nativeLabel: '繁體中文 (香港)', shortBadge: '繁', flag: 'cn' },
+  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' }
 ];
 
 export function getLocaleFlag(loc: string): string {
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  const norm = (loc || '').trim().toLowerCase();
+  if (norm === 'zh' || norm === 'zh-cn' || norm === 'zh-hk' || norm === 'zh-tw') return 'cn';
+  if (norm === 'en' || norm === 'en-us') return 'gb';
+  if (norm === 'ms') return 'my';
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   if (item?.flag) return item.flag;
-  if (loc === 'zh') return 'cn';
-  if (loc === 'en') return 'gb';
-  if (loc === 'ja') return 'jp';
-  if (loc === 'ko') return 'kr';
-  if (loc === 'zh-TW') return 'tw';
-  if (loc === 'ms') return 'my';
-  return 'sg';
+  return 'cn';
 }
 
 export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  const norm = (loc || '').trim().toLowerCase();
+  if (norm === 'zh-tw' || norm === 'zh-hk') {
+    const currentUi = uiLocale || store.currentLocale || 'zh';
+    return currentUi === 'en' ? 'Traditional Chinese (HK)' : '繁体中文 (香港)';
+  }
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   const currentUi = uiLocale || store.currentLocale || 'zh';
   if (!item) return loc.toUpperCase();
   return currentUi === 'en' ? item.labelEn : item.labelZh;
 }
 
 export function getLocaleNativeName(loc: string): string {
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  const norm = (loc || '').trim().toLowerCase();
+  if (norm === 'zh-tw' || norm === 'zh-hk') return '繁體中文 (香港)';
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   return item ? item.nativeLabel : loc.toUpperCase();
 }
 
 export function getLocaleShortBadge(loc: string): string {
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code === loc);
+  const norm = (loc || '').trim().toLowerCase();
+  if (norm === 'zh-tw' || norm === 'zh-hk') return '繁';
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   return item ? item.shortBadge : loc.toUpperCase();
 }
 
@@ -270,7 +275,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.declarationRequiredTip': '开启后，用户必须勾选同意所有声明复选条款才能提交表单。',
     'prop.customErrorMsg': '未填校验提示',
     'prop.customizeError': '自定义提示',
-    'prop.defaultFallback': '系统默认兜底',
+    'prop.defaultFallback': '系统默认提示',
+    'prop.defaultFallbackTip': '用户提交表单未填写此项时的校验报错提示',
     'prop.customized': '已自定义',
     'prop.resetToDefaultError': '恢复默认',
     'prop.declarationErrorMsg': '未同意声明提示',
@@ -361,6 +367,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 属性面板：页面属性 (PagePropsEditor)
     'prop.pageSubtitle': '画布页面全局设置',
+    'prop.pageTitle': '页面大标题',
+    'prop.pageDesc': '页面说明文案',
     'prop.page': '页面',
     'prop.pageTitlePlaceholder': '请输入页面标题',
     'prop.pageDescPlaceholder': '显示在标题下方的副标题或补充说明',
@@ -534,17 +542,15 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'tour.step8Title': '8. 发布表单',
     'tour.step8Desc': '检查多语言完整度，并将表单正式保存发布。',
     'tour.risk.step1Title': '1. 风险评估组件',
-    'tour.risk.step1Desc': '点击或拖拽“风险评估问题”到画布，即可在分组内新增问题；回答选项固定为 Yes / No / Not Applicable。',
-    'tour.risk.step2Title': '2. 问题分组',
-    'tour.risk.step2Desc': '在此新增、重命名问题分组，并拖拽调整分组顺序。',
-    'tour.risk.step3Title': '3. 问卷画布',
-    'tour.risk.step3Desc': '直接在画布上编辑分组名称与问题内容，拖拽调整问题顺序，左右拖拽边缘可调整画布宽度。',
-    'tour.risk.step4Title': '4. 权重设置',
-    'tour.risk.step4Desc': '每道问题权重为 1–10 的整数，点击或按住滑动即可设置；回答 Yes 将按权重扣减风险评分。',
-    'tour.risk.step5Title': '5. 属性配置',
-    'tour.risk.step5Desc': '配置分组名称、问题内容、权重及双语翻译。',
-    'tour.risk.step6Title': '6. 保存与发布',
-    'tour.risk.step6Desc': '发布前将检查英文内容是否完整，中文翻译可后续补充。',
+    'tour.risk.step1Desc': '欢迎来到风险评估！点击或拖拽该组件添加到画布，选项固定为 Yes / No / NA 并支持配置扣分权重。',
+    'tour.risk.step2Title': '2. 画布与题目编辑',
+    'tour.risk.step2Desc': '点击画板文字可直接修改大标题和说明；点击底部按钮可快捷添加问题或新建分组。',
+    'tour.risk.step3Title': '3. 问题分组管理',
+    'tour.risk.step3Desc': '支持直接修改组名，右侧显示题目数，按住左侧把手可上下拖拽调整分组顺序。',
+    'tour.risk.step4Title': '4. 翻译管理',
+    'tour.risk.step4Desc': '点击进入多语言工作区，支持双画布左右对照，点击“+ Add Language”即可新增翻译。',
+    'tour.risk.step5Title': '5. 保存与发布',
+    'tour.risk.step5Desc': '设计完成后可随时保存草稿；点击“发布表单”系统将校验问卷并正式上线。',
 
     // API 接口错误提示
     'api.error400': '请求参数错误 (400)',
@@ -595,9 +601,18 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.propQuestionSub': '配置评估问题与分值权重',
     'risk.propGroupTitle': '分组设置',
     'risk.propGroupSub': '配置分组名称及组内问题',
-    'risk.systemFixed': '系统固定',
-    'risk.fixedRulesDesc': '固定评估规范说明',
-    'risk.fixedNoPropTip': '风险评估问卷由系统固定规则驱动，无需配置页面属性。',
+    'risk.systemFixed': '风险评估',
+    'risk.fixedRulesDesc': '问卷标题、引导说明与快捷概览',
+    'risk.canvasSettingsDesc': '问卷标题、引导说明与快捷概览',
+    'risk.canvasWidth': '画板宽度',
+    'risk.canvasWidthCompact': '紧凑 (540px)',
+    'risk.canvasWidthStandard': '标准 (640px)',
+    'risk.canvasWidthWide': '宽屏 (720px)',
+    'risk.overviewStats': '问卷概览',
+    'risk.groupUnit': '分组',
+    'risk.rulesCardTitle': '评分规则说明',
+    'risk.rulesCardDesc': '采用固定命中扣分制；回答选项固定为 Yes / No / Not Applicable，勾选“Yes”表示命中风险项并按设定权重扣除分值。',
+    'risk.addGroupBtn': '添加分组',
     'risk.addSectionSlot': '添加新问题分组',
     'risk.groupCreated': '已添加新问题分组',
 
@@ -680,6 +695,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.countLeft': '待译 {count}',
     'trans.noPagesToTranslate': '暂无需要翻译的自定义页面',
     'trans.addedLocaleSuccess': '已添加 {name} 翻译版本',
+    'trans.removedLocaleSuccess': '已移除 {name} 翻译版本',
+    'trans.singleLocaleTitle': '当前为单语言版本',
+    'trans.singleLocaleDesc': '未启用多语言翻译。可直接发布当前单语言表单，或点击「+ 添加语言」开启多语言对照',
+    'trans.backToNormalDesign': '返回普通设计模式',
     'trans.sideBySideSubtitle': '管理各语言翻译内容',
     'trans.navTitle': '翻译管理',
     'trans.navSubtitle': '页面导航与翻译进度',
@@ -704,7 +723,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.enterTarget': '请输入译文...',
     'header.warnEnRequiredDesc': '英文翻译为必填项，请完成全部英文翻译后再提交发布。',
     'header.warnMultiCount': '当前表单还有 {count} 项多语言翻译尚未完成。',
-    'header.warnMultiDesc': '现在发布可能导致对应语言访问时显示默认原文或空白，建议补充完整后再发布。',
+    'header.warnMultiDesc': '现在发布可能导致对应语言访问时显示英文或空白，建议补充完整后再发布。',
     'prop.element': '组件属性',
     'common.leaveConfirm': '您有未保存的更改，确定要离开吗？',
     'common.switchLanguage': '切换语言 / Switch Language',
@@ -911,6 +930,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.customErrorMsg': 'Validation Message',
     'prop.customizeError': 'Customize',
     'prop.defaultFallback': 'System Default',
+    'prop.defaultFallbackTip': 'Error message displayed when the field is left empty on submission',
     'prop.customized': 'Customized',
     'prop.resetToDefaultError': 'Reset to Default',
     'prop.declarationErrorMsg': 'Declaration Error Message',
@@ -1001,6 +1021,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 属性面板：页面属性 (PagePropsEditor)
     'prop.pageSubtitle': 'Page Canvas Settings',
+    'prop.pageTitle': 'Page Title',
+    'prop.pageDesc': 'Page Description',
     'prop.page': 'Page',
     'prop.pageTitlePlaceholder': 'Enter page title',
     'prop.pageDescPlaceholder': 'Subtitle or description displayed below the title',
@@ -1173,18 +1195,16 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'tour.step7Desc': 'Test form flow and field validations in mobile preview.',
     'tour.step8Title': '8. Publish',
     'tour.step8Desc': 'Verify translation completeness and publish the form.',
-    'tour.risk.step1Title': '1. Risk Components',
-    'tour.risk.step1Desc': 'Click or drag Risk Question onto the canvas to add a question to a group. Answers are fixed as Yes / No / Not Applicable.',
-    'tour.risk.step2Title': '2. Question Groups',
-    'tour.risk.step2Desc': 'Add and rename question groups here, and drag to reorder them.',
-    'tour.risk.step3Title': '3. Questionnaire Canvas',
-    'tour.risk.step3Desc': 'Edit group names and questions inline, drag to reorder, and drag the edges to resize the canvas width.',
-    'tour.risk.step4Title': '4. Weight',
-    'tour.risk.step4Desc': 'Each question has an integer weight from 1 to 10. Click or press and slide to set it; a Yes answer deducts the weight from the risk score.',
-    'tour.risk.step5Title': '5. Properties',
-    'tour.risk.step5Desc': 'Configure group names, question content, weights and translations.',
-    'tour.risk.step6Title': '6. Save & Publish',
-    'tour.risk.step6Desc': 'English content is checked before publishing; Chinese translations can be completed later.',
+    'tour.risk.step1Title': '1. Risk Question Component',
+    'tour.risk.step1Desc': 'Welcome to Risk Assessment! Click or drag this component to the canvas. Fixed Yes/No/NA logic with weight scoring.',
+    'tour.risk.step2Title': '2. Canvas & Question Editing',
+    'tour.risk.step2Desc': 'Click on text to edit title and description. Use the buttons below to quickly add questions or new groups.',
+    'tour.risk.step3Title': '3. Question Groups',
+    'tour.risk.step3Desc': 'Edit group names inline, check question counts, and drag the left handle to reorder groups.',
+    'tour.risk.step4Title': '4. Translation Management',
+    'tour.risk.step4Desc': 'Enter the workspace for side-by-side localization. Click "+ Add Language" to create a new translation.',
+    'tour.risk.step5Title': '5. Save & Publish',
+    'tour.risk.step5Desc': 'Save progress to draft anytime, or click "Publish" to validate and deploy your form.',
 
     // API 接口错误提示
     'api.error400': 'Bad request parameter (400)',
@@ -1235,9 +1255,18 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.propQuestionSub': 'Configure risk question and weight score',
     'risk.propGroupTitle': 'Group Settings',
     'risk.propGroupSub': 'Configure group title and questions',
-    'risk.systemFixed': 'System Fixed',
-    'risk.fixedRulesDesc': 'Fixed questionnaire rules',
-    'risk.fixedNoPropTip': 'The risk questionnaire uses fixed system rules and requires no page configuration.',
+    'risk.systemFixed': 'Risk Assessment',
+    'risk.fixedRulesDesc': 'Page title, description & overview',
+    'risk.canvasSettingsDesc': 'Page title, description & overview',
+    'risk.canvasWidth': 'Canvas Width',
+    'risk.canvasWidthCompact': 'Compact (540px)',
+    'risk.canvasWidthStandard': 'Standard (640px)',
+    'risk.canvasWidthWide': 'Wide (720px)',
+    'risk.overviewStats': 'Questionnaire Overview',
+    'risk.groupUnit': 'Group(s)',
+    'risk.rulesCardTitle': 'Scoring Rules',
+    'risk.rulesCardDesc': 'Fixed deduction system: Answer options are fixed as Yes / No / Not Applicable. Selecting "Yes" deducts the configured weight points.',
+    'risk.addGroupBtn': 'Add Group',
     'risk.addSectionSlot': 'Add Question Group',
     'risk.groupCreated': 'New question group added',
 
@@ -1320,6 +1349,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.countLeft': '{count} left',
     'trans.noPagesToTranslate': 'No custom form pages to translate',
     'trans.addedLocaleSuccess': 'Added {name}',
+    'trans.removedLocaleSuccess': 'Removed {name}',
+    'trans.singleLocaleTitle': 'Single Language Form',
+    'trans.singleLocaleDesc': 'No translation enabled. You can publish directly or click "+ Add Language" to enable translations',
+    'trans.backToNormalDesign': 'Back to Form Design',
     'trans.sideBySideSubtitle': 'Manage translations across languages',
     'trans.navTitle': 'Translation Management',
     'trans.navSubtitle': 'Page navigation & progress',
@@ -1344,7 +1377,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.enterTarget': 'Enter translation...',
     'header.warnEnRequiredDesc': 'English translation is required. Please complete all English translations before publishing.',
     'header.warnMultiCount': 'There are {count} untranslated items in target languages.',
-    'header.warnMultiDesc': 'Publishing now may result in fallback text or blank fields for those languages.',
+    'header.warnMultiDesc': 'Publishing now may cause these languages to display English text or blank fields. We recommend completing the translations first.',
     'prop.element': 'Element Properties',
     'common.leaveConfirm': 'You have unsaved changes. Are you sure you want to leave?',
     'common.switchLanguage': 'Switch Language / 切换语言',
