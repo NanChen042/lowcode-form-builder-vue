@@ -343,9 +343,11 @@ function addOption() {
   }
   const nextIdx = props.element.options.length + 1;
   props.element.options.push({
-    label: formatOptionLabel(nextIdx, 'zh'),
-    label_en: formatOptionLabel(nextIdx, 'en'),
-    value: `option_${nextIdx}_${Date.now().toString(36)}`
+    value: `option_${nextIdx}_${Date.now().toString(36)}`,
+    i18n: {
+      zh: { label: formatOptionLabel(nextIdx, 'zh') },
+      en: { label: formatOptionLabel(nextIdx, 'en') }
+    }
   });
   markDirty();
   nextTick(() => {
@@ -359,9 +361,11 @@ function addOptionAt(targetIndex: number) {
   }
   const nextIdx = props.element.options.length + 1;
   const newOpt = {
-    label: formatOptionLabel(nextIdx, 'zh'),
-    label_en: formatOptionLabel(nextIdx, 'en'),
-    value: `option_${nextIdx}_${Date.now().toString(36)}`
+    value: `option_${nextIdx}_${Date.now().toString(36)}`,
+    i18n: {
+      zh: { label: formatOptionLabel(nextIdx, 'zh') },
+      en: { label: formatOptionLabel(nextIdx, 'en') }
+    }
   };
   props.element.options.splice(targetIndex, 0, newOpt);
   markDirty();

@@ -163,24 +163,6 @@
       </template>
     </a-modal>
 
-
-    <a-modal v-model:visible="isDisableBilingualModalVisible" :title="t('header.bilingualDisableTitle')" :title-align="'start'" :simple="false" width="420px" :ok-button-props="{ status: 'danger' }">
-      <div class="py-2 text-sm text-slate-600 leading-relaxed">
-        {{ t('header.bilingualDisableDesc') }}
-      </div>
-      <template #footer>
-        <div class="flex justify-end gap-2.5">
-          <a-button status="danger" type="primary" @click="handleConfirmDisableBilingual">
-            {{ t('header.bilingualDisableConfirm') }}
-          </a-button>
-          <a-button @click="isDisableBilingualModalVisible = false">
-            {{ t('header.bilingualDisableCancel') }}
-          </a-button>
-        </div>
-      </template>
-    </a-modal>
-
-
     <a-modal v-model:visible="isVideoModalVisible" :title="t('header.bilingualVideoTitle')" :title-align="'start'" :width="720" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
       <div class="py-1">
         <video ref="videoPlayerRef" :src="helpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[460px] rounded-lg bg-black object-contain shadow-sm" />
@@ -213,7 +195,6 @@ import {
   primaryLocale,
   targetLocales,
   addTargetLocale,
-  disableMultiLanguage,
   openTranslationWorkspace,
   selectPage,
   selectElement,
@@ -398,18 +379,12 @@ const editTitleValue = ref('');
 const titleInputRef = ref<HTMLInputElement | null>(null);
 
 const displayTitle = computed(() => {
-  if (store.currentLocale === 'en') {
-    return store.meta.title_en?.trim() || t('header.untitledForm');
-  }
-  return store.meta.title?.trim() || t('header.untitledForm');
+  const loc = store.currentLocale === 'en' ? 'en' : 'zh';
+  return store.meta.i18n?.[loc]?.title?.trim() || t('header.untitledForm');
 });
 
 function startEditTitle() {
-  if (store.currentLocale === 'en') {
-    editTitleValue.value = store.meta.title_en || '';
-  } else {
-    editTitleValue.value = store.meta.title || '';
-  }
+  editTitleValue.value = store.meta.i18n?.[store.currentLocale === 'en' ? 'en' : 'zh']?.title || '';
   isEditingTitle.value = true;
   nextTick(() => {
     titleInputRef.value?.focus();
@@ -430,31 +405,21 @@ function handleConfirmTitle() {
     '未命名表单', 'Untitled Form'
   ];
 
-  if (store.currentLocale === 'en') {
-    if (store.meta.title_en !== newTitle) {
-      const oldEn = store.meta.title_en;
-      store.meta.title_en = newTitle;
-      if (!store.meta.title || store.meta.title === oldEn || defaultTemplateTitles.includes(store.meta.title)) {
-        store.meta.title = newTitle;
-      }
-      markDirty();
+  // 修改当前界面语言对应的标题；另一语言标题为空 / 与旧标题相同 / 仍是默认模板名时同步跟随
+  const curLoc = store.currentLocale === 'en' ? 'en' : 'zh';
+  const otherLoc = curLoc === 'en' ? 'zh' : 'en';
+  const meta = store.meta.i18n;
+  const oldTitle = meta[curLoc]?.title;
+  if (oldTitle !== newTitle) {
+    meta[curLoc] = { ...(meta[curLoc] || {}), title: newTitle };
+    const otherTitle = meta[otherLoc]?.title;
+    if (!otherTitle || otherTitle === oldTitle || defaultTemplateTitles.includes(otherTitle)) {
+      meta[otherLoc] = { ...(meta[otherLoc] || {}), title: newTitle };
     }
-  } else {
-    if (store.meta.title !== newTitle) {
-      const oldZh = store.meta.title;
-      store.meta.title = newTitle;
-      if (!store.meta.title_en || store.meta.title_en === oldZh || defaultTemplateTitles.includes(store.meta.title_en)) {
-        store.meta.title_en = newTitle;
-      }
-      markDirty();
-    }
+    markDirty();
   }
   isEditingTitle.value = false;
 }
-
-
-const isDisableBilingualModalVisible = ref(false);
-
 
 const isVideoModalVisible = ref(false);
 const videoPlayerRef = ref<HTMLVideoElement | null>(null);
@@ -474,12 +439,6 @@ function handleCloseVideoModal() {
     videoPlayerRef.value.pause();
   }
   isVideoModalVisible.value = false;
-}
-
-function handleConfirmDisableBilingual() {
-  disableMultiLanguage();
-  isDisableBilingualModalVisible.value = false;
-  Message.info(t('header.bilingualDisabledMsg'));
 }
 
 function handleCancelTitle() {

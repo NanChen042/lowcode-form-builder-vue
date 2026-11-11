@@ -752,12 +752,12 @@ const currentLocalizedTitle = computed(() => {
     }
     return getLocalizedPageText(currentPage.value, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
   }
-  return getMetaText(props.schema.meta, 'title', activePreviewLocale.value) || store.meta.title || t('header.untitledForm', activePreviewLocale.value);
+  return getMetaText(props.schema.meta, 'title', activePreviewLocale.value) || t('header.untitledForm', activePreviewLocale.value);
 });
 
 // 顶栏表单标题徽标
 const currentLocalizedFormTitle = computed(() => {
-  return getMetaText(props.schema?.meta, 'title', activePreviewLocale.value) || store.meta?.title || '';
+  return getMetaText(props.schema?.meta, 'title', activePreviewLocale.value) || '';
 });
 
 // 模拟器顶栏机构名称：严格对齐移动端规范，展示机构名称 (AlgoCandy)

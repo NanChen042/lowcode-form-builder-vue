@@ -492,7 +492,7 @@ const countrySelectOptions = computed(() => {
     return {
       value: opt.value,
       label: label,
-      label_en: opt.label_en || opt.value,
+      label_en: opt.i18n?.en?.label || opt.value,
       rawOption: opt
     };
   });
@@ -503,7 +503,7 @@ function filterCountryOption(input: string, option: any): boolean {
   const q = input.trim().toLowerCase();
   const val = String(option.value || '').toLowerCase();
   const label = String(option.label || '').toLowerCase();
-  const labelEn = String(option.label_en || option.rawOption?.label_en || '').toLowerCase();
+  const labelEn = String(option.label_en || option.rawOption?.i18n?.en?.label || '').toLowerCase();
   return val.includes(q) || label.includes(q) || labelEn.includes(q);
 }
 

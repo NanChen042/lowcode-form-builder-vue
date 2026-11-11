@@ -48,8 +48,7 @@ const nationalityEnMap: Record<string, string> = {
  */
 export const fullCountryOptions: FormElementOption[] = allCountryPhoneRules.map(c => ({
   value: c.iso2.toUpperCase(),
-  label: c.zh,
-  label_en: c.name
+  i18n: { zh: { label: c.zh }, en: { label: c.name } }
 }));
 
 /**
@@ -63,7 +62,6 @@ export const fullNationalityOptions: FormElementOption[] = allCountryPhoneRules.
 
   return {
     value: c.iso2.toUpperCase(),
-    label: zhNat,
-    label_en: enNat
+    i18n: { zh: { label: zhNat }, en: { label: enNat } }
   };
 });

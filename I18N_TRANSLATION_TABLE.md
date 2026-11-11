@@ -560,7 +560,6 @@
 | 实时校验引擎已就绪（国际区号默认 +65 新加坡） | Live Validator: Active (Singapore +65 default) | | | |
 | 发布表单 | Publish Form | | | |
 | 发布中... | Publishing... | | | |
-| 上海青墨信息技术有限公司北京分公司 | Beijing Branch of Shanghai Qingmo Information Co., Ltd | | | |
 | 请填写所有必填项并修正错误 | Please fill in all required fields | | | |
 | 表单发布成功！ | Form published successfully! | | | |
 | 发布失败 | Publish failed | | | |

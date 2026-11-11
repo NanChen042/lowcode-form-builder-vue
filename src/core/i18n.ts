@@ -1,11 +1,10 @@
 import { computed } from 'vue';
 import { store, markDirty, primaryLocale } from './store';
-import type { FormElement, FormElementOption } from '@/types/schema';
+import type { FormElement, FormElementOption, I18nTexts } from '@/types/schema';
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
 
 export type Locale = 'zh' | 'en';
-export type FormContentLocale = string;
 
 export interface SupportedFormLocaleItem {
   code: string;
@@ -119,7 +118,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'dir.totalCountSuffix': '个预设国家与地区',
     'dir.presetList': '预设清单',
     'common.close': '关闭',
-    'common.defaultColon': '默认：',
 
     // 顶部导航栏 (AppHeader)
     'app.riskWorkspaceTitle': '风险评估设计工作台',
@@ -146,17 +144,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.warnComplete': '前往完善翻译',
     'header.warnPublishAnyway': '仍然发布',
     'header.untranslatedTag': '未翻译',
-    'header.switchedZh': '已切换至中文编辑模式',
-    'header.switchedEn': '已切换至英文编辑模式',
     'header.bilingualGuideTitle': '翻译管理说明',
     'header.bilingualGuideDesc': '管理表单各语言翻译内容。您可以在翻译工作台中对照编辑源语言与目标语言文案。填表人打开表单时，可通过语言切换按钮自由切换多语言。',
-    'header.bilingualDisableTitle': '停用双语问卷模式',
-    'header.bilingualDisableDesc': '确定停用双语问卷模式吗？停用后将仅保留主要语言并隐藏英文双语配置。',
-    'header.bilingualDisableConfirm': '确认停用',
-    'header.bilingualDisableCancel': '取消',
     'header.bilingualVideoTitle': '双语问卷功能操作演示',
     'header.bilingualVideoTip': '温馨提示：开启双语问卷后，填表端右上角将自动提供语言切换胶囊。',
-    'header.bilingualDisabledMsg': '已停用双语问卷模式',
 
     // 用户下拉菜单 (User Menu)
     'user.logout': '退出登录',
@@ -277,7 +268,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.customizeError': '自定义提示',
     'prop.defaultFallback': '系统默认提示',
     'prop.defaultFallbackTip': '用户提交表单未填写此项时的校验报错提示',
-    'prop.customized': '已自定义',
+    'prop.previewGifPlaceholder': '动图效果预览区域',
     'prop.resetToDefaultError': '恢复默认',
     'prop.declarationErrorMsg': '未同意声明提示',
     'prop.placeholder': '占位提示',
@@ -485,7 +476,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.noFields': '当前页面暂无字段',
     'preview.validateForm': '表单验证',
     'preview.publishForm': '发布表单',
-    'preview.defaultCompanyTitle': '上海青墨信息技术有限公司北京分公司',
     'preview.fillRequiredFields': '请填写所有必填项并修正错误',
     'preview.publishFailed': '发布失败',
     'publish.modalTitle': '发布表单',
@@ -577,7 +567,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 风险评估问卷 (Risk Assessment)
     'risk.pageTitle': '风险评估',
-    'risk.pageDesc': '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
     'risk.catComponents': '风险评估组件',
     'risk.cmpQuestion': '风险评估问题',
     'risk.cmpGroup': '问题分组',
@@ -601,13 +590,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.propQuestionSub': '配置评估问题与分值权重',
     'risk.propGroupTitle': '分组设置',
     'risk.propGroupSub': '配置分组名称及组内问题',
-    'risk.systemFixed': '风险评估',
-    'risk.fixedRulesDesc': '问卷标题、引导说明与快捷概览',
     'risk.canvasSettingsDesc': '问卷标题、引导说明与快捷概览',
-    'risk.canvasWidth': '画板宽度',
-    'risk.canvasWidthCompact': '紧凑 (540px)',
-    'risk.canvasWidthStandard': '标准 (640px)',
-    'risk.canvasWidthWide': '宽屏 (720px)',
     'risk.overviewStats': '问卷概览',
     'risk.groupUnit': '分组',
     'risk.rulesCardTitle': '评分规则说明',
@@ -638,13 +621,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.enterQuestionPlaceholder': '请输入风险评估问题...',
     'risk.weightSettings': '权重设置',
     'risk.weightSettingsDesc': '新问题默认权重为 1。选择 “Yes” 表示命中风险项，系统将按该问题的权重扣减风险评分。请将问题表述为：回答 “Yes” 时明确代表存在风险。',
-    'risk.weightScore': '权重分值',
     'risk.yesDeductionWeight': '命中扣分权重',
     'risk.yesDeductionTip': '回答“Yes”表示命中风险项，系统将按此权重扣减评分',
-    'risk.weightScoreTip': '权重越高，对综合评分的影响越大',
     'risk.weightBadge': '权重：{weight}',
     'risk.ptsUnit': '分',
-    'risk.dragResizeWidth': '左右拖拽调整画布宽度',
     'risk.groupNameWithLang': '分组名称 (中文)',
 
     // 发布校验与提示 (Publish & Validation)
@@ -685,7 +665,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.fieldContent': '提示内容',
     'trans.exitWorkspace': '退出翻译',
     'trans.multilingual': '翻译管理',
-    'trans.multilingualTitle': '翻译管理',
     'trans.multilingualWithCount': '翻译管理 ({count})',
     'trans.addLanguage': '翻译管理',
     'trans.addLanguageShort': '添加语言',
@@ -699,7 +678,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.singleLocaleTitle': '当前为单语言版本',
     'trans.singleLocaleDesc': '未启用多语言翻译。可直接发布当前单语言表单，或点击「+ 添加语言」开启多语言对照',
     'trans.backToNormalDesign': '返回普通设计模式',
-    'trans.sideBySideSubtitle': '管理各语言翻译内容',
     'trans.navTitle': '翻译管理',
     'trans.navSubtitle': '页面导航与翻译进度',
     'trans.propTitle': '译文属性',
@@ -708,6 +686,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.translated': '已填写',
     'trans.pending': '待翻译',
     'trans.completed': '已完成',
+    'trans.allDoneShort': '已译完',
+    'trans.sourceTextLabel': '{lang}原文',
     'trans.optionsTitle': '选项译文对照',
     'trans.declarationOptionsTitle': '声明条款译文对照',
     'trans.sigPromptLabel': '签名区提示文字',
@@ -726,7 +706,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.warnMultiDesc': '现在发布可能导致对应语言访问时显示英文或空白，建议补充完整后再发布。',
     'prop.element': '组件属性',
     'common.leaveConfirm': '您有未保存的更改，确定要离开吗？',
-    'common.switchLanguage': '切换语言 / Switch Language',
     'prop.pageTitleWithLang': '页面标题',
     'prop.pageDescWithLang': '页面描述',
 
@@ -773,7 +752,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'dir.totalCountSuffix': 'countries & regions',
     'dir.presetList': 'Preset List',
     'common.close': 'Close',
-    'common.defaultColon': 'Default: ',
 
     // 顶部导航栏 (AppHeader)
     'app.riskWorkspaceTitle': 'Risk Assessment Workspace',
@@ -800,17 +778,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.warnComplete': 'Complete Translations',
     'header.warnPublishAnyway': 'Publish Anyway',
     'header.untranslatedTag': 'Untranslated',
-    'header.switchedZh': 'Switched to Chinese editing mode',
-    'header.switchedEn': 'Switched to English editing mode',
     'header.bilingualGuideTitle': 'Translation Management Guide',
     'header.bilingualGuideDesc': 'Manage form translations across languages. You can edit source and target language copies side-by-side in the translation workspace. Respondents can toggle languages via the top-right button.',
-    'header.bilingualDisableTitle': 'Disable Bilingual Questionnaire',
-    'header.bilingualDisableDesc': 'Are you sure you want to disable bilingual questionnaire? When disabled, only primary language will be retained.',
-    'header.bilingualDisableConfirm': 'Confirm Disable',
-    'header.bilingualDisableCancel': 'Cancel',
     'header.bilingualVideoTitle': 'Bilingual Questionnaire Video Tutorial',
     'header.bilingualVideoTip': 'Tip: Once enabled, respondents can switch languages in the top-right corner.',
-    'header.bilingualDisabledMsg': 'Bilingual questionnaire disabled',
 
     // 用户下拉菜单 (User Menu)
     'user.logout': 'Sign Out',
@@ -931,7 +902,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.customizeError': 'Customize',
     'prop.defaultFallback': 'System Default',
     'prop.defaultFallbackTip': 'Error message displayed when the field is left empty on submission',
-    'prop.customized': 'Customized',
+    'prop.previewGifPlaceholder': 'GIF Preview Area',
     'prop.resetToDefaultError': 'Reset to Default',
     'prop.declarationErrorMsg': 'Declaration Error Message',
     'prop.placeholder': 'Placeholder',
@@ -1139,7 +1110,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.noFields': 'Current page has no fields',
     'preview.validateForm': 'Validate Form',
     'preview.publishForm': 'Publish Form',
-    'preview.defaultCompanyTitle': 'Beijing Branch of Shanghai Qingmo Information Co., Ltd',
     'preview.fillRequiredFields': 'Please fill in all required fields',
     'preview.publishFailed': 'Publish failed',
     'publish.modalTitle': 'Publish Form',
@@ -1231,7 +1201,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 风险评估问卷 (Risk Assessment)
     'risk.pageTitle': 'Risk Assessment',
-    'risk.pageDesc': 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable, selecting "Yes" indicates hitting a risk item and deducting points by weight.',
     'risk.catComponents': 'Risk Assessment Components',
     'risk.cmpQuestion': 'Risk Question',
     'risk.cmpGroup': 'Question Group',
@@ -1255,13 +1224,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.propQuestionSub': 'Configure risk question and weight score',
     'risk.propGroupTitle': 'Group Settings',
     'risk.propGroupSub': 'Configure group title and questions',
-    'risk.systemFixed': 'Risk Assessment',
-    'risk.fixedRulesDesc': 'Page title, description & overview',
     'risk.canvasSettingsDesc': 'Page title, description & overview',
-    'risk.canvasWidth': 'Canvas Width',
-    'risk.canvasWidthCompact': 'Compact (540px)',
-    'risk.canvasWidthStandard': 'Standard (640px)',
-    'risk.canvasWidthWide': 'Wide (720px)',
     'risk.overviewStats': 'Questionnaire Overview',
     'risk.groupUnit': 'Group(s)',
     'risk.rulesCardTitle': 'Scoring Rules',
@@ -1292,13 +1255,10 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'risk.enterQuestionPlaceholder': 'Enter risk assessment question...',
     'risk.weightSettings': 'Weight Settings',
     'risk.weightSettingsDesc': 'New questions default to weight 1. Selecting Yes indicates a risk hit and deducts the weight from the risk score.',
-    'risk.weightScore': 'Weight Score',
     'risk.yesDeductionWeight': 'Risk Deduction Weight',
     'risk.yesDeductionTip': 'Answering "Yes" triggers risk deduction by this weight value',
-    'risk.weightScoreTip': 'Higher weight has a greater impact on the overall score',
     'risk.weightBadge': 'Weight: {weight}',
     'risk.ptsUnit': 'pts',
-    'risk.dragResizeWidth': 'Drag to resize canvas width',
     'risk.groupNameWithLang': 'Group Name (EN)',
 
     // 发布校验与提示 (Publish & Validation)
@@ -1339,7 +1299,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.fieldContent': 'Notice Content',
     'trans.exitWorkspace': 'Exit Translation',
     'trans.multilingual': 'Translation Management',
-    'trans.multilingualTitle': 'Translation Management',
     'trans.multilingualWithCount': 'Translation Management ({count})',
     'trans.addLanguage': 'Translation Management',
     'trans.addLanguageShort': 'Add Language',
@@ -1353,7 +1312,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.singleLocaleTitle': 'Single Language Form',
     'trans.singleLocaleDesc': 'No translation enabled. You can publish directly or click "+ Add Language" to enable translations',
     'trans.backToNormalDesign': 'Back to Form Design',
-    'trans.sideBySideSubtitle': 'Manage translations across languages',
     'trans.navTitle': 'Translation Management',
     'trans.navSubtitle': 'Page navigation & progress',
     'trans.propTitle': 'Translation Properties',
@@ -1362,6 +1320,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'trans.translated': 'Filled',
     'trans.pending': 'Pending',
     'trans.completed': 'Completed',
+    'trans.allDoneShort': 'Translated',
+    'trans.sourceTextLabel': 'Source ({lang})',
     'trans.optionsTitle': 'Options Translation',
     'trans.declarationOptionsTitle': 'Declarations Translation',
     'trans.sigPromptLabel': 'Signature Prompt Text',
@@ -1380,7 +1340,6 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.warnMultiDesc': 'Publishing now may cause these languages to display English text or blank fields. We recommend completing the translations first.',
     'prop.element': 'Element Properties',
     'common.leaveConfirm': 'You have unsaved changes. Are you sure you want to leave?',
-    'common.switchLanguage': 'Switch Language / 切换语言',
     'prop.pageTitleWithLang': 'Page Title (EN)',
     'prop.pageDescWithLang': 'Page Description (EN)',
 
@@ -1427,17 +1386,26 @@ export function formatOptionLabel(index: number, locale?: string): string {
 
 function readI18nField(obj: any, field: string, loc: string): string {
   if (!obj) return '';
+  // 1. 优先读取标准嵌套结构: obj.i18n[loc][field]
   const fromI18n = obj.i18n?.[loc]?.[field];
   if (fromI18n !== undefined && fromI18n !== null && String(fromI18n).trim() !== '') {
     return String(fromI18n).trim();
   }
+  // 2. 兼容直接字符串 locale (如部分旧结构 obj.i18n[loc] 为字符串)
+  const directLoc = obj.i18n?.[loc];
+  if (typeof directLoc === 'string' && directLoc.trim() !== '') {
+    return directLoc.trim();
+  }
+  // 3. 兼容平铺字段或静态配置 (title/title_en, label/label_en, desc/desc_en 等)
   if (loc === 'zh') {
     const v = obj[field];
-    return v !== undefined && v !== null && String(v).trim() !== '' ? String(v).trim() : '';
-  }
-  if (loc === 'en') {
-    const v = obj[`${field}_en`];
-    return v !== undefined && v !== null && String(v).trim() !== '' ? String(v).trim() : '';
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  } else if (loc === 'en') {
+    const v = obj[`${field}_en`] ?? obj[field];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+  } else {
+    const v = obj[field] ?? obj[`${field}_en`];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
   }
   return '';
 }
@@ -1447,11 +1415,6 @@ function writeI18nField(obj: any, field: string, val: string, loc: string) {
   if (!obj.i18n) obj.i18n = {};
   if (!obj.i18n[loc]) obj.i18n[loc] = {};
   obj.i18n[loc][field] = val;
-  if (loc === 'zh') {
-    obj[field] = val;
-  } else if (loc === 'en') {
-    obj[`${field}_en`] = val;
-  }
 }
 
 /**
@@ -1506,21 +1469,7 @@ export function getLocalizedFieldText(
  * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
 function readOptionI18n(option: any, loc: string): string {
-  if (!option) return '';
-  const rawI18n = option.i18n?.[loc];
-  if (rawI18n !== undefined && rawI18n !== null) {
-    const str = typeof rawI18n === 'object' ? rawI18n.label : rawI18n;
-    if (str !== undefined && str !== null && String(str).trim() !== '') {
-      return String(str).trim();
-    }
-  }
-  if (loc === 'zh' && option.label !== undefined && option.label !== null && String(option.label).trim() !== '') {
-    return String(option.label).trim();
-  }
-  if (loc === 'en' && option.label_en !== undefined && option.label_en !== null && String(option.label_en).trim() !== '') {
-    return String(option.label_en).trim();
-  }
-  return '';
+  return readI18nField(option, 'label', loc);
 }
 
 export function getOptionLabel(
@@ -1567,7 +1516,7 @@ export function getLocalizedOptionLabel(
  * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
 export function getPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
+  page: { i18n?: I18nTexts },
   field: 'title' | 'description',
   locale?: string,
   fallback = false
@@ -1597,7 +1546,7 @@ export function getPageText(
  * 预览态/只读态获取页面多语言文本（自动回退另一语言）
  */
 export function getLocalizedPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
+  page: { i18n?: I18nTexts },
   field: 'title' | 'description',
   locale?: string
 ): string {
@@ -1662,18 +1611,6 @@ export function getMetaText(
   return '';
 }
 
-export function setMetaText(
-  meta: any,
-  field: 'title' | 'description',
-  val: string,
-  locale?: string
-) {
-  if (!meta) return;
-  const current = getEffectiveFormLocale(locale);
-  writeI18nField(meta, field, val, current);
-  markDirty();
-}
-
 /**
  * 统一设置组件多语言文本并标记变更
  */
@@ -1692,7 +1629,7 @@ export function setFieldText(
  * 统一设置页面多语言文本并标记变更
  */
 export function setPageText(
-  page: { title?: string; title_en?: string; description?: string; description_en?: string; i18n?: Record<string, Record<string, string>> },
+  page: { i18n?: I18nTexts },
   field: 'title' | 'description',
   val: string,
   locale?: string
@@ -1710,14 +1647,20 @@ export function setOptionLabel(
   val: string,
   locale?: string
 ) {
-  const current = getEffectiveFormLocale(locale);
-  if (!option.i18n) option.i18n = {};
-  option.i18n[current] = val;
-  if (current === 'zh') {
-    option.label = val;
-  } else if (current === 'en') {
-    option.label_en = val;
-  }
+  writeI18nField(option, 'label', val, getEffectiveFormLocale(locale));
+  markDirty();
+}
+
+/**
+ * 统一设置表单 Meta（标题/描述）多语言文本并标记变更
+ */
+export function setMetaText(
+  meta: any,
+  field: 'title' | 'description',
+  val: string,
+  locale?: string
+) {
+  writeI18nField(meta, field, val, getEffectiveFormLocale(locale));
   markDirty();
 }
 

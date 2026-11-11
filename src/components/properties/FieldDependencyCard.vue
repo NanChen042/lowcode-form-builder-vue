@@ -120,10 +120,10 @@ const conditionItems = computed(() => {
       const parentIdx = page.fields?.findIndex(f => f.key === cond.fieldKey) ?? -1;
       if (parentIdx !== -1 && page.fields) {
         const parentField = page.fields[parentIdx];
-        const rawLabel = getFieldText(parentField, 'label', undefined, true) || parentField.label || parentField.key;
+        const rawLabel = getFieldText(parentField, 'label', undefined, true) || parentField.key;
         const opt = parentField.options?.find(o => o.value === cond.value);
         const optLabel = opt
-          ? (getOptionLabel(opt, undefined, true) || opt.label || opt.value)
+          ? (getOptionLabel(opt, undefined, true) || opt.value)
           : (cond.value === 'yes' ? yesLabel : cond.value);
         return {
           parentField,

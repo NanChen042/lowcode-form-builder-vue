@@ -631,10 +631,8 @@ watch(
 );
 
 const floatingTitle = computed(() => {
-  if (store.currentLocale === 'en') {
-    return store.meta.title_en?.trim() || t('header.untitledForm');
-  }
-  return store.meta.title?.trim() || t('header.untitledForm');
+  const loc = store.currentLocale === 'en' ? 'en' : 'zh';
+  return store.meta.i18n?.[loc]?.title?.trim() || t('header.untitledForm');
 });
 
 const floatingProfileBadge = computed(() => {

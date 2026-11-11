@@ -22,12 +22,12 @@
                 <img
                   v-if="previewGif"
                   :src="previewGif"
-                  alt="校验提示动图预览"
+                  :alt="t('prop.previewGifPlaceholder')"
                   class="w-full h-auto object-cover block"
                 />
                 <div v-else class="flex flex-col items-center gap-1 py-3 text-slate-400">
                   <Play class="w-4 h-4 opacity-40" />
-                  <span class="text-[11px]">动图效果预览区域</span>
+                  <span class="text-[11px]">{{ t('prop.previewGifPlaceholder') }}</span>
                 </div>
               </div>
             </div>
@@ -53,7 +53,7 @@
       class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text"
     >
       <div class="text-[10px] font-medium text-slate-400 mb-1 select-none flex items-center justify-between">
-        <span>{{ sourceLangName ? `${sourceLangName}原文` : '原文' }}</span>
+        <span>{{ t('trans.sourceTextLabel', undefined, { lang: sourceLangName || '' }) }}</span>
       </div>
       <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
         {{ sourceText }}
@@ -164,8 +164,6 @@ interface Props {
   sourceLangName?: string;
   // 源语言校验提示文案原文
   sourceText?: string;
-  // 源语言是否采用默认提示
-  isSourceDefault?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -176,8 +174,7 @@ const props = withDefaults(defineProps<Props>(), {
   isFocused: false,
   isTranslationMode: false,
   sourceLangName: '',
-  sourceText: '',
-  isSourceDefault: false
+  sourceText: ''
 });
 
 const emit = defineEmits<{

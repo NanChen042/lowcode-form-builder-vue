@@ -347,7 +347,7 @@ const upstreamLinkableParents = computed(() => {
     .map(({ field, idx }) => ({
       field,
       orderNum: idx + 1,
-      title: getFieldText(field, 'label', undefined, true) || field.label || field.key,
+      title: getFieldText(field, 'label', undefined, true) || field.key,
       isLinked: isParentLinkedToTargetAnyOption(fields, field, targetElement.value!)
     }));
 });
@@ -384,7 +384,7 @@ const downstreamLinkableTargets = computed(() => {
     .map(({ field, idx }) => ({
       field,
       orderNum: idx + 1,
-      title: getFieldText(field, 'label', undefined, true) || field.label || field.key
+      title: getFieldText(field, 'label', undefined, true) || field.key
     }));
 });
 

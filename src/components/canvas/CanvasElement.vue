@@ -129,7 +129,7 @@ const triggerOptName = computed(() => {
       if (parentField) {
         const opt = parentField.options?.find(o => o.value === dep.value);
         if (opt) {
-          optLabel = getOptionLabel(opt, frameLocale.value, true) || opt.label || opt.value;
+          optLabel = getOptionLabel(opt, frameLocale.value, true) || opt.value;
         }
         const rawLabel = (getFieldText(parentField, 'label', frameLocale.value, true) || '').trim();
         if (rawLabel && !DEFAULT_TITLES.has(rawLabel)) {

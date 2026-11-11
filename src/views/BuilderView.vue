@@ -168,7 +168,7 @@ function handleWelcomeWizardClosed() {
 }
 const currentPreviewSchema = ref<FormSchema>({
   schemaVersion: '1.0.0',
-  meta: { title: '', description: '' },
+  meta: { i18n: {} },
   pages: []
 });
 
@@ -273,8 +273,7 @@ onMounted(async () => {
     loadSchema({
       schemaVersion: '1.0.0',
       meta: {
-        title: '',
-        description: '',
+        i18n: {},
         formType: isRisk.value ? 'risk' : 'kyc',
         baseLocale: store.currentLocale === 'en' ? 'en' : 'zh',
         enabledLocales: store.currentLocale === 'en' ? ['en'] : ['zh', 'en'],
@@ -366,18 +365,19 @@ onMounted(async () => {
       const newCopiedId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'diy');
       store.meta.formId = newCopiedId;
       store.meta.serialNo = newCopiedId;
-      if (store.meta.title && !store.meta.title.endsWith('_副本')) {
-        store.meta.title = `${store.meta.title}_副本`;
-      }
-      if (store.meta.title_en && !store.meta.title_en.endsWith('_Copy')) {
-        store.meta.title_en = `${store.meta.title_en}_Copy`;
+      const copySuffix: Record<string, string> = { zh: '_副本', en: '_Copy' };
+      for (const [loc, suffix] of Object.entries(copySuffix)) {
+        const title = store.meta.i18n[loc]?.title;
+        if (title && !title.endsWith(suffix)) {
+          store.meta.i18n[loc] = { ...store.meta.i18n[loc], title: `${title}${suffix}` };
+        }
       }
       let saveRes = await FormAPI.saveTemplate(buildSchema());
       if (!saveRes.success && saveRes.code == 409) {
         const suffix = newCopiedId.split('_').pop() || String(Date.now()).slice(-4);
-        store.meta.title = `${store.meta.title}_${suffix}`;
-        if (store.meta.title_en) {
-          store.meta.title_en = `${store.meta.title_en}_${suffix}`;
+        for (const loc of ['zh', 'en']) {
+          const title = store.meta.i18n[loc]?.title;
+          if (title) store.meta.i18n[loc] = { ...store.meta.i18n[loc], title: `${title}_${suffix}` };
         }
         saveRes = await FormAPI.saveTemplate(buildSchema());
       }

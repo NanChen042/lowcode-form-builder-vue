@@ -88,8 +88,7 @@ body {
 .arco-select-view,
 .arco-textarea-wrapper,
 .arco-picker,
-.component-placeholder,
-.preview-input {
+.component-placeholder {
     border-radius: 6px;
     border: 1px solid #d9d9d9;
     background-color: #ffffff;
@@ -105,8 +104,7 @@ body {
 .arco-select-view:hover,
 .arco-textarea-wrapper:hover,
 .arco-picker:hover,
-.component-placeholder:hover,
-.preview-input:hover {
+.component-placeholder:hover {
     border-color: #4096ff;
     background-color: #ffffff;
 }
@@ -119,8 +117,7 @@ body {
 .arco-textarea-wrapper:focus-within,
 .arco-picker.arco-picker-focused,
 .arco-picker:focus-within,
-.component-placeholder:focus,
-.preview-input:focus {
+.component-placeholder:focus {
     border-color: #1677ff;
     box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.16);
     outline: none;
@@ -165,8 +162,7 @@ body {
 .arco-select-view-value,
 .arco-select-view-input,
 .arco-picker-input input,
-.component-placeholder,
-.preview-input {
+.component-placeholder {
     font-size: 13px;
     line-height: 1.5;
     color: #1e293b;
@@ -194,8 +190,7 @@ body {
 .arco-textarea::placeholder,
 .arco-select-view-input::placeholder,
 .arco-picker-input input::placeholder,
-.component-placeholder::placeholder,
-.preview-input::placeholder {
+.component-placeholder::placeholder {
     font-size: 13px;
     color: #94a3b8;
 }
@@ -207,8 +202,6 @@ body {
 .canvas-ghost-skeleton .arco-input-wrapper,
 .canvas-ghost-skeleton .arco-picker,
 .canvas-ghost-skeleton .component-placeholder,
-.preview-card .arco-input-wrapper,
-.preview-card .arco-picker,
 .preview-field .arco-input-wrapper,
 .preview-field .arco-picker {
     height: 32px;
@@ -218,7 +211,6 @@ body {
 
 .canvas-element .arco-select-view,
 .canvas-ghost-skeleton .arco-select-view,
-.preview-card .arco-select-view,
 .preview-field .arco-select-view {
     min-height: 32px;
     height: auto;
@@ -226,7 +218,6 @@ body {
 
 .canvas-element .arco-textarea-wrapper,
 .canvas-ghost-skeleton .arco-textarea-wrapper,
-.preview-card .arco-textarea-wrapper,
 .preview-field .arco-textarea-wrapper {
     min-height: 72px;
     height: auto;
@@ -235,8 +226,7 @@ body {
 
 #prop-editor .arco-input-wrapper:not(:has(.arco-input-size-mini)),
 #prop-editor .arco-picker,
-#page-prop-editor .arco-input-wrapper,
-.sidebar-search-box {
+#page-prop-editor .arco-input-wrapper {
     height: 32px;
     min-height: 32px;
     font-size: 13px;
@@ -504,34 +494,6 @@ body.is-panning * {
 }
 
 
-.header-glass-btn {
-    height: 32px;
-    padding: 0 12px;
-    color: #334155;
-    font-weight: 500;
-}
-
-.header-primary-btn {
-    height: 32px;
-    padding: 0 14px;
-    color: #ffffff;
-    font-weight: 500;
-}
-
-.header-icon-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #64748b;
-}
-
-.header-icon-btn:hover {
-    color: #1e293b;
-}
-
 .icon-btn.danger {
     border-color: #ffccc7;
     background: #fff2f0;
@@ -542,21 +504,6 @@ body.is-panning * {
     border-color: #ff4d4f;
     background: #ff4d4f;
     color: #fff;
-}
-
-.code-badge {
-    display: inline-flex;
-    min-width: 24px;
-    height: 22px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.04);
-    padding: 0 8px;
-    color: rgba(0, 0, 0, 0.65);
-    font-family: "SFMono-Regular", Consolas, monospace;
-    font-size: 11px;
-    line-height: 20px;
 }
 
 :root {
@@ -653,8 +600,7 @@ body.space-panning-ready * {
     transform-origin: 0 0;
 }
 
-.canvas-world.is-animating,
-.canvas-world.is-zooming {
+.canvas-world.is-animating {
     transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -815,8 +761,7 @@ body.is-dragging-frame .mobile-frame {
 [data-read-only-frame="true"] .label-text,
 [data-read-only-frame="true"] .page-desc-text,
 [data-read-only-frame="true"] .field-help,
-[data-read-only-frame="true"] .field-help-bottom,
-[data-read-only-frame="true"] .option-item .editable-text-node {
+[data-read-only-frame="true"] .field-help-bottom {
     color: #64748b;
 }
 
@@ -995,9 +940,7 @@ body.is-dragging-frame .mobile-frame {
 .canvas-element .signature-declaration-text,
 .canvas-element .signature-pad-text,
 .canvas-element .field-help,
-.canvas-element .component-placeholder-text,
-.page-title-input,
-.page-desc-input {
+.canvas-element .component-placeholder-text {
     user-select: text;
     -webkit-user-select: text;
 }
@@ -1682,11 +1625,7 @@ body.is-dragging-component .canvas-element .component-placeholder-text {
 }
 
 
-.page-title-input,
-.page-title-input.text-xl {
-    font-size: 1.25rem; 
-    line-height: 1.75rem; 
-}
+
 
 .canvas-element[data-type="alert"] {
     background: transparent;
@@ -1718,23 +1657,7 @@ body.is-dragging-component .canvas-element .component-placeholder-text {
 }
 
 
-.menu-pop-enter-active,
-.menu-pop-leave-active {
-    transition: opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1), transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-}
 
-.menu-pop-enter-from,
-.menu-pop-leave-to {
-    opacity: 0;
-    transform: translateY(6px) scale(0.96);
-}
-
-.menu-pop-enter-to,
-.menu-pop-leave-from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
 
 .arco-tooltip-content {
     background-color: #111827;

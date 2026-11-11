@@ -6,7 +6,8 @@ import type {
   FormQuestionGroup,
   ComponentType,
   CanvasState,
-  ProfileType
+  ProfileType,
+  I18nTexts
 } from '../types/schema';
 import { componentRegistry } from '../registry/components';
 import {
@@ -74,14 +75,10 @@ export const store = reactive({
   uniqueIdCounter: 1,
 
   meta: {
-    title: '未命名表单',
-    title_en: '',
-    description: '',
-    description_en: '',
     profileType: 'customer' as ProfileType,
     baseLocale: '' as string,
     enabledLocales: undefined as string[] | undefined,
-    i18n: undefined as Record<string, Record<string, string>> | undefined,
+    i18n: {} as I18nTexts,
     source: 'diy' as 'template' | 'diy',
     templateKey: '' as string,
     formId: '' as string,
@@ -290,6 +287,10 @@ export function clearSelection() {
   store.focusedTarget = null;
 }
 
+function cloneRiskOptions() {
+  return JSON.parse(JSON.stringify(RISK_FIXED_OPTIONS));
+}
+
 export function createElement(type: ComponentType, groupId?: string): FormElement {
   const meta = componentRegistry[type];
   const id = `cmp_${getUniqueId()}`;
@@ -305,11 +306,14 @@ export function createElement(type: ComponentType, groupId?: string): FormElemen
       layout: 'inline',
       weight: 1,
       groupId,
-      label: '',
-      label_en: '',
-      options: RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+      i18n: {},
+      options: cloneRiskOptions()
     };
   }
+
+  // 新建组件的标题默认留空（展示 placeholder 引导输入），其余默认文案保留
+  const defaultI18n: I18nTexts = JSON.parse(JSON.stringify(defaultData.i18n || {}));
+  for (const loc of Object.keys(defaultI18n)) delete defaultI18n[loc].label;
 
   return {
     id,
@@ -319,8 +323,7 @@ export function createElement(type: ComponentType, groupId?: string): FormElemen
     showLabel: true,
     helpPosition: 'right',
     ...defaultData,
-    label: '',
-    label_en: '',
+    i18n: defaultI18n,
     options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
   };
 }
@@ -332,8 +335,7 @@ export function addQuestionGroup(afterGroupId?: string, insertIndexOverride?: nu
   const newId = `grp_${Date.now()}_${getUniqueId()}`;
   const newGroup: FormQuestionGroup = {
     id: newId,
-    title: '',
-    title_en: ''
+    i18n: {}
   };
   let insertIdx = page.groups.length;
   if (typeof insertIndexOverride === 'number') {
@@ -372,22 +374,6 @@ export function deleteQuestionGroup(groupId: string): boolean {
   return true;
 }
 
-export function moveQuestionGroup(groupId: string, direction: 'up' | 'down') {
-  const page = store.pages[0];
-  if (!page || !page.groups) return;
-  const idx = page.groups.findIndex(g => g.id === groupId);
-  if (idx === -1) return;
-  const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-  if (targetIdx < 0 || targetIdx >= page.groups.length) return;
-  const [moved] = page.groups.splice(idx, 1);
-  page.groups.splice(targetIdx, 0, moved);
-  const groupOrder = page.groups.map(g => g.id);
-  const groupedFields = groupOrder.flatMap(gId => page.fields.filter(f => f.groupId === gId));
-  const leftoverFields = page.fields.filter(f => !f.groupId || !groupOrder.includes(f.groupId));
-  page.fields = [...groupedFields, ...leftoverFields];
-  markDirty();
-}
-
 export function addElement(type: ComponentType, targetPageId?: string, targetGroupId?: string, insertAfterElementId?: string) {
   if (store.pages.length === 0) {
     addPage();
@@ -398,7 +384,7 @@ export function addElement(type: ComponentType, targetPageId?: string, targetGro
     if (!page) return;
     if (!page.groups || page.groups.length === 0) {
       page.groups = [
-        { id: 'grp_risk_1', title: '', title_en: '' }
+        { id: 'grp_risk_1', i18n: {} }
       ];
     }
     const resolvedGroupId =
@@ -518,7 +504,7 @@ export function duplicateElement(elementId: string) {
         cloneObj.groupId = original.groupId || page.groups?.[0]?.id || 'grp_risk_1';
         delete cloneObj.defaultValue;
         cloneObj.type = 'radio';
-        cloneObj.options = RISK_FIXED_OPTIONS.map(o => ({ ...o }));
+        cloneObj.options = cloneRiskOptions();
       }
 
       // 检查原组件名下是否有紧随其后的从属联动子组件（含多级嵌套），若有则打包一同复制并重映射依赖目标
@@ -604,21 +590,6 @@ export function deleteElement(elementId: string) {
   }
 }
 
-export function toChineseNum(num: number): string {
-  const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-  if (num <= 10) return cnNums[num] || String(num);
-  if (num < 20) {
-    const unit = num % 10;
-    return `十${unit > 0 ? cnNums[unit] : ''}`;
-  }
-  if (num < 100) {
-    const tens = Math.floor(num / 10);
-    const rem = num % 10;
-    return `${cnNums[tens]}十${rem > 0 ? cnNums[rem] : ''}`;
-  }
-  return String(num);
-}
-
 export function addPage(afterPageId?: string | null, options: { focus?: boolean } = {}) {
   if (isRisk.value && store.pages.length >= 1) {
     return store.pages[0];
@@ -644,10 +615,7 @@ export function addPage(afterPageId?: string | null, options: { focus?: boolean 
   const newPage: FormPage = {
     id: newId,
     pageType: 'form',
-    title: '',
-    title_en: '',
-    description: '',
-    description_en: '',
+    i18n: {},
     fields: [],
     x,
     y
@@ -714,15 +682,6 @@ export function updatePageGroups(pageId: string, groups: FormQuestionGroup[]) {
   const target = store.pages.find(p => p.id === pageId);
   if (target) {
     target.groups = groups;
-    markDirty();
-  }
-}
-
-export function setPagePosition(pageId: string, pos: { x?: number; y?: number }) {
-  const target = store.pages.find(p => p.id === pageId);
-  if (target) {
-    if (pos.x !== undefined) target.x = pos.x;
-    if (pos.y !== undefined) target.y = pos.y;
     markDirty();
   }
 }
@@ -1040,13 +999,6 @@ export function generateFormId(
   return `tpl_${dateStr}_${rand}`;
 }
 
-export function generateSerialNo(
-  profileType: ProfileType = 'customer',
-  source: 'diy' | 'template' = 'diy'
-): string {
-  return generateFormId(profileType, source);
-}
-
 const TRANSLATABLE_FIELD_PROPS = [
   'label',
   'placeholder',
@@ -1084,22 +1036,25 @@ export function buildSchema(): FormSchema {
     '企业客户尽职调查问卷', '个人客户尽职调查问卷', '实体企业尽职调查问卷',
     'Corporate Customer CDD Questionnaire', 'Individual CDD Questionnaire', 'Corporate Entity CDD Questionnaire'
   ];
+  if (!store.meta.i18n) store.meta.i18n = {};
+  const setMetaTitle = (loc: string, val: string) => {
+    store.meta.i18n[loc] = { ...(store.meta.i18n[loc] || {}), title: val };
+  };
   const effectiveTitle = (
-    store.meta.title ||
-    store.meta.i18n?.zh?.title ||
-    (activeLocale === 'en' ? (store.meta.title_en || store.meta.i18n?.en?.title) : '') ||
+    store.meta.i18n.zh?.title ||
+    (activeLocale === 'en' ? store.meta.i18n.en?.title : '') ||
     (isRisk.value ? (activeLocale === 'en' ? 'Risk Assessment' : '风险评估') : (activeLocale === 'en' ? 'Untitled Form' : '未命名表单'))
   ).trim();
-  let effectiveTitleEn = (store.meta.title_en || store.meta.i18n?.en?.title || '').trim();
+  let effectiveTitleEn = (store.meta.i18n.en?.title || '').trim();
 
   // 若英文标题仍为默认冲突模版名，且中文标题已被用户修改，则英文标题自动对齐中文标题，彻底杜绝后端 checkTitle 触发 409
   if (defaultTemplateTitles.includes(effectiveTitleEn) && !defaultTemplateTitles.includes(effectiveTitle)) {
     effectiveTitleEn = effectiveTitle;
-    store.meta.title_en = effectiveTitle;
+    setMetaTitle('en', effectiveTitle);
   }
   if (!effectiveTitleEn && hasEn) {
     effectiveTitleEn = effectiveTitle;
-    store.meta.title_en = effectiveTitle;
+    setMetaTitle('en', effectiveTitle);
   }
 
   const metaI18n: Record<string, Record<string, string>> = {};
@@ -1109,12 +1064,8 @@ export function buildSchema(): FormSchema {
       ? effectiveTitle
       : loc === 'en'
         ? (effectiveTitleEn || effectiveTitle)
-        : (store.meta.i18n?.[loc]?.title || '').trim();
-    const dVal = loc === 'zh'
-      ? (store.meta.description || store.meta.i18n?.zh?.description || '').trim()
-      : loc === 'en'
-        ? (store.meta.description_en || store.meta.i18n?.en?.description || '').trim()
-        : (store.meta.i18n?.[loc]?.description || '').trim();
+        : (store.meta.i18n[loc]?.title || '').trim();
+    const dVal = (store.meta.i18n[loc]?.description || '').trim();
     if (tVal) entry.title = tVal;
     if (dVal) entry.description = dVal;
     if (Object.keys(entry).length > 0) {
@@ -1148,17 +1099,11 @@ export function buildSchema(): FormSchema {
   const buildUnifiedOptions = (options: any[] | undefined) => {
     if (!Array.isArray(options)) return undefined;
     return options.map((opt: any) => {
-      const optI18n: Record<string, string> = {};
+      const optI18n: Record<string, Record<string, string>> = {};
       for (const loc of enabledLocales) {
-        const rawI18n = opt.i18n?.[loc];
-        const fromI18n = typeof rawI18n === 'object' ? rawI18n?.label : rawI18n;
-        const val = loc === 'zh'
-          ? (fromI18n ?? opt.label ?? '')
-          : loc === 'en'
-            ? (fromI18n ?? opt.label_en ?? '')
-            : (fromI18n ?? '');
+        const val = opt.i18n?.[loc]?.label;
         if (val !== undefined && val !== null && String(val).trim() !== '') {
-          optI18n[loc] = String(val);
+          optI18n[loc] = { label: String(val) };
         }
       }
       return {
@@ -1174,9 +1119,9 @@ export function buildSchema(): FormSchema {
       const riskPageI18n: Record<string, Record<string, string>> = {};
       for (const loc of enabledLocales) {
         const tVal = loc === 'zh'
-          ? (p.i18n?.zh?.title || p.title || '风险评估').trim()
+          ? (p.i18n?.zh?.title || '风险评估').trim()
           : loc === 'en'
-            ? (p.i18n?.en?.title || p.title_en || 'Risk Assessment').trim()
+            ? (p.i18n?.en?.title || 'Risk Assessment').trim()
             : (p.i18n?.[loc]?.title || '').trim();
         if (tVal) {
           riskPageI18n[loc] = { title: tVal };
@@ -1190,11 +1135,7 @@ export function buildSchema(): FormSchema {
           ? p.groups.map(g => {
               const grpI18n: Record<string, Record<string, string>> = {};
               for (const loc of enabledLocales) {
-                const gt = loc === 'zh'
-                  ? (g.i18n?.zh?.title ?? g.title ?? '').trim()
-                  : loc === 'en'
-                    ? (g.i18n?.en?.title ?? g.title_en ?? '').trim()
-                    : (g.i18n?.[loc]?.title ?? '').trim();
+                const gt = (g.i18n?.[loc]?.title ?? '').trim();
                 if (gt) grpI18n[loc] = { title: gt };
               }
               return {
@@ -1206,20 +1147,12 @@ export function buildSchema(): FormSchema {
         fields: p.fields.map(f => {
           const rawOpts = f.options && f.options.length
             ? JSON.parse(JSON.stringify(f.options))
-            : RISK_FIXED_OPTIONS.map(o => ({ ...o }));
+            : cloneRiskOptions();
           const fieldI18n: Record<string, Record<string, string>> = {};
           for (const loc of enabledLocales) {
             const dict: Record<string, string> = {};
-            const lbl = loc === 'zh'
-              ? (f.i18n?.zh?.label ?? f.label ?? '').trim()
-              : loc === 'en'
-                ? (f.i18n?.en?.label ?? f.label_en ?? '').trim()
-                : (f.i18n?.[loc]?.label ?? '').trim();
-            const hlp = loc === 'zh'
-              ? (f.i18n?.zh?.help ?? f.help ?? '').trim()
-              : loc === 'en'
-                ? (f.i18n?.en?.help ?? f.help_en ?? '').trim()
-                : (f.i18n?.[loc]?.help ?? '').trim();
+            const lbl = (f.i18n?.[loc]?.label ?? '').trim();
+            const hlp = (f.i18n?.[loc]?.help ?? '').trim();
             if (lbl) dict.label = lbl;
             if (hlp) dict.help = hlp;
             if (Object.keys(dict).length > 0) {
@@ -1244,16 +1177,8 @@ export function buildSchema(): FormSchema {
     const pageI18n: Record<string, Record<string, string>> = {};
     for (const loc of enabledLocales) {
       const entry: Record<string, string> = {};
-      const pTitle = loc === 'zh'
-        ? (p.i18n?.zh?.title ?? p.title ?? '').trim()
-        : loc === 'en'
-          ? (p.i18n?.en?.title ?? p.title_en ?? '').trim()
-          : (p.i18n?.[loc]?.title ?? '').trim();
-      const pDesc = loc === 'zh'
-        ? (p.i18n?.zh?.description ?? p.description ?? '').trim()
-        : loc === 'en'
-          ? (p.i18n?.en?.description ?? p.description_en ?? '').trim()
-          : (p.i18n?.[loc]?.description ?? '').trim();
+      const pTitle = (p.i18n?.[loc]?.title ?? '').trim();
+      const pDesc = (p.i18n?.[loc]?.description ?? '').trim();
       if (pTitle) entry.title = pTitle;
       if (pDesc) entry.description = pDesc;
       if (Object.keys(entry).length > 0) {
@@ -1280,51 +1205,48 @@ export function buildSchema(): FormSchema {
             delete fieldCopy.options;
           }
         }
+        // 补全默认文案：仅在对应语言该属性为空时写入 i18n
+        const ensureText = (loc: string, prop: string, val: string) => {
+          if (!fieldCopy.i18n?.[loc]?.[prop]) {
+            fieldCopy.i18n = fieldCopy.i18n || {};
+            fieldCopy.i18n[loc] = { ...(fieldCopy.i18n[loc] || {}), [prop]: val };
+          }
+        };
         // 签名组件：规范化填充默认值
         if (fieldCopy.type === 'signature') {
-          if (!fieldCopy.signPlaceholder && !fieldCopy.i18n?.zh?.signPlaceholder) {
-            fieldCopy.signPlaceholder = '请在此处手写签名';
-          }
-          if (hasEn && !fieldCopy.signPlaceholder_en && !fieldCopy.i18n?.en?.signPlaceholder) {
-            fieldCopy.signPlaceholder_en = 'Please sign here';
-          }
-          if (!fieldCopy.placeholder && !fieldCopy.i18n?.zh?.placeholder) {
-            fieldCopy.placeholder = '请在下方指定区域签名';
-          }
-          if (hasEn && !fieldCopy.placeholder_en && !fieldCopy.i18n?.en?.placeholder) {
-            fieldCopy.placeholder_en = 'Please sign in the designated area below';
+          ensureText('zh', 'signPlaceholder', '请在此处手写签名');
+          ensureText('zh', 'placeholder', '请在下方指定区域签名');
+          if (hasEn) {
+            ensureText('en', 'signPlaceholder', 'Please sign here');
+            ensureText('en', 'placeholder', 'Please sign in the designated area below');
           }
         }
         // 日期组件：起止模式规范化默认占位符，长期有效规范化默认文案
         if (fieldCopy.type === 'date') {
           if (fieldCopy.dateMode === 'range') {
-            if (!fieldCopy.placeholder || fieldCopy.placeholder === '请选择日期') {
-              fieldCopy.placeholder = '开始日期';
-              if (hasEn && !fieldCopy.placeholder_en) fieldCopy.placeholder_en = 'Start Date';
+            const zhPh = fieldCopy.i18n?.zh?.placeholder;
+            if (!zhPh || zhPh === '请选择日期') {
+              fieldCopy.i18n = fieldCopy.i18n || {};
+              fieldCopy.i18n.zh = { ...(fieldCopy.i18n.zh || {}), placeholder: '开始日期' };
+              if (hasEn) ensureText('en', 'placeholder', 'Start Date');
             }
-            if (!fieldCopy.endPlaceholder) {
-              fieldCopy.endPlaceholder = '截止日期';
-              if (hasEn && !fieldCopy.endPlaceholder_en) fieldCopy.endPlaceholder_en = 'End Date';
+            if (!fieldCopy.i18n?.zh?.endPlaceholder) {
+              ensureText('zh', 'endPlaceholder', '截止日期');
+              if (hasEn) ensureText('en', 'endPlaceholder', 'End Date');
             }
           }
-          if (fieldCopy.enableLongTerm) {
-            if (!fieldCopy.longTermText) {
-              fieldCopy.longTermText = '长期';
-              if (hasEn && !fieldCopy.longTermText_en) fieldCopy.longTermText_en = 'Long-term';
-            }
+          if (fieldCopy.enableLongTerm && !fieldCopy.i18n?.zh?.longTermText) {
+            ensureText('zh', 'longTermText', '长期');
+            if (hasEn) ensureText('en', 'longTermText', 'Long-term');
           }
         }
 
-        // 构建统一的多语言对象 i18n: { zh: { ... }, en: { ... }, ja: { ... } }
+        // 仅保留已启用语言、且非空的文案，统一输出 i18n: { zh: { ... }, en: { ... } }
         const unifiedFieldI18n: Record<string, Record<string, string>> = {};
         for (const loc of enabledLocales) {
           const locDict: Record<string, string> = {};
           for (const prop of TRANSLATABLE_FIELD_PROPS) {
-            const rawVal = loc === 'zh'
-              ? (fieldCopy.i18n?.zh?.[prop] ?? fieldCopy[prop])
-              : loc === 'en'
-                ? (fieldCopy.i18n?.en?.[prop] ?? fieldCopy[`${prop}_en`])
-                : fieldCopy.i18n?.[loc]?.[prop];
+            const rawVal = fieldCopy.i18n?.[loc]?.[prop];
             if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') {
               locDict[prop] = String(rawVal);
             }
@@ -1334,11 +1256,6 @@ export function buildSchema(): FormSchema {
           }
         }
 
-        // 移除顶层散落的旧版单语言及 _en 冗余属性与空值属性
-        for (const prop of TRANSLATABLE_FIELD_PROPS) {
-          delete fieldCopy[prop];
-          delete fieldCopy[`${prop}_en`];
-        }
         if (fieldCopy.defaultValue === '') delete fieldCopy.defaultValue;
         if (fieldCopy.endValue === '') delete fieldCopy.endValue;
         delete fieldCopy.i18n;
@@ -1364,8 +1281,7 @@ export function buildSchema(): FormSchema {
   return {
     schemaVersion: '1.0.0',
     meta: metaCopy,
-    pages: pagesCopy,
-    pageConnections: isRisk.value ? [] : []
+    pages: pagesCopy
   };
 }
 
@@ -1493,8 +1409,8 @@ export function createNewCanvas(options: {
   const existingId = store.meta.formId || store.meta.serialNo;
   const formId = (isPersisted && existingId) ? existingId : generateFormId(profileType, 'diy');
   const now = Date.now();
-  const curTitle = (store.meta.title || '').trim();
-  const curTitleEn = (store.meta.title_en || '').trim();
+  const curTitle = (store.meta.i18n?.zh?.title || '').trim();
+  const curTitleEn = (store.meta.i18n?.en?.title || '').trim();
   const shouldKeepTitle = isPersisted || Boolean(curTitle && !defaultTemplateTitles.includes(curTitle));
   const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
   const initialTitle = options.title?.trim() || (shouldKeepTitle && curTitle ? curTitle : defaultTitle);
@@ -1509,23 +1425,20 @@ export function createNewCanvas(options: {
   schema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(schema);
-  store.meta.title = initialTitle;
-  store.meta.title_en = initialTitleEn;
-  store.meta.description = options.description !== undefined ? options.description : (schema.meta.description || '');
-  if (!store.meta.i18n) store.meta.i18n = {};
   if (primaryLocale.value === 'en') {
-    store.meta.i18n.en = {
-      ...(store.meta.i18n.en || {}),
-      title: initialTitleEn,
-      ...(store.meta.description_en ? { description: store.meta.description_en } : {})
+    store.meta.i18n = {
+      en: {
+        ...(store.meta.i18n.en || {}),
+        title: initialTitleEn
+      }
     };
-    delete store.meta.i18n.zh;
   } else {
     store.meta.i18n.zh = {
       ...(store.meta.i18n.zh || {}),
       title: initialTitle,
-      ...(store.meta.description ? { description: store.meta.description } : {})
+      ...(options.description ? { description: options.description } : {})
     };
+    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: initialTitleEn };
   }
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
@@ -1600,8 +1513,8 @@ export function applyTemplateKey(
   const formId = (isPersisted && existingId) ? existingId : generateFormId(pType, 'template');
   const now = Date.now();
 
-  const curTitle = (store.meta.title || '').trim();
-  const curTitleEn = (store.meta.title_en || '').trim();
+  const curTitle = (store.meta.i18n?.zh?.title || '').trim();
+  const curTitleEn = (store.meta.i18n?.en?.title || '').trim();
   const shouldKeepTitle = isPersisted || Boolean(curTitle && !defaultTemplateTitles.includes(curTitle));
   const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
 
@@ -1609,8 +1522,6 @@ export function applyTemplateKey(
   const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : (store.currentLocale === 'en' ? defaultTitleEn : defaultTitle));
   const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : defaultTitleEn);
 
-  clonedSchema.meta.title = title;
-  clonedSchema.meta.title_en = titleEn;
   const isEnEntry = store.currentLocale === 'en';
   clonedSchema.meta.baseLocale = isEnEntry ? 'en' : 'zh';
   clonedSchema.meta.enabledLocales = isEnEntry ? ['en'] : ['zh', 'en'];
@@ -1630,9 +1541,6 @@ export function applyTemplateKey(
   clonedSchema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(clonedSchema);
-  store.meta.title = title;
-  store.meta.title_en = titleEn;
-  if (!store.meta.i18n) store.meta.i18n = {};
   if (isEnEntry) {
     store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
     delete store.meta.i18n.zh;
@@ -1662,13 +1570,9 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
     store.editorMode = 'risk';
   }
   const metaI18n = schema.meta?.i18n ? JSON.parse(JSON.stringify(schema.meta.i18n)) : undefined;
-  store.meta.title = metaI18n?.zh?.title || schema.meta?.title || '未命名表单';
-  store.meta.title_en = metaI18n?.en?.title || schema.meta?.title_en || '';
-  store.meta.description = metaI18n?.zh?.description || schema.meta?.description || '';
-  store.meta.description_en = metaI18n?.en?.description || schema.meta?.description_en || '';
   const baseLoc = schema.meta?.baseLocale || (store.currentLocale === 'en' ? 'en' : 'zh');
   store.meta.baseLocale = baseLoc;
-  store.meta.i18n = metaI18n;
+  store.meta.i18n = metaI18n || {};
 
   if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
     const loadedLocales = [...schema.meta.enabledLocales];
@@ -1747,34 +1651,30 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
 
   if (schema.pages && schema.pages.length > 0) {
     store.pages = schema.pages.map((p, idx) => {
-      const pageI18n = p.i18n ? JSON.parse(JSON.stringify(p.i18n)) : undefined;
-      const rawTitleZh = pageI18n?.zh?.title || p.title || '';
-      const rawTitleEn = pageI18n?.en?.title || p.title_en || '';
+      const pageI18n: I18nTexts = p.i18n ? JSON.parse(JSON.stringify(p.i18n)) : {};
+      const rawTitleZh = pageI18n.zh?.title || '';
+      const rawTitleEn = pageI18n.en?.title || '';
       const isSystemProfile = p.pageType === 'system_profile' || (idx === 0 && (rawTitleZh === '基本资料' || rawTitleEn === 'Basic Information'));
-      let pageTitle = rawTitleZh;
-      let pageTitleEn = rawTitleEn;
-      if (!isSystemProfile) {
+      if (isSystemProfile) {
+        // 系统预置「基本资料」页：补齐中英默认标题
+        pageI18n.zh = { ...(pageI18n.zh || {}), title: rawTitleZh || '基本资料' };
+        pageI18n.en = { ...(pageI18n.en || {}), title: rawTitleEn || 'Basic Information' };
+      } else {
         // 清理历史遗留纯数字序号残余（如 '02' / '2'），保持空状态以展示 placeholder
-        if (/^0\d+$/.test(pageTitle.trim())) {
-          pageTitle = '';
-        }
-        if (/^0\d+$/.test(pageTitleEn.trim())) {
-          pageTitleEn = '';
+        for (const loc of Object.keys(pageI18n)) {
+          if (/^0\d+$/.test((pageI18n[loc]?.title || '').trim())) {
+            pageI18n[loc] = { ...pageI18n[loc], title: '' };
+          }
         }
       }
       let hydratedGroups = p.groups && p.groups.length > 0
-        ? JSON.parse(JSON.stringify(p.groups)).map((g: any) => ({
-            ...g,
-            title: g.i18n?.zh?.title ?? g.title ?? '',
-            title_en: g.i18n?.en?.title ?? g.title_en ?? ''
-          }))
+        ? JSON.parse(JSON.stringify(p.groups))
         : undefined;
       if (isRisk.value && !isSystemProfile && (!hydratedGroups || hydratedGroups.length === 0)) {
         hydratedGroups = [
           {
             id: 'grp_risk_1',
-            title: '',
-            title_en: ''
+            i18n: {}
           }
         ];
       }
@@ -1785,10 +1685,6 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
         pageType: (isSystemProfile ? 'system_profile' : 'form') as 'form' | 'system_profile',
         profileType: isSystemProfile ? (store.meta.profileType || p.profileType || 'entity') : p.profileType,
         showSkeleton: p.showSkeleton !== false,
-        title: isSystemProfile ? (rawTitleZh || '基本资料') : pageTitle,
-        title_en: isSystemProfile ? (rawTitleEn || 'Basic Information') : pageTitleEn,
-        description: pageI18n?.zh?.description ?? p.description ?? '',
-        description_en: pageI18n?.en?.description ?? p.description_en ?? '',
         i18n: pageI18n,
         groups: hydratedGroups,
         fields: isSystemProfile ? [] : (p.fields || []).map(f => {
@@ -1796,43 +1692,24 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
           const meta = componentRegistry[resolvedType];
           const defaultData = meta ? meta.defaultData() : {};
           const rawFieldOptions = isRisk.value
-            ? RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+            ? cloneRiskOptions()
             : (f.options && f.options.length
                 ? f.options
                 : (defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined));
           const fieldOptions = rawFieldOptions
-            ? rawFieldOptions.map((opt: any) => {
-                const optZh = typeof opt.i18n?.zh === 'string' ? opt.i18n.zh : (opt.i18n?.zh?.label ?? opt.label ?? '');
-                const optEn = typeof opt.i18n?.en === 'string' ? opt.i18n.en : (opt.i18n?.en?.label ?? opt.label_en ?? '');
-                return {
-                  ...opt,
-                  label: optZh,
-                  label_en: optEn
-                };
-              })
+            ? rawFieldOptions.map((opt: any) => ({
+                value: opt.value,
+                i18n: opt.i18n ? JSON.parse(JSON.stringify(opt.i18n)) : {}
+              }))
             : undefined;
-          const fI18n = f.i18n ? JSON.parse(JSON.stringify(f.i18n)) : undefined;
+          // 默认文案作为兜底，schema 已有的 i18n 文案优先
+          const fI18n: I18nTexts = JSON.parse(JSON.stringify(defaultData.i18n || {}));
+          for (const [loc, dict] of Object.entries(f.i18n || {})) {
+            fI18n[loc] = { ...(fI18n[loc] || {}), ...JSON.parse(JSON.stringify(dict)) };
+          }
           return {
             ...defaultData,
             ...f,
-            label: fI18n?.zh?.label ?? f.label ?? defaultData.label ?? '',
-            label_en: fI18n?.en?.label ?? f.label_en ?? defaultData.label_en ?? '',
-            placeholder: fI18n?.zh?.placeholder ?? f.placeholder ?? defaultData.placeholder ?? '',
-            placeholder_en: fI18n?.en?.placeholder ?? f.placeholder_en ?? defaultData.placeholder_en ?? '',
-            endPlaceholder: fI18n?.zh?.endPlaceholder ?? f.endPlaceholder ?? defaultData.endPlaceholder ?? '',
-            endPlaceholder_en: fI18n?.en?.endPlaceholder ?? f.endPlaceholder_en ?? defaultData.endPlaceholder_en ?? '',
-            longTermText: fI18n?.zh?.longTermText ?? f.longTermText ?? defaultData.longTermText ?? '',
-            longTermText_en: fI18n?.en?.longTermText ?? f.longTermText_en ?? defaultData.longTermText_en ?? '',
-            signPlaceholder: fI18n?.zh?.signPlaceholder ?? f.signPlaceholder ?? defaultData.signPlaceholder ?? '',
-            signPlaceholder_en: fI18n?.en?.signPlaceholder ?? f.signPlaceholder_en ?? defaultData.signPlaceholder_en ?? '',
-            help: fI18n?.zh?.help ?? f.help ?? defaultData.help ?? '',
-            help_en: fI18n?.en?.help ?? f.help_en ?? defaultData.help_en ?? '',
-            content: fI18n?.zh?.content ?? f.content ?? defaultData.content ?? '',
-            content_en: fI18n?.en?.content ?? f.content_en ?? defaultData.content_en ?? '',
-            customErrorMessage: fI18n?.zh?.customErrorMessage ?? f.customErrorMessage ?? defaultData.customErrorMessage ?? '',
-            customErrorMessage_en: fI18n?.en?.customErrorMessage ?? f.customErrorMessage_en ?? defaultData.customErrorMessage_en ?? '',
-            declarationErrorMessage: fI18n?.zh?.declarationErrorMessage ?? f.declarationErrorMessage ?? defaultData.declarationErrorMessage ?? '',
-            declarationErrorMessage_en: fI18n?.en?.declarationErrorMessage ?? f.declarationErrorMessage_en ?? defaultData.declarationErrorMessage_en ?? '',
             i18n: fI18n,
             type: resolvedType,
             groupId: isRisk.value ? (f.groupId || fallbackGroupId) : f.groupId,
@@ -1969,16 +1846,6 @@ export const isBilingual = computed<boolean>(() => {
   return targetLocales.value.length > 0;
 });
 
-export const secondaryLocale = computed<string>(() => {
-  if (store.activeTargetLocale && targetLocales.value.includes(store.activeTargetLocale)) {
-    return store.activeTargetLocale;
-  }
-  if (targetLocales.value.length > 0) {
-    return targetLocales.value[0];
-  }
-  return primaryLocale.value === 'zh' ? 'en' : 'zh';
-});
-
 export function setActiveTargetLocale(locale: string) {
   if (targetLocales.value.includes(locale)) {
     store.activeTargetLocale = locale;
@@ -2014,8 +1881,9 @@ export function addTargetLocale(locale?: string) {
 
   store.pages.forEach(p => {
     if (p.pageType === 'system_profile') {
-      if (!p.title) p.title = '基本资料';
-      if (!p.title_en) p.title_en = 'Basic Information';
+      p.i18n = p.i18n || {};
+      if (!p.i18n.zh?.title) p.i18n.zh = { ...(p.i18n.zh || {}), title: '基本资料' };
+      if (!p.i18n.en?.title) p.i18n.en = { ...(p.i18n.en || {}), title: 'Basic Information' };
     }
   });
 
@@ -2064,22 +1932,6 @@ export function removeTargetLocale(locale: string) {
     store.activeTargetLocale = '';
     store.editingLocale = base;
   }
-  markDirty();
-  syncTranslationUrlParams();
-}
-
-export function enableBilingual() {
-  const base = primaryLocale.value;
-  const defaultTarget = base === 'zh' ? 'en' : 'zh';
-  addTargetLocale(defaultTarget);
-}
-
-export function disableMultiLanguage() {
-  const base = primaryLocale.value;
-  store.meta.baseLocale = base;
-  store.meta.enabledLocales = [base];
-  store.editingLocale = base;
-  store.workspaceMode = 'builder';
   markDirty();
   syncTranslationUrlParams();
 }

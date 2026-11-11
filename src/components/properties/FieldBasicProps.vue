@@ -521,7 +521,7 @@ const placeholderInputDefault = computed(() => {
   }
   const defaultData = componentRegistry[props.element.type]?.defaultData();
   if (defaultData) {
-    const defaultPlaceholder = store.currentLocale === 'en' ? defaultData.placeholder_en : defaultData.placeholder;
+    const defaultPlaceholder = defaultData.i18n?.[store.currentLocale === 'en' ? 'en' : 'zh']?.placeholder;
     if (defaultPlaceholder) return defaultPlaceholder;
   }
   return placeholderFieldLabel.value;

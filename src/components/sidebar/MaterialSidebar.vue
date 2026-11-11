@@ -1100,11 +1100,12 @@ function createGhostElement(type: ComponentType): FormElement {
       showLabel: true,
       layout: 'inline',
       weight: 1,
-      label: '',
-      label_en: '',
-      options: RISK_FIXED_OPTIONS.map(o => ({ ...o }))
+      i18n: {},
+      options: JSON.parse(JSON.stringify(RISK_FIXED_OPTIONS))
     };
   }
+  const ghostI18n = JSON.parse(JSON.stringify(defaultData.i18n || {}));
+  for (const loc of Object.keys(ghostI18n)) delete ghostI18n[loc].label;
   return {
     id: `ghost_${type}`,
     type,
@@ -1113,8 +1114,7 @@ function createGhostElement(type: ComponentType): FormElement {
     showLabel: defaultData.showLabel !== false,
     helpPosition: 'right',
     ...defaultData,
-    label: '',
-    label_en: '',
+    i18n: ghostI18n,
     options: defaultData.options ? JSON.parse(JSON.stringify(defaultData.options)) : undefined
   };
 }
@@ -1167,7 +1167,7 @@ const noSearchResult = computed(() => {
 });
 
 function getRiskGroupDisplayTitle(grp: any, idx: number): string {
-  const custom = store.currentLocale === 'en' ? grp.title_en?.trim() : grp.title?.trim();
+  const custom = grp.i18n?.[store.currentLocale === 'en' ? 'en' : 'zh']?.title?.trim();
   return custom || t('risk.defaultGroupTitle', undefined, { index: idx + 1 });
 }
 

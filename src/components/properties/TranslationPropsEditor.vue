@@ -83,7 +83,7 @@
 
         <div v-if="sourceLabel" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceLabel }}
@@ -125,7 +125,7 @@
 
         <div v-if="sourcePlaceholder" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourcePlaceholder }}
@@ -167,7 +167,7 @@
 
         <div v-if="sourceEndPlaceholder" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceEndPlaceholder }}
@@ -209,7 +209,7 @@
 
         <div v-if="sourceLongTermText" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceLongTermText }}
@@ -251,7 +251,7 @@
 
         <div v-if="sourceSignPlaceholder" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceSignPlaceholder }}
@@ -293,7 +293,7 @@
 
         <div v-if="sourceHelp" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceHelp }}
@@ -321,7 +321,6 @@
           :is-translation-mode="true"
           :source-lang-name="getLocaleNativeName(primaryLocale)"
           :source-text="effectiveSourceCustomError"
-          :is-source-default="isSourceCustomErrorDefault"
           :model-value="targetCustomError"
           :default-text="defaultTargetCustomError"
           input-id="prop-custom-error-input"
@@ -339,7 +338,6 @@
           :is-translation-mode="true"
           :source-lang-name="getLocaleNativeName(primaryLocale)"
           :source-text="effectiveSourceDeclarationError"
-          :is-source-default="isSourceDeclarationErrorDefault"
           :model-value="targetDeclarationError"
           :default-text="defaultTargetDeclarationError"
           input-id="prop-declaration-error-input"
@@ -371,7 +369,7 @@
 
         <div v-if="sourceContent" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceContent }}
@@ -472,7 +470,7 @@
 
         <div v-if="sourceGroupTitle" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourceGroupTitle }}
@@ -529,7 +527,7 @@
 
         <div v-if="sourcePageTitle" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourcePageTitle }}
@@ -571,7 +569,7 @@
 
         <div v-if="sourcePageDesc" class="rounded-[4px] bg-[#f8fafc] border border-slate-200/70 p-2 text-[12px] select-text">
           <div class="text-[10px] font-medium text-slate-400 mb-1 select-none">
-            {{ getLocaleNativeName(primaryLocale) }}原文
+            {{ t('trans.sourceTextLabel', undefined, { lang: getLocaleNativeName(primaryLocale) }) }}
           </div>
           <div class="text-slate-800 leading-relaxed break-words whitespace-pre-wrap select-text">
             {{ sourcePageDesc }}
@@ -761,8 +759,6 @@ const supportsCustomError = computed(() => {
   const el = selectedElement.value;
   if (el.type === 'alert') return false;
   const hasAnyCustom = Boolean(
-    el.customErrorMessage?.trim() ||
-    el.customErrorMessage_en?.trim() ||
     Object.values(el.i18n || {}).some(loc => loc?.customErrorMessage?.trim())
   );
   return Boolean(el.required || el.type === 'signature' || hasAnyCustom);
@@ -780,10 +776,6 @@ function handleTargetCustomErrorInput(val: string) {
   if (!selectedElement.value) return;
   setFieldText(selectedElement.value, 'customErrorMessage', val, store.activeTargetLocale);
 }
-
-const isSourceCustomErrorDefault = computed(() => {
-  return !sourceCustomError.value?.trim();
-});
 
 const effectiveSourceCustomError = computed(() => {
   if (!selectedElement.value) return '';
@@ -811,8 +803,6 @@ const supportsDeclarationError = computed(() => {
   const el = selectedElement.value;
   if (el.type !== 'signature') return false;
   const hasAnyDecl = Boolean(
-    el.declarationErrorMessage?.trim() ||
-    el.declarationErrorMessage_en?.trim() ||
     Object.values(el.i18n || {}).some(loc => loc?.declarationErrorMessage?.trim())
   );
   return Boolean(el.declarationRequired || hasAnyDecl);
@@ -832,10 +822,6 @@ function handleTargetDeclarationErrorInput(val: string) {
   if (!selectedElement.value) return;
   setFieldText(selectedElement.value, 'declarationErrorMessage', val, store.activeTargetLocale);
 }
-
-const isSourceDeclarationErrorDefault = computed(() => {
-  return !sourceDeclarationError.value?.trim();
-});
 
 const effectiveSourceDeclarationError = computed(() => {
   if (!selectedElement.value) return '';

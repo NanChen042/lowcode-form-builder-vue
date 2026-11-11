@@ -208,8 +208,4 @@ Mock.mock(/\/pc\/user\/authInfo.*/, 'get', () => {
   };
 });
 
-export function matchMockRequest(_config?: any): any | null {
-  return null;
-}
-
 export default Mock;

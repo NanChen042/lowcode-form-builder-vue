@@ -138,8 +138,8 @@ const nationalityMap = computed(() => {
   const map: Record<string, { zh: string; en: string }> = {};
   for (const opt of fullNationalityOptions) {
     map[opt.value.toLowerCase()] = {
-      zh: opt.label || '',
-      en: opt.label_en || opt.label || ''
+      zh: opt.i18n?.zh?.label || '',
+      en: opt.i18n?.en?.label || opt.i18n?.zh?.label || ''
     };
   }
   return map;

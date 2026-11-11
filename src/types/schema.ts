@@ -14,11 +14,13 @@ export type ComponentType =
 
 export type FormLocale = 'zh' | 'en' | 'ja' | 'ko' | 'zh-TW' | 'ms' | string;
 
+/** 统一多语言文本：locale -> { 属性名: 文本 } */
+export type I18nTexts = Record<string, Record<string, string>>;
+
 export interface FormElementOption {
-  label?: string;
-  label_en?: string;
-  i18n?: Record<string, string>;
   value: string;
+  /** 选项文案：{ zh: { label }, en: { label } } */
+  i18n?: I18nTexts;
 }
 
 export interface LinkageCondition {
@@ -34,21 +36,9 @@ export interface FieldLinkage {
 export interface FormElement {
   id: string;
   type: ComponentType;
-  label?: string;
-  label_en?: string;
   key: string;
   required: boolean;
   showLabel?: boolean;
-  placeholder?: string;
-  placeholder_en?: string;
-  endPlaceholder?: string;
-  endPlaceholder_en?: string;
-  signPlaceholder?: string;
-  signPlaceholder_en?: string;
-  longTermText?: string;
-  longTermText_en?: string;
-  help?: string;
-  help_en?: string;
   helpPosition?: 'right' | 'bottom';
   defaultValue?: string;
   options?: FormElementOption[];
@@ -74,31 +64,20 @@ export interface FormElement {
   maxSelections?: number | null;
   layout?: 'inline' | 'stack';
   declarationRequired?: boolean;
-  // 提示区块文本内容 (支持换行、- 列表、[文字](链接))
-  content?: string;
-  content_en?: string;
+  // 提示区块列表样式 (文本内容见 i18n.*.content，支持换行、- 列表、[文字](链接))
   listStyle?: 'circle' | 'number';
-  // 自定义校验错误提示 (中英双语)
-  customErrorMessage?: string;
-  customErrorMessage_en?: string;
-  declarationErrorMessage?: string;
-  declarationErrorMessage_en?: string;
   // 条件联动显示规则（支持单父或多父组合联动）
   linkage?: FieldLinkage;
   // 风险评估问题权重 (1-10，默认 1) 及所属分组 ID
   weight?: number;
   groupId?: string;
-  // 多语言扩展字典 (例如 ja, ko, zh-TW, ms 等)
-  i18n?: Record<string, Record<string, string>>;
+  // 全部可翻译文本：label / placeholder / endPlaceholder / signPlaceholder / longTermText / help / content / customErrorMessage / declarationErrorMessage
+  i18n?: I18nTexts;
 }
 
 export interface FormQuestionGroup {
   id: string;
-  title: string;
-  title_en?: string;
-  description?: string;
-  description_en?: string;
-  i18n?: Record<string, Record<string, string>>;
+  i18n?: I18nTexts;
 }
 
 export type ProfileType = 'customer' | 'individual' | 'entity' | 'client';
@@ -139,10 +118,6 @@ export interface ProfileCapitalItem {
 
 export interface FormPageSchema {
   id: string;
-  title?: string;
-  title_en?: string;
-  description?: string;
-  description_en?: string;
   fields: FormElement[];
   groups?: FormQuestionGroup[];
   pageType?: 'form' | 'system_profile';
@@ -153,7 +128,7 @@ export interface FormPageSchema {
   capitalTitle?: string;
   capitalTitle_en?: string;
   capitalList?: ProfileCapitalItem[];
-  i18n?: Record<string, Record<string, string>>;
+  i18n?: I18nTexts;
 }
 
 export interface FormPage extends FormPageSchema {
@@ -167,15 +142,11 @@ export interface PageConnection {
 }
 
 export interface FormMeta {
-  title?: string;
-  title_en?: string;
-  description?: string;
-  description_en?: string;
   profileType?: ProfileType;
   formType?: 'kyc' | 'risk';
   baseLocale?: FormLocale;
   enabledLocales?: FormLocale[];
-  i18n?: Record<string, Record<string, string>>;
+  i18n?: I18nTexts;
   // 内部创建模式：仅内部业务与后端识别，不在 URL 暴露明文
   source?: 'template' | 'diy';
   templateKey?: string;

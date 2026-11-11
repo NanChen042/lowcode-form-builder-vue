@@ -25,7 +25,7 @@
         <template v-else>
           <span class="h-3 w-[1px] bg-slate-200 mx-0.5"></span>
           <span class="px-1.5 py-0.5 text-[11px] font-medium bg-emerald-500/10 text-emerald-700 rounded-[4px] leading-none">
-            已译完
+            {{ t('trans.allDoneShort') }}
           </span>
         </template>
       </template>
@@ -34,7 +34,7 @@
     <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }">
       <button
         type="button"
-        aria-label="翻译管理功能说明"
+        :aria-label="t('header.bilingualGuideTitle')"
         class="w-6 h-8 rounded-(--radius-control) text-slate-400 hover:text-slate-600 hover:bg-[#f2f3f5] inline-flex items-center justify-center cursor-pointer"
         :title="t('header.bilingualGuideTitle')"
       >

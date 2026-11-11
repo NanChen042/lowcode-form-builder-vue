@@ -193,7 +193,7 @@ function isCanvasDirty(): boolean {
   // 针对风险评估模式初始默认仅有1个未编辑空问题的情况，视为纯净模板无需覆盖确认
   if (isRisk.value && store.pages.length === 1 && totalFields === 1) {
     const firstField = store.pages[0].fields?.[0];
-    if (firstField && !firstField.label && !firstField.label_en && !store.meta.formId) {
+    if (firstField && !Object.values(firstField.i18n || {}).some(d => d?.label?.trim()) && !store.meta.formId) {
       return false;
     }
   }

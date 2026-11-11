@@ -222,6 +222,10 @@ function handleClose() {
   emit('close');
 }
 
+function setMetaField(loc: string, key: 'title' | 'description', val: string) {
+  store.meta.i18n[loc] = { ...(store.meta.i18n[loc] || {}), [key]: val };
+}
+
 watch(
   () => props.visible,
   (val) => {
@@ -229,8 +233,8 @@ watch(
       isSuccess.value = false;
       nameError.value = false;
 
-      formModel.titleZh = store.meta.title || '';
-      formModel.titleEn = store.meta.title_en || '';
+      formModel.titleZh = store.meta.i18n.zh?.title || '';
+      formModel.titleEn = store.meta.i18n.en?.title || '';
 
       const defaultMockDescs = [
         '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
@@ -248,14 +252,14 @@ watch(
         'Comprehensive test suite for all form components, multiline row/char limits, selectors, conditional logic, and i18n'
       ];
 
-      const curDescZh = store.meta.description || '';
-      const curDescEn = store.meta.description_en || '';
+      const curDescZh = store.meta.i18n.zh?.description || '';
+      const curDescEn = store.meta.i18n.en?.description || '';
 
-      if (defaultMockDescs.includes(curDescZh)) store.meta.description = '';
-      if (defaultMockDescs.includes(curDescEn)) store.meta.description_en = '';
+      if (defaultMockDescs.includes(curDescZh)) setMetaField('zh', 'description', '');
+      if (defaultMockDescs.includes(curDescEn)) setMetaField('en', 'description', '');
 
-      formModel.descZh = store.meta.description || '';
-      formModel.descEn = store.meta.description_en || '';
+      formModel.descZh = store.meta.i18n.zh?.description || '';
+      formModel.descEn = store.meta.i18n.en?.description || '';
 
       nextTick(() => {
         if (activeLocale.value === 'zh') {
@@ -284,10 +288,10 @@ async function handleConfirmPublish() {
     return;
   }
 
-  if (formModel.titleZh.trim()) store.meta.title = formModel.titleZh.trim();
-  if (formModel.titleEn.trim()) store.meta.title_en = formModel.titleEn.trim();
-  store.meta.description = formModel.descZh.trim();
-  store.meta.description_en = formModel.descEn.trim();
+  if (formModel.titleZh.trim()) setMetaField('zh', 'title', formModel.titleZh.trim());
+  if (formModel.titleEn.trim()) setMetaField('en', 'title', formModel.titleEn.trim());
+  setMetaField('zh', 'description', formModel.descZh.trim());
+  setMetaField('en', 'description', formModel.descEn.trim());
 
   const schema = buildSchema();
   isSubmitting.value = true;

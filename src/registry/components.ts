@@ -1,4 +1,4 @@
-import type { ComponentType, FormElement, FormElementOption } from '@/types/schema';
+import type { ComponentType, FormElement, FormElementOption, I18nTexts } from '@/types/schema';
 import {
   Type,
   AlignLeft,
@@ -18,6 +18,7 @@ export interface ComponentMeta {
   type: ComponentType;
   label: string;
   label_en: string;
+  i18n?: I18nTexts;
   category: 'basic' | 'business' | 'layout';
   icon: string;
   defaultData: () => Partial<FormElement>;
@@ -45,15 +46,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'input',
     label: '单行文本',
     label_en: 'Single Line',
+    i18n: { zh: { label: '单行文本' }, en: { label: 'Single Line' } },
     category: 'basic',
     icon: 'Type',
     defaultData: () => ({
-      label: '单行文本',
-      label_en: 'Single Line Text',
-      placeholder: '请输入内容',
-      placeholder_en: 'Please enter content',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '单行文本', placeholder: '请输入内容' },
+        en: { label: 'Single Line Text', placeholder: 'Please enter content' }
+      },
       defaultValue: '',
       inputType: 'text',
       required: true,
@@ -64,15 +64,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'textarea',
     label: '多行文本',
     label_en: 'Multi-line',
+    i18n: { zh: { label: '多行文本' }, en: { label: 'Multi-line' } },
     category: 'basic',
     icon: 'AlignLeft',
     defaultData: () => ({
-      label: '多行文本',
-      label_en: 'Multi-line Text',
-      placeholder: '请输入详细描述...',
-      placeholder_en: 'Please enter detailed description...',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '多行文本', placeholder: '请输入详细描述...' },
+        en: { label: 'Multi-line Text', placeholder: 'Please enter detailed description...' }
+      },
       defaultValue: '',
       required: true,
       showLabel: true,
@@ -85,22 +84,21 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'select',
     label: '下拉选择',
     label_en: 'Dropdown',
+    i18n: { zh: { label: '下拉选择' }, en: { label: 'Dropdown' } },
     category: 'basic',
     icon: 'SquareChevronDown',
     defaultData: () => ({
-      label: '下拉选择',
-      label_en: 'Dropdown Select',
-      placeholder: '请选择选项',
-      placeholder_en: 'Please select an option',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '下拉选择', placeholder: '请选择选项' },
+        en: { label: 'Dropdown Select', placeholder: 'Please select an option' }
+      },
       defaultValue: '',
       multiple: false,
       required: true,
       showLabel: true,
       options: [
-        { label: '选项一', label_en: 'Option 1', value: 'option_1' },
-        { label: '选项二', label_en: 'Option 2', value: 'option_2' }
+        { value: 'option_1', i18n: { zh: { label: '选项一' }, en: { label: 'Option 1' } } },
+        { value: 'option_2', i18n: { zh: { label: '选项二' }, en: { label: 'Option 2' } } }
       ]
     })
   },
@@ -108,20 +106,21 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'radio',
     label: '单选框组',
     label_en: 'Radio',
+    i18n: { zh: { label: '单选框组' }, en: { label: 'Radio' } },
     category: 'basic',
     icon: 'CircleDot',
     defaultData: () => ({
-      label: '单选框组',
-      label_en: 'Radio Group',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '单选框组' },
+        en: { label: 'Radio Group' }
+      },
       defaultValue: '',
       layout: 'inline',
       required: true,
       showLabel: true,
       options: [
-        { label: '选项一', label_en: 'Option 1', value: 'option_1' },
-        { label: '选项二', label_en: 'Option 2', value: 'option_2' }
+        { value: 'option_1', i18n: { zh: { label: '选项一' }, en: { label: 'Option 1' } } },
+        { value: 'option_2', i18n: { zh: { label: '选项二' }, en: { label: 'Option 2' } } }
       ]
     })
   },
@@ -129,20 +128,21 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'checkbox',
     label: '多选框组',
     label_en: 'Checkbox',
+    i18n: { zh: { label: '多选框组' }, en: { label: 'Checkbox' } },
     category: 'basic',
     icon: 'CheckSquare',
     defaultData: () => ({
-      label: '多选框组',
-      label_en: 'Checkbox Group',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '多选框组' },
+        en: { label: 'Checkbox Group' }
+      },
       defaultValue: '',
       layout: 'inline',
       required: true,
       showLabel: true,
       options: [
-        { label: '选项一', label_en: 'Option 1', value: 'option_1' },
-        { label: '选项二', label_en: 'Option 2', value: 'option_2' }
+        { value: 'option_1', i18n: { zh: { label: '选项一' }, en: { label: 'Option 1' } } },
+        { value: 'option_2', i18n: { zh: { label: '选项二' }, en: { label: 'Option 2' } } }
       ]
     })
   },
@@ -150,15 +150,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'date',
     label: '日期选择',
     label_en: 'Date Picker',
+    i18n: { zh: { label: '日期选择' }, en: { label: 'Date Picker' } },
     category: 'basic',
     icon: 'Calendar',
     defaultData: () => ({
-      label: '日期选择',
-      label_en: 'Date Picker',
-      placeholder: '请选择日期',
-      placeholder_en: 'Please select a date',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '日期选择', placeholder: '请选择日期' },
+        en: { label: 'Date Picker', placeholder: 'Please select a date' }
+      },
       defaultValue: '',
       endValue: '',
       dateType: 'date',
@@ -173,15 +172,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'country',
     label: '国家',
     label_en: 'Country',
+    i18n: { zh: { label: '国家' }, en: { label: 'Country' } },
     category: 'business',
     icon: 'Globe',
     defaultData: () => ({
-      label: '国家',
-      label_en: 'Country',
-      placeholder: '请选择国家',
-      placeholder_en: 'Please select a country',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '国家', placeholder: '请选择国家' },
+        en: { label: 'Country', placeholder: 'Please select a country' }
+      },
       defaultValue: '',
       required: true,
       showLabel: true,
@@ -193,15 +191,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'nationality',
     label: '国籍',
     label_en: 'Nationality',
+    i18n: { zh: { label: '国籍' }, en: { label: 'Nationality' } },
     category: 'business',
     icon: 'Flag',
     defaultData: () => ({
-      label: '国籍',
-      label_en: 'Nationality',
-      placeholder: '请选择国籍',
-      placeholder_en: 'Please select nationality',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '国籍', placeholder: '请选择国籍' },
+        en: { label: 'Nationality', placeholder: 'Please select nationality' }
+      },
       defaultValue: '',
       required: true,
       showLabel: true,
@@ -213,22 +210,19 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'signature',
     label: '电子签名',
     label_en: 'E-Signature',
+    i18n: { zh: { label: '电子签名' }, en: { label: 'E-Signature' } },
     category: 'business',
     icon: 'Signature',
     defaultData: () => ({
-      label: '电子签名',
-      label_en: 'E-Signature',
-      placeholder: '请在下方指定区域签名',
-      placeholder_en: 'Please sign in the designated area below',
-      signPlaceholder: '请在此处手写签名',
-      signPlaceholder_en: 'Please sign here',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '电子签名', placeholder: '请在下方指定区域签名', signPlaceholder: '请在此处手写签名' },
+        en: { label: 'E-Signature', placeholder: 'Please sign in the designated area below', signPlaceholder: 'Please sign here' }
+      },
       showLabel: true,
       required: true,
       declarationRequired: true,
       options: [
-        { label: '本人保证以上填写的信息真实、准确、有效。', label_en: 'I confirm that all information provided is true, accurate and valid.', value: 'dec_1' }
+        { value: 'dec_1', i18n: { zh: { label: '本人保证以上填写的信息真实、准确、有效。' }, en: { label: 'I confirm that all information provided is true, accurate and valid.' } } }
       ]
     })
   },
@@ -236,31 +230,31 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'alert',
     label: '提示区块',
     label_en: 'Notice',
+    i18n: { zh: { label: '提示区块' }, en: { label: 'Notice' } },
     category: 'business',
     icon: 'Info',
     defaultData: () => ({
-      label: '提示',
-      label_en: 'Notice',
+      i18n: {
+        zh: { label: '提示' },
+        en: { label: 'Notice' }
+      },
       required: false,
       showLabel: true,
-      listStyle: 'circle',
-      content: '',
-      content_en: ''
+      listStyle: 'circle'
     })
   },
   email: {
     type: 'email',
     label: '电子邮箱',
     label_en: 'Email',
+    i18n: { zh: { label: '电子邮箱' }, en: { label: 'Email' } },
     category: 'basic',
     icon: 'Mail',
     defaultData: () => ({
-      label: '电子邮箱',
-      label_en: 'Email Address',
-      placeholder: '请输入邮箱',
-      placeholder_en: 'Please enter email',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '电子邮箱', placeholder: '请输入邮箱' },
+        en: { label: 'Email Address', placeholder: 'Please enter email' }
+      },
       defaultValue: '',
       required: true,
       showLabel: true
@@ -270,15 +264,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     type: 'phone',
     label: '手机号码',
     label_en: 'Phone',
+    i18n: { zh: { label: '手机号码' }, en: { label: 'Phone' } },
     category: 'business',
     icon: 'Smartphone',
     defaultData: () => ({
-      label: '手机号码',
-      label_en: 'Phone Number',
-      placeholder: '',
-      placeholder_en: '',
-      help: '',
-      help_en: '',
+      i18n: {
+        zh: { label: '手机号码' },
+        en: { label: 'Phone Number' }
+      },
       dialCode: '+65',
       countryCode: 'sg',
       strictPhoneValidation: true,
