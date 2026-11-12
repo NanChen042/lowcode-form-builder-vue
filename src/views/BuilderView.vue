@@ -72,6 +72,9 @@ import {
   kycCustomerTemplate,
   kycIndividualTemplate,
   kycEntityTemplate,
+  riskCustomerTemplate,
+  riskIndividualTemplate,
+  riskEntityTemplate,
   blankTemplate,
   createBlankTemplate,
   createRiskAssessmentTemplate
@@ -314,8 +317,19 @@ onMounted(async () => {
         notFound = true;
       }
     } else if (isRisk.value) {
-      resetToBlankState();
-      targetTemplateKey = 'blank';
+      if (tplParam === 'risk-customer') {
+        targetTemplate = riskCustomerTemplate;
+        targetTemplateKey = 'risk-customer';
+      } else if (tplParam === 'risk-individual') {
+        targetTemplate = riskIndividualTemplate;
+        targetTemplateKey = 'risk-individual';
+      } else if (tplParam === 'risk-entity') {
+        targetTemplate = riskEntityTemplate;
+        targetTemplateKey = 'risk-entity';
+      } else {
+        resetToBlankState();
+        targetTemplateKey = 'blank';
+      }
     } else if (tplParam === 'kyc-customer' || tplParam === 'kyc-client' || typeParam === 'customer' || typeParam === 'client') {
       targetTemplate = kycCustomerTemplate;
       targetTemplateKey = 'kyc-customer';
@@ -348,12 +362,16 @@ onMounted(async () => {
       (window as any).__dismissAppLoader();
     }
     const notFoundPath = '/404';
+    const isSubpath = typeof window !== 'undefined' && window.location.pathname.includes('/form-builder');
     router.replace({
       path: notFoundPath,
       query: {
         reason: 'form',
         id: rawId,
-        lang: store.currentLocale
+        lang: store.currentLocale,
+        ...(isRisk.value ? { mode: 'risk' } : {}),
+        ...(isSubpath ? { sub: '1' } : {}),
+        ...(typeParam ? { profileType: typeParam } : {})
       }
     });
     return;

@@ -44,9 +44,10 @@
           </label>
           <span class="text-[10px] text-slate-400 font-mono">H2</span>
         </div>
-        <a-input
+        <a-textarea
           id="page-prop-title-input"
           v-model="pageTitleModel"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           allow-clear
           :placeholder="t('prop.pageTitlePlaceholder')"
           class="w-full !rounded-[4px] !text-xs"

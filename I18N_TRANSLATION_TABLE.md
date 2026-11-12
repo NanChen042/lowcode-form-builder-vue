@@ -434,6 +434,19 @@
 | 实体案例 KYC 模板 | Entity KYC Template | | | |
 | 实体案例 | Entity | | | |
 | 涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。 | Covers corporate business activities, sales volume, funding source, listed company stock code linkage, and authorized signature. | | | |
+| 涵盖客户、国家及服务交易三大风险维度（24 题）。 | Covers client, country, and service risk dimensions (24 questions). | | | |
+| 涵盖恐怖分子名单、制裁、PEP 及高风险国家（5 题）。 | Covers terrorist list, sanctions, PEP, and FATF high-risk checks (5 questions). | | | |
+| 涵盖恐怖分子名单、制裁、FATF 及高风险实体（4 题）。 | Covers terrorist list, sanctions, FATF, and higher-risk entity checks (4 questions). | | | |
+| {count} 题 | {count} Questions | | | |
+| 客户案例风险评估模板 | Customer Risk Template | | | |
+| 涵盖客户、国家及服务交易三大风险维度，共 3 个分组 24 道合规评估项。 | Covers client, country, and service risk factors across 3 groups (24 compliance questions). | | | |
+| 1 页面 · 24 题 | 1 Page · 24 Questions | | | |
+| 个人案例风险评估模板 | Individual Risk Template | | | |
+| 涵盖 MHA 恐怖分子名单、MAS 制裁名单、PEP 及高风险国家等 5 道评估项。 | Covers MHA terrorist list, MAS sanctions list, PEP, and FATF high-risk checks (5 questions). | | | |
+| 1 页面 · 5 题 | 1 Page · 5 Questions | | | |
+| 实体案例风险评估模板 | Entity Risk Template | | | |
+| 涵盖 MHA 恐怖分子名单、MAS 制裁名单、FATF 名单及高风险客户特征 4 道评估项。 | Covers MHA terrorist list, MAS sanctions list, FATF list, and higher-risk entity checks (4 questions). | | | |
+| 1 页面 · 4 题 | 1 Page · 4 Questions | | | |
 
 ## 新建表单弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -467,7 +480,7 @@
 | 发布表单 | Publish Form | | | |
 | 请填写所有必填项并修正错误 | Please fill in all required fields | | | |
 | 发布失败 | Publish failed | | | |
-| 核对并确认表单基本信息与发布介绍，确认无误后即可生成公网访问链接。 | Confirm form name and description before generating public access link. | | | |
+| 核对并确认表单基本信息与发布介绍，确认无误后即可发布生效。 | Verify and confirm form name and description before publishing. | | | |
 | 核对并确认风险评估表单基本信息，确认无误后即可发布生效。 | Verify and confirm risk assessment form details before publishing. | | | |
 | 表单名称 | Form Name | | | |
 | 请输入表单名称 (50字以内) | Enter form name (up to 50 chars) | | | |

@@ -6,8 +6,16 @@ import tplCustomerIcon from '@/assets/templates/c.png';
 import tplIndividualIcon from '@/assets/templates/u.png';
 import tplEntityIcon from '@/assets/templates/e.png';
 
+export type ScenarioTemplateKey =
+  | 'kyc-customer'
+  | 'kyc-individual'
+  | 'kyc-entity'
+  | 'risk-customer'
+  | 'risk-individual'
+  | 'risk-entity';
+
 export interface ScenarioTemplateMeta {
-  key: 'kyc-customer' | 'kyc-individual' | 'kyc-entity';
+  key: ScenarioTemplateKey;
   type: ProfileType;
   tagColor: string;
   pages: number;
@@ -104,6 +112,87 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
   }
 ];
 
+export const RISK_SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
+  {
+    key: 'risk-customer',
+    type: 'customer',
+    tagColor: 'purple',
+    pages: 1,
+    fields: 24,
+    descKey: 'wizard.tplRiskCustomerDesc',
+    image: tplCustomerImg,
+    icon: tplCustomerIcon,
+    code: 'SG_RISK_CUSTOMER',
+    bannerBgClass: 'bg-[#faf5ff]',
+    i18n: {
+      zh: {
+        title: '客户案例风险评估模板',
+        tag: '客户案例',
+        desc: '涵盖客户、国家及服务交易三大风险维度，共 3 个分组 24 道合规评估项。',
+        stats: '1 页面 · 24 题'
+      },
+      en: {
+        title: 'Customer Risk Template',
+        tag: 'Customer',
+        desc: 'Covers client, country, and service risk factors across 3 groups (24 compliance questions).',
+        stats: '1 Page · 24 Questions'
+      }
+    }
+  },
+  {
+    key: 'risk-individual',
+    type: 'individual',
+    tagColor: 'green',
+    pages: 1,
+    fields: 5,
+    descKey: 'wizard.tplRiskIndividualDesc',
+    image: tplIndividualImg,
+    icon: tplIndividualIcon,
+    code: 'SG_RISK_INDIVIDUAL',
+    bannerBgClass: 'bg-[#f0fdf4]',
+    i18n: {
+      zh: {
+        title: '个人案例风险评估模板',
+        tag: '个人案例',
+        desc: '涵盖 MHA 恐怖分子名单、MAS 制裁名单、PEP 及高风险国家等 5 道评估项。',
+        stats: '1 页面 · 5 题'
+      },
+      en: {
+        title: 'Individual Risk Template',
+        tag: 'Individual',
+        desc: 'Covers MHA terrorist list, MAS sanctions list, PEP, and FATF high-risk checks (5 questions).',
+        stats: '1 Page · 5 Questions'
+      }
+    }
+  },
+  {
+    key: 'risk-entity',
+    type: 'entity',
+    tagColor: 'arcoblue',
+    pages: 1,
+    fields: 4,
+    descKey: 'wizard.tplRiskEntityDesc',
+    image: tplEntityImg,
+    icon: tplEntityIcon,
+    code: 'SG_RISK_ENTITY',
+    bannerBgClass: 'bg-[#f0f9ff]',
+    i18n: {
+      zh: {
+        title: '实体案例风险评估模板',
+        tag: '实体案例',
+        desc: '涵盖 MHA 恐怖分子名单、MAS 制裁名单、FATF 名单及高风险客户特征 4 道评估项。',
+        stats: '1 页面 · 4 题'
+      },
+      en: {
+        title: 'Entity Risk Template',
+        tag: 'Entity',
+        desc: 'Covers MHA terrorist list, MAS sanctions list, FATF list, and higher-risk entity checks (4 questions).',
+        stats: '1 Page · 4 Questions'
+      }
+    }
+  }
+];
+
 export const presetCustomerProfileFields: ProfileFieldItem[] = [
   { label: '企业注册全称', label_en: 'Company Name', value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '65%' },
   { label: '统一机构识别码 (UEN)', label_en: 'UEN', value: '202319827K', skeletonWidth: '40%' },
@@ -158,12 +247,12 @@ export function createBlankTemplate(
         (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
 
   const defaultMetaMap: Record<string, { title: string; desc: string }> = {
-    customer: { title: isEnEntry ? 'Corporate Customer CDD Questionnaire' : '企业客户尽职调查问卷', desc: '' },
-    client: { title: isEnEntry ? 'Corporate Customer CDD Questionnaire' : '企业客户尽职调查问卷', desc: '' },
-    individual: { title: isEnEntry ? 'Individual CDD Questionnaire' : '个人客户尽职调查问卷', desc: '' },
-    entity: { title: isEnEntry ? 'Corporate Entity CDD Questionnaire' : '实体企业尽职调查问卷', desc: '' }
+    customer: { title: 'SG_CDD_CUSTOMER', desc: '' },
+    client: { title: 'SG_CDD_CUSTOMER', desc: '' },
+    individual: { title: 'SG_CDD_INDIVIDUAL', desc: '' },
+    entity: { title: 'SG_CDD_ENTITY', desc: '' }
   };
-  const resolvedTitle = title || defaultMetaMap[normType]?.title || (isEnEntry ? 'Corporate Customer CDD Questionnaire' : '企业客户尽职调查问卷');
+  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_CUSTOMER';
   const resolvedDesc = description || '';
 
   const defaultFields = normType === 'individual'
@@ -340,12 +429,12 @@ export const kycCustomerTemplate: FormSchema = {
     "templateKey": "kyc-customer",
     "i18n": {
       "zh": {
-        "title": "企业客户尽职调查问卷",
-        "description": "适用于企业及机构客户身份认证与合规KYC尽职调查场景。"
+        "title": "SG_CDD_CUSTOMER",
+        "description": ""
       },
       "en": {
-        "title": "Corporate Customer CDD Questionnaire",
-        "description": "Applicable for corporate and institutional client KYC due diligence."
+        "title": "SG_CDD_CUSTOMER",
+        "description": ""
       }
     }
   },
@@ -774,12 +863,12 @@ export const kycIndividualTemplate: FormSchema = {
     "templateKey": "kyc-individual",
     "i18n": {
       "zh": {
-        "title": "个人客户尽职调查问卷",
-        "description": "适用于自然人、个人客户身份认证与合规KYC尽职调查场景。"
+        "title": "SG_CDD_INDIVIDUAL",
+        "description": ""
       },
       "en": {
-        "title": "Individual CDD Questionnaire",
-        "description": "Applicable for individual customer identification and compliance KYC due diligence."
+        "title": "SG_CDD_INDIVIDUAL",
+        "description": ""
       }
     }
   },
@@ -1772,12 +1861,12 @@ export const kycEntityTemplate: FormSchema = {
     "templateKey": "kyc-entity",
     "i18n": {
       "zh": {
-        "title": "实体企业尽职调查问卷",
-        "description": "实体企业尽职调查问卷标准模板"
+        "title": "SG_CDD_ENTITY",
+        "description": ""
       },
       "en": {
-        "title": "Corporate Entity CDD Questionnaire",
-        "description": "Standard Corporate Entity Customer Due Diligence Questionnaire"
+        "title": "SG_CDD_ENTITY",
+        "description": ""
       }
     }
   },
@@ -2700,3 +2789,140 @@ export const multilingualMockTemplate: FormSchema = {
     }
   ]
 };
+
+interface RiskQuestionSeed {
+  id: string;
+  key: string;
+  groupId: string;
+  zh: string;
+  en: string;
+  weight?: number;
+}
+
+interface RiskGroupSeed {
+  id: string;
+  zh: string;
+  en: string;
+}
+
+function createPresetRiskSchema(params: {
+  profileType: ProfileType;
+  templateKey: ScenarioTemplateKey;
+  code: string;
+  groups: RiskGroupSeed[];
+  questions: RiskQuestionSeed[];
+}): FormSchema {
+  return {
+    schemaVersion: '1.0.0',
+    meta: {
+      profileType: params.profileType,
+      formType: 'risk',
+      baseLocale: 'zh',
+      enabledLocales: ['zh', 'en'],
+      source: 'template',
+      templateKey: params.templateKey,
+      i18n: {
+        zh: { title: params.code, description: '' },
+        en: { title: params.code, description: '' }
+      }
+    },
+    pages: [
+      {
+        id: 'page_risk_0',
+        pageType: 'form',
+        i18n: {
+          zh: { title: '风险评估' },
+          en: { title: 'Risk Assessment' }
+        },
+        groups: params.groups.map(g => ({
+          id: g.id,
+          i18n: {
+            zh: { title: g.zh },
+            en: { title: g.en }
+          }
+        })),
+        fields: params.questions.map(q => ({
+          id: q.id,
+          key: q.key,
+          type: 'radio',
+          required: true,
+          groupId: q.groupId,
+          weight: q.weight ?? 1,
+          i18n: {
+            zh: { label: q.zh },
+            en: { label: q.en }
+          },
+          options: JSON.parse(JSON.stringify(RISK_FIXED_OPTIONS))
+        }))
+      }
+    ]
+  };
+}
+
+export const riskCustomerTemplate: FormSchema = createPresetRiskSchema({
+  profileType: 'customer',
+  templateKey: 'risk-customer',
+  code: 'SG_RISK_CUSTOMER',
+  groups: [
+    { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' },
+    { id: 'grp_1793342667455_13', zh: '国家或地区风险因素', en: 'Country or Territory Risk Factors' },
+    { id: 'grp_1793342755246_19', zh: '服务或交易风险因素', en: 'Service or Transaction Risk Factors' }
+  ],
+  questions: [
+    { id: 'cmp_1', key: 'radio_1', groupId: 'grp_risk_1', zh: '该客户是否为新客户？', en: 'Is this client a new customer?' },
+    { id: 'cmp_2', key: 'radio_2', groupId: 'grp_risk_1', zh: '该客户是否使用提名董事或股东？', en: 'Does the client use nominee directors or shareholders?' },
+    { id: 'cmp_3', key: 'radio_3', groupId: 'grp_risk_1', zh: '如适用，挂名股东是否持有公司的多数股权？', en: 'Where applicable, do the nominee shareholders hold majority ownership in the company?' },
+    { id: 'cmp_4', key: 'radio_4', groupId: 'grp_risk_1', zh: '鉴于客户/委托人的业务性质，其股权结构是否显得异常或过于复杂？', en: 'Does the ownership structure of the customer/client appear unusual or excessively complex given the nature of its business?' },
+    { id: 'cmp_5', key: 'radio_5', groupId: 'grp_risk_1', zh: '客户/委托人的业务是否为现金密集型？', en: 'Is the customer/client’s business cash-intensive?' },
+    { id: 'cmp_6', key: 'radio_6', groupId: 'grp_risk_1', zh: '拟任董事、合伙人或股东是否曾因欺诈、失信或类似不当行为而被判刑？', en: 'Have any of the proposed directors, partners, or shareholders ever been convicted of a criminal offence involving fraud, dishonesty, or similar misconduct?' },
+    { id: 'cmp_7', key: 'radio_7', groupId: 'grp_risk_1', zh: '客户/委托人、任何实益拥有人或其代理人是否属于政治公众人物(PEP)？', en: 'Is the customer/client, any beneficial owner, or any of their agents a Politically Exposed Person (PEP)?' },
+    { id: 'cmp_8', key: 'radio_8', groupId: 'grp_risk_1', zh: '客户/委托人是否为未在新加坡注册的慈善或非营利组织？', en: 'Is the customer/client a charitable or non-profit organisation that is not registered in Singapore?' },
+    { id: 'cmp_9', key: 'radio_9', groupId: 'grp_risk_1', zh: '客户/委托人是否看起来像是一家空壳公司(即无实际业务活动或实体办公场所的公司)？', en: 'Does the customer/client appear to be a shell company (i.e., a company with no significant business activity or physical presence)?' },
+    { id: 'cmp_10', key: 'radio_10', groupId: 'grp_risk_1', zh: '客户/委托人是否从事高风险行业或领域？', en: 'Is the customer/client engaged in a high-risk industry or sector?' },
+    { id: 'cmp_11', key: 'radio_11', groupId: 'grp_risk_1', zh: '专业机构是否通过额外筛查(如使用 Google、美国财政部外国资产控制办公室发布的制裁名单，或其他第三方数据库)发现与客户/委托人、其实益拥有人、授权代表或关联方有关的不利信息或负面新闻？', en: 'Has the professional firm identified any adverse news or information through additional screening of the customer/client, its beneficial owner, authorised representative, or connected party using sources such as Google, OFAC sanctions lists, or third-party databases?' },
+    { id: 'cmp_12', key: 'radio_12', groupId: 'grp_risk_1', zh: '是否存在与客户/委托人、其实益拥有人、授权代表或关联方相关的异常情况，且无法被令人满意地解释或解决？', en: 'Are there any exceptions or irregularities related to the customer/client, its beneficial owner, authorised representative, or connected party that cannot be satisfactorily explained or resolved?' },
+    { id: 'cmp_14', key: 'radio_14', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被认定为缺乏充分反洗钱(AML)或反恐融资(CFT)措施的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or conducting transactions with, a country or territory identified as lacking adequate anti-money laundering (AML) or counter-financing of terrorism (CFT) measures?' },
+    { id: 'cmp_15', key: 'radio_15', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与与高风险司法管辖区有往来的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory that has dealings with high-risk jurisdictions?' },
+    { id: 'cmp_16', key: 'radio_16', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被联合国(UN)等监管机构制裁的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory that is subject to sanctions imposed by a regulatory body, such as the United Nations (UN)?' },
+    { id: 'cmp_17', key: 'radio_17', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被认定为资助或支持恐怖活动，或其境内有被指定的恐怖组织活动的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory identified as financing or supporting terrorist activities, or as having designated terrorist organisations operating within its borders?' },
+    { id: 'cmp_18', key: 'radio_18', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与金融行动特别工作组(FATF)呼吁采取对策的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory for which the FATF has called for the application of countermeasures?' },
+    { id: 'cmp_20', key: 'radio_20', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否曾指示以匿名或不披露身份的方式进行交易(包括现金交易)？', en: 'Has the customer/client provided any instruction to conduct a transaction (including cash) anonymously or without disclosing their identity?' },
+    { id: 'cmp_21', key: 'radio_21', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否曾指示设立包含挂名股东和/或挂名董事的空壳公司？', en: 'Has the customer/client provided any instruction to incorporate shell companies with nominee shareholder(s) and/or nominee director(s)?' },
+    { id: 'cmp_22', key: 'radio_22', groupId: 'grp_1793342755246_19', zh: '本次业务关系是否在未与客户/委托人进行任何面对面会面的情况下建立？', en: 'Is this business relationship being established without any face-to-face (physical) meeting with the customer/client?' },
+    { id: 'cmp_23', key: 'radio_23', groupId: 'grp_1793342755246_19', zh: '客户/委托人所要求的交易是否与专业中介对其风险画像和业务性质的了解不一致？', en: 'Are the transactions requested by the customer/client inconsistent with the professional intermediary’s understanding of the customer/client’s risk profile and nature of business?' },
+    { id: 'cmp_24', key: 'radio_24', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否使用注册的 FA 地址或邮政信箱地址作为其注册或邮寄地址？', en: 'Does the customer/client use a registered FA address or a P.O. Box address as its registered or mailing address?' },
+    { id: 'cmp_25', key: 'radio_25', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否在客户尽职调查(CDD)过程中提供了可疑或不一致的信息？', en: 'Has the customer/client provided any suspicious or inconsistent information during the customer due diligence (CDD) process?' },
+    { id: 'cmp_26', key: 'radio_26', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否不愿意或无法提供客户尽职调查(CDD)所需的信息？', en: 'Is the customer/client unwilling or unable to provide information required for customer due diligence (CDD)?' }
+  ]
+});
+
+export const riskIndividualTemplate: FormSchema = createPresetRiskSchema({
+  profileType: 'individual',
+  templateKey: 'risk-individual',
+  code: 'SG_RISK_INDIVIDUAL',
+  groups: [
+    { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' }
+  ],
+  questions: [
+    { id: 'cmp_1', key: 'radio_1', groupId: 'grp_risk_1', zh: '是否在新加坡内政部(MHA)网站的跨部门恐怖分子认定委员会(IMC-TD)所发布的恐怖分子认定名单中发现匹配的个人或实体？', en: 'Is there any match found on the Ministry of Home Affairs (MHA) website under the Inter-Ministry Committee on Terrorist Designation (IMC-TD) list of designated terrorists (persons or entities)?' },
+    { id: 'cmp_2', key: 'radio_2', groupId: 'grp_risk_1', zh: '是否在新加坡金融管理局(MAS)网站根据《联合国法规》(UN Regulations)发布的定向金融制裁名单中，发现匹配的被指定个人或实体？', en: 'Is there any match found on the Monetary Authority of Singapore (MAS) website under the United Nations Regulations (UN Regulations) list of designated individuals and entities subject to targeted financial sanctions?' },
+    { id: 'cmp_3', key: 'radio_3', groupId: 'grp_risk_1', zh: '客户/委托人是否为政治公众人物(PEP)？', en: 'Is the customer/client a Politically Exposed Person (PEP)?' },
+    { id: 'cmp_4', key: 'radio_4', groupId: 'grp_risk_1', zh: '客户所在国家是否被列入金融行动特别工作组(FATF)公开发布的高风险或加强监控的司法管辖区名单？', en: "Is the customer's country listed on the FATF public list of high-risk jurisdictions or jurisdictions under increased monitoring?" },
+    { id: 'cmp_5', key: 'radio_5', groupId: 'grp_risk_1', zh: '根据受监管交易商所进行的风险评估，客户/委托人是否符合高风险客户的特征？', en: 'Does the customer/client fit the profile of a higher-risk customer based on the risk assessment conducted by the regulated dealer?' }
+  ]
+});
+
+export const riskEntityTemplate: FormSchema = createPresetRiskSchema({
+  profileType: 'entity',
+  templateKey: 'risk-entity',
+  code: 'SG_RISK_ENTITY',
+  groups: [
+    { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' }
+  ],
+  questions: [
+    { id: 'cmp_1', key: 'radio_1', groupId: 'grp_risk_1', zh: '是否在新加坡内政部(MHA)网站的跨部门恐怖分子认定委员会(IMC-TD)所发布的恐怖分子认定名单中发现匹配的个人或实体？', en: 'Is there any match found on the Ministry of Home Affairs (MHA) website under the Inter-Ministry Committee on Terrorist Designation (IMC-TD) list of designated terrorists (persons or entities)?' },
+    { id: 'cmp_2', key: 'radio_2', groupId: 'grp_risk_1', zh: '是否在新加坡金融管理局(MAS)网站根据《联合国法规》(UN Regulations)发布的定向金融制裁名单中，发现匹配的被指定个人或实体？', en: 'Is there any match found on the Monetary Authority of Singapore (MAS) website under the United Nations Regulations (UN Regulations) list of designated individuals and entities subject to targeted financial sanctions?' },
+    { id: 'cmp_3', key: 'radio_3', groupId: 'grp_risk_1', zh: '客户所在国家是否被列入金融行动特别工作组(FATF)公开发布的高风险或加强监控的司法管辖区名单？', en: "Is the customer's country listed on the FATF public list of high-risk jurisdictions or jurisdictions under increased monitoring?" },
+    { id: 'cmp_4', key: 'radio_4', groupId: 'grp_risk_1', zh: '根据受监管交易商所进行的风险评估，客户/委托人是否符合高风险客户的特征？', en: 'Does the customer/client fit the profile of a higher-risk customer based on the risk assessment conducted by the regulated dealer?' }
+  ]
+});

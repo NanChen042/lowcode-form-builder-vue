@@ -17,7 +17,6 @@
       <div class="flex flex-col items-center justify-between w-[64px] h-full shrink-0 border-r border-slate-200/90 bg-[#F8FAFC] py-3.5 z-20">
         <div id="tour-activity-bar" class="flex flex-col items-center gap-2 w-full px-1">
           <button
-              v-if="!isRisk"
               type="button"
               class="figma-activity-btn"
               :class="{ active: activeTab === 'templates' }"
@@ -298,7 +297,7 @@
                   @click="handleComponentClick(item.type)"
                 >
                   <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden">
-                    <!-- 标题栏（保留图标与标题，已移除单选标识） -->
+                    <!-- 标题栏 -->
                     <div class="flex items-center gap-1.5 min-w-0 w-full">
                       <div class="flex h-5 w-5 items-center justify-center rounded bg-blue-50 text-[#1677ff] shrink-0">
                         <ListOrdered class="h-3.5 w-3.5" />
@@ -308,22 +307,20 @@
                       </span>
                     </div>
 
-                    <!-- 选项按扭示意区（模拟真实单选：首项为高亮蓝色带勾，其余两项为白色圆角线框） -->
-                    <div class="grid grid-cols-3 gap-1.5 w-full">
-                      <div class="h-6 rounded-md bg-[#1677ff] flex items-center justify-center shadow-2xs">
-                        <Check class="h-3.5 w-3.5 text-white stroke-[2.8]" />
+                    <!-- 极简清单行示意（与画布新样式一致：序号 + 题干骨架 + Yes · 分值胶囊） -->
+                    <div class="flex items-center justify-between gap-2 w-full rounded-md border border-slate-200/80 bg-slate-50/70 group-hover:border-blue-200/80 group-hover:bg-blue-50/30 transition-colors px-2 py-2">
+                      <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span class="text-[10.5px] font-semibold text-slate-400 group-hover:text-[#1677ff] leading-none shrink-0 transition-colors">1.</span>
+                        <div class="flex flex-col gap-1 flex-1 min-w-0">
+                          <span class="h-1.5 w-4/5 rounded-full bg-slate-200/90 group-hover:bg-blue-200/80 transition-colors"></span>
+                          <span class="h-1.5 w-3/5 rounded-full bg-slate-200/60 group-hover:bg-blue-100/80 transition-colors"></span>
+                        </div>
                       </div>
-                      <div class="h-6 rounded-md bg-white border border-slate-200/90 group-hover:border-blue-200/80 transition-colors"></div>
-                      <div class="h-6 rounded-md bg-white border border-slate-200/90 group-hover:border-blue-200/80 transition-colors"></div>
-                    </div>
-
-                    <!-- 权重滑轨示意区（浅底胶囊、首点为蓝色激活光环、后续点均匀刻度分布） -->
-                    <div class="w-full rounded-md bg-slate-100/70 group-hover:bg-blue-50/50 transition-colors px-2 py-1.5 flex items-center">
-                      <div class="relative flex items-center justify-between w-full h-2.5">
-                        <div class="absolute left-1 right-1 h-[2px] bg-slate-200/90 group-hover:bg-blue-200/80 transition-colors rounded-full"></div>
-                        <span class="relative z-10 flex h-3 w-3 items-center justify-center rounded-full border-[2px] border-[#1677ff] bg-white ring-2 ring-blue-500/15 shadow-2xs"></span>
-                        <span v-for="dot in 6" :key="dot" class="relative z-10 h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-blue-300 transition-colors"></span>
-                      </div>
+                      <span class="inline-flex items-center gap-0.5 shrink-0 rounded-full border border-blue-200/80 bg-blue-50/90 px-2 py-0.5 text-[10px] font-semibold leading-none text-[#1677ff] tabular-nums">
+                        <span class="opacity-80">Yes</span>
+                        <span class="opacity-60">·</span>
+                        <span>1 {{ t('risk.ptsUnit') }}</span>
+                      </span>
                     </div>
                   </div>
                   <div v-else class="sidebar-btn-view flex w-full items-center gap-2 overflow-hidden">
@@ -704,7 +701,12 @@ import {
   deletePage,
   markDirty
 } from '@/core/store';
-import { RISK_FIXED_OPTIONS, SCENARIO_TEMPLATES_META } from '@/templates/recommend';
+import {
+  RISK_FIXED_OPTIONS,
+  SCENARIO_TEMPLATES_META,
+  RISK_SCENARIO_TEMPLATES_META,
+  type ScenarioTemplateKey
+} from '@/templates/recommend';
 import { t, getPageText, getFieldText } from '@/core/i18n';
 import { translationStats, getPageTranslationProgress } from '@/utils/translationHelper';
 import { componentRegistry, getComponentIcon } from '@/registry/components';
@@ -739,7 +741,6 @@ import {
   FileText,
   GripVertical,
   ListOrdered,
-  Check,
   CheckCircle2
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
@@ -760,13 +761,10 @@ const activeTab = computed({
     if (store.workspaceMode === 'translation') {
       return 'languages';
     }
-    if (isRisk.value && store.sidebarTab === 'templates') {
-      return 'components';
-    }
     return store.sidebarTab;
   },
   set: (val: 'templates' | 'components' | 'pages' | 'languages') => {
-    store.sidebarTab = isRisk.value && val === 'templates' ? 'components' : val;
+    store.sidebarTab = val;
   }
 });
 
@@ -805,7 +803,9 @@ function handleSelectTranslationPage(pageId: string) {
   });
 }
 
-const scenarioTemplates = SCENARIO_TEMPLATES_META;
+const scenarioTemplates = computed(() =>
+  isRisk.value ? RISK_SCENARIO_TEMPLATES_META : SCENARIO_TEMPLATES_META
+);
 
 const { isResizing, startResize } = useSidebarResize({
   getWidth: () => store.leftSidebarWidth,
@@ -851,9 +851,10 @@ const searchQuery = ref('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
 const filteredTemplates = computed(() => {
+  const list = scenarioTemplates.value;
   const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return scenarioTemplates;
-  return scenarioTemplates.filter(tpl =>
+  if (!q) return list;
+  return list.filter(tpl =>
     tpl.i18n.zh.title.toLowerCase().includes(q) ||
     tpl.i18n.en.title.toLowerCase().includes(q) ||
     tpl.i18n.zh.desc.toLowerCase().includes(q) ||
@@ -879,9 +880,9 @@ function handleSearchEsc() {
 }
 
 const confirmModalVisible = ref(false);
-const pendingTemplateKey = ref<'kyc-customer' | 'kyc-individual' | 'kyc-entity' | null>(null);
+const pendingTemplateKey = ref<ScenarioTemplateKey | null>(null);
 
-function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
+function handleSelectTemplate(tplKey: ScenarioTemplateKey) {
   pendingTemplateKey.value = tplKey;
   if (store.pages.length > 0) {
     confirmModalVisible.value = true;

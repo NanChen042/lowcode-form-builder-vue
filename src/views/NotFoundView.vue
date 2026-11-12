@@ -223,6 +223,20 @@ const isFormNotFound = computed(() => {
   return route.query.reason === 'form' || Boolean(route.query.id);
 });
 
+const isRiskMode = computed(() => {
+  return (
+    route.query.mode === 'risk' ||
+    route.query.formType === 'risk' ||
+    route.query.type === 'risk' ||
+    route.path.includes('/risk') ||
+    store.editorMode === 'risk'
+  );
+});
+
+const isSubpath = computed(() => {
+  return route.query.sub === '1' || (typeof window !== 'undefined' && window.location.pathname.includes('/form-builder'));
+});
+
 const primaryBtnText = computed(() => {
   return isFormNotFound.value ? t('notFound.createNewForm') : t('notFound.backToBuilder');
 });
@@ -251,16 +265,25 @@ function stopCountdown() {
 
 function goToBuilder() {
   stopCountdown();
-  if (window.location.pathname.includes('/form-builder')) {
-    router.push('/form-builder');
-  } else {
-    router.push('/');
+  const targetPath = isRiskMode.value
+    ? (isSubpath.value ? '/form-builder/risk' : '/risk')
+    : (isSubpath.value ? '/form-builder' : '/');
+  const nextQuery: Record<string, string> = {};
+  if (typeof route.query.lang === 'string' && route.query.lang) {
+    nextQuery.lang = route.query.lang;
   }
+  if (typeof route.query.profileType === 'string' && route.query.profileType) {
+    nextQuery.profileType = route.query.profileType;
+  }
+  router.push({
+    path: targetPath,
+    ...(Object.keys(nextQuery).length > 0 ? { query: nextQuery } : {})
+  });
 }
 
 function goBackToAlgo() {
   stopCountdown();
-  window.location.href = '/pc/csp/formsetting?tab=kyc';
+  window.location.href = isRiskMode.value ? '/pc/csp/formsetting?tab=risk' : '/pc/csp/formsetting?tab=kyc';
 }
 
 onMounted(() => {

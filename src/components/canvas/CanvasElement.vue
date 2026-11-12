@@ -5,6 +5,7 @@
     class="canvas-element"
     :class="{
       'is-selected': isSelected,
+      'is-risk-unfilled': isRiskUnfilled,
       'is-branch-child': hasLinkage,
       'branch-depth-1': elementDepth === 1,
       'branch-depth-2': elementDepth >= 2,
@@ -75,6 +76,23 @@ const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed
 
 const isSelected = computed(() => {
   return store.selectedType === 'element' && store.selectedId === props.element.id;
+});
+
+const isRiskUnfilled = computed(() => {
+  if (!store.showPublishValidation || !isRisk.value || isReadOnlyFrame.value || String(props.element.id || '').startsWith('ghost_')) {
+    return false;
+  }
+  const sourceLabel = getFieldText(props.element, 'label', primaryLocale.value).trim();
+  const sourceHelp = getFieldText(props.element, 'help', primaryLocale.value).trim();
+  if (isTranslationFrame.value) {
+    // 翻译目标画板：源语言已有文案但目标语言尚未翻译时，同步展示黄色提示
+    const targetLabel = getFieldText(props.element, 'label', frameLocale.value).trim();
+    const targetHelp = getFieldText(props.element, 'help', frameLocale.value).trim();
+    const missingLabel = props.element.showLabel !== false && Boolean(sourceLabel) && !targetLabel;
+    const missingHelp = Boolean(sourceHelp) && !targetHelp;
+    return missingLabel || missingHelp;
+  }
+  return props.element.showLabel !== false && !sourceLabel;
 });
 
 const hasLinkage = computed(() => {

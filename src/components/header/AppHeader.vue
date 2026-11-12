@@ -278,6 +278,7 @@ function validateFormBeforePublish(): boolean {
         const rawGrpTitle = getGroupText(grp, 'title', baseLoc);
         const grpTitle = (rawGrpTitle || '').trim();
         if (!grpTitle) {
+          store.showPublishValidation = true;
           Message.warning(t('header.valEmptyGroupTitle', undefined, { index: String(gIdx + 1).padStart(2, '0') }));
           focusOnPage(page.id, { duration: 350 });
           selectGroup(grp.id);
@@ -285,6 +286,54 @@ function validateFormBeforePublish(): boolean {
           return false;
         }
       }
+
+      // 按分组展示顺序收集所有未填写题干的问题，提示真实「分组 + 组内第几题」而非扁平全局下标
+      const firstGrpId = page.groups[0]?.id;
+      const missingQuestions: Array<{
+        field: (typeof page.fields)[number];
+        groupTitle: string;
+        questionIndex: number;
+      }> = [];
+
+      for (let gIdx = 0; gIdx < page.groups.length; gIdx++) {
+        const grp = page.groups[gIdx];
+        const grpTitle = (getGroupText(grp, 'title', baseLoc) || '').trim();
+        const grpFields = page.fields.filter(f => (f.groupId || firstGrpId) === grp.id);
+        for (let qIdx = 0; qIdx < grpFields.length; qIdx++) {
+          const field = grpFields[qIdx];
+          if (field.showLabel !== false) {
+            const fieldLabel = (getFieldText(field, 'label', baseLoc) || '').trim();
+            if (!fieldLabel) {
+              missingQuestions.push({
+                field,
+                groupTitle: grpTitle,
+                questionIndex: qIdx + 1
+              });
+            }
+          }
+        }
+      }
+
+      if (missingQuestions.length > 0) {
+        store.showPublishValidation = true;
+        const first = missingQuestions[0];
+        const msgKey = missingQuestions.length > 1
+          ? 'header.valEmptyGroupQuestionTextMulti'
+          : 'header.valEmptyGroupQuestionText';
+        Message.warning(
+          t(msgKey, undefined, {
+            group: first.groupTitle,
+            index: first.questionIndex,
+            total: missingQuestions.length
+          })
+        );
+        focusOnPage(page.id, { duration: 350 });
+        selectElement(first.field);
+        store.focusedTarget = { elementId: first.field.id, field: 'label' };
+        if (!store.rightSidebarVisible) store.rightSidebarVisible = true;
+        return false;
+      }
+      continue;
     }
 
     for (let fIdx = 0; fIdx < page.fields.length; fIdx++) {
@@ -337,15 +386,18 @@ function handleDeployClick() {
   // 1. 中文版缺少英文或英文未完成：强拦截提示（不可无视）
   // 2. 启用了任何其他多语言且未翻译完整：弹窗提示未翻译项，但允许无视后继续发布
   if (isEnBlocked.value || translationStats.value.untranslatedCount > 0) {
+    store.showPublishValidation = true;
     publishCheckModalVisible.value = true;
     return;
   }
 
   // 3. 所有启用的多语言均已 100% 完成或没有未翻译项：直接发布
+  store.showPublishValidation = false;
   emit('open-deploy');
 }
 
 function handleProceedPublish() {
+  store.showPublishValidation = false;
   publishCheckModalVisible.value = false;
   emit('open-deploy');
 }
@@ -380,11 +432,14 @@ const titleInputRef = ref<HTMLInputElement | null>(null);
 
 const displayTitle = computed(() => {
   const loc = store.currentLocale === 'en' ? 'en' : 'zh';
-  return store.meta.i18n?.[loc]?.title?.trim() || t('header.untitledForm');
+  const other = loc === 'en' ? 'zh' : 'en';
+  return store.meta.i18n?.[loc]?.title?.trim() || store.meta.i18n?.[other]?.title?.trim() || t('header.untitledForm');
 });
 
 function startEditTitle() {
-  editTitleValue.value = store.meta.i18n?.[store.currentLocale === 'en' ? 'en' : 'zh']?.title || '';
+  const loc = store.currentLocale === 'en' ? 'en' : 'zh';
+  const other = loc === 'en' ? 'zh' : 'en';
+  editTitleValue.value = store.meta.i18n?.[loc]?.title?.trim() || store.meta.i18n?.[other]?.title?.trim() || '';
   isEditingTitle.value = true;
   nextTick(() => {
     titleInputRef.value?.focus();

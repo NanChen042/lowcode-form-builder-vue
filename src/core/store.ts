@@ -16,7 +16,10 @@ import {
   RISK_FIXED_OPTIONS,
   kycCustomerTemplate,
   kycIndividualTemplate,
-  kycEntityTemplate
+  kycEntityTemplate,
+  riskCustomerTemplate,
+  riskIndividualTemplate,
+  riskEntityTemplate
 } from '../templates/recommend';
 
 export const PAGE_WIDTH = 390;
@@ -108,6 +111,7 @@ export const store = reactive({
   isCanvasLoading: false,
 
   focusedTarget: null as FocusedTarget | null,
+  showPublishValidation: false,
 
   activeTemplateKey: 'blank',
   isDirty: false,
@@ -1040,21 +1044,25 @@ export function buildSchema(): FormSchema {
   const setMetaTitle = (loc: string, val: string) => {
     store.meta.i18n[loc] = { ...(store.meta.i18n[loc] || {}), title: val };
   };
-  const effectiveTitle = (
-    store.meta.i18n.zh?.title ||
-    (activeLocale === 'en' ? store.meta.i18n.en?.title : '') ||
-    (isRisk.value ? (activeLocale === 'en' ? 'Risk Assessment' : '风险评估') : (activeLocale === 'en' ? 'Untitled Form' : '未命名表单'))
-  ).trim();
-  let effectiveTitleEn = (store.meta.i18n.en?.title || '').trim();
+  const rawTitleZh = (store.meta.i18n.zh?.title || '').trim();
+  const rawTitleEn = (store.meta.i18n.en?.title || '').trim();
+  const fallbackUntitled = isRisk.value
+    ? (activeLocale === 'en' ? 'Risk Assessment' : '风险评估')
+    : (activeLocale === 'en' ? 'Untitled Form' : '未命名表单');
 
-  // 若英文标题仍为默认冲突模版名，且中文标题已被用户修改，则英文标题自动对齐中文标题，彻底杜绝后端 checkTitle 触发 409
+  let effectiveTitle = rawTitleZh || rawTitleEn || fallbackUntitled;
+  let effectiveTitleEn = rawTitleEn || rawTitleZh || fallbackUntitled;
+
+  // 若其中一语仍为默认模版名而另一语已被修改为自定义名称，则自动对齐，避免残留默认编码名冲突
   if (defaultTemplateTitles.includes(effectiveTitleEn) && !defaultTemplateTitles.includes(effectiveTitle)) {
     effectiveTitleEn = effectiveTitle;
     setMetaTitle('en', effectiveTitle);
+  } else if (defaultTemplateTitles.includes(effectiveTitle) && !defaultTemplateTitles.includes(effectiveTitleEn)) {
+    effectiveTitle = effectiveTitleEn;
+    setMetaTitle('zh', effectiveTitleEn);
   }
-  if (!effectiveTitleEn && hasEn) {
-    effectiveTitleEn = effectiveTitle;
-    setMetaTitle('en', effectiveTitle);
+  if (!rawTitleEn && hasEn) {
+    setMetaTitle('en', effectiveTitleEn);
   }
 
   const metaI18n: Record<string, Record<string, string>> = {};
@@ -1400,7 +1408,7 @@ export function createNewCanvas(options: {
   ];
   const defaultTitle = isRisk.value
     ? (profileType === 'individual' ? 'SG_RISK_INDIVIDUAL' : profileType === 'entity' ? 'SG_RISK_ENTITY' : 'SG_RISK_CUSTOMER')
-    : (profileType === 'individual' ? '个人客户尽职调查问卷' : profileType === 'entity' ? '实体企业尽职调查问卷' : '企业客户尽职调查问卷');
+    : (profileType === 'individual' ? 'SG_CDD_INDIVIDUAL' : profileType === 'entity' ? 'SG_CDD_ENTITY' : 'SG_CDD_CUSTOMER');
   const persistedUrlId = typeof window !== 'undefined'
     ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
     : '';
@@ -1463,31 +1471,31 @@ export function applyTemplateKey(
 ) {
   let templateSource: FormSchema = kycCustomerTemplate;
   let pType: ProfileType = 'customer';
-  let defaultTitle = '企业客户尽职调查问卷';
-  let defaultTitleEn = 'Corporate Customer CDD Questionnaire';
+  let defaultTitle = 'SG_CDD_CUSTOMER';
+  let defaultTitleEn = 'SG_CDD_CUSTOMER';
 
   if (tplKey === 'kyc-individual') {
     templateSource = kycIndividualTemplate;
     pType = 'individual';
-    defaultTitle = '个人客户尽职调查问卷';
-    defaultTitleEn = 'Individual CDD Questionnaire';
+    defaultTitle = 'SG_CDD_INDIVIDUAL';
+    defaultTitleEn = 'SG_CDD_INDIVIDUAL';
   } else if (tplKey === 'kyc-entity') {
     templateSource = kycEntityTemplate;
     pType = 'entity';
-    defaultTitle = '实体企业尽职调查问卷';
-    defaultTitleEn = 'Corporate Entity CDD Questionnaire';
+    defaultTitle = 'SG_CDD_ENTITY';
+    defaultTitleEn = 'SG_CDD_ENTITY';
   } else if (tplKey === 'risk-individual') {
-    templateSource = createRiskAssessmentTemplate('individual', 'SG_RISK_INDIVIDUAL');
+    templateSource = riskIndividualTemplate;
     pType = 'individual';
     defaultTitle = 'SG_RISK_INDIVIDUAL';
     defaultTitleEn = 'SG_RISK_INDIVIDUAL';
   } else if (tplKey === 'risk-entity') {
-    templateSource = createRiskAssessmentTemplate('entity', 'SG_RISK_ENTITY');
+    templateSource = riskEntityTemplate;
     pType = 'entity';
     defaultTitle = 'SG_RISK_ENTITY';
     defaultTitleEn = 'SG_RISK_ENTITY';
   } else if (tplKey === 'risk-customer') {
-    templateSource = createRiskAssessmentTemplate('customer', 'SG_RISK_CUSTOMER');
+    templateSource = riskCustomerTemplate;
     pType = 'customer';
     defaultTitle = 'SG_RISK_CUSTOMER';
     defaultTitleEn = 'SG_RISK_CUSTOMER';
@@ -1565,6 +1573,7 @@ export function applyTemplateKey(
 }
 
 export function loadSchema(schema: FormSchema, options?: { duration?: number }) {
+  store.showPublishValidation = false;
   clearSelection();
   if (schema.meta?.formType === 'risk') {
     store.editorMode = 'risk';
@@ -1702,8 +1711,8 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
                 i18n: opt.i18n ? JSON.parse(JSON.stringify(opt.i18n)) : {}
               }))
             : undefined;
-          // 默认文案作为兜底，schema 已有的 i18n 文案优先
-          const fI18n: I18nTexts = JSON.parse(JSON.stringify(defaultData.i18n || {}));
+          // 默认文案作为兜底，schema 已有的 i18n 文案优先；风险评估题干默认留空，不继承普通单选框的「单选框组」兜底
+          const fI18n: I18nTexts = isRisk.value ? {} : JSON.parse(JSON.stringify(defaultData.i18n || {}));
           for (const [loc, dict] of Object.entries(f.i18n || {})) {
             fI18n[loc] = { ...(fI18n[loc] || {}), ...JSON.parse(JSON.stringify(dict)) };
           }
@@ -1878,6 +1887,17 @@ export function addTargetLocale(locale?: string) {
   }
   store.activeTargetLocale = nextLocale;
   store.editingLocale = nextLocale;
+
+  // 默认模板启用新目标语种时，自动同步默认英文模板名称（避免切换中文时名称空白）
+  const baseTitle = (store.meta.i18n?.[base]?.title || '').trim();
+  const defaultCodeTitles = [
+    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY'
+  ];
+  if (baseTitle && defaultCodeTitles.includes(baseTitle) && !(store.meta.i18n?.[nextLocale]?.title || '').trim()) {
+    store.meta.i18n = store.meta.i18n || {};
+    store.meta.i18n[nextLocale] = { ...(store.meta.i18n[nextLocale] || {}), title: baseTitle };
+  }
 
   store.pages.forEach(p => {
     if (p.pageType === 'system_profile') {

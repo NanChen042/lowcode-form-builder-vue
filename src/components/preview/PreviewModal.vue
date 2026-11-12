@@ -762,9 +762,9 @@ const currentLocalizedFormTitle = computed(() => {
   return getMetaText(props.schema?.meta, 'title', activePreviewLocale.value) || '';
 });
 
-// 模拟器顶栏机构名称：严格对齐移动端规范，展示机构名称 (AlgoCandy)
+// 模拟器顶栏机构名称：优先展示当前登录机构名称，缺省兜底 AlgoCandy
 const formBrandTitle = computed(() => {
-  return 'AlgoCandy';
+  return store.org?.companyName?.trim() || 'AlgoCandy';
 });
 
 const currentLocalizedDesc = computed(() => {

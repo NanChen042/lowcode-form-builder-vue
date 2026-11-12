@@ -90,10 +90,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-label-input"
           :model-value="targetLabel"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 6 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -132,10 +133,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-placeholder-input"
           :model-value="targetPlaceholder"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -174,10 +176,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-end-placeholder-input"
           :model-value="targetEndPlaceholder"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -216,10 +219,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-long-term-text-input"
           :model-value="targetLongTermText"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 3 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -258,10 +262,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-sign-placeholder-input"
           :model-value="targetSignPlaceholder"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -300,10 +305,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="prop-help-input"
           :model-value="targetHelp"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -424,9 +430,10 @@
               </span>
             </div>
 
-            <a-input
+            <a-textarea
               :model-value="getOptionLabel(opt, store.activeTargetLocale)"
               :placeholder="getOptionLabel(opt, primaryLocale) || t('trans.enterTarget')"
+              :auto-size="{ minRows: 1, maxRows: 6 }"
               size="small"
               allow-clear
               class="w-full !rounded-[4px]"
@@ -477,10 +484,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="group-prop-title-input"
           :model-value="targetGroupTitle"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"
@@ -534,10 +542,11 @@
           </div>
         </div>
 
-        <a-input
+        <a-textarea
           id="page-prop-title-input"
           :model-value="targetPageTitle"
           :placeholder="t('trans.enterTarget')"
+          :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
           class="w-full !rounded-[4px]"

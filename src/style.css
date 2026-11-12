@@ -862,6 +862,20 @@ body.is-dragging-frame .mobile-frame {
     text-underline-offset: 4px !important;
 }
 
+/* 风险评估未填写/待翻译题目的黄色高亮提醒（包含编辑态及翻译目标画板选中态） */
+.risk-group-dropzone .canvas-element.is-risk-unfilled,
+.risk-group-dropzone .canvas-element.is-risk-unfilled.is-selected,
+[data-translation-frame="true"] .risk-group-dropzone .canvas-element.is-risk-unfilled,
+[data-translation-frame="true"] .risk-group-dropzone .canvas-element.is-risk-unfilled.is-selected {
+    background-color: #fffbeb !important;
+    box-shadow: inset 3px 0 0 #f59e0b !important;
+}
+
+.risk-group-dropzone .canvas-element.is-risk-unfilled:hover,
+[data-translation-frame="true"] .risk-group-dropzone .canvas-element.is-risk-unfilled:hover {
+    background-color: #fef3c7 !important;
+}
+
 .risk-group-dropzone .canvas-element .element-actions {
     display: none !important;
 }

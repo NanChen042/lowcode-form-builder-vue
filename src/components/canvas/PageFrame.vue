@@ -157,7 +157,13 @@
             @click.stop="handleSelectGroup(grp.id)"
           >
 
-            <div class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b border-blue-100/90 bg-[#f0f6ff] rounded-t-[4px]" :class="isTranslationFrame ? '' : 'cursor-grab active:cursor-grabbing'">
+            <div
+              class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b rounded-t-[4px] transition-colors"
+              :class="[
+                isTranslationFrame ? '' : 'cursor-grab active:cursor-grabbing',
+                isGroupTitleUnfilled(grp) ? 'border-amber-200/90 bg-amber-50/85' : 'border-blue-100/90 bg-[#f0f6ff]'
+              ]"
+            >
               <div class="flex items-center gap-2 flex-1 min-w-0">
                 <GripVertical
                   v-if="!isTranslationFrame"
@@ -176,6 +182,12 @@
               </div>
 
               <div class="flex items-center gap-2 shrink-0 select-none">
+                <span
+                  v-if="!isTranslationFrame"
+                  class="rounded bg-white/80 px-2 py-0.5 text-[11px] font-medium text-slate-400 border border-slate-200/70"
+                >
+                  Yes / No / Not Applicable
+                </span>
                 <span class="rounded bg-white/95 px-2 py-0.5 text-[11px] font-medium text-blue-600 border border-blue-200/80 shadow-2xs">
                   {{ getGroupFields(grp.id).length }} {{ t('risk.questionUnit') }}
                 </span>
@@ -696,6 +708,15 @@ function setRiskGroupDropzoneRef(groupId: string, el: HTMLElement | null) {
 
 function getGroupTitle(grp: FormQuestionGroup, _idx?: number): string {
   return getGroupText(grp, 'title', frameLocale.value);
+}
+
+function isGroupTitleUnfilled(grp: FormQuestionGroup): boolean {
+  if (!store.showPublishValidation || props.isReadOnlyReference) return false;
+  const sourceTitle = getGroupText(grp, 'title', primaryLocale.value).trim();
+  if (props.isTranslationFrame) {
+    return Boolean(sourceTitle) && !getGroupText(grp, 'title', frameLocale.value).trim();
+  }
+  return !sourceTitle;
 }
 
 function getGroupTitlePlaceholder(grp?: FormQuestionGroup, _idx?: number): string {

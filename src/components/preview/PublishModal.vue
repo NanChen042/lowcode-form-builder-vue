@@ -99,9 +99,15 @@
         <p class="text-xs text-slate-500 m-0 leading-relaxed pr-3">
           {{ isRisk ? t('publish.riskModalDesc') : t('publish.modalDesc') }}
         </p>
-        <a-radio-group v-if="isBilingual" v-model="activeLocale" type="button" size="small" class="shrink-0">
-          <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
-          <a-radio value="en" class="whitespace-nowrap">English</a-radio>
+        <a-radio-group v-if="showLocaleSwitch" v-model="activeLocale" type="button" size="small" class="shrink-0">
+          <template v-if="primaryLocale === 'en'">
+            <a-radio value="en" class="whitespace-nowrap">English</a-radio>
+            <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
+          </template>
+          <template v-else>
+            <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
+            <a-radio value="en" class="whitespace-nowrap">English</a-radio>
+          </template>
         </a-radio-group>
       </div>
 
@@ -179,7 +185,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
-import { store, buildSchema, isBilingual, primaryLocale, establishBaseline, syncUrlParams, isRisk } from '@/core/store';
+import { store, buildSchema, primaryLocale, establishBaseline, syncUrlParams, isRisk } from '@/core/store';
 import { t } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
@@ -195,9 +201,17 @@ const emit = defineEmits<{
   (e: 'published', data: { url: string }): void;
 }>();
 
-const localPublishLocale = ref<'zh' | 'en'>('zh');
+const hasZhEnabled = computed(() =>
+  primaryLocale.value === 'zh' || (store.meta.enabledLocales || []).includes('zh')
+);
+const hasEnEnabled = computed(() =>
+  primaryLocale.value === 'en' || (store.meta.enabledLocales || []).includes('en')
+);
+const showLocaleSwitch = computed(() => hasZhEnabled.value && hasEnEnabled.value);
+
+const localPublishLocale = ref<'zh' | 'en'>(primaryLocale.value === 'en' ? 'en' : 'zh');
 const activeLocale = computed<'zh' | 'en'>({
-  get: () => (isBilingual.value ? localPublishLocale.value : (primaryLocale.value === 'en' ? 'en' : 'zh')),
+  get: () => (showLocaleSwitch.value ? localPublishLocale.value : (primaryLocale.value === 'en' ? 'en' : 'zh')),
   set: (val: 'zh' | 'en') => {
     localPublishLocale.value = val;
   }
@@ -208,6 +222,15 @@ const formModel = reactive({
   descZh: '',
   descEn: ''
 });
+const initialTitles = reactive({
+  zh: '',
+  en: ''
+});
+
+const defaultTemplateCodeTitles = [
+  'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
+  'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY'
+];
 
 const nameError = ref(false);
 const isSubmitting = ref(false);
@@ -232,9 +255,20 @@ watch(
     if (val) {
       isSuccess.value = false;
       nameError.value = false;
+      localPublishLocale.value = primaryLocale.value === 'en' ? 'en' : 'zh';
 
-      formModel.titleZh = store.meta.i18n.zh?.title || '';
-      formModel.titleEn = store.meta.i18n.en?.title || '';
+      let initZh = (store.meta.i18n.zh?.title || '').trim();
+      let initEn = (store.meta.i18n.en?.title || '').trim();
+      if (!initZh && defaultTemplateCodeTitles.includes(initEn)) {
+        initZh = initEn;
+      } else if (!initEn && defaultTemplateCodeTitles.includes(initZh)) {
+        initEn = initZh;
+      }
+
+      formModel.titleZh = initZh;
+      formModel.titleEn = initEn;
+      initialTitles.zh = initZh;
+      initialTitles.en = initEn;
 
       const defaultMockDescs = [
         '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
@@ -275,9 +309,12 @@ watch(
 
 async function handleConfirmPublish() {
   nameError.value = false;
-  const activeTitle = activeLocale.value === 'zh' ? formModel.titleZh.trim() : formModel.titleEn.trim();
+  let rawZh = formModel.titleZh.trim();
+  let rawEn = formModel.titleEn.trim();
+  const activeTitle = activeLocale.value === 'zh' ? rawZh : rawEn;
+  const fallbackTitle = activeTitle || rawZh || rawEn;
 
-  if (!activeTitle) {
+  if (!fallbackTitle) {
     nameError.value = true;
     Message.warning(t('publish.nameRequired'));
     if (activeLocale.value === 'zh') {
@@ -288,10 +325,35 @@ async function handleConfirmPublish() {
     return;
   }
 
-  if (formModel.titleZh.trim()) setMetaField('zh', 'title', formModel.titleZh.trim());
-  if (formModel.titleEn.trim()) setMetaField('en', 'title', formModel.titleEn.trim());
-  setMetaField('zh', 'description', formModel.descZh.trim());
-  setMetaField('en', 'description', formModel.descEn.trim());
+  // 若只编辑了一侧标题，另一侧留空或仍是未改动的默认模板编码，则双语统一对齐为同一名称；若两侧各自翻译则分别保留
+  if (!rawZh && rawEn) {
+    rawZh = rawEn;
+  } else if (!rawEn && rawZh) {
+    rawEn = rawZh;
+  } else if (
+    rawZh === initialTitles.zh &&
+    defaultTemplateCodeTitles.includes(rawZh) &&
+    rawEn &&
+    rawEn !== initialTitles.en
+  ) {
+    rawZh = rawEn;
+  } else if (
+    rawEn === initialTitles.en &&
+    defaultTemplateCodeTitles.includes(rawEn) &&
+    rawZh &&
+    rawZh !== initialTitles.zh
+  ) {
+    rawEn = rawZh;
+  }
+
+  if (hasZhEnabled.value) {
+    setMetaField('zh', 'title', rawZh);
+    setMetaField('zh', 'description', formModel.descZh.trim());
+  }
+  if (hasEnEnabled.value) {
+    setMetaField('en', 'title', rawEn);
+    setMetaField('en', 'description', formModel.descEn.trim());
+  }
 
   const schema = buildSchema();
   isSubmitting.value = true;

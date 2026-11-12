@@ -19,7 +19,7 @@ export interface SupportedFormLocaleItem {
 export const TRADITIONAL_LOCALE = 'zh-Hant';
 
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
-  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH', flag: 'cn' },
+  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: '中', flag: 'cn' },
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
   { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'cn' },
   { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' }
@@ -440,11 +440,15 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.tplCustomerDesc': '适用于客户身份认证、KYC 相关的业务场景。',
     'wizard.tplIndividualDesc': '适用于个人用户信息采集、身份验证等场景。',
     'wizard.tplEntityDesc': '适用于实体成员、企业信息采集等场景。',
+    'wizard.tplRiskCustomerDesc': '涵盖客户、国家及服务交易三大风险维度（24 题）。',
+    'wizard.tplRiskIndividualDesc': '涵盖恐怖分子名单、制裁、PEP 及高风险国家（5 题）。',
+    'wizard.tplRiskEntityDesc': '涵盖恐怖分子名单、制裁、FATF 及高风险实体（4 题）。',
     'wizard.confirmOverwriteTitle': '覆盖确认',
     'wizard.confirmOverwriteDesc': '当前画布已包含 {pages} 个画板页面，载入 {title} 将完全覆盖当前画布内容。是否确认继续？',
     'wizard.confirmOverwriteBtn': '确定覆盖',
     'wizard.pagesCount': '{count} 页面',
     'wizard.fieldsCount': '{count} 字段',
+    'wizard.questionsCount': '{count} 题',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': '新建表单画布',
@@ -475,7 +479,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.fillRequiredFields': '请填写所有必填项并修正错误',
     'preview.publishFailed': '发布失败',
     'publish.modalTitle': '发布表单',
-    'publish.modalDesc': '核对并确认表单基本信息与发布介绍，确认无误后即可生成公网访问链接。',
+    'publish.modalDesc': '核对并确认表单基本信息与发布介绍，确认无误后即可发布生效。',
     'publish.riskModalDesc': '核对并确认风险评估表单基本信息，确认无误后即可发布生效。',
     'publish.formName': '表单名称',
     'publish.formNamePlaceholder': '请输入表单名称 (50字以内)',
@@ -629,6 +633,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.valEmptyPageFields': '第 {page} 页暂无表单组件，请添加组件或删除空页面',
     'header.valEmptyGroupTitle': '请填写分组 {index} 的分组名称',
     'header.valEmptyQuestionText': '请填写第 {index} 道评估问题的题目内容',
+    'header.valEmptyGroupQuestionText': '请填写「{group}」第 {index} 题的题目内容',
+    'header.valEmptyGroupQuestionTextMulti': '请填写「{group}」第 {index} 题的题目内容（共 {total} 题未填写）',
     'header.valEmptyFieldLabel': '请填写第 {page} 页中未命名组件的标题',
     'header.draftSavedWithTime': '已保存至草稿 {time}',
     'val.requiredFallback': '必填项不能为空',
@@ -1074,11 +1080,15 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.tplCustomerDesc': 'Suitable for customer identification and KYC-related scenarios.',
     'wizard.tplIndividualDesc': 'Suitable for personal user data collection and identity verification.',
     'wizard.tplEntityDesc': 'Suitable for corporate clients and enterprise information collection.',
+    'wizard.tplRiskCustomerDesc': 'Covers client, country, and service risk dimensions (24 questions).',
+    'wizard.tplRiskIndividualDesc': 'Covers terrorist list, sanctions, PEP, and FATF high-risk checks (5 questions).',
+    'wizard.tplRiskEntityDesc': 'Covers terrorist list, sanctions, FATF, and higher-risk entity checks (4 questions).',
     'wizard.confirmOverwriteTitle': 'Confirm Overwrite',
     'wizard.confirmOverwriteDesc': 'The current canvas already contains {pages} artboard page(s). Applying {title} will overwrite all current canvas contents. Are you sure you want to continue?',
     'wizard.confirmOverwriteBtn': 'Confirm Overwrite',
     'wizard.pagesCount': '{count} Pages',
     'wizard.fieldsCount': '{count} Fields',
+    'wizard.questionsCount': '{count} Questions',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': 'New Form Canvas',
@@ -1109,7 +1119,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'preview.fillRequiredFields': 'Please fill in all required fields',
     'preview.publishFailed': 'Publish failed',
     'publish.modalTitle': 'Publish Form',
-    'publish.modalDesc': 'Confirm form name and description before generating public access link.',
+    'publish.modalDesc': 'Verify and confirm form name and description before publishing.',
     'publish.riskModalDesc': 'Verify and confirm risk assessment form details before publishing.',
     'publish.formName': 'Form Name',
     'publish.formNamePlaceholder': 'Enter form name (up to 50 chars)',
@@ -1263,6 +1273,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.valEmptyPageFields': 'Page {page} has no components. Please add components or remove the empty page.',
     'header.valEmptyGroupTitle': 'Please enter the title for Group {index}',
     'header.valEmptyQuestionText': 'Please enter question text for Question {index}',
+    'header.valEmptyGroupQuestionText': 'Please enter question text for Question {index} in "{group}"',
+    'header.valEmptyGroupQuestionTextMulti': 'Please enter question text for Question {index} in "{group}" ({total} unfilled)',
     'header.valEmptyFieldLabel': 'Please enter the label for the untitled field on Page {page}',
     'header.draftSavedWithTime': 'Draft saved {time}',
     'val.requiredFallback': 'This required field cannot be empty',

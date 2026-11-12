@@ -137,9 +137,10 @@
                     </a-tag>
                   </div>
                 </div>
-                <a-input
+                <a-textarea
                   id="group-prop-title-input"
                   v-model="groupTitleModel"
+                  :auto-size="{ minRows: 1, maxRows: 4 }"
                   allow-clear
                   :placeholder="t('risk.groupNamePlaceholder')"
                   class="w-full"

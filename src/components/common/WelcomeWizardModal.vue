@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="isRisk ? 'min(760px, 94vw)' : 'min(840px, 94vw)'"
+    :width="'min(840px, 94vw)'"
     :align-center="true"
     :footer="false"
     :header="false"
@@ -53,51 +53,8 @@
         </button>
       </header>
 
-      <!-- 风险评估模式：横向卡片 -->
-      <div v-if="isRisk" class="p-5 flex justify-center select-none">
-        <div
-          class="group flex flex-col sm:flex-row items-center justify-between gap-6 rounded-xl bg-gradient-to-r from-[#edf5fe] via-[#e5f0fe] to-[#d8ebfe] hover:from-[#e6f2fe] hover:to-[#d2e6fe] p-6 cursor-pointer transition-all duration-150 select-none text-left relative overflow-hidden w-full"
-          @click="handleCreateBlank"
-        >
-          <div class="flex-1 z-10 flex flex-col justify-between h-full min-w-0 pr-2">
-            <div>
-              <span class="text-[11.5px] font-bold text-[#1677ff] tracking-wider uppercase">
-                {{ t('wizard.createNewTag') }}
-              </span>
-              <h3 class="text-[19px] font-bold text-slate-900 mt-1 leading-tight tracking-tight group-hover:text-[#1677ff] transition-colors">
-                {{ t('wizard.createBlankRisk') }}
-              </h3>
-              <p class="text-[12px] text-slate-500 mt-1.5 leading-relaxed m-0 max-w-[320px]">
-                {{ t('wizard.createBlankRiskDesc') }}
-              </p>
-            </div>
-
-            <div class="mt-4">
-              <a-button
-                type="primary"
-                shape="round"
-                class="px-5 h-8 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12.5px] flex items-center gap-1.5 shadow-sm"
-              >
-                <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>{{ t('wizard.createNowBtn') }}</span>
-                <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </a-button>
-            </div>
-          </div>
-
-          <div class="w-[280px] sm:w-[320px] h-[150px] shrink-0 flex items-center justify-center z-10 select-none">
-            <img
-              :src="tplRiskHeroImg"
-              :alt="t('wizard.createBlankRisk')"
-              class="w-full h-full object-contain select-none pointer-events-none group-hover:scale-103 transition-transform duration-300 drop-shadow-sm"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- KYC 标准模式：左侧快捷空白新建 + 右侧场景预置模板 -->
-      <div v-else class="p-5 select-none">
+      <!-- 左侧快捷空白新建 + 右侧场景预置模板（KYC 与风险评估统一两栏结构） -->
+      <div class="p-5 select-none">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           
           <div class="md:col-span-5 flex">
@@ -110,17 +67,17 @@
                   {{ t('wizard.createNewTag') }}
                 </span>
                 <h3 class="text-[17px] font-bold text-slate-900 mt-0.5 leading-tight tracking-tight group-hover:text-[#1677ff] transition-colors">
-                  {{ t('wizard.createBlank') }}
+                  {{ isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank') }}
                 </h3>
                 <p class="text-[11.5px] text-slate-500 mt-1 leading-normal m-0">
-                  {{ t('wizard.createBlankDesc') }}
+                  {{ isRisk ? t('wizard.createBlankRiskDesc') : t('wizard.createBlankDesc') }}
                 </p>
               </div>
 
               <div class="w-full flex items-center justify-center my-auto py-3 z-10">
                 <img
-                  :src="tplBlankHeroImg"
-                  :alt="t('wizard.createBlank')"
+                  :src="isRisk ? tplRiskHeroImg : tplBlankHeroImg"
+                  :alt="isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank')"
                   class="w-full max-h-[135px] object-contain select-none pointer-events-none group-hover:scale-102 transition-transform duration-300"
                   loading="lazy"
                 />
@@ -255,7 +212,12 @@ import {
 } from '@/core/store';
 import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
-import { SCENARIO_TEMPLATES_META } from '@/templates/recommend';
+import {
+  SCENARIO_TEMPLATES_META,
+  RISK_SCENARIO_TEMPLATES_META,
+  type ScenarioTemplateKey,
+  type ScenarioTemplateMeta
+} from '@/templates/recommend';
 import logoUrl from '@/assets/logo.png';
 import tplBlankHeroImg from '@/assets/templates/tpl-blank-hero.webp';
 import tplRiskHeroImg from '@/assets/templates/tpl-risk-hero.webp';
@@ -293,22 +255,24 @@ const modalVisible = computed({
   }
 });
 
-const scenarioTemplates = SCENARIO_TEMPLATES_META;
+const scenarioTemplates = computed<ScenarioTemplateMeta[]>(() =>
+  isRisk.value ? RISK_SCENARIO_TEMPLATES_META : SCENARIO_TEMPLATES_META
+);
 
-function getTemplateTitle(tpl: (typeof scenarioTemplates)[number]) {
+function getTemplateTitle(tpl: ScenarioTemplateMeta) {
   return getFieldText(tpl, 'title', store.currentLocale);
 }
 
-function getTemplateTag(tpl: (typeof scenarioTemplates)[number]) {
+function getTemplateTag(tpl: ScenarioTemplateMeta) {
   return getFieldText(tpl, 'tag', store.currentLocale);
 }
 
-function getPagesText(tpl: (typeof scenarioTemplates)[number]) {
+function getPagesText(tpl: ScenarioTemplateMeta) {
   return t('wizard.pagesCount', undefined, { count: tpl.pages });
 }
 
-function getFieldsText(tpl: (typeof scenarioTemplates)[number]) {
-  return t('wizard.fieldsCount', undefined, { count: tpl.fields });
+function getFieldsText(tpl: ScenarioTemplateMeta) {
+  return t(isRisk.value ? 'wizard.questionsCount' : 'wizard.fieldsCount', undefined, { count: tpl.fields });
 }
 
 function handleCreateBlank() {
@@ -316,11 +280,11 @@ function handleCreateBlank() {
 }
 
 const confirmOverwriteVisible = ref(false);
-const pendingTemplateKey = ref<'kyc-customer' | 'kyc-individual' | 'kyc-entity' | null>(null);
+const pendingTemplateKey = ref<ScenarioTemplateKey | null>(null);
 
 const pendingTemplateTitle = computed(() => {
   if (!pendingTemplateKey.value) return '';
-  const item = scenarioTemplates.find(t => t.key === pendingTemplateKey.value);
+  const item = scenarioTemplates.value.find(t => t.key === pendingTemplateKey.value);
   if (!item) return '';
   return getFieldText(item, 'title', store.currentLocale);
 });
@@ -334,7 +298,7 @@ function isCanvasDirty(): boolean {
   return true;
 }
 
-function handleSelectTemplate(tplKey: 'kyc-customer' | 'kyc-individual' | 'kyc-entity') {
+function handleSelectTemplate(tplKey: ScenarioTemplateKey) {
   pendingTemplateKey.value = tplKey;
   if (isCanvasDirty()) {
     confirmOverwriteVisible.value = true;
