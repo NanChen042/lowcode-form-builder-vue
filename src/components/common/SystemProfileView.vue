@@ -213,7 +213,7 @@ const props = withDefaults(
 
 // 语言规则：支持简体中文 (zh)、繁体中文 (zh-Hant)、英文 (en)、马来语 (ms) 基本资料页默认文案，其余语种回退英文 (en)
 const effectiveLocale = computed<string>(() => {
-  const raw = props.locale || store.previewLocale || (props.isCanvas ? store.currentLocale : 'zh');
+  const raw = props.locale || (props.isCanvas ? store.currentLocale : (store.previewLocale || 'zh'));
   const loc = (raw || 'zh').toLowerCase().trim();
   if (loc === 'zh' || loc === 'zh-cn') return 'zh';
   if (loc === TRADITIONAL_LOCALE.toLowerCase()) return TRADITIONAL_LOCALE;

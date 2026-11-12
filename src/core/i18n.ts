@@ -57,7 +57,6 @@ export function getLocaleShortBadge(loc: string): string {
 
 export function getEffectiveFormLocale(locale?: string): string {
   if (locale) return locale;
-  if (store.previewLocale) return store.previewLocale;
   if (store.workspaceMode === 'translation') {
     return store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh';
   }

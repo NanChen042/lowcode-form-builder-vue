@@ -438,6 +438,8 @@ watch(
     if (val) {
       store.previewLocale = activePreviewLocale.value;
       initFormData();
+    } else {
+      store.previewLocale = '';
     }
   },
   { immediate: true }
