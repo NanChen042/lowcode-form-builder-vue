@@ -1869,7 +1869,7 @@ export function addTargetLocale(locale?: string) {
 
   let nextLocale = locale;
   if (!nextLocale) {
-    const candidates = ['zh', 'en', 'zh-HK', 'ms'];
+    const candidates = ['zh', 'en', 'zh-Hant', 'ms'];
     nextLocale = candidates.find(c => !store.meta.enabledLocales!.includes(c)) || (base === 'zh' ? 'en' : 'zh');
   }
 

@@ -235,6 +235,7 @@ import {
   t,
   getEffectiveFormLocale,
   getLocaleNativeName,
+  getFieldText,
   getGroupText,
   setGroupText
 } from '@/core/i18n';
@@ -312,7 +313,7 @@ const headerBadgeText = computed(() => {
     const el = selectedElement.value;
     const meta = el ? componentRegistry[el.type] : null;
     if (meta) {
-      return store.currentLocale === 'en' ? meta.label_en : meta.label;
+      return getFieldText(meta, 'label', store.currentLocale) || el?.type || t('prop.element');
     }
     return el?.type || t('prop.element');
   }

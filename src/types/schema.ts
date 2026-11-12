@@ -12,7 +12,7 @@ export type ComponentType =
   | 'email'
   | 'alert';
 
-export type FormLocale = 'zh' | 'en' | 'ja' | 'ko' | 'zh-TW' | 'ms' | string;
+export type FormLocale = 'zh' | 'en' | 'zh-Hant' | 'ms' | string;
 
 /** 统一多语言文本：locale -> { 属性名: 文本 } */
 export type I18nTexts = Record<string, Record<string, string>>;

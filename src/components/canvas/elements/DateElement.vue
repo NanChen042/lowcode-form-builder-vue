@@ -104,7 +104,7 @@ import { ref, computed, inject, type ComputedRef } from 'vue';
 import { Calendar } from '@lucide/vue';
 import type { FormElement } from '@/types/schema';
 import { store, markDirty, primaryLocale } from '@/core/store';
-import { t, getFieldText, setFieldText } from '@/core/i18n';
+import { t, TRADITIONAL_LOCALE, getFieldText, setFieldText } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
@@ -115,7 +115,7 @@ const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => pr
 const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 const frameDictLocale = computed<'zh' | 'en'>(() =>
-  frameLocale.value === 'zh' || frameLocale.value === 'zh-TW' ? 'zh' : 'en'
+  frameLocale.value === 'zh' || frameLocale.value === TRADITIONAL_LOCALE ? 'zh' : 'en'
 );
 
 const isFocusedPlaceholder = computed(() => {

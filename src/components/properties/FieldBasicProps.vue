@@ -376,7 +376,7 @@ const componentLabel = computed(() => {
   }
   const meta = componentRegistry[props.element.type];
   if (!meta) return t('prop.fieldFallback');
-  return (store.currentLocale === 'en' ? (meta.label_en || meta.label) : meta.label) || t('prop.fieldFallback');
+  return getFieldText(meta, 'label', store.currentLocale) || t('prop.fieldFallback');
 });
 
 const isShowLabel = computed({

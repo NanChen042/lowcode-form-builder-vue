@@ -169,7 +169,7 @@ Mock.mock(/\/pc\/form\/publish/, 'post', (options: any) => {
     } catch (_) {}
   }
   const formId = body?.schema?.meta?.formId || 'form_' + Date.now();
-  const formTitle = (body?.schema?.meta?.i18n?.zh?.title || body?.schema?.meta?.title || '').trim();
+  const formTitle = (body?.schema?.meta?.i18n?.zh?.title || body?.schema?.meta?.i18n?.en?.title || '').trim();
 
   if (formTitle.includes('重名') || formTitle.includes('已存在') || formTitle.toLowerCase().includes('duplicate')) {
     return {

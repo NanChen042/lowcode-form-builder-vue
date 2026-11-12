@@ -62,7 +62,7 @@
 import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { primaryLocale } from '@/core/store';
-import { t, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
+import { t, TRADITIONAL_LOCALE, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 import { Eraser, PenLine } from '@lucide/vue';
@@ -71,6 +71,6 @@ defineProps<{ element: FormElement }>();
 
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
 const frameDictLocale = computed<'zh' | 'en'>(() =>
-  frameLocale.value === 'zh' || frameLocale.value === 'zh-TW' ? 'zh' : 'en'
+  frameLocale.value === 'zh' || frameLocale.value === TRADITIONAL_LOCALE ? 'zh' : 'en'
 );
 </script>

@@ -253,7 +253,7 @@ import {
   isRisk,
   applyTemplateKey
 } from '@/core/store';
-import { t } from '@/core/i18n';
+import { t, getFieldText } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 import { SCENARIO_TEMPLATES_META } from '@/templates/recommend';
 import logoUrl from '@/assets/logo.png';
@@ -296,11 +296,11 @@ const modalVisible = computed({
 const scenarioTemplates = SCENARIO_TEMPLATES_META;
 
 function getTemplateTitle(tpl: (typeof scenarioTemplates)[number]) {
-  return store.currentLocale === 'en' ? tpl.title_en : tpl.title;
+  return getFieldText(tpl, 'title', store.currentLocale);
 }
 
 function getTemplateTag(tpl: (typeof scenarioTemplates)[number]) {
-  return store.currentLocale === 'en' ? tpl.tag_en : tpl.tag;
+  return getFieldText(tpl, 'tag', store.currentLocale);
 }
 
 function getPagesText(tpl: (typeof scenarioTemplates)[number]) {
@@ -322,7 +322,7 @@ const pendingTemplateTitle = computed(() => {
   if (!pendingTemplateKey.value) return '';
   const item = scenarioTemplates.find(t => t.key === pendingTemplateKey.value);
   if (!item) return '';
-  return store.currentLocale === 'en' ? item.title_en : item.title;
+  return getFieldText(item, 'title', store.currentLocale);
 });
 
 function isCanvasDirty(): boolean {

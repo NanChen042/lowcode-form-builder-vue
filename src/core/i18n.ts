@@ -15,16 +15,19 @@ export interface SupportedFormLocaleItem {
   flag: string;
 }
 
+/** 繁体中文统一语言码：zh-Hant（BCP 47 文字子标签，不区分香港/台湾） */
+export const TRADITIONAL_LOCALE = 'zh-Hant';
+
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
   { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH', flag: 'cn' },
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
-  { code: 'zh-HK', labelZh: '繁体中文 (香港)', labelEn: 'Traditional Chinese (HK)', nativeLabel: '繁體中文 (香港)', shortBadge: '繁', flag: 'cn' },
+  { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'cn' },
   { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' }
 ];
 
 export function getLocaleFlag(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
-  if (norm === 'zh' || norm === 'zh-cn' || norm === 'zh-hk' || norm === 'zh-tw') return 'cn';
+  if (norm === 'zh' || norm === 'zh-cn') return 'cn';
   if (norm === 'en' || norm === 'en-us') return 'gb';
   if (norm === 'ms') return 'my';
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
@@ -34,10 +37,6 @@ export function getLocaleFlag(loc: string): string {
 
 export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
   const norm = (loc || '').trim().toLowerCase();
-  if (norm === 'zh-tw' || norm === 'zh-hk') {
-    const currentUi = uiLocale || store.currentLocale || 'zh';
-    return currentUi === 'en' ? 'Traditional Chinese (HK)' : '繁体中文 (香港)';
-  }
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   const currentUi = uiLocale || store.currentLocale || 'zh';
   if (!item) return loc.toUpperCase();
@@ -46,14 +45,12 @@ export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
 
 export function getLocaleNativeName(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
-  if (norm === 'zh-tw' || norm === 'zh-hk') return '繁體中文 (香港)';
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   return item ? item.nativeLabel : loc.toUpperCase();
 }
 
 export function getLocaleShortBadge(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
-  if (norm === 'zh-tw' || norm === 'zh-hk') return '繁';
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   return item ? item.shortBadge : loc.toUpperCase();
 }
@@ -1347,13 +1344,115 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 };
 
 /**
+ * 系统预设资料页（基本资料页）多语言默认配置（补充繁体中文 zh-Hant 与马来语 ms）
+ */
+const profileTwDict: Record<string, string> = {
+  'common.notice': '提示',
+  'profile.notice.ind1': '根據合規要求，您需要填寫 KYC 問卷。',
+  'profile.notice.ent1': '您將作為以下公司的授權代表填寫 KYC 問卷。',
+  'profile.notice.common': '請確認以下信息是否準確，如需修改請聯繫服務商修改後再進行下一步。',
+  'profile.customerTitle': '客戶註冊信息',
+  'profile.entityTitle': '企業註冊信息',
+  'profile.basicTitle': '基本信息',
+  'profile.authorizedRep': '授權代表',
+  'profile.associatedInfo': '關聯信息',
+  'profile.associatedEntity': '關聯實體',
+  'profile.relationshipType': '關聯類型',
+  'profile.shareholder': '股東',
+  'profile.director': '董事',
+  'profile.partner': '合夥人',
+  'profile.capitalTitle': '股份與出資信息',
+  'profile.shareClass': '股份類別',
+  'profile.sharesHeld': '持股數量',
+  'profile.paidUpAmount': '分配實繳資本額',
+  'profile.field.name': '姓名',
+  'profile.field.nativeName': '母語姓名',
+  'profile.field.nationality': '國籍',
+  'profile.field.sgStatus': '新加坡身份',
+  'profile.field.nricFin': 'NRIC/FIN(如有)',
+  'profile.field.idType': '證件類型',
+  'profile.field.idNumber': '證件號碼',
+  'profile.field.dob': '出生日期',
+  'profile.field.gender': '性別',
+  'profile.field.phone': '手機號碼',
+  'profile.field.email': '電子郵箱',
+  'profile.field.resAddress': '居住地址',
+  'profile.field.contactAddress': '聯繫地址',
+  'profile.field.entityName': '實體名稱',
+  'profile.field.formerName': '曾用名(如有)',
+  'profile.field.jurisdiction': '註冊地',
+  'profile.field.entityRegNo': '實體註冊號碼',
+  'profile.field.registeredAddress': '註冊地址',
+  'profile.field.repCapacity': '授權代表身份',
+  'profile.field.repName': '授權代表姓名',
+  'profile.val.sgCitizen': '新加坡公民',
+  'profile.val.idCardPassport': '身份證 / 護照',
+  'profile.val.male': '男',
+  'profile.val.repCapacityVal': '董事 / 高級管理人員',
+  'profile.val.repIdTypeVal': 'NRIC (新加坡公民)'
+};
+
+const profileMsDict: Record<string, string> = {
+  'common.notice': 'Notis',
+  'profile.notice.ind1': 'Mengikut keperluan pematuhan kawal selia, anda perlu melengkapkan soal selidik KYC.',
+  'profile.notice.ent1': 'Anda akan melengkapkan soal selidik KYC sebagai wakil sah bagi syarikat di bawah.',
+  'profile.notice.common': 'Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan anda sebelum meneruskan.',
+  'profile.customerTitle': 'Maklumat Pendaftaran Pelanggan',
+  'profile.entityTitle': 'Maklumat Pendaftaran Korporat',
+  'profile.basicTitle': 'Maklumat Asas',
+  'profile.authorizedRep': 'Wakil Sah',
+  'profile.associatedInfo': 'Maklumat Berkaitan',
+  'profile.associatedEntity': 'Entiti Berkaitan',
+  'profile.relationshipType': 'Jenis Hubungan',
+  'profile.shareholder': 'Pemegang Saham',
+  'profile.director': 'Pengarah',
+  'profile.partner': 'Rakan Kongsi',
+  'profile.capitalTitle': 'Maklumat Pegangan Saham & Modal',
+  'profile.shareClass': 'Kelas Saham',
+  'profile.sharesHeld': 'Bilangan Saham Dipegang',
+  'profile.paidUpAmount': 'Jumlah Modal Berbayar Diperuntukkan',
+  'profile.field.name': 'Nama Penuh',
+  'profile.field.nativeName': 'Nama Bahasa Ibunda',
+  'profile.field.nationality': 'Kewarganegaraan',
+  'profile.field.sgStatus': 'Status Singapura',
+  'profile.field.nricFin': 'NRIC/FIN (jika berkenaan)',
+  'profile.field.idType': 'Jenis Dokumen Pengenalan',
+  'profile.field.idNumber': 'Nombor Pengenalan / Pasport',
+  'profile.field.dob': 'Tarikh Lahir',
+  'profile.field.gender': 'Jantina',
+  'profile.field.phone': 'Nombor Telefon Bimbit',
+  'profile.field.email': 'Alamat E-mel',
+  'profile.field.resAddress': 'Alamat Kediaman',
+  'profile.field.contactAddress': 'Alamat Surat-menyurat',
+  'profile.field.entityName': 'Nama Entiti',
+  'profile.field.formerName': 'Nama Dahulu (jika ada)',
+  'profile.field.jurisdiction': 'Bidang Kuasa Pemerbadanan',
+  'profile.field.entityRegNo': 'Nombor Pendaftaran Entiti',
+  'profile.field.registeredAddress': 'Alamat Berdaftar',
+  'profile.field.repCapacity': 'Kapasiti / Peranan Wakil Sah',
+  'profile.field.repName': 'Nama Wakil Sah',
+  'profile.val.sgCitizen': 'Warganegara Singapura',
+  'profile.val.idCardPassport': 'NRIC / Pasport',
+  'profile.val.male': 'Lelaki',
+  'profile.val.repCapacityVal': 'Pengarah / Pegawai Kanan',
+  'profile.val.repIdTypeVal': 'NRIC (Warganegara Singapura)'
+};
+
+export const profileMultiMessages: Record<string, Record<string, string>> = {
+  'zh-Hant': profileTwDict,
+  ms: profileMsDict
+};
+
+/**
  * 获取系统 UI 文案（支持多语言与参数插值）
- * 注意：系统 UI 界面仅维护中英双语；若指定了非 zh 语种（如 en, ja, ko, ms），UI 文案自动以 en 保底展示
+ * 注意：系统 UI 界面仅维护中英双语（基本资料页额外支持繁体中文与马来语预设文案）；其他语种自动以 en 保底展示
  */
 export function t(key: string, locale?: string, params?: Record<string, string | number>): string {
   const targetLoc = locale || store.currentLocale || 'zh';
-  const resolvedLocale: Locale = (targetLoc === 'zh' || targetLoc === 'zh-TW') ? 'zh' : 'en';
-  let str = systemMessages[resolvedLocale]?.[key] || systemMessages.en?.[key] || systemMessages.zh[key] || key;
+  const isTrad = targetLoc === TRADITIONAL_LOCALE;
+  const multiHit = profileMultiMessages[targetLoc]?.[key];
+  const resolvedLocale: Locale = (targetLoc === 'zh' || isTrad) ? 'zh' : 'en';
+  let str = multiHit || systemMessages[resolvedLocale]?.[key] || systemMessages.en?.[key] || systemMessages.zh[key] || key;
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
@@ -1372,11 +1471,11 @@ export function formatOptionLabel(index: number, locale?: string): string {
   if (current === 'en' || current === 'ms') {
     return `Option ${index}`;
   }
-  if (current === 'ja') {
-    return `選択肢 ${index}`;
-  }
-  if (current === 'ko') {
-    return `옵션 ${index}`;
+  if (current === TRADITIONAL_LOCALE) {
+    if (index >= 1 && index <= 10) {
+      return `選項${CHINESE_NUMS[index - 1]}`;
+    }
+    return `選項${index}`;
   }
   if (index >= 1 && index <= 10) {
     return `选项${CHINESE_NUMS[index - 1]}`;
@@ -1385,29 +1484,8 @@ export function formatOptionLabel(index: number, locale?: string): string {
 }
 
 function readI18nField(obj: any, field: string, loc: string): string {
-  if (!obj) return '';
-  // 1. 优先读取标准嵌套结构: obj.i18n[loc][field]
-  const fromI18n = obj.i18n?.[loc]?.[field];
-  if (fromI18n !== undefined && fromI18n !== null && String(fromI18n).trim() !== '') {
-    return String(fromI18n).trim();
-  }
-  // 2. 兼容直接字符串 locale (如部分旧结构 obj.i18n[loc] 为字符串)
-  const directLoc = obj.i18n?.[loc];
-  if (typeof directLoc === 'string' && directLoc.trim() !== '') {
-    return directLoc.trim();
-  }
-  // 3. 兼容平铺字段或静态配置 (title/title_en, label/label_en, desc/desc_en 等)
-  if (loc === 'zh') {
-    const v = obj[field];
-    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
-  } else if (loc === 'en') {
-    const v = obj[`${field}_en`] ?? obj[field];
-    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
-  } else {
-    const v = obj[field] ?? obj[`${field}_en`];
-    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
-  }
-  return '';
+  const val = obj?.i18n?.[loc]?.[field];
+  return val !== undefined && val !== null ? String(val).trim() : '';
 }
 
 function writeI18nField(obj: any, field: string, val: string, loc: string) {
@@ -1670,50 +1748,38 @@ export function setMetaText(
 const defaultValidationMessages: Record<string, Record<string, string>> = {
   declaration: {
     zh: '请确认并同意声明条款',
-    'zh-TW': '請確認並同意聲明條款',
+    'zh-Hant': '請確認並同意聲明條款',
     en: 'Please agree to the declarations',
-    ja: '宣誓事項を確認し、同意してください',
-    ko: '선서 사항을 확인하고 동의해 주세요',
     ms: 'Sila sahkan dan bersetuju dengan pengisytiharan'
   },
   signature: {
     zh: '请完成手写签名',
-    'zh-TW': '請完成手寫簽名',
+    'zh-Hant': '請完成手寫簽名',
     en: 'Please complete handwritten signature',
-    ja: '手書きで署名してください',
-    ko: '서명을 완료해 주세요',
     ms: 'Sila lengkapkan tandatangan'
   },
   selectOne: {
     zh: '请选择一个选项',
-    'zh-TW': '請選擇一個選項',
+    'zh-Hant': '請選擇一個選項',
     en: 'Please select an option',
-    ja: '選択してください',
-    ko: '항목을 선택해 주세요',
     ms: 'Sila pilih satu pilihan'
   },
   selectAtLeastOne: {
     zh: '请至少选择一个选项',
-    'zh-TW': '請至少選擇一個選項',
+    'zh-Hant': '請至少選擇一個選項',
     en: 'Please select at least one option',
-    ja: '1つ以上選択してください',
-    ko: '하나 이상 선택해 주세요',
     ms: 'Sila pilih sekurang-kurangnya satu pilihan'
   },
   selectDate: {
     zh: '请选择日期',
-    'zh-TW': '請選擇日期',
+    'zh-Hant': '請選擇日期',
     en: 'Please select a date',
-    ja: '日付を選択してください',
-    ko: '날짜를 선택해 주세요',
     ms: 'Sila pilih tarikh'
   },
   required: {
     zh: '必填项不能为空',
-    'zh-TW': '必填項不能為空',
+    'zh-Hant': '必填項不能為空',
     en: 'This required field cannot be empty',
-    ja: '入力してください',
-    ko: '필수 입력 항목입니다',
     ms: 'Medan ini diperlukan'
   }
 };

@@ -16,9 +16,7 @@ import {
 
 export interface ComponentMeta {
   type: ComponentType;
-  label: string;
-  label_en: string;
-  i18n?: I18nTexts;
+  i18n: I18nTexts;
   category: 'basic' | 'business' | 'layout';
   icon: string;
   defaultData: () => Partial<FormElement>;
@@ -44,8 +42,6 @@ export function validatePhoneNumber(
 export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   input: {
     type: 'input',
-    label: '单行文本',
-    label_en: 'Single Line',
     i18n: { zh: { label: '单行文本' }, en: { label: 'Single Line' } },
     category: 'basic',
     icon: 'Type',
@@ -62,8 +58,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   textarea: {
     type: 'textarea',
-    label: '多行文本',
-    label_en: 'Multi-line',
     i18n: { zh: { label: '多行文本' }, en: { label: 'Multi-line' } },
     category: 'basic',
     icon: 'AlignLeft',
@@ -82,8 +76,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   select: {
     type: 'select',
-    label: '下拉选择',
-    label_en: 'Dropdown',
     i18n: { zh: { label: '下拉选择' }, en: { label: 'Dropdown' } },
     category: 'basic',
     icon: 'SquareChevronDown',
@@ -104,8 +96,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   radio: {
     type: 'radio',
-    label: '单选框组',
-    label_en: 'Radio',
     i18n: { zh: { label: '单选框组' }, en: { label: 'Radio' } },
     category: 'basic',
     icon: 'CircleDot',
@@ -126,8 +116,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   checkbox: {
     type: 'checkbox',
-    label: '多选框组',
-    label_en: 'Checkbox',
     i18n: { zh: { label: '多选框组' }, en: { label: 'Checkbox' } },
     category: 'basic',
     icon: 'CheckSquare',
@@ -148,8 +136,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   date: {
     type: 'date',
-    label: '日期选择',
-    label_en: 'Date Picker',
     i18n: { zh: { label: '日期选择' }, en: { label: 'Date Picker' } },
     category: 'basic',
     icon: 'Calendar',
@@ -170,8 +156,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   country: {
     type: 'country',
-    label: '国家',
-    label_en: 'Country',
     i18n: { zh: { label: '国家' }, en: { label: 'Country' } },
     category: 'business',
     icon: 'Globe',
@@ -189,8 +173,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   nationality: {
     type: 'nationality',
-    label: '国籍',
-    label_en: 'Nationality',
     i18n: { zh: { label: '国籍' }, en: { label: 'Nationality' } },
     category: 'business',
     icon: 'Flag',
@@ -208,8 +190,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   signature: {
     type: 'signature',
-    label: '电子签名',
-    label_en: 'E-Signature',
     i18n: { zh: { label: '电子签名' }, en: { label: 'E-Signature' } },
     category: 'business',
     icon: 'Signature',
@@ -228,8 +208,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   alert: {
     type: 'alert',
-    label: '提示区块',
-    label_en: 'Notice',
     i18n: { zh: { label: '提示区块' }, en: { label: 'Notice' } },
     category: 'business',
     icon: 'Info',
@@ -245,8 +223,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   email: {
     type: 'email',
-    label: '电子邮箱',
-    label_en: 'Email',
     i18n: { zh: { label: '电子邮箱' }, en: { label: 'Email' } },
     category: 'basic',
     icon: 'Mail',
@@ -262,8 +238,6 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
   },
   phone: {
     type: 'phone',
-    label: '手机号码',
-    label_en: 'Phone',
     i18n: { zh: { label: '手机号码' }, en: { label: 'Phone' } },
     category: 'business',
     icon: 'Smartphone',

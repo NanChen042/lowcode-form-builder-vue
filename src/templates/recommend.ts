@@ -9,84 +9,98 @@ import tplEntityIcon from '@/assets/templates/e.png';
 export interface ScenarioTemplateMeta {
   key: 'kyc-customer' | 'kyc-individual' | 'kyc-entity';
   type: ProfileType;
-  title: string;
-  title_en: string;
-  tag: string;
-  tag_en: string;
   tagColor: string;
   pages: number;
   fields: number;
   descKey: string;
-  desc: string;
-  desc_en: string;
-  stats: string;
-  stats_en: string;
   image: string;
   icon: string;
   code: string;
   bannerBgClass: string;
+  i18n: {
+    zh: { title: string; tag: string; desc: string; stats: string };
+    en: { title: string; tag: string; desc: string; stats: string };
+  };
 }
 
 export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
   {
     key: 'kyc-customer',
     type: 'customer',
-    title: '客户案例 KYC 模板',
-    title_en: 'Customer KYC Template',
-    tag: '客户案例',
-    tag_en: 'Customer',
     tagColor: 'purple',
     pages: 3,
     fields: 9,
     descKey: 'wizard.tplCustomerDesc',
-    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
-    desc_en: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
-    stats: '3 页面 · 9 字段',
-    stats_en: '3 Pages · 9 Fields',
     image: tplCustomerImg,
     icon: tplCustomerIcon,
     code: 'SG_CDD_CUSTOMER',
-    bannerBgClass: 'bg-[#faf5ff]'
+    bannerBgClass: 'bg-[#faf5ff]',
+    i18n: {
+      zh: {
+        title: '客户案例 KYC 模板',
+        tag: '客户案例',
+        desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+        stats: '3 页面 · 9 字段'
+      },
+      en: {
+        title: 'Customer KYC Template',
+        tag: 'Customer',
+        desc: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+        stats: '3 Pages · 9 Fields'
+      }
+    }
   },
   {
     key: 'kyc-individual',
     type: 'individual',
-    title: '个人案例 KYC 模板',
-    title_en: 'Individual KYC Template',
-    tag: '个人案例',
-    tag_en: 'Individual',
     tagColor: 'green',
     pages: 5,
     fields: 22,
     descKey: 'wizard.tplIndividualDesc',
-    desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
-    desc_en: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
-    stats: '5 页面 · 22 字段',
-    stats_en: '5 Pages · 22 Fields',
     image: tplIndividualImg,
     icon: tplIndividualIcon,
     code: 'SG_CDD_INDIVIDUAL',
-    bannerBgClass: 'bg-[#f0fdf4]'
+    bannerBgClass: 'bg-[#f0fdf4]',
+    i18n: {
+      zh: {
+        title: '个人案例 KYC 模板',
+        tag: '个人案例',
+        desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
+        stats: '5 页面 · 22 字段'
+      },
+      en: {
+        title: 'Individual KYC Template',
+        tag: 'Individual',
+        desc: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
+        stats: '5 Pages · 22 Fields'
+      }
+    }
   },
   {
     key: 'kyc-entity',
     type: 'entity',
-    title: '实体案例 KYC 模板',
-    title_en: 'Entity KYC Template',
-    tag: '实体案例',
-    tag_en: 'Entity',
     tagColor: 'arcoblue',
     pages: 3,
     fields: 9,
     descKey: 'wizard.tplEntityDesc',
-    desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
-    desc_en: 'Covers corporate business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
-    stats: '3 页面 · 9 字段',
-    stats_en: '3 Pages · 9 Fields',
     image: tplEntityImg,
     icon: tplEntityIcon,
     code: 'SG_CDD_ENTITY',
-    bannerBgClass: 'bg-[#f0f9ff]'
+    bannerBgClass: 'bg-[#f0f9ff]',
+    i18n: {
+      zh: {
+        title: '实体案例 KYC 模板',
+        tag: '实体案例',
+        desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+        stats: '3 页面 · 9 字段'
+      },
+      en: {
+        title: 'Entity KYC Template',
+        tag: 'Entity',
+        desc: 'Covers corporate business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+        stats: '3 Pages · 9 Fields'
+      }
+    }
   }
 ];
 
@@ -2187,7 +2201,7 @@ export const multilingualMockTemplate: FormSchema = {
     "enabledLocales": [
       "zh",
       "en",
-      "zh-HK"
+      "zh-Hant"
     ],
     "source": "template",
     "templateKey": "kyc-multilang-demo",
@@ -2202,7 +2216,7 @@ export const multilingualMockTemplate: FormSchema = {
         "title": "Multilingual Corporate CDD Questionnaire",
         "description": "Multilingual Corporate CDD Questionnaire Demo"
       },
-      "zh-HK": {
+      "zh-Hant": {
         "title": "企業客戶多語言盡職調查問卷",
         "description": "多語言企業客戶盡職調查問卷範例"
       }
@@ -2221,7 +2235,7 @@ export const multilingualMockTemplate: FormSchema = {
         "en": {
           "title": "Basic Information"
         },
-        "zh-HK": {
+        "zh-Hant": {
           "title": "基本資料"
         }
       },
@@ -2241,7 +2255,7 @@ export const multilingualMockTemplate: FormSchema = {
           "title": "Business & Compliance Information",
           "description": "Please truthfully provide your core business activities, source of funds, and compliance contact details."
         },
-        "zh-HK": {
+        "zh-Hant": {
           "title": "業務與合規資訊",
           "description": "請如實填寫貴司主營業務、資金來源及合規聯絡資訊。"
         }
@@ -2264,7 +2278,7 @@ export const multilingualMockTemplate: FormSchema = {
               "label": "Filing Instructions",
               "content": "Please confirm the following before submission:\n· All monetary amounts are denominated in Singapore Dollars (SGD)\n· If cross-border business is involved, please disclose your top 3 counterparty countries/regions"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "填報須知",
               "content": "請在提交前確認以下事項：\n· 所有金額均以新加坡元 (SGD) 計價\n· 若涉及跨國業務，請完整披露前三大交易對手國家/地區"
             }
@@ -2293,7 +2307,7 @@ export const multilingualMockTemplate: FormSchema = {
               "help": "Recommended to cover core products/services and target markets",
               "customErrorMessage": "Please provide a description of your main business activity"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "公司主營業務說明",
               "placeholder": "請簡述公司業務範圍及經營模式。",
               "help": "建議涵蓋核心產品/服務及主要目標市場",
@@ -2318,7 +2332,7 @@ export const multilingualMockTemplate: FormSchema = {
               "label": "Annual Sales Volume",
               "placeholder": "Please select an option"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "年銷售額規模",
               "placeholder": "請選擇選項"
             }
@@ -2333,7 +2347,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Below SGD 100,000"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "SGD 100,000 以下"
                 }
               }
@@ -2347,7 +2361,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "SGD 100,000 – 1,000,000"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "SGD 100,000 – 1,000,000"
                 }
               }
@@ -2361,7 +2375,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "SGD 1,000,000 – 5,000,000"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "SGD 1,000,000 – 5,000,000"
                 }
               }
@@ -2375,7 +2389,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Above SGD 5,000,000"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "SGD 5,000,000 以上"
                 }
               }
@@ -2400,7 +2414,7 @@ export const multilingualMockTemplate: FormSchema = {
               "label": "Primary Source of Funds",
               "help": "(Up to 3 items)"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "主要資金來源渠道",
               "help": "(最多選3項)"
             }
@@ -2415,7 +2429,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Bank Loans"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "銀行貸款"
                 }
               }
@@ -2429,7 +2443,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Business Income"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "營業收入"
                 }
               }
@@ -2443,7 +2457,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Capital/Shareholding Contribution"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "出資/股權投入"
                 }
               }
@@ -2457,7 +2471,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Inter-company Funding/Loans"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "公司間資金/借貸"
                 }
               }
@@ -2484,7 +2498,7 @@ export const multilingualMockTemplate: FormSchema = {
               "placeholder": "Please select a country",
               "help": "(Up to 3 items)"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "主要客戶所在國家/地區",
               "placeholder": "請選擇國家",
               "help": "(最多選3項)"
@@ -2515,7 +2529,7 @@ export const multilingualMockTemplate: FormSchema = {
               "endPlaceholder": "End Date",
               "longTermText": "Long-term"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "營業執照有效期限",
               "placeholder": "開始日期",
               "endPlaceholder": "截止日期",
@@ -2538,7 +2552,7 @@ export const multilingualMockTemplate: FormSchema = {
             "en": {
               "label": "Is your company publicly listed?"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "是否是上市公司"
             }
           },
@@ -2552,7 +2566,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "Yes"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "是"
                 }
               }
@@ -2566,7 +2580,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "No"
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "否"
                 }
               }
@@ -2590,7 +2604,7 @@ export const multilingualMockTemplate: FormSchema = {
               "label": "Stock Ticker (if applicable)",
               "placeholder": "Please enter stock ticker (if applicable)"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "股票代碼(如適用)",
               "placeholder": "請輸入股票代碼(如適用)"
             }
@@ -2618,7 +2632,7 @@ export const multilingualMockTemplate: FormSchema = {
         "en": {
           "title": "Declaration and Signature"
         },
-        "zh-HK": {
+        "zh-Hant": {
           "title": "聲明及簽名"
         }
       },
@@ -2644,7 +2658,7 @@ export const multilingualMockTemplate: FormSchema = {
               "signPlaceholder": "Please sign here",
               "declarationErrorMessage": "Please read and accept all statutory declaration terms first"
             },
-            "zh-HK": {
+            "zh-Hant": {
               "label": "聲明",
               "placeholder": "請在下方指定區域簽名",
               "signPlaceholder": "請在此處手寫簽名",
@@ -2661,7 +2675,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "I hereby declare that the Company has fully and truthfully disclosed all information regarding its Ultimate Beneficial Owners (UBOs) in accordance with the relevant requirements, and there exists no concealment, omission or circumvention of such disclosure in any form whatsoever."
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "本人特此聲明，公司已根據相關要求，完整、真實地披露其最終受益所有人(UBO)的全部資訊，且不存在任何形式的隱瞞、遺漏或規避披露的情況。"
                 }
               }
@@ -2675,7 +2689,7 @@ export const multilingualMockTemplate: FormSchema = {
                 "en": {
                   "label": "I confirm that I have been duly authorised by the company or entity to complete and submit this questionnaire, documents, and declarations on its behalf.\nI hereby declare that all information, documents, and declarations provided above are true, accurate, and complete. I understand that any false statement, misleading statement, or intentional concealment of material facts may result in legal liability, including criminal liability."
                 },
-                "zh-HK": {
+                "zh-Hant": {
                   "label": "本人確認已獲得該公司或實體的正式授權，代表其填寫並提交本問卷及文件和聲明。\n本人特此聲明，以上所提供的資訊、文件及聲明均為真實、準確且完整。本人知悉，如存在任何虛假陳述、誤導性陳述或故意隱瞞重要事實的行為，本人可能需承擔相應的法律責任，包括刑事責任。"
                 }
               }

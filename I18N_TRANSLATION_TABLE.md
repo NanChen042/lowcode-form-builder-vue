@@ -329,50 +329,78 @@
 | 已达最大追问层级（最多支持2级嵌套） | Max nesting depth reached (up to 2 levels) | | | |
 
 ## 系统预设资料页
-| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
-| :--- | :--- | :--- | :--- | :--- |
-| 根据合规监管要求，您需要完成KYC问卷填写。 | According to regulatory compliance requirements, you need to complete the KYC questionnaire. | | | |
-| 您将作为以下公司的授权代表，完成KYC问卷填写。 | You will complete the KYC questionnaire as the authorized representative of the company below. | | | |
-| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please verify if the following information is accurate. If modification is required, contact your service provider before proceeding. | | | |
-| 客户母案例注册基本信息 | Customer Registration Information | | | |
-| 公司注册基本信息 | Corporate Registration Information | | | |
-| 基本资料 | Basic Information | | | |
-| 授权代表 | Authorized Representative | | | |
-| 关联信息 | Associated Information | | | |
-| 关联实体 | Associated Entity | | | |
-| 关联类型 | Relationship Type | | | |
-| 股东 | Shareholder | | | |
-| 董事 | Director | | | |
-| 合伙人 | Partner | | | |
-| 股份与出资信息 | Shareholding & Capital Info | | | |
-| 股份类别 | Share Class | | | |
-| 持有股份数 | Shares Held | | | |
-| 对应已缴股本金额 | Allocated Paid-up Capital | | | |
-| 姓名 | Full Name | | | |
-| 国籍语言姓名 | Native Language Name | | | |
-| 国籍 | Nationality | | | |
-| 新加坡身份类型 | Singapore Status | | | |
-| NRIC/FIN(如适用) | NRIC/FIN (if applicable) | | | |
-| 证件类型 | ID Document Type | | | |
-| 证件号码 | ID / Passport Number | | | |
-| 出生日期 | Date of Birth | | | |
-| 性别 | Gender | | | |
-| 手机号码 | Mobile Phone | | | |
-| 电子邮箱 | Email Address | | | |
-| 居住地址 | Residential Address | | | |
-| 联系地址 | Contact Address | | | |
-| 实体名称 | Entity Name | | | |
-| 曾用名(如有) | Former Name (if any) | | | |
-| 注册地 | Jurisdiction of Incorporation | | | |
-| 实体注册号码 | Entity Registration Number | | | |
-| 注册地址 | Registered Address | | | |
-| 授权代表身份 | Capacity / Role | | | |
-| 授权代表姓名 | Representative Name | | | |
-| 新加坡公民 | Singapore Citizen | | | |
-| 身份证 / 护照 | NRIC / Passport | | | |
-| 男 | Male | | | |
-| 董事 / 高级管理人员 | Director / Senior Officer | | | |
-| NRIC(新加坡公民) | NRIC (Singapore Citizen) | | | |
+| 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 根据合规监管要求，您需要完成KYC问卷填写。 | According to regulatory compliance requirements, you need to complete the KYC questionnaire. | 根據合規要求，您需要填寫 KYC 問卷。 | Mengikut keperluan pematuhan kawal selia, anda perlu melengkapkan soal selidik KYC. | | | | | |
+| 您将作为以下公司的授权代表，完成KYC问卷填写。 | You will complete the KYC questionnaire as the authorized representative of the company below. | 您將作為以下公司的授權代表填寫 KYC 問卷。 | Anda akan melengkapkan soal selidik KYC sebagai wakil sah bagi syarikat di bawah. | | | | | |
+| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please verify if the following information is accurate. If modification is required, contact your service provider before proceeding. | 請確認以下信息是否準確，如需修改請聯繫服務商修改後再進行下一步。 | Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan anda sebelum meneruskan. | | | | | |
+| 客户母案例注册基本信息 | Customer Registration Information | 客戶註冊信息 | Maklumat Pendaftaran Pelanggan | | | | | |
+| 公司注册基本信息 | Corporate Registration Information | 企業註冊信息 | Maklumat Pendaftaran Korporat | | | | | |
+| 基本资料 | Basic Information | 基本信息 | Maklumat Asas | | | | | |
+| 授权代表 | Authorized Representative | 授權代表 | Wakil Sah | | | | | |
+| 关联信息 | Associated Information | 關聯信息 | Maklumat Berkaitan | | | | | |
+| 关联实体 | Associated Entity | 關聯實體 | Entiti Berkaitan | | | | | |
+| 关联类型 | Relationship Type | 關聯類型 | Jenis Hubungan | | | | | |
+| 股东 | Shareholder | 股東 | Pemegang Saham | | | | | |
+| 董事 | Director | 董事 | Pengarah | | | | | |
+| 合伙人 | Partner | 合夥人 | Rakan Kongsi | | | | | |
+| 股份与出资信息 | Shareholding & Capital Info | 股份與出資信息 | Maklumat Pegangan Saham & Modal | | | | | |
+| 股份类别 | Share Class | 股份類別 | Kelas Saham | | | | | |
+| 持有股份数 | Shares Held | 持股數量 | Bilangan Saham Dipegang | | | | | |
+| 对应已缴股本金额 | Allocated Paid-up Capital | 分配實繳資本額 | Jumlah Modal Berbayar Diperuntukkan | | | | | |
+| 姓名 | Full Name | 姓名 | Nama Penuh | | | | | |
+| 国籍语言姓名 | Native Language Name | 母語姓名 | Nama Bahasa Ibunda | | | | | |
+| 国籍 | Nationality | 國籍 | Kewarganegaraan | | | | | |
+| 新加坡身份类型 | Singapore Status | 新加坡身份 | Status Singapura | | | | | |
+| NRIC/FIN(如适用) | NRIC/FIN (if applicable) | NRIC/FIN(如有) | NRIC/FIN (jika berkenaan) | | | | | |
+| 证件类型 | ID Document Type | 證件類型 | Jenis Dokumen Pengenalan | | | | | |
+| 证件号码 | ID / Passport Number | 證件號碼 | Nombor Pengenalan / Pasport | | | | | |
+| 出生日期 | Date of Birth | 出生日期 | Tarikh Lahir | | | | | |
+| 性别 | Gender | 性別 | Jantina | | | | | |
+| 手机号码 | Mobile Phone | 手機號碼 | Nombor Telefon Bimbit | | | | | |
+| 电子邮箱 | Email Address | 電子郵箱 | Alamat E-mel | | | | | |
+| 居住地址 | Residential Address | 居住地址 | Alamat Kediaman | | | | | |
+| 联系地址 | Contact Address | 聯繫地址 | Alamat Surat-menyurat | | | | | |
+| 实体名称 | Entity Name | 實體名稱 | Nama Entiti | | | | | |
+| 曾用名(如有) | Former Name (if any) | 曾用名(如有) | Nama Dahulu (jika ada) | | | | | |
+| 注册地 | Jurisdiction of Incorporation | 註冊地 | Bidang Kuasa Pemerbadanan | | | | | |
+| 实体注册号码 | Entity Registration Number | 實體註冊號碼 | Nombor Pendaftaran Entiti | | | | | |
+| 注册地址 | Registered Address | 註冊地址 | Alamat Berdaftar | | | | | |
+| 授权代表身份 | Capacity / Role | 授權代表身份 | Kapasiti / Peranan Wakil Sah | | | | | |
+| 授权代表姓名 | Representative Name | 授權代表姓名 | Nama Wakil Sah | | | | | |
+| 新加坡公民 | Singapore Citizen | 新加坡公民 | Warganegara Singapura | | | | | |
+| 身份证 / 护照 | NRIC / Passport | 身份證 / 護照 | NRIC / Pasport | | | | | |
+| 男 | Male | 男 | Lelaki | | | | | |
+| 董事 / 高级管理人员 | Director / Senior Officer | 董事 / 高級管理人員 | Pengarah / Pegawai Kanan | | | | | |
+| NRIC(新加坡公民) | NRIC (Singapore Citizen) | NRIC (新加坡公民) | NRIC (Warganegara Singapura) | | | | | |
+| 提示 | Notice | 提示 | Notis | | | | | |
+| 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | 根據合規監管要求，您需要完成KYC問卷填寫。 | Selaras dengan keperluan pematuhan peraturan, anda dikehendaki melengkapkan soal selidik KYC. | | | | | |
+| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | 請確認以下資訊是否準確，如需修改，請聯繫服務商修改後再進行下一步。 | Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan sebelum meneruskan. | | | | | |
+| 基本资料 | Basic Details | 基本資料 | Butiran Asas | | | | | |
+| 关联信息 | Relationship Information | 關聯資訊 | Maklumat Hubungan | | | | | |
+| 股份与出资信息 | Shareholding & Capital Information | 股份與出資資訊 | Maklumat Pegangan Saham & Modal | | | | | |
+| 持有股份数 | Number of Shares Held | 持有股份數 | Bilangan Saham Dipegang | | | | | |
+| 对应已缴股本金额 | Allocated Paid-up Amount | 對應已繳股本金額 | Jumlah Modal Berbayar Diperuntukkan | | | | | |
+| 企业注册全称 | Company Name | 企業註冊全稱 | Nama Syarikat | | | | | |
+| 统一机构识别码 (UEN) | UEN | 統一機構識別碼 (UEN) | Nombor Pengenalan Entiti Unik (UEN) | | | | | |
+| 注册设立国家 | Country of Incorporation | 註冊設立國家 | Negara Pemerbadanan | | | | | |
+| 法律实体形式 | Entity Type | 法律實體形式 | Jenis Entiti Undang-Undang | | | | | |
+| 实体注册号码 | Registration Number | 實體註冊號碼 | Nombor Pendaftaran Entiti | | | | | |
+| 注册地 | Place of Incorporation | 註冊地 | Bidang Kuasa Pemerbadanan | | | | | |
+| 授权代表身份 | Authorised Representative Role | 授權代表身份 | Kapasiti / Peranan Wakil Sah | | | | | |
+| 授权代表姓名 | Authorized Representative | 授權代表姓名 | Nama Wakil Diberi Kuasa | | | | | |
+| 官方联络邮箱 | Contact Email | 官方聯絡信箱 | E-mel Rasmi | | | | | |
+| 企业注册地址 | Registered Address | 企業註冊地址 | Alamat Berdaftar Syarikat | | | | | |
+| 姓名 | Name | 姓名 | Nama | | | | | |
+| 国籍语言姓名 | Native Name | 國籍語言姓名 | Nama Bahasa Asal | | | | | |
+| 新加坡身份类型 | Singapore Identity Status | 新加坡身分類型 | Status Identiti Singapura | | | | | |
+| NRIC/FIN(如适用) | NRIC/FIN | NRIC/FIN(如適用) | NRIC/FIN (jika berkenaan) | | | | | |
+| 证件类型 | ID Type | 證件類型 | Jenis Pengenalan | | | | | |
+| 证件号码 | ID Number | 證件號碼 | Nombor Dokumen | | | | | |
+| 电子邮箱 | Email | 電子郵件 | E-mel | | | | | |
+| 最终受益人 | Ultimate Beneficial Owner | 最終受益人 | Pemilik Manfaat Muktamad | | | | | |
+| 普通股 | Ordinary Shares | 普通股 | Saham Biasa | | | | | |
+| 优先股 | Preference Shares | 優先股 | Saham Keutamaan | | | | | |
 
 ## 欢迎向导弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -395,6 +423,17 @@
 | 确定覆盖 | Confirm Overwrite | | | |
 | {count} 页面 | {count} Pages | | | |
 | {count} 字段 | {count} Fields | | | |
+| 客户案例 KYC 模板 | Customer KYC Template | | | |
+| 客户案例 | Customer | | | |
+| 涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。 | Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature. | | | |
+| 3 页面 · 9 字段 | 3 Pages · 9 Fields | | | |
+| 个人案例 KYC 模板 | Individual KYC Template | | | |
+| 个人案例 | Individual | | | |
+| 涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。 | Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature. | | | |
+| 5 页面 · 22 字段 | 5 Pages · 22 Fields | | | |
+| 实体案例 KYC 模板 | Entity KYC Template | | | |
+| 实体案例 | Entity | | | |
+| 涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。 | Covers corporate business activities, sales volume, funding source, listed company stock code linkage, and authorized signature. | | | |
 
 ## 新建表单弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -672,103 +711,152 @@
 | 页面标题 | Page Title (EN) | | | |
 | 页面描述 | Page Description (EN) | | | |
 
-## 移动端填报端
+## 支持的表单语言名称（SUPPORTED_FORM_LOCALES）
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
-| 上一步 | Back | | | |
-| 下一步 | Next | | | |
-| 确认提交 | Submit Form | | | |
-| 提交中... | Submitting... | | | |
-| 表单已提交 | Form Submitted | | | |
-| 提交失败，请检查网络后重试 | Submission failed. Please check network and retry. | | | |
-| 必填项不能为空 | This field is required | | | |
-| 请输入有效的电子邮箱地址 | Please enter a valid email address | | | |
-| 请输入有效的手机号码 | Please enter a valid phone number | | | |
-| 请在下方签名板完成电子手写签名 | Please sign in the signature pad below | | | |
-| 重新签名 | Clear Signature | | | |
-| 完成签名 | Done | | | |
-| 修改签名 | Edit | | | |
-| 请在此处手写签名 | Please sign here | | | |
-| 请点击选择 | Select an option | | | |
-| 请输入 | Enter here | | | |
-| 长期 | Long-term | | | |
-| 长期有效 | Permanent | | | |
-| 获取表单数据失败，请检查链接有效性 | Failed to load form schema. Invalid link. | | | |
-| 您的填报资料已成功送达，请勿重复提交。 | Your submission has been received. Please do not submit again. | | | |
-| 提交时间 | Submission Time | | | |
-| 当前状态 | Status | | | |
-| 已完成 | Completed | | | |
-| 关闭页面 | Close Page | | | |
-| 返回待办列表 | Back to Task List | | | |
-| 链接无效或已失效 | Link Invalid or Expired | | | |
-| 未找到对应的填报任务，该链接可能已过期或已被处理 | Task not found. The link may have expired or already been processed. | | | |
-| 确认 | Confirm | | | |
-| 取消 | Cancel | | | |
-| 确认提交表单？ | Confirm Submission? | | | |
-| 提交后表单资料将进入正式审核流程，无法撤回或修改，请确认所填信息真实有效。 | Once submitted, your information will be processed and cannot be edited. Please ensure all details are accurate. | | | |
-| 确认提交 | Confirm Submit | | | |
-| 再检查下 | Check Again | | | |
-| 请检查并完善标红的必填项 | Please check and complete the required fields | | | |
-| 回到第一页 (重新浏览) | Back to Step 1 | | | |
-| 已回到第一页 | Returned to Step 1 | | | |
-| 当前为表单预览模式，所填内容仅供体验，不会被保存或提交。 | This is a form preview. Information entered here will not be saved or submitted. | | | |
-| 手机扫码预览 | Mobile Preview | | | |
-| 手机扫码即可体验 | Scan to preview | | | |
-| 选择语言 | Select Language | | | |
-| 添加 | Add | | | |
-| 已选 | Selected | | | |
-| 已选: | Selected: | | | |
-| 确定 | Confirm | | | |
-| 移除 | Remove | | | |
-| 撤销 | Undo | | | |
-| 请输入关键字搜索... | Search options... | | | |
-| 未找到相关选项 | No matching options found | | | |
-| 暂无匹配国家、地区或区号 | No matching country, region or code found | | | |
-| 选择国家/地区 | Select Country/Region | | | |
-| 选择国家/地区区号 | Select Country/Region Code | | | |
-| 选择国籍 | Select Nationality | | | |
-| 请选择国籍 | Please select nationality | | | |
-| 请选择国家/地区 | Please select country/region | | | |
-| 点击在下方列表中定位 | Click to locate in list | | | |
-| 开始日期 | Start Date | | | |
-| 截止日期 | End Date | | | |
-| 搜索国家、地区或区号... | Search by country or dial code... | | | |
-| 搜索国家或地区名称... | Search country or region... | | | |
-| 请在下方指定区域签名 | Please sign in the designated area below | | | |
-| 最多只能选择 {max} 项 | Up to {max} items allowed | | | |
-| 提示 | Notice | | | |
-| 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | | | |
-| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | | | |
-| 基本资料 | Basic Details | | | |
-| 关联信息 | Relationship Information | | | |
-| 关联实体 | Associated Entity | | | |
-| 关联类型 | Relationship Type | | | |
-| 股份与出资信息 | Shareholding & Capital Information | | | |
-| 持有股份数 | Number of Shares Held | | | |
-| 对应已缴股本金额 | Allocated Paid-up Amount | | | |
-| 企业注册全称 | Company Name | | | |
-| 统一机构识别码 (UEN) | UEN | | | |
-| 注册设立国家 | Country of Incorporation | | | |
-| 法律实体形式 | Entity Type | | | |
-| 授权代表姓名 | Authorized Representative | | | |
-| 官方联络邮箱 | Contact Email | | | |
-| 企业注册地址 | Registered Address | | | |
-| 居住地址 | Residential Address | | | |
-| 联系地址 | Contact Address | | | |
-| 姓名 | Name | | | |
-| 国籍语言姓名 | Native Name | | | |
-| 国籍 | Nationality | | | |
-| 新加坡身份类型 | Singapore Identity Status | | | |
-| NRIC/FIN(如适用) | NRIC/FIN | | | |
-| 证件类型 | ID Type | | | |
-| 证件号码 | ID Number | | | |
-| 出生日期 | Date of Birth | | | |
-| 性别 | Gender | | | |
-| 手机号码 | Mobile Phone | | | |
-| 电子邮箱 | Email | | | |
-| 董事 | Director | | | |
-| 股东 | Shareholder | | | |
-| 最终受益人 | Ultimate Beneficial Owner | | | |
-| 股份类别 | Share Class | | | |
-| 普通股 | Ordinary Shares | | | |
-| 优先股 | Preference Shares | | | |
+| 简体中文 | Simplified Chinese | | | |
+| 英语 (English) | English | | | |
+| 繁体中文 | Traditional Chinese | | | |
+| 马来语 (Bahasa Melayu) | Malay (Bahasa Melayu) | | | |
+
+## 组件库与默认字段占位文案（componentRegistry / phoneRules）
+| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- |
+| 单行文本 | Single Line | | | |
+| 多行文本 | Multi-line | | | |
+| 下拉选择 | Dropdown | | | |
+| 单选框组 | Radio | | | |
+| 多选框组 | Checkbox | | | |
+| 电子签名 | E-Signature | | | |
+| 提示区块 | Notice | | | |
+| 手机号码 | Phone | | | |
+| 请输入内容 | Please enter content | | | |
+| 请输入详细描述... | Please enter detailed description... | | | |
+| 请选择国家 | Please select a country | | | |
+| 本人保证以上填写的信息真实、准确、有效。 | I confirm that all information provided is true, accurate and valid. | | | |
+| 请输入手机号码 | Please enter phone number | | | |
+| 请输入6-15位有效手机号码 | Please enter 6-15 digit phone number | | | |
+
+## 表单组件默认校验与选项占位文案（多语言默认配置）
+| 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 请确认并同意声明条款 | Please agree to the declarations | 請確認並同意聲明條款 | Sila sahkan dan bersetuju dengan pengisytiharan | | | | | |
+| 请完成手写签名 | Please complete handwritten signature | 請完成手寫簽名 | Sila lengkapkan tandatangan | | | | | |
+| 请选择一个选项 | Please select an option | 請選擇一個選項 | Sila pilih satu pilihan | | | | | |
+| 请至少选择一个选项 | Please select at least one option | 請至少選擇一個選項 | Sila pilih sekurang-kurangnya satu pilihan | | | | | |
+| 请选择日期 | Please select a date | 請選擇日期 | Sila pilih tarikh | | | | | |
+| 必填项不能为空 | This required field cannot be empty | 必填項不能為空 | Medan ini diperlukan | | | | | |
+| 请选择选项 | Please select an option | 請選擇選項 | Sila pilih satu pilihan | | | | | |
+| 请至少选择一项 | Please select at least one option | 請至少選擇一項 | Sila pilih sekurang-kurangnya satu pilihan | | | | | |
+| 请选择日期 | Please select date | 請選擇日期 | Sila pilih tarikh | | | | | |
+| 请在下方签名板完成电子手写签名 | Please provide electronic handwritten signature on the signature pad below | 請在下方簽名板完成電子手寫簽名 | Sila lengkapkan tandatangan elektronik pada pad tandatangan di bawah | | | | | |
+| 请阅读并勾选同意上方声明条款 | Please read and agree to the above declaration terms | 請閱讀並勾選同意上方聲明條款 | Sila baca dan setuju dengan syarat perisytiharan di atas | | | | | |
+| 必填项不能为空 | This field is required | 必填項不能為空 | Medan ini diperlukan | | | | | |
+| 选项一 ~ 选项十（超过十项为 选项N） | Option 1 ~ Option N | 選項一 ~ 選項十（超過十項為 選項N） | Option 1 ~ Option N | | | | | |
+
+## 移动端填报端
+| 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 上一步 | Back | 上一步 | Kembali | | | | | |
+| 下一步 | Next | 下一步 | Seterusnya | | | | | |
+| 确认提交 | Submit Form | 確認提交 | Hantar Borang | | | | | |
+| 提交中... | Submitting... | 提交中... | Menghantar... | | | | | |
+| 表单已提交 | Form Submitted | 表單已提交 | Borang Berjaya Dihantar | | | | | |
+| 提交失败，请检查网络后重试 | Submission failed. Please check network and retry. | 提交失敗，請檢查網路後重試 | Penghantaran gagal. Sila semak rangkaian dan cuba lagi. | | | | | |
+| 必填项不能为空 | This field is required | 必填項不能為空 | Medan ini wajib diisi | | | | | |
+| 请输入有效的电子邮箱地址 | Please enter a valid email address | 請輸入有效的電子郵件地址 | Sila masukkan alamat e-mel yang sah | | | | | |
+| 请输入有效的手机号码 | Please enter a valid phone number | 請輸入有效的手機號碼 | Sila masukkan nombor telefon yang sah | | | | | |
+| 请在下方签名板完成电子手写签名 | Please sign in the signature pad below | 請在下方簽名板完成電子手寫簽名 | Sila lengkapkan tandatangan elektronik pada pad tandatangan di bawah | | | | | |
+| 重新签名 | Clear Signature | 重新簽名 | Padam Tandatangan | | | | | |
+| 完成签名 | Done | 完成簽名 | Selesai | | | | | |
+| 修改签名 | Edit | 修改簽名 | Edit | | | | | |
+| 请在此处手写签名 | Please sign here | 請在此處手寫簽名 | Sila tandatangan di sini | | | | | |
+| 请点击选择 | Select an option | 請點擊選擇 | Sila pilih satu pilihan | | | | | |
+| 请输入 | Enter here | 請輸入 | Sila masukkan | | | | | |
+| 长期 | Long-term | 長期 | Jangka panjang | | | | | |
+| 长期有效 | Permanent | 長期有效 | Sah kekal | | | | | |
+| 获取表单数据失败，请检查链接有效性 | Failed to load form schema. Invalid link. | 獲取表單資料失敗，請檢查連結有效性 | Gagal memuatkan data borang. Sila semak kesahan pautan. | | | | | |
+| 您的填报资料已成功送达，请勿重复提交。 | Your submission has been received. Please do not submit again. | 您的填報資料已成功送達，請勿重複提交。 | Maklumat anda telah berjaya dihantar. Sila jangan hantar lagi. | | | | | |
+| 提交时间 | Submission Time | 提交時間 | Masa Penghantaran | | | | | |
+| 当前状态 | Status | 當前狀態 | Status | | | | | |
+| 已完成 | Completed | 已完成 | Selesai | | | | | |
+| 关闭页面 | Close Page | 關閉頁面 | Tutup Halaman | | | | | |
+| 返回待办列表 | Back to Task List | 返回待辦清單 | Kembali ke Senarai Tugasan | | | | | |
+| 链接无效或已失效 | Link Invalid or Expired | 連結無效或已失效 | Pautan Tidak Sah atau Telah Tamat Tempoh | | | | | |
+| 未找到对应的填报任务，该链接可能已过期或已被处理 | Task not found. The link may have expired or already been processed. | 未找到對應的填報任務，該連結可能已過期或已被處理 | Tugasan tidak ditemui. Pautan mungkin telah tamat tempoh atau telah diproses. | | | | | |
+| 确认 | Confirm | 確認 | Sahkan | | | | | |
+| 取消 | Cancel | 取消 | Batal | | | | | |
+| 确认提交表单？ | Confirm Submission? | 確認提交表單？ | Sahkan penghantaran borang? | | | | | |
+| 提交后表单资料将进入正式审核流程，无法撤回或修改，请确认所填信息真实有效。 | Once submitted, your information will be processed and cannot be edited. Please ensure all details are accurate. | 提交後表單資料將進入正式審核流程，無法撤回或修改，請確認所填資訊真實有效。 | Maklumat anda akan diproses dan tidak boleh diedit selepas dihantar. Sila pastikan semua maklumat adalah tepat. | | | | | |
+| 确认提交 | Confirm Submit | 確認提交 | Sahkan Hantar | | | | | |
+| 再检查下 | Check Again | 再檢查下 | Semak Semula | | | | | |
+| 请检查并完善标红的必填项 | Please check and complete the required fields | 請檢查並完善標紅的必填項 | Sila semak dan lengkapkan medan wajib yang ditandakan merah | | | | | |
+| 回到第一页 (重新浏览) | Back to Step 1 | 回到第一頁 (重新瀏覽) | Kembali ke Langkah 1 (Semak Semula) | | | | | |
+| 已回到第一页 | Returned to Step 1 | 已回到第一頁 | Kembali ke Langkah 1 | | | | | |
+| 当前为表单预览模式，所填内容仅供体验，不会被保存或提交。 | This is a form preview. Information entered here will not be saved or submitted. | 當前為表單預覽模式，所填內容僅供體驗，不會被儲存或提交。 | Ini adalah pratonton borang. Maklumat yang dimasukkan di sini tidak akan disimpan atau dihantar. | | | | | |
+| 手机扫码预览 | Mobile Preview | 手機掃碼預覽 | Pratonton Mudah Alih | | | | | |
+| 手机扫码即可体验 | Scan to preview | 手機掃碼即可體驗 | Imbas kod QR untuk pratonton | | | | | |
+| 选择语言 | Select Language | 選擇語言 | Pilih Bahasa | | | | | |
+| 取消 | Cancel | 取消 | Batal | | | | | |
+| 添加 | Add | 新增 | Tambah | | | | | |
+| 已选 | Selected | 已選 | Dipilih | | | | | |
+| 已选: | Selected: | 已選: | Dipilih: | | | | | |
+| 确定 | Confirm | 確定 | Sahkan | | | | | |
+| 移除 | Remove | 移除 | Padam | | | | | |
+| 撤销 | Undo | 復原 | Buat asal | | | | | |
+| 请输入关键字搜索... | Search options... | 請輸入關鍵字搜尋... | Cari pilihan... | | | | | |
+| 未找到相关选项 | No matching options found | 未找到相關選項 | Tiada pilihan ditemui | | | | | |
+| 暂无匹配国家、地区或区号 | No matching country, region or code found | 查無相符國家、地區或國碼 | Tiada negara, wilayah atau kod yang sepadan ditemui | | | | | |
+| 选择国家/地区 | Select Country/Region | 選擇國家/地區 | Pilih Negara/Wilayah | | | | | |
+| 选择国家/地区区号 | Select Country/Region Code | 選擇國家/地區國碼 | Pilih Kod Negara/Wilayah | | | | | |
+| 选择国籍 | Select Nationality | 選擇國籍 | Pilih Kewarganegaraan | | | | | |
+| 请选择国籍 | Please select nationality | 請選擇國籍 | Sila pilih kewarganegaraan | | | | | |
+| 请选择国家/地区 | Please select country/region | 請選擇國家/地區 | Sila pilih negara/wilayah | | | | | |
+| 点击在下方列表中定位 | Click to locate in list | 點擊在下方列表中定位 | Klik untuk cari dalam senarai | | | | | |
+| 开始日期 | Start Date | 開始日期 | Tarikh Mula | | | | | |
+| 截止日期 | End Date | 截止日期 | Tarikh Tamat | | | | | |
+| 搜索国家、地区或区号... | Search by country or dial code... | 搜尋國家、地區或國碼... | Cari mengikut negara, wilayah atau kod panggilan... | | | | | |
+| 搜索国家或地区名称... | Search country or region... | 搜尋國家或地區名稱... | Cari negara atau wilayah... | | | | | |
+| 请在下方指定区域签名 | Please sign in the designated area below | 請在下方指定區域簽名 | Sila tandatangan di kawasan yang ditetapkan di bawah | | | | | |
+| 最多只能选择 {max} 项 | Up to {max} items allowed | 最多只能選擇 {max} 項 | Sehingga {max} item dibenarkan | | | | | |
+| 提示 | Notice | 提示 | Notis | | | | | |
+| 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | 根據合規監管要求，您需要完成KYC問卷填寫。 | Selaras dengan keperluan pematuhan peraturan, anda dikehendaki melengkapkan soal selidik KYC. | | | | | |
+| 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | 請確認以下資訊是否準確，如需修改，請聯繫服務商修改後再進行下一步。 | Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan sebelum meneruskan. | | | | | |
+| 基本资料 | Basic Details | 基本資料 | Butiran Asas | | | | | |
+| 关联信息 | Relationship Information | 關聯資訊 | Maklumat Hubungan | | | | | |
+| 关联实体 | Associated Entity | 關聯實體 | Entiti Berkaitan | | | | | |
+| 关联类型 | Relationship Type | 關聯類型 | Jenis Hubungan | | | | | |
+| 股份与出资信息 | Shareholding & Capital Information | 股份與出資資訊 | Maklumat Pegangan Saham & Modal | | | | | |
+| 持有股份数 | Number of Shares Held | 持有股份數 | Bilangan Saham Dipegang | | | | | |
+| 对应已缴股本金额 | Allocated Paid-up Amount | 對應已繳股本金額 | Jumlah Modal Berbayar Diperuntukkan | | | | | |
+| 企业注册全称 | Company Name | 企業註冊全稱 | Nama Syarikat | | | | | |
+| 统一机构识别码 (UEN) | UEN | 統一機構識別碼 (UEN) | Nombor Pengenalan Entiti Unik (UEN) | | | | | |
+| 注册设立国家 | Country of Incorporation | 註冊設立國家 | Negara Pemerbadanan | | | | | |
+| 法律实体形式 | Entity Type | 法律實體形式 | Jenis Entiti Undang-Undang | | | | | |
+| 实体名称 | Entity Name | 實體名稱 | Nama Entiti | | | | | |
+| 实体注册号码 | Registration Number | 實體註冊號碼 | Nombor Pendaftaran Entiti | | | | | |
+| 曾用名(如有) | Former Name (if any) | 曾用名(如有) | Nama Dahulu (jika ada) | | | | | |
+| 注册地 | Place of Incorporation | 註冊地 | Bidang Kuasa Pemerbadanan | | | | | |
+| 授权代表身份 | Authorised Representative Role | 授權代表身份 | Kapasiti / Peranan Wakil Sah | | | | | |
+| 授权代表姓名 | Authorized Representative | 授權代表姓名 | Nama Wakil Diberi Kuasa | | | | | |
+| 官方联络邮箱 | Contact Email | 官方聯絡信箱 | E-mel Rasmi | | | | | |
+| 企业注册地址 | Registered Address | 企業註冊地址 | Alamat Berdaftar Syarikat | | | | | |
+| 居住地址 | Residential Address | 居住地址 | Alamat Kediaman | | | | | |
+| 联系地址 | Contact Address | 聯絡地址 | Alamat Surat-menyurat | | | | | |
+| 姓名 | Name | 姓名 | Nama | | | | | |
+| 国籍语言姓名 | Native Name | 國籍語言姓名 | Nama Bahasa Asal | | | | | |
+| 国籍 | Nationality | 國籍 | Kewarganegaraan | | | | | |
+| 新加坡身份类型 | Singapore Identity Status | 新加坡身分類型 | Status Identiti Singapura | | | | | |
+| NRIC/FIN(如适用) | NRIC/FIN | NRIC/FIN(如適用) | NRIC/FIN (jika berkenaan) | | | | | |
+| 证件类型 | ID Type | 證件類型 | Jenis Pengenalan | | | | | |
+| 证件号码 | ID Number | 證件號碼 | Nombor Dokumen | | | | | |
+| 出生日期 | Date of Birth | 出生日期 | Tarikh Lahir | | | | | |
+| 性别 | Gender | 性別 | Jantina | | | | | |
+| 手机号码 | Mobile Phone | 手機號碼 | Nombor Telefon Mudah Alih | | | | | |
+| 电子邮箱 | Email | 電子郵件 | E-mel | | | | | |
+| 董事 | Director | 董事 | Pengarah | | | | | |
+| 股东 | Shareholder | 股東 | Pemegang Saham | | | | | |
+| 最终受益人 | Ultimate Beneficial Owner | 最終受益人 | Pemilik Manfaat Muktamad | | | | | |
+| 股份类别 | Share Class | 股份類別 | Kelas Saham | | | | | |
+| 普通股 | Ordinary Shares | 普通股 | Saham Biasa | | | | | |
+| 优先股 | Preference Shares | 優先股 | Saham Keutamaan | | | | | |

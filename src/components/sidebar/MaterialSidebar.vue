@@ -853,14 +853,14 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 const filteredTemplates = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return scenarioTemplates;
-  return scenarioTemplates.filter(t =>
-    t.title.toLowerCase().includes(q) ||
-    (t.title_en && t.title_en.toLowerCase().includes(q)) ||
-    t.desc.toLowerCase().includes(q) ||
-    (t.desc_en && t.desc_en.toLowerCase().includes(q)) ||
-    t.tag.toLowerCase().includes(q) ||
-    (t.tag_en && t.tag_en.toLowerCase().includes(q)) ||
-    t.code.toLowerCase().includes(q)
+  return scenarioTemplates.filter(tpl =>
+    tpl.i18n.zh.title.toLowerCase().includes(q) ||
+    tpl.i18n.en.title.toLowerCase().includes(q) ||
+    tpl.i18n.zh.desc.toLowerCase().includes(q) ||
+    tpl.i18n.en.desc.toLowerCase().includes(q) ||
+    tpl.i18n.zh.tag.toLowerCase().includes(q) ||
+    tpl.i18n.en.tag.toLowerCase().includes(q) ||
+    tpl.code.toLowerCase().includes(q)
   );
 });
 
@@ -1139,8 +1139,8 @@ const filteredBasicComponents = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
   return all.filter(
     c =>
-      c.label.toLowerCase().includes(q) ||
-      (c.label_en && c.label_en.toLowerCase().includes(q)) ||
+      Boolean(c.i18n?.zh?.label?.toLowerCase().includes(q)) ||
+      Boolean(c.i18n?.en?.label?.toLowerCase().includes(q)) ||
       c.type.toLowerCase().includes(q)
   );
 });
@@ -1152,8 +1152,8 @@ const filteredBusinessComponents = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
   return all.filter(
     c =>
-      c.label.toLowerCase().includes(q) ||
-      (c.label_en && c.label_en.toLowerCase().includes(q)) ||
+      Boolean(c.i18n?.zh?.label?.toLowerCase().includes(q)) ||
+      Boolean(c.i18n?.en?.label?.toLowerCase().includes(q)) ||
       c.type.toLowerCase().includes(q)
   );
 });

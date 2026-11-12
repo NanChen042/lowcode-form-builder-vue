@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { store, isRisk, primaryLocale, targetLocales, selectPage, selectElement, selectGroup, focusOnPage, resetCanvasView, highlightPropertyField } from '@/core/store';
 import { componentRegistry } from '@/registry/components';
-import { t, getPageText, getGroupText, getFieldText, getOptionLabel } from '@/core/i18n';
+import { t, TRADITIONAL_LOCALE, getPageText, getGroupText, getFieldText, getOptionLabel } from '@/core/i18n';
 
 export type TranslationFieldType =
   | 'page_title'
@@ -72,7 +72,7 @@ function getFieldDisplayLabel(element: any, locale: string): string {
   if (base) return base;
   const meta = componentRegistry[element.type as keyof typeof componentRegistry];
   if (meta) {
-    return store.currentLocale === 'en' ? meta.label_en : meta.label;
+    return getFieldText(meta, 'label', store.currentLocale) || t('trans.fieldDefault');
   }
   return t('trans.fieldDefault');
 }
@@ -81,9 +81,7 @@ export function isDefaultOptionPlaceholder(val: string, loc: string): boolean {
   const trimmed = (val || '').trim();
   if (!trimmed) return true;
   if (loc === 'en' || loc === 'ms') return /^Option\s*\d+$/i.test(trimmed);
-  if (loc === 'zh' || loc === 'zh-TW') return /^选项[一二三四五六七八九十\d]+$/.test(trimmed);
-  if (loc === 'ja') return /^選択肢\s*\d+$/.test(trimmed);
-  if (loc === 'ko') return /^옵션\s*\d+$/.test(trimmed);
+  if (loc === 'zh' || loc === TRADITIONAL_LOCALE) return /^(?:选项|選項)[一二三四五六七八九十\d]+$/.test(trimmed);
   return false;
 }
 

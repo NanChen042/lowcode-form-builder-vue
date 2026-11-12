@@ -187,7 +187,7 @@
 import { computed } from 'vue';
 import type { ProfileType } from '@/types/schema';
 import { store } from '@/core/store';
-import { t, type Locale } from '@/core/i18n';
+import { t, TRADITIONAL_LOCALE } from '@/core/i18n';
 import { formatInlineText } from '@/utils/alertParser';
 import {
   Info,
@@ -211,11 +211,13 @@ const props = withDefaults(
   }
 );
 
-// 语言规则：除中英以外的语言统一第一页先用英语 (en)，后续会补充多语言的基本资料页
-const effectiveLocale = computed<Locale>(() => {
+// 语言规则：支持简体中文 (zh)、繁体中文 (zh-Hant)、英文 (en)、马来语 (ms) 基本资料页默认文案，其余语种回退英文 (en)
+const effectiveLocale = computed<string>(() => {
   const raw = props.locale || store.previewLocale || (props.isCanvas ? store.currentLocale : 'zh');
   const loc = (raw || 'zh').toLowerCase().trim();
   if (loc === 'zh' || loc === 'zh-cn') return 'zh';
+  if (loc === TRADITIONAL_LOCALE.toLowerCase()) return TRADITIONAL_LOCALE;
+  if (loc === 'ms' || loc.startsWith('ms-')) return 'ms';
   return 'en';
 });
 
