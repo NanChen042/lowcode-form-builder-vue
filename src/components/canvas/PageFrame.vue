@@ -81,7 +81,7 @@
       <span>{{ t('canvas.droppable') }}</span>
     </div>
 
-    <div class="flex-1 flex flex-col w-full relative" :class="isRisk ? 'rounded-none' : 'rounded-2xl'">
+    <div class="flex-auto flex flex-col w-full relative" :class="isRisk ? 'rounded-none' : 'rounded-2xl'">
       <div
         v-if="store.isDraggingComponent && isSystemProfile"
         class="absolute inset-0 z-30 rounded-2xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
@@ -137,7 +137,7 @@
         </template>
       </div>
 
-      <div v-if="isSystemProfile" class="flex-1 bg-white p-3 rounded-b-2xl" @click="handleSelectPage">
+      <div v-if="isSystemProfile" class="flex-auto bg-white p-3 rounded-b-2xl" @click="handleSelectPage">
         <SystemProfileView
           :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
@@ -275,7 +275,7 @@
         </div>
       </div>
 
-      <div v-else class="canvas-pages-container relative flex-1 flex flex-col rounded-b-2xl" :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'">
+      <div v-else class="canvas-pages-container relative flex-auto flex flex-col rounded-b-2xl" :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'">
         <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
           <div class="relative mb-6 grid h-20 w-24 grid-cols-2 gap-2">
             <div class="col-span-2 rounded-md border border-slate-200 bg-white shadow-sm"></div>

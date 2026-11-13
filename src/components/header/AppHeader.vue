@@ -176,7 +176,7 @@
     </a-modal>
 
     <transition name="nano-progress-fade">
-      <div v-if="store.isCanvasLoading" class="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50 bg-blue-50/70">
+      <div v-if="store.isCanvasLoading || store.isWorkspaceTransitioning" class="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden pointer-events-none z-50 bg-blue-50/70">
         <div class="nano-stream-bar h-full w-full" />
       </div>
     </transition>

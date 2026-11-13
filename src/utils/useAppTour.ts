@@ -1,7 +1,7 @@
 import { nextTick } from 'vue';
 import { driver, type Driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { store, isRisk, focusOnPage, resetCanvasView, closeTranslationWorkspace } from '@/core/store';
+import { store, isRisk, focusOnPage, selectPage, resetCanvasView, closeTranslationWorkspace } from '@/core/store';
 import { t, type Locale } from '@/core/i18n';
 import { Message } from '@arco-design/web-vue';
 
@@ -108,7 +108,7 @@ export function getTourSteps(localeOrIsEn?: Locale | boolean): DriveStep[] {
       popover: {
         title: t('tour.step4Title', locale),
         description: t('tour.step4Desc', locale),
-        side: 'bottom',
+        side: 'top',
         align: 'center'
       }
     },
@@ -159,7 +159,7 @@ export function cleanupTour() {
   sessionStorage.setItem('diy_form_tour_shown_session', 'true');
   localStorage.setItem('diy_form_tour_shown', 'true');
   if (isRisk.value && store.workspaceMode === 'translation') {
-    closeTranslationWorkspace();
+    closeTranslationWorkspace({ immediate: true });
   }
   store.sidebarTab = 'components';
   if (driverInstance) {
@@ -210,19 +210,19 @@ export function startAppTour(initialIndex = 0) {
         const activeIdx = opts.state.activeIndex;
         if (activeIdx === 0) {
           // 第 1 步：选中组件里的风险评估组件
-          if (store.workspaceMode === 'translation') closeTranslationWorkspace();
+          if (store.workspaceMode === 'translation') closeTranslationWorkspace({ immediate: true });
           store.sidebarTab = 'components';
           if (!store.leftSidebarVisible) store.leftSidebarVisible = true;
         } else if (activeIdx === 1 || activeIdx === 2) {
           // 第 2 步画布编辑 & 第 3 步分组功能
-          if (store.workspaceMode === 'translation') closeTranslationWorkspace();
+          if (store.workspaceMode === 'translation') closeTranslationWorkspace({ immediate: true });
           resetCanvasView({ duration: 0 });
         } else if (activeIdx === 3) {
           // 第 4 步翻译管理
         } else if (activeIdx === 4) {
           // 第 5 步：退出翻译管理，切回标准组件页面，聚焦发布
           if (store.workspaceMode === 'translation') {
-            closeTranslationWorkspace();
+            closeTranslationWorkspace({ immediate: true });
           }
           store.sidebarTab = 'components';
         }
@@ -241,14 +241,28 @@ export function startAppTour(initialIndex = 0) {
       } else if (idx === 3) {
         resetCanvasView({ duration: 0 });
       } else if (idx === 4 && store.pages.length > 0) {
-        focusOnPage(store.pages[0].id, { forTour: true, duration: 0 });
+        focusOnPage(store.pages[0].id, { forTour: true, popoverWidth: 380, duration: 0 });
         const canvasContainer = document.getElementById('tour-canvas-area');
         if (canvasContainer) {
           canvasContainer.scrollTop = 0;
           canvasContainer.scrollLeft = 0;
         }
-        requestAnimationFrame(() => {
-          driverInstance?.refresh();
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            driverInstance?.refresh();
+          });
+        });
+      } else if (idx === 5 && store.pages.length > 0) {
+        if (!store.selectedType) {
+          selectPage(store.pages[0].id);
+        }
+        if (!store.rightSidebarVisible) {
+          store.rightSidebarVisible = true;
+        }
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            driverInstance?.refresh();
+          });
         });
       }
     },
@@ -266,7 +280,11 @@ export function startAppTour(initialIndex = 0) {
           canvasContainer.scrollTop = 0;
           canvasContainer.scrollLeft = 0;
         }
-        driverInstance?.refresh();
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            driverInstance?.refresh();
+          });
+        });
       }
     },
     onPopoverRender: (popoverDOM) => {

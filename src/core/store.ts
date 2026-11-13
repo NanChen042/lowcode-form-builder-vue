@@ -1,4 +1,4 @@
-import { reactive, computed, toRaw, watch } from 'vue';
+import { reactive, computed, toRaw, watch, nextTick } from 'vue';
 import type {
   FormSchema,
   FormPage,
@@ -109,6 +109,8 @@ export const store = reactive({
   draggedFrameId: null as string | null,
   isCanvasAnimating: false,
   isCanvasLoading: false,
+  isWorkspaceTransitioning: false,
+  isWorkspaceDomHold: false,
 
   focusedTarget: null as FocusedTarget | null,
   showPublishValidation: false,
@@ -1972,7 +1974,38 @@ export function removeTargetLocale(locale: string) {
   }
 }
 
-export function openTranslationWorkspace(targetLocale?: string) {
+let workspaceTransTimer: ReturnType<typeof setTimeout> | null = null;
+
+function runSmoothWorkspaceTransition() {
+  if (typeof window === 'undefined') {
+    resetCanvasView({ duration: 0 });
+    return;
+  }
+  if (workspaceTransTimer) {
+    clearTimeout(workspaceTransTimer);
+    workspaceTransTimer = null;
+  }
+  store.isWorkspaceTransitioning = true;
+  store.isWorkspaceDomHold = true;
+
+  workspaceTransTimer = setTimeout(() => {
+    store.isWorkspaceDomHold = false;
+    nextTick(() => {
+      window.requestAnimationFrame(() => {
+        resetCanvasView({ duration: 0 });
+        const targetY = store.canvasState.y;
+        store.canvasState.y = targetY + 12;
+        window.requestAnimationFrame(() => {
+          animateCanvasTransition(300);
+          store.canvasState.y = targetY;
+          store.isWorkspaceTransitioning = false;
+        });
+      });
+    });
+  }, 40);
+}
+
+export function openTranslationWorkspace(targetLocale?: string, options?: { immediate?: boolean }) {
   if (targetLocale && !targetLocales.value.includes(targetLocale)) {
     addTargetLocale(targetLocale);
   }
@@ -1999,19 +2032,42 @@ export function openTranslationWorkspace(targetLocale?: string) {
 
   syncTranslationUrlParams();
 
-  requestAnimationFrame(() => {
-    resetCanvasView({ duration: 380 });
-  });
+  if (options?.immediate) {
+    if (workspaceTransTimer) {
+      clearTimeout(workspaceTransTimer);
+      workspaceTransTimer = null;
+    }
+    store.isWorkspaceDomHold = false;
+    store.isWorkspaceTransitioning = false;
+    requestAnimationFrame(() => {
+      resetCanvasView({ duration: 0 });
+    });
+    return;
+  }
+
+  runSmoothWorkspaceTransition();
 }
 
-export function closeTranslationWorkspace() {
+export function closeTranslationWorkspace(options?: { immediate?: boolean }) {
   store.workspaceMode = 'builder';
   store.editingLocale = primaryLocale.value;
   if (store.sidebarTab === 'languages') {
     store.sidebarTab = 'pages';
   }
   syncTranslationUrlParams();
-  requestAnimationFrame(() => {
-    resetCanvasView({ duration: 380 });
-  });
+
+  if (options?.immediate) {
+    if (workspaceTransTimer) {
+      clearTimeout(workspaceTransTimer);
+      workspaceTransTimer = null;
+    }
+    store.isWorkspaceDomHold = false;
+    store.isWorkspaceTransitioning = false;
+    requestAnimationFrame(() => {
+      resetCanvasView({ duration: 0 });
+    });
+    return;
+  }
+
+  runSmoothWorkspaceTransition();
 }

@@ -136,81 +136,83 @@
     </div>
 
     <div
-      class="canvas-world transition-opacity duration-300 ease-out"
+      class="canvas-world transition-opacity duration-200 ease-out"
       :class="{
-        'opacity-0': store.isCanvasLoading,
+        'opacity-0 pointer-events-none': store.isCanvasLoading || store.isWorkspaceTransitioning,
         'is-animating': store.isCanvasAnimating
       }"
       :style="{
         transform: `translate(${store.canvasState.x}px, ${store.canvasState.y}px) scale(${store.canvasState.scale})`
       }"
     >
-      <template v-if="store.workspaceMode === 'translation' && activeTranslationPage">
-        <!-- 存在目标翻译语言：双画布对照排布 -->
-        <template v-if="targetLocales.length > 0 && store.activeTargetLocale">
-          <PageFrame
-            :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
-            :page="activeTranslationPage"
-            :page-index="activeTranslationDisplayIndex"
-            :is-translation-frame="true"
-            :is-read-only-reference="true"
-            :in-translation-workspace="true"
-            :translation-locale="primaryLocale"
-            :custom-x="0"
-            :custom-y="0"
-          />
+      <template v-if="!store.isWorkspaceDomHold">
+        <template v-if="store.workspaceMode === 'translation' && activeTranslationPage">
+          <!-- 存在目标翻译语言：双画布对照排布 -->
+          <template v-if="targetLocales.length > 0 && store.activeTargetLocale">
+            <PageFrame
+              :key="`src_${activeTranslationPage.id}_${primaryLocale}`"
+              :page="activeTranslationPage"
+              :page-index="activeTranslationDisplayIndex"
+              :is-translation-frame="true"
+              :is-read-only-reference="true"
+              :in-translation-workspace="true"
+              :translation-locale="primaryLocale"
+              :custom-x="0"
+              :custom-y="0"
+            />
 
-          <div
-            class="translation-target-frame absolute flex flex-col items-center justify-center pointer-events-none select-none z-20"
-            :style="{
-              left: `${translationFrameWidth}px`,
-              top: '140px',
-              width: `${TRANSLATION_FRAME_GAP}px`
-            }"
-          >
-            <div class="w-8 h-8 rounded-full bg-white border border-blue-200/90 shadow-xs flex items-center justify-center text-[#1677ff]">
-              <ArrowRight class="w-4 h-4" />
+            <div
+              class="translation-target-frame absolute flex flex-col items-center justify-center pointer-events-none select-none z-20"
+              :style="{
+                left: `${translationFrameWidth}px`,
+                top: '140px',
+                width: `${TRANSLATION_FRAME_GAP}px`
+              }"
+            >
+              <div class="w-8 h-8 rounded-full bg-white border border-blue-200/90 shadow-xs flex items-center justify-center text-[#1677ff]">
+                <ArrowRight class="w-4 h-4" />
+              </div>
             </div>
-          </div>
 
-          <PageFrame
-            :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
-            class="translation-target-frame"
-            :page="activeTranslationPage"
-            :page-index="activeTranslationDisplayIndex"
-            :is-translation-frame="true"
-            :in-translation-workspace="true"
-            :translation-locale="store.activeTargetLocale"
-            :custom-x="translationFrameWidth + TRANSLATION_FRAME_GAP"
-            :custom-y="0"
-          />
+            <PageFrame
+              :key="`tgt_${activeTranslationPage.id}_${store.activeTargetLocale}`"
+              class="translation-target-frame"
+              :page="activeTranslationPage"
+              :page-index="activeTranslationDisplayIndex"
+              :is-translation-frame="true"
+              :in-translation-workspace="true"
+              :translation-locale="store.activeTargetLocale"
+              :custom-x="translationFrameWidth + TRANSLATION_FRAME_GAP"
+              :custom-y="0"
+            />
+          </template>
+
+          <!-- 仅剩单一主语言：作为只读参考基准画板展示，不可直接编辑，提示用户添加目标语言 -->
+          <template v-else>
+            <PageFrame
+              :key="`single_${activeTranslationPage.id}_${primaryLocale}`"
+              :page="activeTranslationPage"
+              :page-index="activeTranslationDisplayIndex"
+              :is-translation-frame="true"
+              :is-read-only-reference="true"
+              :in-translation-workspace="true"
+              :translation-locale="primaryLocale"
+              :custom-x="0"
+              :custom-y="0"
+            />
+          </template>
         </template>
 
-        <!-- 仅剩单一主语言：作为只读参考基准画板展示，不可直接编辑，提示用户添加目标语言 -->
         <template v-else>
+          <CanvasConnections v-if="!isRisk" />
+
           <PageFrame
-            :key="`single_${activeTranslationPage.id}_${primaryLocale}`"
-            :page="activeTranslationPage"
-            :page-index="activeTranslationDisplayIndex"
-            :is-translation-frame="true"
-            :is-read-only-reference="true"
-            :in-translation-workspace="true"
-            :translation-locale="primaryLocale"
-            :custom-x="0"
-            :custom-y="0"
+            v-for="(page, idx) in (isRisk ? store.pages.slice(0, 1) : store.pages)"
+            :key="page.id"
+            :page="page"
+            :page-index="idx"
           />
         </template>
-      </template>
-
-      <template v-else>
-        <CanvasConnections v-if="!isRisk" />
-
-        <PageFrame
-          v-for="(page, idx) in (isRisk ? store.pages.slice(0, 1) : store.pages)"
-          :key="page.id"
-          :page="page"
-          :page-index="idx"
-        />
       </template>
     </div>
 
