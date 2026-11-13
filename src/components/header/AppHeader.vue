@@ -163,9 +163,9 @@
       </template>
     </a-modal>
 
-    <a-modal v-model:visible="isVideoModalVisible" :title="t('header.bilingualVideoTitle')" :title-align="'start'" :width="720" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
+    <a-modal v-model:visible="isVideoModalVisible" :title="t('header.bilingualVideoTitle')" :title-align="'start'" :width="820" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
       <div class="py-1">
-        <video ref="videoPlayerRef" :src="helpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[460px] rounded-lg bg-black object-contain shadow-sm" />
+        <video ref="videoPlayerRef" :src="helpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[520px] rounded-lg bg-black object-contain shadow-sm" />
         <div class="mt-3 px-1 flex items-center justify-between text-xs text-slate-500">
           <span>{{ t('header.bilingualVideoTip') }}</span>
           <a-button size="small" type="primary" class="bg-[#1677ff]" @click="handleCloseVideoModal">

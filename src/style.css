@@ -1943,12 +1943,14 @@ body.tour-active.driver-active .driver-overlay {
 
 .driver-popover.figma-tour-popover,
 .driver-popover {
+    box-sizing: border-box;
     background-color: #ffffff;
     color: #1d2129;
     border-radius: 8px;
     padding: 14px 16px;
-    min-width: 300px;
-    max-width: 360px;
+    width: 380px;
+    max-width: min(420px, calc(100vw - 32px));
+    min-width: 320px;
     border: 1px solid #e5e6eb;
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08), 0 2px 4px 0 rgba(0, 0, 0, 0.04);
     font-family: inherit;
@@ -1982,11 +1984,13 @@ body.tour-active.driver-active .driver-overlay {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
+    margin-top: 14px;
     padding-top: 10px;
     border-top: 1px solid #f2f3f5;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: nowrap;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .figma-tour-popover .driver-never-show-btn,
@@ -1994,9 +1998,9 @@ body.tour-active.driver-active .driver-overlay {
     background: transparent;
     border: none;
     color: #86909c;
-    font-size: 12px;
+    font-size: 11.5px;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 0;
     border-radius: 3px;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -2014,20 +2018,22 @@ body.tour-active.driver-active .driver-overlay {
 
 .figma-tour-popover .driver-popover-progress-text,
 .driver-popover-progress-text {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 500;
     color: #86909c;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     white-space: nowrap;
     flex-shrink: 0;
+    margin: 0 4px;
 }
 
 .figma-tour-popover .driver-popover-navigation-btns,
 .driver-popover-navigation-btns {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .figma-tour-popover .driver-popover-prev-btn,
@@ -2111,21 +2117,25 @@ body.tour-active.driver-active .driver-overlay {
 .figma-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow,
 .driver-popover-arrow-side-left.driver-popover-arrow {
     border-left-color: #ffffff;
+    filter: drop-shadow(1px 0 0 #e5e6eb);
 }
 
 .figma-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow,
 .driver-popover-arrow-side-right.driver-popover-arrow {
     border-right-color: #ffffff;
+    filter: drop-shadow(-1px 0 0 #e5e6eb);
 }
 
 .figma-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow,
 .driver-popover-arrow-side-top.driver-popover-arrow {
     border-top-color: #ffffff;
+    filter: drop-shadow(0 1px 0 #e5e6eb);
 }
 
 .figma-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow,
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
     border-bottom-color: #ffffff;
+    filter: drop-shadow(0 -1px 0 #e5e6eb);
 }
 
 /* 拖拽过程中隐藏被拖拽组件（含占位幽灵与跟手副本）上的关联连线，避免线段残留 */

@@ -1,3 +1,4 @@
+import { nextTick } from 'vue';
 import { driver, type Driver, type DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { store, isRisk, focusOnPage, resetCanvasView, closeTranslationWorkspace } from '@/core/store';
@@ -7,6 +8,14 @@ import { Message } from '@arco-design/web-vue';
 let driverInstance: Driver | null = null;
 
 export function getRiskTourSteps(locale?: Locale): DriveStep[] {
+  const hasPageHeader = typeof document !== 'undefined' ? Boolean(document.querySelector('#tour-risk-page-header')) : true;
+  const pageHeaderTarget = hasPageHeader ? '#tour-risk-page-header' : '#tour-first-page-frame';
+
+  const hasGroupHeader = typeof document !== 'undefined' ? Boolean(document.querySelector('#tour-risk-first-group-header')) : true;
+  const groupTarget = hasGroupHeader
+    ? '#tour-risk-first-group-header'
+    : (typeof document !== 'undefined' && document.querySelector('#tour-risk-first-group') ? '#tour-risk-first-group' : '#tour-first-page-frame');
+
   const steps: DriveStep[] = [
     {
       element: '#tour-risk-component-item',
@@ -18,21 +27,21 @@ export function getRiskTourSteps(locale?: Locale): DriveStep[] {
       }
     },
     {
-      element: '#tour-first-page-frame',
+      element: pageHeaderTarget,
       popover: {
         title: t('tour.risk.step2Title', locale),
         description: t('tour.risk.step2Desc', locale),
-        side: 'right',
+        side: 'bottom',
         align: 'center'
       }
     },
     {
-      element: '#tour-risk-first-group',
+      element: groupTarget,
       popover: {
         title: t('tour.risk.step3Title', locale),
         description: t('tour.risk.step3Desc', locale),
-        side: 'right',
-        align: 'start'
+        side: 'bottom',
+        align: 'center'
       }
     },
     {
@@ -207,7 +216,7 @@ export function startAppTour(initialIndex = 0) {
         } else if (activeIdx === 1 || activeIdx === 2) {
           // 第 2 步画布编辑 & 第 3 步分组功能
           if (store.workspaceMode === 'translation') closeTranslationWorkspace();
-          resetCanvasView({ duration: 150 });
+          resetCanvasView({ duration: 0 });
         } else if (activeIdx === 3) {
           // 第 4 步翻译管理
         } else if (activeIdx === 4) {
@@ -217,8 +226,10 @@ export function startAppTour(initialIndex = 0) {
           }
           store.sidebarTab = 'components';
         }
-        requestAnimationFrame(() => {
-          driverInstance?.refresh();
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            driverInstance?.refresh();
+          });
         });
         return;
       }
@@ -242,7 +253,12 @@ export function startAppTour(initialIndex = 0) {
       }
     },
     onHighlighted: (_el, _step, opts) => {
-      if (isRisk.value) return;
+      if (isRisk.value) {
+        requestAnimationFrame(() => {
+          driverInstance?.refresh();
+        });
+        return;
+      }
       const idx = opts.state.activeIndex;
       if (idx === 4) {
         const canvasContainer = document.getElementById('tour-canvas-area');

@@ -1909,6 +1909,14 @@ export function addTargetLocale(locale?: string) {
 
   markDirty();
   syncTranslationUrlParams();
+
+  if (store.workspaceMode === 'translation') {
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        resetCanvasView({ duration: 320 });
+      });
+    }
+  }
 }
 
 export function removeTargetLocale(locale: string) {
@@ -1954,6 +1962,14 @@ export function removeTargetLocale(locale: string) {
   }
   markDirty();
   syncTranslationUrlParams();
+
+  if (store.workspaceMode === 'translation') {
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        resetCanvasView({ duration: 280 });
+      });
+    }
+  }
 }
 
 export function openTranslationWorkspace(targetLocale?: string) {

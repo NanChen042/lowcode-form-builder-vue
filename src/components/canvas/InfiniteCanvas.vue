@@ -543,6 +543,11 @@ function getLocalePercent(locale: string): number {
 function handleAddTargetLanguage(locale: string) {
   addTargetLocale(locale);
   Message.success(t('trans.addedLocaleSuccess', undefined, { name: getLocaleNativeName(locale) }));
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      resetCanvasView({ duration: 320 });
+    });
+  });
 }
 
 function handleSelectTargetLocale(locale: string) {
@@ -555,11 +560,11 @@ function handleRemoveTargetLanguage(locale: string) {
   const name = getLocaleNativeName(locale);
   removeTargetLocale(locale);
   Message.success(t('trans.removedLocaleSuccess', undefined, { name }));
-  if (targetLocales.value.length === 0) {
-    nextTick(() => {
-      resetCanvasView({ duration: 250 });
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      resetCanvasView({ duration: 280 });
     });
-  }
+  });
 }
 
 const activeTranslationPageIndex = computed(() => {
@@ -626,6 +631,20 @@ watch(
   (newCount, oldCount) => {
     if (newCount > (oldCount || 0)) {
       isPillDismissed.value = false;
+    }
+  }
+);
+
+// 监听翻译管理模式下目标语言增删（单卡片 ↔ 双卡片结构变化），确保画布自适应校准默认居中位置与缩放
+watch(
+  () => store.workspaceMode === 'translation' ? targetLocales.value.length : -1,
+  (newLen, oldLen) => {
+    if (store.workspaceMode === 'translation' && oldLen !== undefined && oldLen !== -1 && newLen !== oldLen) {
+      nextTick(() => {
+        requestAnimationFrame(() => {
+          resetCanvasView({ duration: 320 });
+        });
+      });
     }
   }
 );

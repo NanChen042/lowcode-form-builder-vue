@@ -40,9 +40,12 @@ export function formatInlineText(rawText: string): string {
   // 匹配 [文案](URL)
   let processed = rawText.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, rawUrl) => {
     const trimmedUrl = String(rawUrl).trim();
-    // 智能协议补全：若未写协议头 (如 xxx.com、www.xxx.com)，自动补全 https://
+    // 拦截危险伪协议，防止 XSS
     let href = trimmedUrl;
-    if (!/^(?:https?:\/\/|mailto:|tel:|\/|#)/i.test(trimmedUrl)) {
+    if (/^(?:javascript|data|vbscript):/i.test(trimmedUrl)) {
+      href = 'about:blank';
+    } else if (!/^(?:https?:\/\/|mailto:|tel:|\/|#)/i.test(trimmedUrl)) {
+      // 智能协议补全：若未写协议头 (如 xxx.com、www.xxx.com)，自动补全 https://
       href = `https://${trimmedUrl}`;
     }
     const safeLabel = escapeHtml(label);
@@ -60,8 +63,10 @@ export function formatInlineText(rawText: string): string {
 
   // 3. 匹配未包装在 Markdown 语法中的裸 URL (例如 https://example.com 或 www.example.com)
   processed = processed.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/g, (url) => {
-    const href = url.startsWith('www.') ? `https://${url}` : url;
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-[#1677ff] underline underline-offset-2 hover:text-[#4096ff] font-medium transition-colors break-words">${url}</a>`;
+    const rawHref = url.startsWith('www.') ? `https://${url}` : url;
+    const safeHref = escapeHtml(rawHref);
+    const safeUrl = escapeHtml(url);
+    return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="text-[#1677ff] underline underline-offset-2 hover:text-[#4096ff] font-medium transition-colors break-words">${safeUrl}</a>`;
   });
 
   // 4. 还原 Markdown 链接

@@ -97,7 +97,12 @@
         </p>
       </div>
 
-      <div class="page-header-area pb-4 shrink-0" :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl']" @click.stop="handleSelectPage">
+      <div
+        :id="isTranslationFrame ? undefined : (pageIndex === 0 ? 'tour-risk-page-header' : undefined)"
+        class="page-header-area pb-4 shrink-0"
+        :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl']"
+        @click.stop="handleSelectPage"
+      >
         <template v-if="isSystemProfile">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
@@ -158,6 +163,7 @@
           >
 
             <div
+              :id="isTranslationFrame ? undefined : (gIdx === 0 ? 'tour-risk-first-group-header' : undefined)"
               class="risk-group-header flex items-center justify-between gap-3 px-4 py-2.5 border-b rounded-t-[4px] transition-colors"
               :class="[
                 isTranslationFrame ? '' : 'cursor-grab active:cursor-grabbing',
