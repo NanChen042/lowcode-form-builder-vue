@@ -1,6 +1,20 @@
 # 系统多语言翻译对照表
 
-> 说明：按功能模块顺序整理了kyc自定义表单和风险评估自定义表单中。可直接查阅，如需修改可以在表格中补充对应文案文本
+> **多语言架构说明**：
+> 1. **低代码表单设计器（PC 端工作台）**：系统界面固定且仅支持 **中英文双语** (`zh` 简体中文 / `en` 英语)。
+> 2. **表单组件、默认移动端样例与移动端填报端**：面向业务填报与终端用户，支持 **4 种标准多语言**：
+>    - **简体中文 (`zh`)**
+>    - **英语 (`en`)**
+>    - **繁体中文 (`zh-Hant`)**：统一归一化为 `zh-Hant`，全面兼容香港 (`zh-HK`) 与台湾 (`zh-TW`) 等繁体语种分支
+>    - **马来语 (`ms`)**：标准 Bahasa Melayu 语种
+>    *(系统内不包含且不维护日语、韩语等其他非目标小语种)*。
+> 
+> 本表前半部分整理了 PC 端低代码设计器界面的中英对照文案；后半部分整理了系统预设资料卡片、表单组件默认文案、校验报错及移动端填报端的 4 语对照文案。如需业务定制，可在对应的“替换成”列中直接填写。
+
+
+>
+
+
 
 ## 通用与状态
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -655,17 +669,19 @@
 | 必填项不能为空 | This required field cannot be empty | | | |
 | 请输入有效的手机号码 | Please enter a valid phone number | | | |
 
-## 预览与提交结果
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
-| :--- | :--- | :--- | :--- | :--- |
-| 提交已完成 | Submission Completed | | | |
-| 感谢您的填写！您的表单信息已成功提交。 | Thank you! Your information has been received successfully. | | | |
-| 处理状态 | Status | | | |
-| 已完成 | Completed | | | |
-| 提交编号 | Submission No. | | | |
-| 提交时间 | Submission Time | | | |
-| 重新体验填报 | Refill Form (Preview) | | | |
-| 签名区域 | Signature Area | | | |
+| 请填写「{group}」第 {index} 题的题目内容（共 {total} 题未填写） | Please enter question text for Question {index} in [{group}] ({total} questions untranslated) | | | |
+## 预览与提交结果
+| 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 提交已完成 | Submission Completed | 提交已完成 | Penghantaran Selesai | | | | | |
+| 感谢您的填写！您的表单信息已成功提交。 | Thank you! Your information has been received successfully. | 感謝您的填寫！您的表單資訊已成功提交。 | Terima kasih! Maklumat borang anda telah berjaya diterima. | | | | | |
+| 处理状态 | Status | 處理狀態 | Status | | | | | |
+| 已完成 | Completed | 已完成 | Selesai | | | | | |
+| 提交编号 | Submission No. | 提交編號 | No. Rujukan Penghantaran | | | | | |
+| 提交时间 | Submission Time | 提交時間 | Masa Penghantaran | | | | | |
+| 重新体验填报 | Refill Form (Preview) | 重新體驗填報 | Isi Borang Semula (Pratonton) | | | | | |
+| 签名区域 | Signature Area | 簽名區域 | Kawasan Tandatangan | | | | | |
 
 ## 翻译抽屉与通用
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -733,22 +749,22 @@
 | 马来语 (Bahasa Melayu) | Malay (Bahasa Melayu) | | | |
 
 ## 组件库与默认字段占位文案（componentRegistry / phoneRules）
-| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
-| :--- | :--- | :--- | :--- | :--- |
-| 单行文本 | Single Line | | | |
-| 多行文本 | Multi-line | | | |
-| 下拉选择 | Dropdown | | | |
-| 单选框组 | Radio | | | |
-| 多选框组 | Checkbox | | | |
-| 电子签名 | E-Signature | | | |
-| 提示区块 | Notice | | | |
-| 手机号码 | Phone | | | |
-| 请输入内容 | Please enter content | | | |
-| 请输入详细描述... | Please enter detailed description... | | | |
-| 请选择国家 | Please select a country | | | |
-| 本人保证以上填写的信息真实、准确、有效。 | I confirm that all information provided is true, accurate and valid. | | | |
-| 请输入手机号码 | Please enter phone number | | | |
-| 请输入6-15位有效手机号码 | Please enter 6-15 digit phone number | | | |
+| 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 单行文本 | Single Line | 單行文字 | Baris Tunggal | | | | | |
+| 多行文本 | Multi-line | 多行文字 | Pelbagai Baris | | | | | |
+| 下拉选择 | Dropdown | 下拉選擇 | Menu Juntai Bawah | | | | | |
+| 单选框组 | Radio | 單選框組 | Pilihan Tunggal (Radio) | | | | | |
+| 多选框组 | Checkbox | 多選框組 | Kotak Semak (Checkbox) | | | | | |
+| 电子签名 | E-Signature | 電子簽名 | Tandatangan Elektronik | | | | | |
+| 提示区块 | Notice | 提示區塊 | Notis | | | | | |
+| 手机号码 | Phone | 手機號碼 | Nombor Telefon | | | | | |
+| 请输入内容 | Please enter content | 請輸入內容 | Sila masukkan kandungan | | | | | |
+| 请输入详细描述... | Please enter detailed description... | 請輸入詳細描述... | Sila masukkan penerangan terperinci... | | | | | |
+| 请选择国家 | Please select a country | 請選擇國家 | Sila pilih negara | | | | | |
+| 本人保证以上填写的信息真实、准确、有效。 | I confirm that all information provided is true, accurate and valid. | 本人保證以上填寫的資訊真實、準確、有效。 | Saya mengesahkan semua maklumat yang diberikan adalah benar, tepat dan sah. | | | | | |
+| 请输入手机号码 | Please enter phone number | 請輸入手機號碼 | Sila masukkan nombor telefon | | | | | |
+| 请输入6-15位有效手机号码 | Please enter 6-15 digit phone number | 請輸入6-15位有效手機號碼 | Sila masukkan 6-15 digit nombor telefon yang sah | | | | | |
 
 ## 表单组件默认校验与选项占位文案（多语言默认配置）
 | 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |

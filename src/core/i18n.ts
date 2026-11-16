@@ -18,49 +18,83 @@ export interface SupportedFormLocaleItem {
 /** 繁体中文统一语言码：zh-Hant（BCP 47 文字子标签，不区分香港/台湾） */
 export const TRADITIONAL_LOCALE = 'zh-Hant';
 
+/**
+ * 判断是否为繁体/香港/台湾等繁体中文语种标识
+ */
+export function isTraditionalChineseLocale(loc?: string): boolean {
+  if (!loc) return false;
+  const norm = loc.trim().toLowerCase();
+  return (
+    norm === 'zh-hant' ||
+    norm === 'zh_hant' ||
+    norm === 'zh-hk' ||
+    norm === 'zh_hk' ||
+    norm === 'zh-tw' ||
+    norm === 'zh_tw' ||
+    norm === 'zh-mo' ||
+    norm === 'zh_mo' ||
+    norm === 'hk' ||
+    norm === 'tw' ||
+    norm.startsWith('zh-hant')
+  );
+}
+
+export function normalizeLocaleKey(loc?: string): string {
+  const raw = (loc || '').trim();
+  const norm = raw.toLowerCase();
+  if (isTraditionalChineseLocale(norm)) return TRADITIONAL_LOCALE;
+  if (norm === 'zh' || norm === 'zh-cn' || norm === 'zh_cn' || norm === 'cn' || norm.startsWith('zh-hans')) return 'zh';
+  if (norm === 'en' || norm === 'en-us' || norm === 'en_us' || norm === 'en-gb' || norm === 'en_gb') return 'en';
+  if (norm === 'ms' || norm === 'ms-my' || norm === 'ms_my') return 'ms';
+  return raw;
+}
+
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
   { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: '中', flag: 'cn' },
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
-  { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'cn' },
+  { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'hk' },
   { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' }
 ];
 
 export function getLocaleFlag(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
+  if (isTraditionalChineseLocale(norm)) return 'hk';
   if (norm === 'zh' || norm === 'zh-cn') return 'cn';
-  if (norm === 'en' || norm === 'en-us') return 'gb';
-  if (norm === 'ms') return 'my';
+  if (norm === 'en' || norm === 'en-us' || norm === 'en-gb') return 'gb';
+  if (norm === 'ms' || norm === 'ms-my') return 'my';
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
   if (item?.flag) return item.flag;
   return 'cn';
 }
 
 export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
-  const norm = (loc || '').trim().toLowerCase();
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
+  const norm = normalizeLocaleKey(loc);
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm.toLowerCase());
   const currentUi = uiLocale || store.currentLocale || 'zh';
   if (!item) return loc.toUpperCase();
   return currentUi === 'en' ? item.labelEn : item.labelZh;
 }
 
 export function getLocaleNativeName(loc: string): string {
-  const norm = (loc || '').trim().toLowerCase();
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
+  const norm = normalizeLocaleKey(loc);
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm.toLowerCase());
   return item ? item.nativeLabel : loc.toUpperCase();
 }
 
 export function getLocaleShortBadge(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
+  if (norm === 'zh-hk' || norm === 'hk') return '港';
+  const normalized = normalizeLocaleKey(loc);
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === normalized.toLowerCase());
   return item ? item.shortBadge : loc.toUpperCase();
 }
 
 export function getEffectiveFormLocale(locale?: string): string {
-  if (locale) return locale;
+  if (locale) return normalizeLocaleKey(locale);
   if (store.workspaceMode === 'translation') {
-    return store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh';
+    return normalizeLocaleKey(store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh');
   }
-  return primaryLocale.value || 'zh';
+  return normalizeLocaleKey(primaryLocale.value || 'zh');
 }
 
 /**
@@ -1459,8 +1493,9 @@ export const profileMultiMessages: Record<string, Record<string, string>> = {
  * 注意：系统 UI 界面仅维护中英双语（基本资料页额外支持繁体中文与马来语预设文案）；其他语种自动以 en 保底展示
  */
 export function t(key: string, locale?: string, params?: Record<string, string | number>): string {
-  const targetLoc = locale || store.currentLocale || 'zh';
-  const isTrad = targetLoc === TRADITIONAL_LOCALE;
+  const rawLoc = locale || store.currentLocale || 'zh';
+  const targetLoc = normalizeLocaleKey(rawLoc);
+  const isTrad = isTraditionalChineseLocale(rawLoc);
   const multiHit = profileMultiMessages[targetLoc]?.[key];
   const resolvedLocale: Locale = (targetLoc === 'zh' || isTrad) ? 'zh' : 'en';
   let str = multiHit || systemMessages[resolvedLocale]?.[key] || systemMessages.en?.[key] || systemMessages.zh[key] || key;
@@ -1482,7 +1517,7 @@ export function formatOptionLabel(index: number, locale?: string): string {
   if (current === 'en' || current === 'ms') {
     return `Option ${index}`;
   }
-  if (current === TRADITIONAL_LOCALE) {
+  if (isTraditionalChineseLocale(current)) {
     if (index >= 1 && index <= 10) {
       return `選項${CHINESE_NUMS[index - 1]}`;
     }
@@ -1495,8 +1530,18 @@ export function formatOptionLabel(index: number, locale?: string): string {
 }
 
 function readI18nField(obj: any, field: string, loc: string): string {
-  const val = obj?.i18n?.[loc]?.[field];
-  return val !== undefined && val !== null ? String(val).trim() : '';
+  if (!obj?.i18n) return '';
+  const norm = normalizeLocaleKey(loc);
+  const locVariants = isTraditionalChineseLocale(loc)
+    ? Array.from(new Set([loc, norm, 'zh-Hant', 'zh-HK', 'zh-TW', 'zh_hk', 'zh_tw', 'hk', 'tw']))
+    : [loc, norm];
+  for (const l of locVariants) {
+    const val = obj.i18n[l]?.[field];
+    if (val !== undefined && val !== null && String(val).trim() !== '') {
+      return String(val).trim();
+    }
+  }
+  return '';
 }
 
 function writeI18nField(obj: any, field: string, val: string, loc: string) {
@@ -1796,8 +1841,9 @@ const defaultValidationMessages: Record<string, Record<string, string>> = {
 };
 
 function resolveDefaultMsg(type: keyof typeof defaultValidationMessages, loc: string): string {
+  const norm = normalizeLocaleKey(loc);
   const dict = defaultValidationMessages[type];
-  return dict[loc] || dict[loc.split('-')[0]] || dict.en || dict.zh;
+  return dict[norm] || dict[loc] || dict[loc.split('-')[0]] || dict.en || dict.zh;
 }
 
 export function getFieldDefaultErrorMessage(
