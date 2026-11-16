@@ -176,8 +176,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.untranslatedTag': '未翻译',
     'header.bilingualGuideTitle': '翻译管理说明',
     'header.bilingualGuideDesc': '管理表单各语言翻译内容。您可以在翻译工作台中对照编辑源语言与目标语言文案。填表人打开表单时，可通过语言切换按钮自由切换多语言。',
-    'header.bilingualVideoTitle': '双语问卷功能操作演示',
-    'header.bilingualVideoTip': '温馨提示：开启双语问卷后，填表端右上角将自动提供语言切换胶囊。',
+    'header.bilingualVideoTitle': '多语言 KYC 问卷操作演示',
+    'header.bilingualVideoTip': '温馨提示：进入翻译管理后，可配置对应表单语言版本。',
 
     // 用户下拉菜单 (User Menu)
     'user.logout': '退出登录',
@@ -816,8 +816,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'header.untranslatedTag': 'Untranslated',
     'header.bilingualGuideTitle': 'Translation Management Guide',
     'header.bilingualGuideDesc': 'Manage form translations across languages. You can edit source and target language copies side-by-side in the translation workspace. Respondents can toggle languages via the top-right button.',
-    'header.bilingualVideoTitle': 'Bilingual Questionnaire Video Tutorial',
-    'header.bilingualVideoTip': 'Tip: Once enabled, respondents can switch languages in the top-right corner.',
+    'header.bilingualVideoTitle': 'Multilingual KYC Questionnaire Video Tutorial',
+    'header.bilingualVideoTip': 'Tip: You can configure corresponding form language versions in Translation Management.',
 
     // 用户下拉菜单 (User Menu)
     'user.logout': 'Sign Out',

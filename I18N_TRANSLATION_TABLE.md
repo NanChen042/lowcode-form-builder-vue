@@ -87,8 +87,8 @@
 | 未翻译 | Untranslated | | | |
 | 翻译管理说明 | Translation Management Guide | | | |
 | 管理表单各语言翻译内容。您可以在翻译工作台中对照编辑源语言与目标语言文案。填表人打开表单时，可通过语言切换按钮自由切换多语言。 | Manage form translations across languages. You can edit source and target language copies side-by-side in the translation workspace. Respondents can toggle languages via the top-right button. | | | |
-| 双语问卷功能操作演示 | Bilingual Questionnaire Video Tutorial | | | |
-| 温馨提示：开启双语问卷后，填表端右上角将自动提供语言切换胶囊。 | Tip: Once enabled, respondents can switch languages in the top-right corner. | | | |
+| 多语言 KYC 问卷操作演示 | Multilingual KYC Questionnaire Video Tutorial | | | |
+| 温馨提示：进入翻译管理后，可配置对应表单语言版本。 | Tip: You can configure corresponding form language versions in Translation Management. | | | |
 
 ## 用户下拉菜单
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
