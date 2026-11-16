@@ -33,7 +33,7 @@
       </template>
     </button>
 
-    <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '380px', boxSizing: 'border-box' }">
+    <a-popover position="bottom" trigger="hover" :content-style="{ padding: '12px 14px', width: '300px', boxSizing: 'border-box' }">
       <button
         type="button"
         :aria-label="t('header.bilingualGuideTitle')"
@@ -52,8 +52,18 @@
             {{ t('header.bilingualGuideDesc') }}
           </p>
 
-          <div class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900" @click="emit('open-video')">
-            <img :src="guideCover" alt="Video Guide Cover" width="1024" height="576" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block" style="image-rendering: -webkit-optimize-contrast;" />
+          <div
+            class="group relative mt-2 rounded-lg overflow-hidden border border-slate-200/90 cursor-pointer shadow-xs transition-all hover:shadow-md hover:border-blue-400 select-none aspect-[16/9] w-full bg-slate-900"
+            @click="emit('open-video')"
+          >
+            <img
+              :src="guideCover"
+              alt="Video Guide Cover"
+              width="1024"
+              height="576"
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 block"
+              style="image-rendering: -webkit-optimize-contrast;"
+            />
             <div class="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors pointer-events-none"></div>
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div class="w-11 h-11 rounded-full bg-white/95 text-[#1677ff] flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-white transition-all duration-200">

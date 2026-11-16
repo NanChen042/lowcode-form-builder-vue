@@ -7,32 +7,32 @@
         <span class="text-[12px] font-medium text-slate-700">
           {{ label }}
         </span>
-        <!-- 问号解释：单行说明 + 预留 GIF 动图预览效果容器 -->
-        <a-popover position="top" trigger="hover" :content-style="{ padding: '10px 12px', width: '250px', boxSizing: 'border-box' }">
-          <button type="button" class="flex items-center justify-center text-slate-400 hover:text-[#1677ff] transition-colors cursor-help">
-            <HelpCircle class="w-3.5 h-3.5" />
-          </button>
+        <!-- 问号解释：说明文字（若传入动图使用 a-popover，默认统一使用全局标准的 a-tooltip） -->
+        <a-popover
+          v-if="previewGif"
+          position="top"
+          trigger="hover"
+          :content-style="{ padding: '8px 12px', maxWidth: '240px', boxSizing: 'border-box' }"
+        >
+          <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           <template #content>
             <div class="space-y-2 text-left select-none">
               <p class="text-[12px] text-slate-600 leading-normal m-0">
                 {{ computedTooltip }}
               </p>
-              <!-- 动图预览容器预留：供用户后续贴入实际 gif 动图效果 -->
-              <div class="rounded border border-slate-200/90 bg-slate-50 flex items-center justify-center overflow-hidden min-h-[96px] text-slate-400">
+              <div class="rounded border border-slate-200/90 bg-slate-50 flex items-center justify-center overflow-hidden text-slate-400">
                 <img
-                  v-if="previewGif"
                   :src="previewGif"
                   :alt="t('prop.previewGifPlaceholder')"
                   class="w-full h-auto object-cover block"
                 />
-                <div v-else class="flex flex-col items-center gap-1 py-3 text-slate-400">
-                  <Play class="w-4 h-4 opacity-40" />
-                  <span class="text-[11px]">{{ t('prop.previewGifPlaceholder') }}</span>
-                </div>
               </div>
             </div>
           </template>
         </a-popover>
+        <a-tooltip v-else :content="computedTooltip" position="top">
+          <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+        </a-tooltip>
       </div>
 
       <!-- 翻译管理模式专属：已翻译状态标识（未自定义时不显示多余文字） -->
@@ -138,7 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
-import { MessageSquare, HelpCircle, Pencil, RotateCcw, Check, CheckCircle2, Play } from '@lucide/vue';
+import { MessageSquare, HelpCircle, Pencil, RotateCcw, Check, CheckCircle2 } from '@lucide/vue';
 import { t } from '@/core/i18n';
 
 interface Props {
