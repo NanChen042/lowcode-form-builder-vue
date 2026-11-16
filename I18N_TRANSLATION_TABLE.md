@@ -552,10 +552,10 @@
 | 检查多语言完整度，并将表单正式保存发布。 | Verify translation completeness and publish the form. | | | |
 | 1. 风险评估组件 | 1. Risk Question Component | | | |
 | 欢迎来到风险评估！点击或拖拽该组件添加到画布，选项固定为 Yes / No / NA 并支持配置扣分权重。 | Welcome to Risk Assessment! Click or drag this component to the canvas. Fixed Yes/No/NA logic with weight scoring. | | | |
-| 2. 画布与题目编辑 | 2. Canvas & Question Editing | | | |
-| 点击画板文字可直接修改大标题和说明；点击底部按钮可快捷添加问题或新建分组。 | Click on text to edit title and description. Use the buttons below to quickly add questions or new groups. | | | |
-| 3. 问题分组管理 | 3. Question Groups | | | |
-| 支持直接修改组名，右侧显示题目数，按住左侧把手可上下拖拽调整分组顺序。 | Edit group names inline, check question counts, and drag the left handle to reorder groups. | | | |
+| 2. 画布与标题编辑 | 2. Canvas & Title Editing | | | |
+| 点击画布标题与说明文字即可直接修改，即改即显；亦可在右侧面板同步调整画布设置。 | Click directly on the canvas title and description to edit inline. You can also edit them in the right settings panel. | | | |
+| 3. 问题分组与题目管理 | 3. Question Group & Management | | | |
+| 支持直接修改组名，按住左侧把手可上下拖拽排序；可在分组内点击“+ 添加问题”，或在右侧面板快捷加题加组。 | Edit group names inline and drag the left handle to reorder. Click "+ Add Question" inside the group or use the right panel to add questions and groups. | | | |
 | 4. 翻译管理 | 4. Translation Management | | | |
 | 点击进入多语言工作区，支持双画布左右对照，点击“+ Add Language”即可新增翻译。 | Enter the workspace for side-by-side localization. Click "+ Add Language" to create a new translation. | | | |
 | 5. 保存与发布 | 5. Save & Publish | | | |
@@ -669,8 +669,8 @@
 | 必填项不能为空 | This required field cannot be empty | | | |
 | 请输入有效的手机号码 | Please enter a valid phone number | | | |
 
-| 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
-| 请填写「{group}」第 {index} 题的题目内容（共 {total} 题未填写） | Please enter question text for Question {index} in [{group}] ({total} questions untranslated) | | | |
+| 请填写「{group}」第 {index} 题的题目内容 | Please enter question text for Question {index} in "{group}" | | | |
+| 请填写「{group}」第 {index} 题的题目内容（共 {total} 题未填写） | Please enter question text for Question {index} in "{group}" ({total} unfilled) | | | |
 ## 预览与提交结果
 | 中文 | 英文 | 繁体中文 | 马来语 | 中文替换成 | 英文替换成 | 繁体替换成 | 马来语替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
