@@ -65,17 +65,6 @@
             >
               {{ getLocaleNativeName(primaryLocale) }}
             </a-tag>
-            <a-tag
-              v-else-if="store.selectedType && isBilingual"
-              :color="effectiveEditingLocale === primaryLocale ? 'gray' : 'arcoblue'"
-              size="small"
-              class="text-[11px] font-medium"
-            >
-              {{ getLocaleNativeName(effectiveEditingLocale) }}
-            </a-tag>
-            <a-tag v-if="store.selectedId && store.workspaceMode !== 'translation' && headerBadgeText" color="arcoblue" size="small" class="font-mono">
-              {{ headerBadgeText }}
-            </a-tag>
             <a-tooltip :content="t('prop.collapsePanel')" position="bottom">
               <button
                 type="button"
@@ -234,13 +223,10 @@ import {
 } from '@/core/store';
 import {
   t,
-  getEffectiveFormLocale,
   getLocaleNativeName,
-  getFieldText,
   getGroupText,
   setGroupText
 } from '@/core/i18n';
-import { componentRegistry } from '@/registry/components';
 import { useSidebarResize } from '@/utils/useSidebarResize';
 import PagePropsEditor from './PagePropsEditor.vue';
 import FieldBasicProps from './FieldBasicProps.vue';
@@ -257,8 +243,6 @@ import {
 } from '@lucide/vue';
 
 const isCountryListModalVisible = ref(false);
-
-const effectiveEditingLocale = computed(() => getEffectiveFormLocale());
 
 const groupTitleModel = computed({
   get() {
@@ -290,35 +274,6 @@ const { isResizing, startResize } = useSidebarResize({
   min: 260,
   max: 520,
   direction: 'left'
-});
-
-const headerBadgeText = computed(() => {
-  if (store.selectedType === 'page') {
-    const idx = store.pages.findIndex(p => p.id === store.selectedId);
-    return idx >= 0 ? `P${idx + 1}` : t('prop.page');
-  }
-  if (store.selectedType === 'group') {
-    const idx = store.pages[0]?.groups?.findIndex(g => g.id === store.selectedId) ?? -1;
-    if (idx !== -1) {
-      return `Group ${String(idx + 1).padStart(2, '0')}`;
-    }
-    return t('risk.cmpGroup');
-  }
-  if (store.selectedType === 'element') {
-    if (isRisk.value && store.selectedId) {
-      const idx = store.pages[0]?.fields?.findIndex(f => f.id === store.selectedId) ?? -1;
-      if (idx !== -1) {
-        return `Q${String(idx + 1).padStart(2, '0')}`;
-      }
-    }
-    const el = selectedElement.value;
-    const meta = el ? componentRegistry[el.type] : null;
-    if (meta) {
-      return getFieldText(meta, 'label', store.currentLocale) || el?.type || t('prop.element');
-    }
-    return el?.type || t('prop.element');
-  }
-  return '';
 });
 
 watch(

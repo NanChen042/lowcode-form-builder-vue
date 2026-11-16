@@ -20,9 +20,6 @@
         </div>
         <div v-if="!isRisk" class="flex items-center gap-1.5 font-normal select-none">
           <span class="text-[11px] text-slate-400">{{ t('prop.showLabel') }}</span>
-          <a-tooltip :content="t('prop.showLabelTip')" position="top">
-            <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-          </a-tooltip>
           <a-switch v-model="isShowLabel" size="small" />
         </div>
       </div>
@@ -38,10 +35,6 @@
         @blur="clearFocus"
         @input="markDirty"
       />
-      <div v-if="!isRisk && !isShowLabel" class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-        <span class="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-        <span>{{ t('prop.hiddenLabelNote') }}</span>
-      </div>
     </div>
 
     <template v-if="isRisk">
@@ -237,9 +230,6 @@
         <span class="text-[12px] font-medium text-slate-600">
           {{ element.type === 'signature' ? t('prop.signatureRequired') : t('prop.required') }}
         </span>
-        <a-tooltip :content="element.type === 'signature' ? t('prop.signatureRequiredTip') : t('prop.requiredTip')" position="top">
-          <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-        </a-tooltip>
       </div>
       <a-switch v-model="isElementRequired" size="small" />
     </div>
@@ -265,9 +255,6 @@
     <div v-if="element.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
-        <a-tooltip :content="t('prop.declarationRequiredTip')" position="top">
-          <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-        </a-tooltip>
       </div>
       <a-switch v-model="isDeclarationRequired" size="small" />
     </div>
@@ -293,9 +280,6 @@
     <div v-if="['select', 'country', 'nationality'].includes(element.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.allowMultiple') }}</span>
-        <a-tooltip :content="t('prop.allowMultipleTip')" position="top">
-          <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
-        </a-tooltip>
       </div>
       <a-switch v-model="isSelectMultiple" size="small" />
     </div>

@@ -30,7 +30,7 @@
             </div>
           </template>
         </a-popover>
-        <a-tooltip v-else :content="computedTooltip" position="top">
+        <a-tooltip v-else-if="tooltip" :content="computedTooltip" position="top">
           <HelpCircle class="w-3.5 h-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
         </a-tooltip>
       </div>
