@@ -44,6 +44,8 @@
 | 预置核验节点 | Pre-filled Baseline | | | |
 | 开始日期 | Start Date | | | |
 | 结束日期 | End Date | | | |
+| 选择日期 | Select Date | | | |
+| 选择日期范围 | Select Date Range | | | |
 | 请输入有效数字 | Please enter a valid number | | | |
 | 请输入有效的邮箱地址 | Please enter a valid email | | | |
 | 最多只能选择 {count} 项 | Maximum {count} options allowed | | | |
@@ -844,6 +846,8 @@
 | 点击在下方列表中定位 | Click to locate in list | 點擊在下方列表中定位 | Klik untuk cari dalam senarai | | | | | |
 | 开始日期 | Start Date | 開始日期 | Tarikh Mula | | | | | |
 | 截止日期 | End Date | 截止日期 | Tarikh Tamat | | | | | |
+| 选择日期 | Select Date | 選擇日期 | Pilih Tarikh | | | | | |
+| 选择日期范围 | Select Date Range | 選擇日期範圍 | Pilih Julat Tarikh | | | | | |
 | 搜索国家、地区或区号... | Search by country or dial code... | 搜尋國家、地區或國碼... | Cari mengikut negara, wilayah atau kod panggilan... | | | | | |
 | 搜索国家或地区名称... | Search country or region... | 搜尋國家或地區名稱... | Cari negara atau wilayah... | | | | | |
 | 请在下方指定区域签名 | Please sign in the designated area below | 請在下方指定區域簽名 | Sila tandatangan di kawasan yang ditetapkan di bawah | | | | | |
