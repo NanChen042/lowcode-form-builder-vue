@@ -8,6 +8,8 @@ export type Locale = 'zh' | 'en';
 
 export interface SupportedFormLocaleItem {
   code: string;
+  /** 下拉选项等展示用的标准 BCP 47 代码（如 zh 对应展示 zh-Hans） */
+  displayCode?: string;
   labelZh: string;
   labelEn: string;
   nativeLabel: string;
@@ -44,27 +46,46 @@ export function normalizeLocaleKey(loc?: string): string {
   const norm = raw.toLowerCase();
   if (isTraditionalChineseLocale(norm)) return TRADITIONAL_LOCALE;
   if (norm === 'zh' || norm === 'zh-cn' || norm === 'zh_cn' || norm === 'cn' || norm.startsWith('zh-hans')) return 'zh';
-  if (norm === 'en' || norm === 'en-us' || norm === 'en_us' || norm === 'en-gb' || norm === 'en_gb') return 'en';
-  if (norm === 'ms' || norm === 'ms-my' || norm === 'ms_my') return 'ms';
+  if (norm === 'en' || norm.startsWith('en-') || norm.startsWith('en_')) return 'en';
+  if (norm === 'ms' || norm.startsWith('ms-') || norm.startsWith('ms_')) return 'ms';
+  if (norm === 'id' || norm.startsWith('id-') || norm.startsWith('id_')) return 'id';
+  if (norm === 'ta' || norm.startsWith('ta-') || norm.startsWith('ta_')) return 'ta';
+  if (norm === 'th' || norm.startsWith('th-') || norm.startsWith('th_')) return 'th';
+  if (norm === 'vi' || norm.startsWith('vi-') || norm.startsWith('vi_')) return 'vi';
+  if (norm === 'ja' || norm.startsWith('ja-') || norm.startsWith('ja_')) return 'ja';
+  if (norm === 'ko' || norm.startsWith('ko-') || norm.startsWith('ko_')) return 'ko';
+  if (norm === 'hi' || norm.startsWith('hi-') || norm.startsWith('hi_')) return 'hi';
+  if (norm === 'es' || norm.startsWith('es-') || norm.startsWith('es_')) return 'es';
+  if (norm === 'fr' || norm.startsWith('fr-') || norm.startsWith('fr_')) return 'fr';
+  if (norm === 'de' || norm.startsWith('de-') || norm.startsWith('de_')) return 'de';
+  if (norm === 'pt' || norm.startsWith('pt-') || norm.startsWith('pt_')) return 'pt';
+  if (norm === 'ru' || norm.startsWith('ru-') || norm.startsWith('ru_')) return 'ru';
   return raw;
 }
 
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
-  { code: 'zh', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: '中', flag: 'cn' },
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
+  { code: 'zh', displayCode: 'zh-Hans', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: '中', flag: 'cn' },
   { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'hk' },
-  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' }
+  { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' },
+  { code: 'id', labelZh: '印度尼西亚语 (Bahasa Indonesia)', labelEn: 'Indonesian (Bahasa Indonesia)', nativeLabel: 'Bahasa Indonesia', shortBadge: 'ID', flag: 'id' },
+  { code: 'ta', labelZh: '泰米尔语 (தமிழ்)', labelEn: 'Tamil (தமிழ்)', nativeLabel: 'தமிழ்', shortBadge: 'TA', flag: 'sg' },
+  { code: 'th', labelZh: '泰语 (ไทย)', labelEn: 'Thai (ไทย)', nativeLabel: 'ไทย', shortBadge: 'TH', flag: 'th' },
+  { code: 'vi', labelZh: '越南语 (Tiếng Việt)', labelEn: 'Vietnamese (Tiếng Việt)', nativeLabel: 'Tiếng Việt', shortBadge: 'VI', flag: 'vn' },
+  { code: 'ja', labelZh: '日语 (日本語)', labelEn: 'Japanese (日本語)', nativeLabel: '日本語', shortBadge: 'JA', flag: 'jp' },
+  { code: 'ko', labelZh: '韩语 (한국어)', labelEn: 'Korean (한국어)', nativeLabel: '한국어', shortBadge: 'KO', flag: 'kr' },
+  { code: 'hi', labelZh: '印地语 (हिन्दी)', labelEn: 'Hindi (हिन्दी)', nativeLabel: 'हिन्दी', shortBadge: 'HI', flag: 'in' },
+  { code: 'es', labelZh: '西班牙语 (Español)', labelEn: 'Spanish (Español)', nativeLabel: 'Español', shortBadge: 'ES', flag: 'es' },
+  { code: 'fr', labelZh: '法语 (Français)', labelEn: 'French (Français)', nativeLabel: 'Français', shortBadge: 'FR', flag: 'fr' },
+  { code: 'de', labelZh: '德语 (Deutsch)', labelEn: 'German (Deutsch)', nativeLabel: 'Deutsch', shortBadge: 'DE', flag: 'de' },
+  { code: 'pt', labelZh: '葡萄牙语 (Português)', labelEn: 'Portuguese (Português)', nativeLabel: 'Português', shortBadge: 'PT', flag: 'pt' },
+  { code: 'ru', labelZh: '俄语 (Русский)', labelEn: 'Russian (Русский)', nativeLabel: 'Русский', shortBadge: 'RU', flag: 'ru' }
 ];
 
 export function getLocaleFlag(loc: string): string {
-  const norm = (loc || '').trim().toLowerCase();
-  if (isTraditionalChineseLocale(norm)) return 'hk';
-  if (norm === 'zh' || norm === 'zh-cn') return 'cn';
-  if (norm === 'en' || norm === 'en-us' || norm === 'en-gb') return 'gb';
-  if (norm === 'ms' || norm === 'ms-my') return 'my';
-  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm);
-  if (item?.flag) return item.flag;
-  return 'cn';
+  const norm = normalizeLocaleKey(loc);
+  const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === norm.toLowerCase());
+  return item?.flag || 'cn';
 }
 
 export function getLocaleDisplayName(loc: string, uiLocale?: Locale): string {
@@ -1533,7 +1554,7 @@ export function formatOptionLabel(index: number, locale?: string): string {
   return `选项${index}`;
 }
 
-function readI18nField(obj: any, field: string, loc: string): string {
+function readI18nField(obj: any, field: string, loc: string, allowWhitespaceOnly = false): string {
   if (!obj?.i18n) return '';
   const norm = normalizeLocaleKey(loc);
   const locVariants = isTraditionalChineseLocale(loc)
@@ -1541,8 +1562,11 @@ function readI18nField(obj: any, field: string, loc: string): string {
     : [loc, norm];
   for (const l of locVariants) {
     const val = obj.i18n[l]?.[field];
-    if (val !== undefined && val !== null && String(val).trim() !== '') {
-      return String(val).trim();
+    if (val !== undefined && val !== null) {
+      const str = String(val);
+      if (allowWhitespaceOnly ? str !== '' : str.trim() !== '') {
+        return str;
+      }
     }
   }
   return '';
@@ -1570,7 +1594,7 @@ export function getFieldText(
 ): string {
   if (!element) return '';
   const current = getEffectiveFormLocale(locale);
-  const val = readI18nField(element, field, current);
+  const val = readI18nField(element, field, current, !fallback);
   if (val !== '') {
     return val;
   }
@@ -1606,8 +1630,8 @@ export function getLocalizedFieldText(
  * @param locale 指定语言
  * @param fallback 是否在当前语言为空时回退另一语言（设计态为 false；预览态为 true）
  */
-function readOptionI18n(option: any, loc: string): string {
-  return readI18nField(option, 'label', loc);
+function readOptionI18n(option: any, loc: string, allowWhitespaceOnly = false): string {
+  return readI18nField(option, 'label', loc, allowWhitespaceOnly);
 }
 
 export function getOptionLabel(
@@ -1617,7 +1641,7 @@ export function getOptionLabel(
 ): string {
   if (!option) return '';
   const current = getEffectiveFormLocale(locale);
-  const val = readOptionI18n(option, current);
+  const val = readOptionI18n(option, current, !fallback);
   if (val !== '') {
     return val;
   }
@@ -1661,7 +1685,7 @@ export function getPageText(
 ): string {
   if (!page) return '';
   const current = getEffectiveFormLocale(locale);
-  const val = readI18nField(page, field, current);
+  const val = readI18nField(page, field, current, !fallback);
   if (val !== '') {
     return val;
   }
@@ -1699,7 +1723,7 @@ export function getGroupText(
 ): string {
   if (!group) return '';
   const current = getEffectiveFormLocale(locale);
-  const val = readI18nField(group, field, current);
+  const val = readI18nField(group, field, current, !fallback);
   if (val !== '') return val;
   if (fallback) {
     if (current !== 'en') {
@@ -1736,7 +1760,7 @@ export function getMetaText(
 ): string {
   if (!meta) return '';
   const current = getEffectiveFormLocale(locale);
-  const val = readI18nField(meta, field, current);
+  const val = readI18nField(meta, field, current, !fallback);
   if (val !== '') return val;
   if (fallback) {
     const baseVal = readI18nField(meta, field, primaryLocale.value);
@@ -1803,111 +1827,71 @@ export function setMetaText(
 }
 
 /**
- * 获取字段在当前语言下的通用默认/兜底校验错误提示文字
+ * 系统内置多语言校验错误提示字典（支持 16 种语种自动匹配，无需人工配置/翻译）
  */
-const defaultValidationMessages: Record<string, Record<string, string>> = {
-  declaration: {
-    zh: '请确认并同意声明条款',
-    'zh-Hant': '請確認並同意聲明條款',
-    en: 'Please agree to the declarations',
-    ms: 'Sila sahkan dan bersetuju dengan pengisytiharan'
-  },
-  signature: {
-    zh: '请完成手写签名',
-    'zh-Hant': '請完成手寫簽名',
-    en: 'Please complete handwritten signature',
-    ms: 'Sila lengkapkan tandatangan'
-  },
-  selectOne: {
-    zh: '请选择一个选项',
-    'zh-Hant': '請選擇一個選項',
-    en: 'Please select an option',
-    ms: 'Sila pilih satu pilihan'
-  },
-  selectAtLeastOne: {
-    zh: '请至少选择一个选项',
-    'zh-Hant': '請至少選擇一個選項',
-    en: 'Please select at least one option',
-    ms: 'Sila pilih sekurang-kurangnya satu pilihan'
-  },
-  selectDate: {
-    zh: '请选择日期',
-    'zh-Hant': '請選擇日期',
-    en: 'Please select a date',
-    ms: 'Sila pilih tarikh'
-  },
-  required: {
-    zh: '必填项不能为空',
-    'zh-Hant': '必填項不能為空',
-    en: 'This required field cannot be empty',
-    ms: 'Medan ini diperlukan'
-  }
+export const SYSTEM_REQUIRED_MESSAGES: Record<string, string> = {
+  en: 'Please complete all required fields.',
+  zh: '请填写所有必填项。',
+  'zh-Hant': '請填寫所有必填項。',
+  ms: 'Sila lengkapkan semua medan yang diperlukan.',
+  id: 'Harap lengkapi semua kolom yang wajib diisi.',
+  ta: 'தேவையான அனைத்து புலங்களையும் பூர்த்தி செய்யவும்.',
+  th: 'โปรดกรอกข้อมูลในช่องที่จำเป็นให้ครบถ้วน',
+  vi: 'Vui lòng hoàn thành tất cả các trường bắt buộc.',
+  ja: '必須項目をすべてご入力ください。',
+  ko: '필수 항목을 모두 입력해 주세요.',
+  hi: 'कृपया सभी आवश्यक फ़ील्ड भरें।',
+  es: 'Por favor, complete todos los campos obligatorios.',
+  fr: 'Veuillez remplir tous les champs obligatoires.',
+  de: 'Bitte füllen Sie alle Pflichtfelder aus.',
+  pt: 'Por favor, preencha todos os campos obrigatórios.',
+  ru: 'Пожалуйста, заполните все обязательные поля.'
 };
 
-function resolveDefaultMsg(type: keyof typeof defaultValidationMessages, loc: string): string {
-  const norm = normalizeLocaleKey(loc);
-  const dict = defaultValidationMessages[type];
-  return dict[norm] || dict[loc] || dict[loc.split('-')[0]] || dict.en || dict.zh;
+export const SYSTEM_INVALID_FORMAT_MESSAGES: Record<string, string> = {
+  en: 'Invalid format.',
+  zh: '格式无效。',
+  'zh-Hant': '格式無效。',
+  ms: 'Format tidak sah.',
+  id: 'Format tidak valid.',
+  ta: 'தவறான வடிவம்.',
+  th: 'รูปแบบไม่ถูกต้อง',
+  vi: 'Định dạng không hợp lệ.',
+  ja: '形式が無効です。',
+  ko: '형식이 올바르지 않습니다.',
+  hi: 'अमान्य प्रारूप।',
+  es: 'Formato no válido.',
+  fr: 'Format invalide.',
+  de: 'Ungültiges Format.',
+  pt: 'Formato inválido.',
+  ru: 'Неверный формат.'
+};
+
+export function getRequiredErrorMessage(locale?: string): string {
+  const current = getEffectiveFormLocale(locale);
+  return SYSTEM_REQUIRED_MESSAGES[current] || SYSTEM_REQUIRED_MESSAGES.en;
+}
+
+export function getInvalidFormatErrorMessage(locale?: string): string {
+  const current = getEffectiveFormLocale(locale);
+  return SYSTEM_INVALID_FORMAT_MESSAGES[current] || SYSTEM_INVALID_FORMAT_MESSAGES.en;
 }
 
 export function getFieldDefaultErrorMessage(
-  element: FormElement,
-  subType?: 'declaration' | 'signature',
+  _element?: FormElement,
+  _subType?: 'declaration' | 'signature',
   locale?: string
 ): string {
-  const current = getEffectiveFormLocale(locale);
-
-  if (subType === 'declaration') {
-    return resolveDefaultMsg('declaration', current);
-  }
-
-  if (subType === 'signature' || element.type === 'signature') {
-    return resolveDefaultMsg('signature', current);
-  }
-
-  switch (element.type) {
-    case 'radio':
-      return resolveDefaultMsg('selectOne', current);
-    case 'checkbox':
-      return resolveDefaultMsg('selectAtLeastOne', current);
-    case 'select':
-    case 'country':
-    case 'nationality':
-      if (element.multiple) {
-        return resolveDefaultMsg('selectAtLeastOne', current);
-      }
-      return resolveDefaultMsg('selectOne', current);
-    case 'date':
-      return resolveDefaultMsg('selectDate', current);
-    case 'input':
-    case 'textarea':
-    case 'phone':
-    case 'email':
-    default:
-      return resolveDefaultMsg('required', current);
-  }
+  return getRequiredErrorMessage(locale);
 }
 
 /**
- * 解析字段的有效校验错误提示（三级降级：用户自定义 > 智能语义兜底 > 系统通用兜底）
+ * 解析字段的有效必填校验错误提示（自动匹配 16 国语言，无需人工配置）
  */
 export function getFieldValidationMessage(
-  element: FormElement,
-  subType?: 'declaration' | 'signature',
+  _element?: FormElement,
+  _subType?: 'declaration' | 'signature',
   locale?: string
 ): string {
-  const current = getEffectiveFormLocale(locale);
-
-  if (subType === 'declaration') {
-    const customDecl = readI18nField(element, 'declarationErrorMessage', current);
-    if (customDecl) return customDecl;
-    return getFieldDefaultErrorMessage(element, 'declaration', current);
-  }
-
-  // 第一优先级：用户配置的自定义提示
-  const customErr = readI18nField(element, 'customErrorMessage', current);
-  if (customErr) return customErr;
-
-  // 第二优先级：组件语义化智能兜底
-  return getFieldDefaultErrorMessage(element, subType, current);
+  return getRequiredErrorMessage(locale);
 }

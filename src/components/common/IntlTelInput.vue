@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { store } from '@/core/store';
-import { t } from '@/core/i18n';
+import { getRequiredErrorMessage, getInvalidFormatErrorMessage } from '@/core/i18n';
 import type { IntlTelInputInstance, IntlTelInputOptions } from '@/types/intlTelInput';
 import {
   getCountryPhoneRule,
@@ -60,7 +60,7 @@ const props = withDefaults(
     strict?: boolean;
     error?: boolean;
     errorMessage?: string;
-    customErrorMessage?: string;
+    locale?: string;
   }>(),
   {
     modelValue: '',
@@ -73,7 +73,7 @@ const props = withDefaults(
     strict: true,
     error: false,
     errorMessage: '',
-    customErrorMessage: ''
+    locale: ''
   }
 );
 
@@ -96,8 +96,14 @@ let iti: IntlTelInputInstance | null = null;
 const isDirty = ref(false);
 let isInternalCountryChange = false;
 
-const validationState = ref({
+const validationState = ref<{
+  valid: boolean;
+  errorType: '' | 'required' | 'format';
+  message: string;
+  message_en: string;
+}>({
   valid: true,
+  errorType: '',
   message: '',
   message_en: ''
 });
@@ -111,10 +117,13 @@ const hasError = computed(() => {
 const effectiveErrorMessage = computed(() => {
   if (props.errorMessage) return props.errorMessage;
   if (!isDirty.value || validationState.value.valid) return '';
-  if (props.customErrorMessage) return props.customErrorMessage;
-  return store.currentLocale === 'en'
-    ? validationState.value.message_en
-    : validationState.value.message;
+  if (validationState.value.errorType === 'required') {
+    return getRequiredErrorMessage(props.locale || undefined);
+  }
+  if (validationState.value.errorType === 'format') {
+    return getInvalidFormatErrorMessage(props.locale || undefined);
+  }
+  return validationState.value.message;
 });
 
 onMounted(() => {
@@ -223,24 +232,27 @@ function validateAndEmit() {
   const pureMobile = (iti.getNumber('national') || raw).replace(/\D/g, '');
 
   let valid = true;
+  let errorType: '' | 'required' | 'format' = '';
   let message = '';
   let message_en = '';
 
   if (!raw) {
     if (props.required) {
       valid = false;
-      message = props.customErrorMessage || t('val.requiredFallback', 'zh');
-      message_en = props.customErrorMessage || t('val.requiredFallback', 'en');
+      errorType = 'required';
+      message = getRequiredErrorMessage(props.locale || undefined);
+      message_en = getRequiredErrorMessage('en');
     }
   } else if (props.strict) {
     valid = iti.isValidNumber();
     if (!valid) {
-      message = props.customErrorMessage || t('val.validPhoneFallback', 'zh');
-      message_en = props.customErrorMessage || t('val.validPhoneFallback', 'en');
+      errorType = 'format';
+      message = getInvalidFormatErrorMessage(props.locale || undefined);
+      message_en = getInvalidFormatErrorMessage('en');
     }
   }
 
-  validationState.value = { valid, message, message_en };
+  validationState.value = { valid, errorType, message, message_en };
 
   emit('update:modelValue', pureMobile);
   emit('change', {

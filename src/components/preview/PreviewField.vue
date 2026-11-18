@@ -94,7 +94,7 @@
         v-model:dial-code="phoneDialCode"
         v-model:country-code="phoneCountryCode"
         :custom-placeholder="localizedPlaceholder"
-        :custom-error-message="localizedCustomErrorMessage"
+        :locale="previewLoc"
         :required="isFieldRequired"
         :strict="true"
         :error="Boolean(error)"
@@ -714,7 +714,6 @@ function clearSignature() {
 
 const localizedLabel = computed(() => getLocalizedFieldText(props.field, 'label', previewLoc.value));
 const localizedHelp = computed(() => getLocalizedFieldText(props.field, 'help', previewLoc.value));
-const localizedCustomErrorMessage = computed(() => getLocalizedFieldText(props.field, 'customErrorMessage', previewLoc.value));
 const localizedEndPlaceholder = computed(() => getLocalizedFieldText(props.field, 'endPlaceholder', previewLoc.value));
 const localizedLongTermText = computed(() => getLocalizedFieldText(props.field, 'longTermText', previewLoc.value));
 const localizedSignPlaceholder = computed(() => getLocalizedFieldText(props.field, 'signPlaceholder', previewLoc.value));

@@ -349,6 +349,8 @@ import {
   getMetaText,
   getLocalizedPageText,
   getFieldValidationMessage,
+  getRequiredErrorMessage,
+  getInvalidFormatErrorMessage,
   getLocaleNativeName,
   getLocaleShortBadge,
   getLocaleFlag
@@ -515,7 +517,7 @@ function validateField(field: FormElement, loc = activePreviewLocale.value): str
       return getFieldValidationMessage(field, undefined, loc);
     }
     if (strVal && field.inputType === 'number' && isNaN(Number(strVal))) {
-      return t('val.validNumber', loc);
+      return getInvalidFormatErrorMessage(loc);
     }
     return null;
   }
@@ -532,7 +534,7 @@ function validateField(field: FormElement, loc = activePreviewLocale.value): str
       return getFieldValidationMessage(field, undefined, loc);
     }
     if (strVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(strVal)) {
-      return t('val.validEmail', loc);
+      return getInvalidFormatErrorMessage(loc);
     }
     return null;
   }
@@ -545,14 +547,14 @@ function validateField(field: FormElement, loc = activePreviewLocale.value): str
       if (formData[`${field.key}_valid`] === true) {
         return null;
       }
-      if (formData[`${field.key}_valid`] === false && formData[`${field.key}_msg`]) {
-        return formData[`${field.key}_msg`];
+      if (formData[`${field.key}_valid`] === false) {
+        return getInvalidFormatErrorMessage(loc);
       }
       const countryCode = formData[`${field.key}_countryCode`];
       const dialCode = formData[`${field.key}_areacode`] || field.dialCode || '+65';
       const res = validatePhoneNumber(countryCode || dialCode, strVal, true);
       if (!res.valid) {
-        return loc === 'en' ? res.message_en : res.message;
+        return getInvalidFormatErrorMessage(loc);
       }
     }
     return null;
@@ -662,7 +664,7 @@ function validateCurrentPage(): boolean {
   }
 
   if (hasError) {
-    Message.error(t('preview.fillRequiredFields'));
+    Message.error(getRequiredErrorMessage(activePreviewLocale.value));
     nextTick(() => {
       if (phoneContentRef.value) {
         const errEl = phoneContentRef.value.querySelector('.has-error, [data-error="true"], .arco-input-error, .arco-textarea-error, .arco-select-view-error, .arco-picker-error');

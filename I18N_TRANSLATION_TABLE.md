@@ -894,3 +894,23 @@
 | 股份类别 | Share Class | 股份類別 | Kelas Saham | | | | | |
 | 普通股 | Ordinary Shares | 普通股 | Saham Biasa | | | | | |
 | 优先股 | Preference Shares | 優先股 | Saham Keutamaan | | | | | |
+
+## 统一校验提示（16 国语言内置映射，无需人工设置与翻译）
+| 序号 | 语言 | 显示名称 | 语言代码 | 必填统一提示 | 格式错误提示 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 英语（默认） | English | en | Please complete all required fields. | Invalid format. |
+| 2 | 简体中文 | 简体中文 | zh-Hans (内部兼容 zh) | 请填写所有必填项。 | 格式无效。 |
+| 3 | 繁体中文 | 繁體中文 | zh-Hant | 請填寫所有必填項。 | 格式無效。 |
+| 4 | 马来语 | Bahasa Melayu | ms | Sila lengkapkan semua medan yang diperlukan. | Format tidak sah. |
+| 5 | 印度尼西亚语 | Bahasa Indonesia | id | Harap lengkapi semua kolom yang wajib diisi. | Format tidak valid. |
+| 6 | 泰米尔语 | தமிழ் | ta | தேவையான அனைத்து புலங்களையும் பூர்த்தி செய்யவும். | தவறான வடிவம். |
+| 7 | 泰语 | ไทย | th | โปรดกรอกข้อมูลในช่องที่จำเป็นให้ครบถ้วน | รูปแบบไม่ถูกต้อง |
+| 8 | 越南语 | Tiếng Việt | vi | Vui lòng hoàn thành tất cả các trường bắt buộc. | Định dạng không hợp lệ. |
+| 9 | 日语 | 日本語 | ja | 必須項目をすべてご入力ください。 | 形式が無効です。 |
+| 10 | 韩语 | 한국어 | ko | 필수 항목을 모두 입력해 주세요. | 형식이 올바르지 않습니다. |
+| 11 | 印地语 | हिन्दी | hi | कृपया सभी आवश्यक फ़ील्ड भरें। | अमान्य प्रारूप। |
+| 12 | 西班牙语 | Español | es | Por favor, complete todos los campos obligatorios. | Formato no válido. |
+| 13 | 法语 | Français | fr | Veuillez remplir tous les champs obligatoires. | Format invalide. |
+| 14 | 德语 | Deutsch | de | Bitte füllen Sie alle Pflichtfelder aus. | Ungültiges Format. |
+| 15 | 葡萄牙语 | Português | pt | Por favor, preencha todos os campos obrigatórios. | Formato inválido. |
+| 16 | 俄语 | Русский | ru | Пожалуйста, заполните все обязательные поля. | Неверный формат. |

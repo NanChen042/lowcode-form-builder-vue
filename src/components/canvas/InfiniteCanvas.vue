@@ -118,18 +118,20 @@
             <span class="text-xs leading-none">{{ t('trans.addLanguageShort') }}</span>
           </button>
           <template #content>
-            <a-doption
-              v-for="loc in availableLocalesToAdd"
-              :key="loc.code"
-              class="!py-0.5 !px-2 !min-h-[28px] !leading-none text-xs"
-              @click="handleAddTargetLanguage(loc.code)"
-            >
-              <div class="flex items-center gap-2 min-w-[110px] py-0.5">
-                <span class="iti__flag shrink-0" :class="'iti__' + loc.flag"></span>
-                <span class="text-xs font-medium text-slate-700 flex-1">{{ loc.nativeLabel }}</span>
-                <span class="text-[10px] text-slate-400 font-mono">{{ loc.code.toUpperCase() }}</span>
-              </div>
-            </a-doption>
+            <div class="max-h-[340px] overflow-y-auto custom-scrollbar">
+              <a-doption
+                v-for="loc in availableLocalesToAdd"
+                :key="loc.code"
+                class="!py-0.5 !px-2 !min-h-[28px] !leading-none text-xs"
+                @click="handleAddTargetLanguage(loc.code)"
+              >
+                <div class="flex items-center gap-2 min-w-[165px] py-0.5">
+                  <span class="iti__flag shrink-0" :class="'iti__' + loc.flag"></span>
+                  <span class="text-xs font-medium text-slate-700 flex-1 whitespace-nowrap">{{ loc.nativeLabel }}</span>
+                  <span class="text-[10px] text-slate-400 font-mono shrink-0">{{ (loc.displayCode || loc.code).toUpperCase() }}</span>
+                </div>
+              </a-doption>
+            </div>
           </template>
         </a-dropdown>
       </div>
@@ -509,7 +511,7 @@ import {
   removeTargetLocale,
   setActiveTargetLocale
 } from '@/core/store';
-import { t, getLocaleDisplayName, getLocaleNativeName, getLocaleFlag, SUPPORTED_FORM_LOCALES } from '@/core/i18n';
+import { t, normalizeLocaleKey, getLocaleDisplayName, getLocaleNativeName, getLocaleFlag, SUPPORTED_FORM_LOCALES } from '@/core/i18n';
 import CanvasConnections from './CanvasConnections.vue';
 import PageFrame from './PageFrame.vue';
 import ContextMenu from './ContextMenu.vue';
@@ -534,7 +536,7 @@ const canvasContainerRef = ref<HTMLElement | null>(null);
 
 const availableLocalesToAdd = computed(() => {
   const allowed = isRisk.value ? ['en', 'zh'] : SUPPORTED_FORM_LOCALES.map(l => l.code);
-  const used = new Set([primaryLocale.value, ...targetLocales.value]);
+  const used = new Set([normalizeLocaleKey(primaryLocale.value), ...targetLocales.value.map(normalizeLocaleKey)]);
   return SUPPORTED_FORM_LOCALES.filter(l => allowed.includes(l.code) && !used.has(l.code));
 });
 
