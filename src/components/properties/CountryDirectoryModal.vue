@@ -89,6 +89,10 @@
         </span>
         <span class="font-mono text-slate-400">244 Total</span>
       </div>
+
+      <div class="px-3 py-2 rounded-md bg-slate-50/90 border border-slate-200/70 text-[11px] leading-relaxed text-slate-400">
+        {{ t('dir.standardNote') }}
+      </div>
     </div>
   </a-modal>
 </template>

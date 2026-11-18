@@ -16,7 +16,7 @@
       </div>
 
       <div class="w-full pt-2 flex flex-col gap-2">
-        <a-dropdown trigger="click" position="bottom" class="w-full">
+        <a-dropdown trigger="click" position="bottom" class="w-full" :popup-max-height="false">
           <a-button type="outline" size="small" class="w-full !rounded-[4px] !text-xs !border-blue-300 !text-[#1677ff] hover:!bg-blue-50">
             <template #icon>
               <Plus class="w-3.5 h-3.5" />
@@ -468,8 +468,8 @@
       </div>
     </div>
 
-    <!-- 页面文案翻译 (未选中组件时，显示当前活动页面的标题和描述翻译) -->
-    <div v-else-if="activePage" class="space-y-4">
+    <!-- 页面文案翻译 (非风险评估且未选中组件时，显示当前活动页面的标题和描述翻译) -->
+    <div v-else-if="activePage && !isRisk" class="space-y-4">
       <!-- 页面顶部标头 -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="min-w-0 flex-1 pr-2">
@@ -567,6 +567,10 @@
           @input="handleTargetPageDescInput"
         />
       </div>
+    </div>
+
+    <div v-else-if="activePage && isRisk" class="py-10 px-4 text-center text-slate-400">
+      <p class="text-xs leading-relaxed m-0">{{ t('prop.emptyDesc') }}</p>
     </div>
     </template>
   </div>

@@ -1,5 +1,5 @@
 import type { FormElementOption } from '@/types/schema';
-import { allCountryPhoneRules } from './phoneRules';
+import { allCountryPhoneRules, getCountryZhHantName } from './phoneRules';
 
 /**
  * 知名国籍英文名称对照字典 (对齐 algo 国际 KYC / AML 业务标准)
@@ -7,9 +7,9 @@ import { allCountryPhoneRules } from './phoneRules';
 const nationalityEnMap: Record<string, string> = {
   sg: 'Singaporean',
   cn: 'Chinese',
-  hk: 'Hong Konger',
-  mo: 'Macanese',
-  tw: 'Taiwanese',
+  hk: 'Hong Kong SAR China',
+  mo: 'Macao SAR China',
+  tw: 'Taiwan, China',
   my: 'Malaysian',
   us: 'American',
   gb: 'British',
@@ -48,7 +48,11 @@ const nationalityEnMap: Record<string, string> = {
  */
 export const fullCountryOptions: FormElementOption[] = allCountryPhoneRules.map(c => ({
   value: c.iso2.toUpperCase(),
-  i18n: { zh: { label: c.zh }, en: { label: c.name } }
+  i18n: {
+    zh: { label: c.zh },
+    'zh-Hant': { label: getCountryZhHantName(c.iso2, c.zh) },
+    en: { label: c.name }
+  }
 }));
 
 /**
@@ -59,9 +63,15 @@ export const fullNationalityOptions: FormElementOption[] = allCountryPhoneRules.
   const code = c.iso2.toLowerCase();
   const enNat = nationalityEnMap[code] || `${c.name} Citizen`;
   const zhNat = c.zh.endsWith('籍') ? c.zh : `${c.zh}籍`;
+  const zhHantCountry = getCountryZhHantName(c.iso2, c.zh);
+  const zhHantNat = zhHantCountry.endsWith('籍') ? zhHantCountry : `${zhHantCountry}籍`;
 
   return {
     value: c.iso2.toUpperCase(),
-    i18n: { zh: { label: zhNat }, en: { label: enNat } }
+    i18n: {
+      zh: { label: zhNat },
+      'zh-Hant': { label: zhHantNat },
+      en: { label: enNat }
+    }
   };
 });

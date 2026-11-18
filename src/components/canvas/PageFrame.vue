@@ -98,9 +98,33 @@
       </div>
 
       <div
+        v-if="isRisk"
+        :id="isTranslationFrame ? undefined : (pageIndex === 0 ? 'tour-risk-page-header' : undefined)"
+        class="page-header-area px-8 pt-7 pb-0 shrink-0 select-none"
+        :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'"
+        @click.stop="handleSelectPage"
+      >
+        <div class="flex items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-1 h-5 rounded-full bg-[#1677ff] shrink-0"></span>
+            <h2 class="text-[19px] font-bold tracking-tight text-slate-800 m-0 leading-7 truncate">
+              {{ frameLocale.startsWith('zh') ? (frameLocale === 'zh-TW' ? '風險評估' : '风险评估') : 'Risk Assessment' }}
+            </h2>
+          </div>
+          <span
+            v-if="store.meta.i18n?.[frameLocale]?.title?.trim() || store.meta.i18n?.[primaryLocale]?.title?.trim()"
+            class="text-[11.5px] font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded border border-slate-200/70 truncate max-w-[240px]"
+          >
+            {{ (store.meta.i18n?.[frameLocale]?.title || store.meta.i18n?.[primaryLocale]?.title || '').trim() }}
+          </span>
+        </div>
+      </div>
+
+      <div
+        v-else
         :id="isTranslationFrame ? undefined : (pageIndex === 0 ? 'tour-risk-page-header' : undefined)"
         class="page-header-area pb-4 shrink-0"
-        :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', isRisk ? 'px-8 pt-7 rounded-none' : 'px-6 pt-6 rounded-t-2xl']"
+        :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', 'px-6 pt-6 rounded-t-2xl']"
         @click.stop="handleSelectPage"
       >
         <template v-if="isSystemProfile">
@@ -146,7 +170,7 @@
         />
       </div>
 
-      <div v-else-if="isRisk" class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-none px-8 pb-10 pt-2 space-y-5">
+      <div v-else-if="isRisk" class="canvas-pages-container relative flex-1 bg-white flex flex-col rounded-none px-8 pb-10 pt-5 space-y-5">
         <div ref="riskGroupsContainerRef" class="risk-groups-list space-y-5">
           <div
             v-for="(grp, gIdx) in page.groups"

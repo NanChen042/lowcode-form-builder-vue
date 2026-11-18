@@ -16,7 +16,7 @@
       >
         <div v-if="field.showLabel !== false" class="flex items-center gap-2 mb-2.5">
           <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
-          <span class="text-[14px] font-bold text-slate-800 leading-5">{{ localizedLabel || t('common.notice') }}</span>
+          <span class="text-[14px] font-bold text-slate-800 leading-5">{{ localizedLabel || t('common.notice', previewLoc) }}</span>
         </div>
         <div v-if="alertSegments.length > 0" class="space-y-2 text-[13px] leading-5 text-slate-700">
           <template v-for="seg in alertSegments" :key="seg.id">
@@ -40,14 +40,14 @@
           </template>
         </div>
         <div v-else class="text-[12px] text-slate-400 italic py-1">
-          {{ t('prop.alertEmptyContentPlaceholder') }}
+          {{ t('prop.alertEmptyContentPlaceholder', previewLoc) }}
         </div>
       </div>
     </template>
 
     <template v-else>
       <div v-if="field.showLabel !== false" class="component-label mb-1.5 text-[13px] font-semibold text-slate-800 leading-5">
-        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField') }}</span>
+        <span v-if="isFieldRequired" class="req-star text-[#ff4d4f] font-bold mr-1 inline select-none">*</span><span class="label-text inline break-words">{{ localizedLabel || t('common.untitledField', previewLoc) }}</span>
         <span v-if="field.helpPosition !== 'bottom' && localizedHelp" class="field-help text-[11px] text-slate-400 font-normal ml-1.5 inline">{{ localizedHelp }}</span>
 
         <div v-if="field.helpPosition === 'bottom' && localizedHelp" class="field-help-bottom text-[11px] text-slate-400 font-normal mt-0.5 leading-4">
@@ -277,12 +277,12 @@
               v-model="formData[field.key]"
               class="w-full"
               :error="Boolean(error)"
-              :placeholder="[localizedPlaceholder || t('common.startDate'), localizedEndPlaceholder || t('common.endDate')]"
+              :placeholder="[localizedPlaceholder || t('common.startDate', previewLoc), localizedEndPlaceholder || t('common.endDate', previewLoc)]"
               @change="handleFieldInput"
             />
             <a-input
               v-else-if="isLongTermChecked"
-              :model-value="localizedLongTermText || t('common.longTermValid')"
+              :model-value="localizedLongTermText || t('common.longTermValid', previewLoc)"
               disabled
               class="w-full !bg-slate-50 !text-slate-600 font-medium select-none"
             >
@@ -307,7 +307,7 @@
               @change="onLongTermChange"
             >
               <span class="text-[13px] font-medium text-slate-700">
-                {{ localizedLongTermText || t('common.longTerm') }}
+                {{ localizedLongTermText || t('common.longTerm', previewLoc) }}
               </span>
             </a-checkbox>
           </div>
@@ -367,7 +367,7 @@
         <div class="space-y-1.5">
           <div v-if="localizedPlaceholder || field.required" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
-            <span>{{ localizedPlaceholder || t('preview.signatureArea') }}</span>
+            <span>{{ localizedPlaceholder || t('preview.signatureArea', previewLoc) }}</span>
           </div>
 
           <div
@@ -381,12 +381,12 @@
           >
             <template v-if="formData[field.key]">
               <span class="text-base italic font-semibold text-slate-800 tracking-wider font-serif">
-                {{ t('common.signed') }}
+                {{ t('common.signed', previewLoc) }}
               </span>
               <button
                 type="button"
                 class="absolute right-2.5 bottom-2.5 w-6 h-6 flex items-center justify-center rounded bg-white hover:bg-slate-50 text-slate-400 hover:text-red-500 border border-slate-200 shadow-xs transition-colors cursor-pointer"
-                :title="t('common.clearSignature')"
+                :title="t('common.clearSignature', previewLoc)"
                 @click.stop="clearSignature"
               >
                 <Eraser class="w-3.5 h-3.5" />
@@ -398,7 +398,7 @@
                 :class="signatureError ? 'text-red-500 font-medium' : 'text-slate-400'"
               >
                 <PenLine class="w-3.5 h-3.5" :class="signatureError ? 'text-red-500' : 'opacity-60'" />
-                <span>{{ localizedSignPlaceholder || (previewLoc === 'zh' ? '请在此处手写签名' : 'Please sign here') }}</span>
+                <span>{{ localizedSignPlaceholder || t('common.clickToSign', previewLoc) }}</span>
               </span>
             </template>
           </div>
@@ -720,9 +720,9 @@ const localizedSignPlaceholder = computed(() => getLocalizedFieldText(props.fiel
 const localizedPlaceholder = computed(() => {
   const custom = getLocalizedFieldText(props.field, 'placeholder', previewLoc.value);
   if (custom) return custom;
-  if (props.field.type === 'email') return t('prop.emailPlaceholder');
-  if (props.field.type === 'country') return t('prop.defaultCountryPlaceholder');
-  if (props.field.type === 'nationality') return t('prop.defaultNatPlaceholder');
+  if (props.field.type === 'email') return t('prop.emailPlaceholder', previewLoc.value);
+  if (props.field.type === 'country') return t('prop.defaultCountryPlaceholder', previewLoc.value);
+  if (props.field.type === 'nationality') return t('prop.defaultNatPlaceholder', previewLoc.value);
   return '';
 });
 

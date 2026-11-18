@@ -187,7 +187,7 @@
 import { computed } from 'vue';
 import type { ProfileType } from '@/types/schema';
 import { store } from '@/core/store';
-import { t, TRADITIONAL_LOCALE } from '@/core/i18n';
+import { t, normalizeLocaleKey } from '@/core/i18n';
 import { formatInlineText } from '@/utils/alertParser';
 import {
   Info,
@@ -211,14 +211,10 @@ const props = withDefaults(
   }
 );
 
-// 语言规则：支持简体中文 (zh)、繁体中文 (zh-Hant)、英文 (en)、马来语 (ms) 基本资料页默认文案，其余语种回退英文 (en)
+// 语言规则：统一映射至全量 16 种表单支持语言（未知标识回退为 en）
 const effectiveLocale = computed<string>(() => {
   const raw = props.locale || (props.isCanvas ? store.currentLocale : (store.previewLocale || 'zh'));
-  const loc = (raw || 'zh').toLowerCase().trim();
-  if (loc === 'zh' || loc === 'zh-cn') return 'zh';
-  if (loc === TRADITIONAL_LOCALE.toLowerCase()) return TRADITIONAL_LOCALE;
-  if (loc === 'ms' || loc.startsWith('ms-')) return 'ms';
-  return 'en';
+  return normalizeLocaleKey(raw) || 'zh';
 });
 
 const noticeList = computed(() => {
@@ -250,7 +246,7 @@ const mainFields = computed(() => {
     return [
       { label: t('profile.field.name', loc), value: 'Alexander Tan', skeletonWidth: '45%' },
       { label: t('profile.field.nativeName', loc), value: '陈建国', skeletonWidth: '20%' },
-      { label: t('profile.field.nationality', loc), value: loc === 'en' ? 'Singaporean' : '新加坡 / Singapore', skeletonWidth: '35%' },
+      { label: t('profile.field.nationality', loc), value: t('profile.val.singaporean', loc), skeletonWidth: '35%' },
       { label: t('profile.field.sgStatus', loc), value: t('profile.val.sgCitizen', loc), skeletonWidth: '45%' },
       { label: t('profile.field.nricFin', loc), value: 'S1234567A', skeletonWidth: '25%' },
       { label: t('profile.field.idType', loc), value: t('profile.val.idCardPassport', loc), skeletonWidth: '40%' },
@@ -266,7 +262,7 @@ const mainFields = computed(() => {
   return [
     { label: t('profile.field.entityName', loc), value: 'Algo Global Trading Pte. Ltd.', skeletonWidth: '50%' },
     { label: t('profile.field.formerName', loc), value: '-', skeletonWidth: '20%' },
-    { label: t('profile.field.jurisdiction', loc), value: loc === 'en' ? 'Singapore' : '新加坡 / Singapore', skeletonWidth: '35%' },
+    { label: t('profile.field.jurisdiction', loc), value: t('profile.val.singapore', loc), skeletonWidth: '35%' },
     { label: t('profile.field.entityRegNo', loc), value: '202412345K', skeletonWidth: '35%' },
     { label: t('profile.field.registeredAddress', loc), value: '10 Anson Road, #23-07 International Plaza, Singapore 079903', skeletonWidth: '85%' }
   ];
@@ -277,7 +273,7 @@ const repFields = computed(() => {
   return [
     { label: t('profile.field.repCapacity', loc), value: t('profile.val.repCapacityVal', loc), skeletonWidth: '60%' },
     { label: t('profile.field.repName', loc), value: 'Michael Wong', skeletonWidth: '35%' },
-    { label: t('profile.field.nationality', loc), value: loc === 'en' ? 'Singaporean' : '新加坡 / Singapore', skeletonWidth: '45%' },
+    { label: t('profile.field.nationality', loc), value: t('profile.val.singaporean', loc), skeletonWidth: '45%' },
     { label: t('profile.field.idType', loc), value: t('profile.val.repIdTypeVal', loc), skeletonWidth: '55%' },
     { label: t('profile.field.idNumber', loc), value: 'S7654321B', skeletonWidth: '50%' },
     { label: t('profile.field.phone', loc), value: '+65 8123 1232', skeletonWidth: '55%' },

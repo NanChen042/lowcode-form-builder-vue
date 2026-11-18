@@ -79,7 +79,7 @@
                   {{ getPageTitleDisplay(p, i) }}
                 </span>
                 <span class="text-[11px] text-slate-400 mt-0.5">
-                  {{ p.pageType === 'system_profile' ? t('common.prefilledBaseline') : `${p.fields?.length || 0} ${t('common.fieldsUnit')}` }}
+                  {{ p.pageType === 'system_profile' ? t('common.prefilledBaseline', activePreviewLocale) : `${p.fields?.length || 0} ${t('common.fieldsUnit', activePreviewLocale)}` }}
                 </span>
               </div>
             </div>
@@ -168,33 +168,33 @@
                   </div>
 
                   <h3 class="text-base font-bold text-slate-800 m-0 mb-1">
-                    {{ t('preview.submissionCompleted') }}
+                    {{ t('preview.submissionCompleted', activePreviewLocale) }}
                   </h3>
                   <p class="text-[11.5px] text-slate-400 mb-5 leading-relaxed max-w-[260px]">
-                    {{ t('preview.submissionThanks') }}
+                    {{ t('preview.submissionThanks', activePreviewLocale) }}
                   </p>
 
 
                   <div class="w-full bg-slate-50/80 rounded-xl p-3.5 mb-5 text-left border border-slate-200/80 space-y-2 text-xs">
                     <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">{{ t('preview.status') }}</span>
+                      <span class="text-slate-400 text-[11px]">{{ t('preview.status', activePreviewLocale) }}</span>
                       <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        {{ t('preview.completed') }}
+                        {{ t('preview.completed', activePreviewLocale) }}
                       </span>
                     </div>
                     <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">{{ t('preview.submissionNo') }}</span>
+                      <span class="text-slate-400 text-[11px]">{{ t('preview.submissionNo', activePreviewLocale) }}</span>
                       <span class="font-mono text-slate-700 font-medium text-[11px]">{{ previewSubmissionNo }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">{{ t('preview.submissionTime') }}</span>
+                      <span class="text-slate-400 text-[11px]">{{ t('preview.submissionTime', activePreviewLocale) }}</span>
                       <span class="text-slate-600 font-mono text-[11px]">{{ previewSubmissionTime }}</span>
                     </div>
                   </div>
 
                   <a-button type="primary" class="w-full h-9 rounded-lg text-xs" @click="resetForm">
-                    {{ t('preview.refillFormPreview') }}
+                    {{ t('preview.refillFormPreview', activePreviewLocale) }}
                   </a-button>
                 </div>
 
@@ -742,8 +742,8 @@ function getStepNumber(idx: number): string {
 
 function getPageTitleDisplay(p: any, _idx?: number): string {
   if (p.pageType === 'system_profile') {
-    const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
-    return `${t('profile.basicTitle', loc)} [${t('common.systemPreset', activePreviewLocale.value)}]`;
+    const loc = activePreviewLocale.value;
+    return `${t('profile.basicTitle', loc)} [${t('common.systemPreset', loc)}]`;
   }
   return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
 }
@@ -751,7 +751,7 @@ function getPageTitleDisplay(p: any, _idx?: number): string {
 const currentLocalizedTitle = computed(() => {
   if (currentPage.value) {
     if (currentPage.value.pageType === 'system_profile') {
-      const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
+      const loc = activePreviewLocale.value;
       return getLocalizedPageText(currentPage.value, 'title', loc) || t('profile.basicTitle', loc);
     }
     return getLocalizedPageText(currentPage.value, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
@@ -772,7 +772,7 @@ const formBrandTitle = computed(() => {
 const currentLocalizedDesc = computed(() => {
   if (currentPage.value) {
     if (currentPage.value.pageType === 'system_profile') {
-      const loc = activePreviewLocale.value === 'zh' ? 'zh' : 'en';
+      const loc = activePreviewLocale.value;
       const desc = getLocalizedPageText(currentPage.value, 'description', loc);
       return desc && desc.trim() ? desc.trim() : '';
     }

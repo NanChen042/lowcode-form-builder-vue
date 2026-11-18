@@ -36,51 +36,8 @@
     </div>
 
     <div v-else-if="isRisk" id="risk-page-prop-editor" class="space-y-4">
-      <!-- 页面大标题 -->
-      <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label class="text-[12px] font-medium text-slate-700 flex items-center gap-1">
-            <span>{{ t('prop.pageTitle') }}</span>
-          </label>
-          <span class="text-[10px] text-slate-400 font-mono">H2</span>
-        </div>
-        <a-textarea
-          id="page-prop-title-input"
-          v-model="pageTitleModel"
-          :auto-size="{ minRows: 1, maxRows: 4 }"
-          allow-clear
-          :placeholder="t('prop.pageTitlePlaceholder')"
-          class="w-full !rounded-[4px] !text-xs"
-          @focus="setPageFocus('title')"
-          @blur="clearFocus"
-          @input="markDirty"
-          @clear="markDirty"
-        />
-      </div>
-
-      <!-- 页面引导/说明文案 -->
-      <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label class="text-[12px] font-medium text-slate-700">
-            <span>{{ t('prop.pageDesc') }}</span>
-          </label>
-        </div>
-        <a-textarea
-          id="page-prop-desc-input"
-          v-model="pageDescModel"
-          :auto-size="{ minRows: 2, maxRows: 4 }"
-          allow-clear
-          :placeholder="t('prop.pageDescPlaceholder')"
-          class="w-full !rounded-[4px] !text-xs"
-          @focus="setPageFocus('description')"
-          @blur="clearFocus"
-          @input="markDirty"
-          @clear="markDirty"
-        />
-      </div>
-
       <!-- 问卷概览与快捷操作 -->
-      <div class="space-y-2 pt-2 border-t border-slate-100">
+      <div class="space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-[12px] font-medium text-slate-700">{{ t('risk.overviewStats') }}</span>
           <span class="text-[11px] text-slate-400">

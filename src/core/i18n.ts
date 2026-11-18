@@ -3,6 +3,7 @@ import { store, markDirty, primaryLocale } from './store';
 import type { FormElement, FormElementOption, I18nTexts } from '@/types/schema';
 import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
 import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
+import { formRuntimeMultiMessages } from './i18nFormLocales';
 
 export type Locale = 'zh' | 'en';
 
@@ -161,8 +162,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'val.validEmail': '请输入有效的邮箱地址',
     'val.maxOptions': '最多只能选择 {count} 项',
     'val.maxItems': '最多只能选择 {count} 项',
-    'dir.searchPlaceholder': '搜索国家、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)...',
-    'dir.country': '国家',
+    'dir.searchPlaceholder': '搜索国家/地区、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)...',
+    'dir.country': '国家/地区',
     'dir.nationality': '国籍',
     'dir.code': '代码',
     'dir.dialCode': '国际区号',
@@ -170,6 +171,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'dir.totalCountPrefix': '共',
     'dir.totalCountSuffix': '个预设国家与地区',
     'dir.presetList': '预设清单',
+    'dir.standardNote': '本列表以 ISO 3166-1 标准及联合国相关名称资料为基础，仅用于信息采集，不代表本平台对任何国家或地区法律地位的立场。',
     'common.close': '关闭',
 
     // 顶部导航栏 (AppHeader)
@@ -477,6 +479,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'profile.field.registeredAddress': '注册地址',
     'profile.field.repCapacity': '授权代表身份',
     'profile.field.repName': '授权代表姓名',
+    'profile.val.singapore': '新加坡',
+    'profile.val.singaporean': '新加坡籍',
     'profile.val.sgCitizen': '新加坡公民',
     'profile.val.idCardPassport': '身份证 / 护照',
     'profile.val.male': '男',
@@ -497,7 +501,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.tplCustomerDesc': '适用于客户身份认证、KYC 相关的业务场景。',
     'wizard.tplIndividualDesc': '适用于个人用户信息采集、身份验证等场景。',
     'wizard.tplEntityDesc': '适用于实体成员、企业信息采集等场景。',
-    'wizard.tplRiskCustomerDesc': '涵盖客户、国家及服务交易三大风险维度（24 题）。',
+    'wizard.tplRiskCustomerDesc': '涵盖客户、国家及服务交易三大风险维度（34 题）。',
     'wizard.tplRiskIndividualDesc': '涵盖恐怖分子名单、制裁、PEP 及高风险国家（5 题）。',
     'wizard.tplRiskEntityDesc': '涵盖恐怖分子名单、制裁、FATF 及高风险实体（4 题）。',
     'wizard.confirmOverwriteTitle': '覆盖确认',
@@ -803,8 +807,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'val.validEmail': 'Please enter a valid email',
     'val.maxOptions': 'Maximum {count} options allowed',
     'val.maxItems': 'Maximum {count} items allowed',
-    'dir.searchPlaceholder': 'Search by country, nationality, code or dial code (e.g. Singapore, SG, +65)...',
-    'dir.country': 'Country',
+    'dir.searchPlaceholder': 'Search by country/region, nationality, code or dial code (e.g. Singapore, SG, +65)...',
+    'dir.country': 'Country/Region',
     'dir.nationality': 'Nationality',
     'dir.code': 'Code',
     'dir.dialCode': 'Dial Code',
@@ -812,6 +816,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'dir.totalCountPrefix': 'Total',
     'dir.totalCountSuffix': 'countries & regions',
     'dir.presetList': 'Preset List',
+    'dir.standardNote': 'This list is based on ISO 3166-1 and relevant United Nations naming references. It is intended solely for data collection and does not imply any position by this platform regarding the legal status of any country or region.',
     'common.close': 'Close',
 
     // 顶部导航栏 (AppHeader)
@@ -1119,6 +1124,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'profile.field.registeredAddress': 'Registered Address',
     'profile.field.repCapacity': 'Capacity / Role',
     'profile.field.repName': 'Representative Name',
+    'profile.val.singapore': 'Singapore',
+    'profile.val.singaporean': 'Singaporean',
     'profile.val.sgCitizen': 'Singapore Citizen',
     'profile.val.idCardPassport': 'NRIC / Passport',
     'profile.val.male': 'Male',
@@ -1139,7 +1146,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.tplCustomerDesc': 'Suitable for customer identification and KYC-related scenarios.',
     'wizard.tplIndividualDesc': 'Suitable for personal user data collection and identity verification.',
     'wizard.tplEntityDesc': 'Suitable for corporate clients and enterprise information collection.',
-    'wizard.tplRiskCustomerDesc': 'Covers client, country, and service risk dimensions (24 questions).',
+    'wizard.tplRiskCustomerDesc': 'Covers client, country, and service risk dimensions (34 questions).',
     'wizard.tplRiskIndividualDesc': 'Covers terrorist list, sanctions, PEP, and FATF high-risk checks (5 questions).',
     'wizard.tplRiskEntityDesc': 'Covers terrorist list, sanctions, FATF, and higher-risk entity checks (4 questions).',
     'wizard.confirmOverwriteTitle': 'Confirm Overwrite',
@@ -1413,109 +1420,11 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
   }
 };
 
-/**
- * 系统预设资料页（基本资料页）多语言默认配置（补充繁体中文 zh-Hant 与马来语 ms）
- */
-const profileTwDict: Record<string, string> = {
-  'common.notice': '提示',
-  'profile.notice.ind1': '根據合規要求，您需要填寫 KYC 問卷。',
-  'profile.notice.ent1': '您將作為以下公司的授權代表填寫 KYC 問卷。',
-  'profile.notice.common': '請確認以下信息是否準確，如需修改請聯繫服務商修改後再進行下一步。',
-  'profile.customerTitle': '客戶註冊信息',
-  'profile.entityTitle': '企業註冊信息',
-  'profile.basicTitle': '基本信息',
-  'profile.authorizedRep': '授權代表',
-  'profile.associatedInfo': '關聯信息',
-  'profile.associatedEntity': '關聯實體',
-  'profile.relationshipType': '關聯類型',
-  'profile.shareholder': '股東',
-  'profile.director': '董事',
-  'profile.partner': '合夥人',
-  'profile.capitalTitle': '股份與出資信息',
-  'profile.shareClass': '股份類別',
-  'profile.sharesHeld': '持股數量',
-  'profile.paidUpAmount': '分配實繳資本額',
-  'profile.field.name': '姓名',
-  'profile.field.nativeName': '母語姓名',
-  'profile.field.nationality': '國籍',
-  'profile.field.sgStatus': '新加坡身份',
-  'profile.field.nricFin': 'NRIC/FIN(如有)',
-  'profile.field.idType': '證件類型',
-  'profile.field.idNumber': '證件號碼',
-  'profile.field.dob': '出生日期',
-  'profile.field.gender': '性別',
-  'profile.field.phone': '手機號碼',
-  'profile.field.email': '電子郵箱',
-  'profile.field.resAddress': '居住地址',
-  'profile.field.contactAddress': '聯繫地址',
-  'profile.field.entityName': '實體名稱',
-  'profile.field.formerName': '曾用名(如有)',
-  'profile.field.jurisdiction': '註冊地',
-  'profile.field.entityRegNo': '實體註冊號碼',
-  'profile.field.registeredAddress': '註冊地址',
-  'profile.field.repCapacity': '授權代表身份',
-  'profile.field.repName': '授權代表姓名',
-  'profile.val.sgCitizen': '新加坡公民',
-  'profile.val.idCardPassport': '身份證 / 護照',
-  'profile.val.male': '男',
-  'profile.val.repCapacityVal': '董事 / 高級管理人員',
-  'profile.val.repIdTypeVal': 'NRIC (新加坡公民)'
-};
-
-const profileMsDict: Record<string, string> = {
-  'common.notice': 'Notis',
-  'profile.notice.ind1': 'Mengikut keperluan pematuhan kawal selia, anda perlu melengkapkan soal selidik KYC.',
-  'profile.notice.ent1': 'Anda akan melengkapkan soal selidik KYC sebagai wakil sah bagi syarikat di bawah.',
-  'profile.notice.common': 'Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan anda sebelum meneruskan.',
-  'profile.customerTitle': 'Maklumat Pendaftaran Pelanggan',
-  'profile.entityTitle': 'Maklumat Pendaftaran Korporat',
-  'profile.basicTitle': 'Maklumat Asas',
-  'profile.authorizedRep': 'Wakil Sah',
-  'profile.associatedInfo': 'Maklumat Berkaitan',
-  'profile.associatedEntity': 'Entiti Berkaitan',
-  'profile.relationshipType': 'Jenis Hubungan',
-  'profile.shareholder': 'Pemegang Saham',
-  'profile.director': 'Pengarah',
-  'profile.partner': 'Rakan Kongsi',
-  'profile.capitalTitle': 'Maklumat Pegangan Saham & Modal',
-  'profile.shareClass': 'Kelas Saham',
-  'profile.sharesHeld': 'Bilangan Saham Dipegang',
-  'profile.paidUpAmount': 'Jumlah Modal Berbayar Diperuntukkan',
-  'profile.field.name': 'Nama Penuh',
-  'profile.field.nativeName': 'Nama Bahasa Ibunda',
-  'profile.field.nationality': 'Kewarganegaraan',
-  'profile.field.sgStatus': 'Status Singapura',
-  'profile.field.nricFin': 'NRIC/FIN (jika berkenaan)',
-  'profile.field.idType': 'Jenis Dokumen Pengenalan',
-  'profile.field.idNumber': 'Nombor Pengenalan / Pasport',
-  'profile.field.dob': 'Tarikh Lahir',
-  'profile.field.gender': 'Jantina',
-  'profile.field.phone': 'Nombor Telefon Bimbit',
-  'profile.field.email': 'Alamat E-mel',
-  'profile.field.resAddress': 'Alamat Kediaman',
-  'profile.field.contactAddress': 'Alamat Surat-menyurat',
-  'profile.field.entityName': 'Nama Entiti',
-  'profile.field.formerName': 'Nama Dahulu (jika ada)',
-  'profile.field.jurisdiction': 'Bidang Kuasa Pemerbadanan',
-  'profile.field.entityRegNo': 'Nombor Pendaftaran Entiti',
-  'profile.field.registeredAddress': 'Alamat Berdaftar',
-  'profile.field.repCapacity': 'Kapasiti / Peranan Wakil Sah',
-  'profile.field.repName': 'Nama Wakil Sah',
-  'profile.val.sgCitizen': 'Warganegara Singapura',
-  'profile.val.idCardPassport': 'NRIC / Pasport',
-  'profile.val.male': 'Lelaki',
-  'profile.val.repCapacityVal': 'Pengarah / Pegawai Kanan',
-  'profile.val.repIdTypeVal': 'NRIC (Warganegara Singapura)'
-};
-
-export const profileMultiMessages: Record<string, Record<string, string>> = {
-  'zh-Hant': profileTwDict,
-  ms: profileMsDict
-};
+export const profileMultiMessages: Record<string, Record<string, string>> = formRuntimeMultiMessages;
 
 /**
  * 获取系统 UI 文案（支持多语言与参数插值）
- * 注意：系统 UI 界面仅维护中英双语（基本资料页额外支持繁体中文与马来语预设文案）；其他语种自动以 en 保底展示
+ * 系统界面维持中英双语；表单填报预览与基本资料页支持全部 16 种表单语言，未定义条目自动以 en 保底展示
  */
 export function t(key: string, locale?: string, params?: Record<string, string | number>): string {
   const rawLoc = locale || store.currentLocale || 'zh';

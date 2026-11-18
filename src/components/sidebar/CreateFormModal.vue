@@ -145,13 +145,13 @@ const profileOptions = computed(() => [
 
 const defaultTitleForProfile = computed(() => {
   if (isRisk.value) {
-    if (selectedProfile.value === 'individual') return 'SG_RISK_INDIVIDUAL';
-    if (selectedProfile.value === 'entity') return 'SG_RISK_ENTITY';
-    return 'SG_RISK_CUSTOMER';
+    if (selectedProfile.value === 'individual') return 'SG_CSP_RA_INDIVIDUAL_2025';
+    if (selectedProfile.value === 'entity') return 'SG_CSP_RA_ENTITY_2025';
+    return 'SG_CSP_RA_CUSTOMER_2025';
   }
-  if (selectedProfile.value === 'individual') return 'SG_CDD_INDIVIDUAL';
-  if (selectedProfile.value === 'entity') return 'SG_CDD_ENTITY';
-  return 'SG_CDD_CUSTOMER';
+  if (selectedProfile.value === 'individual') return 'SG_CSP_INDIVIDUAL_2025';
+  if (selectedProfile.value === 'entity') return 'SG_CSP_ENTITY_2025';
+  return 'SG_CSP_CUSTOMER_2025';
 });
 
 const computedTitlePlaceholder = computed(() => {

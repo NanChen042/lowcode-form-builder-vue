@@ -21,101 +21,109 @@
     <!-- 翻译管理模式顶部语言切换与进度栏 (紧凑高阶微圆角风格) -->
     <div
       v-if="store.workspaceMode === 'translation'"
-      class="translation-top-bar absolute top-0 left-0 right-0 z-30 h-10 px-3 bg-white/95 border-b border-slate-200/80 backdrop-blur-md flex items-center justify-between gap-3 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+      class="translation-top-bar absolute top-0 left-0 right-0 z-30 min-h-[42px] px-3 bg-white/95 border-b border-slate-200/80 backdrop-blur-md flex items-center gap-2 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
       @mousedown.stop
+      @wheel.stop
     >
-      <div class="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto custom-scrollbar py-1 pr-2">
-        <!-- 默认基准语言标签 (紧凑一体化卡片样式，参考图二) -->
-        <div class="inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] bg-white border border-slate-200/90 text-xs shadow-2xs shrink-0 select-none">
-          <span class="inline-flex items-center px-1.5 h-4.5 rounded-[3px] bg-[#f2f3f5] text-[#4e5969] text-xs font-medium leading-none select-none">
-            {{ t('trans.defaultLang') }}
-          </span>
-          <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(primaryLocale)"></span>
-          <span class="font-medium text-[#1d2129] text-xs leading-none">{{ getLocaleNativeName(primaryLocale) }}</span>
-        </div>
-
-        <div class="w-px h-3.5 bg-slate-200 shrink-0 mx-0.5"></div>
-
-        <!-- 目标翻译语言标签 (标准统一 h-7 高度、px-2 与 rounded-[4px] 微圆角) -->
-        <button
-          v-for="loc in targetLocales"
-          :key="loc"
-          type="button"
-          class="group/lang-tab relative inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] text-xs font-medium transition-all cursor-pointer shrink-0 border"
-          :class="
-            store.activeTargetLocale === loc
-              ? 'bg-[#165dff] text-white border-[#165dff] shadow-xs font-semibold'
-              : 'bg-white hover:bg-blue-50/35 text-slate-700 hover:text-[#165dff] border-slate-200/90 hover:border-blue-200 shadow-2xs'
-          "
-          @click="handleSelectTargetLocale(loc)"
+      <div class="flex items-center gap-1.5 min-w-0 flex-1">
+        <div
+          ref="localeTabsBarRef"
+          class="flex items-center gap-1.5 min-w-0 overflow-x-auto custom-scrollbar py-1.5 pr-1"
+          @wheel.prevent.stop="onLocaleBarWheel"
         >
-          <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(loc)"></span>
-          <span :class="store.activeTargetLocale === loc ? 'text-white' : 'text-[#1d2129] font-medium'" class="text-xs leading-none">
-            {{ getLocaleNativeName(loc) }}
-          </span>
-          <div
-            v-if="store.activeTargetLocale === loc"
-            class="inline-flex items-center gap-1 text-white font-medium text-xs leading-none ml-0.5"
-          >
-            <Check v-if="getLocalePercent(loc) === 100" class="w-3.5 h-3.5 stroke-[2.2]" />
-            <a-progress
-              v-else
-              type="circle"
-              size="mini"
-              :percent="getLocalePercent(loc) / 100"
-              :width="11"
-              :stroke-width="2.2"
-              color="#ffffff"
-              track-color="rgba(255, 255, 255, 0.35)"
-            />
-            <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
-          </div>
-          <template v-else>
-            <!-- 100% 完成：标准柔和翠绿图标 + 百分比（极简行内结构，完全匹配图二） -->
-            <span
-              v-if="getLocalePercent(loc) === 100"
-              class="inline-flex items-center gap-1 text-[#00b42a] font-medium text-xs leading-none ml-0.5"
-            >
-              <Check class="w-3.5 h-3.5 stroke-[2.2]" />
-              <span class="leading-none">100%</span>
+          <!-- 默认基准语言标签 (紧凑一体化卡片样式，参考图二) -->
+          <div class="inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] bg-white border border-slate-200/90 text-xs shadow-2xs shrink-0 select-none">
+            <span class="inline-flex items-center px-1.5 h-4.5 rounded-[3px] bg-[#f2f3f5] text-[#4e5969] text-xs font-medium leading-none select-none">
+              {{ t('trans.defaultLang') }}
             </span>
-            <!-- 未完成：暖橙色行内进度标签 -->
-            <span
-              v-else
-              class="inline-flex items-center gap-1 text-[#ff7d00] font-medium text-xs leading-none ml-0.5"
+            <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(primaryLocale)"></span>
+            <span class="font-medium text-[#1d2129] text-xs leading-none whitespace-nowrap">{{ getLocaleNativeName(primaryLocale) }}</span>
+          </div>
+
+          <div class="w-px h-3.5 bg-slate-200 shrink-0 mx-0.5"></div>
+
+          <!-- 目标翻译语言标签 (标准统一 h-7 高度、px-2 与 rounded-[4px] 微圆角) -->
+          <button
+            v-for="loc in targetLocales"
+            :key="loc"
+            :data-locale-tab="loc"
+            type="button"
+            class="group/lang-tab relative inline-flex items-center gap-1.5 h-7 px-2 rounded-[4px] text-xs font-medium transition-all cursor-pointer shrink-0 border"
+            :class="
+              store.activeTargetLocale === loc
+                ? 'bg-[#165dff] text-white border-[#165dff] shadow-xs font-semibold'
+                : 'bg-white hover:bg-blue-50/35 text-slate-700 hover:text-[#165dff] border-slate-200/90 hover:border-blue-200 shadow-2xs'
+            "
+            @click="handleSelectTargetLocale(loc)"
+          >
+            <span class="iti__flag shrink-0" :class="'iti__' + getLocaleFlag(loc)"></span>
+            <span :class="store.activeTargetLocale === loc ? 'text-white' : 'text-[#1d2129] font-medium'" class="text-xs leading-none whitespace-nowrap">
+              {{ getLocaleNativeName(loc) }}
+            </span>
+            <div
+              v-if="store.activeTargetLocale === loc"
+              class="inline-flex items-center gap-1 text-white font-medium text-xs leading-none ml-0.5"
             >
+              <Check v-if="getLocalePercent(loc) === 100" class="w-3.5 h-3.5 stroke-[2.2]" />
               <a-progress
+                v-else
                 type="circle"
                 size="mini"
                 :percent="getLocalePercent(loc) / 100"
-                status="normal"
-                color="#ff7d00"
-                track-color="rgba(255, 125, 0, 0.16)"
                 :width="11"
                 :stroke-width="2.2"
+                color="#ffffff"
+                track-color="rgba(255, 255, 255, 0.35)"
               />
               <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
+            </div>
+            <template v-else>
+              <!-- 100% 完成：标准柔和翠绿图标 + 百分比（极简行内结构，完全匹配图二） -->
+              <span
+                v-if="getLocalePercent(loc) === 100"
+                class="inline-flex items-center gap-1 text-[#00b42a] font-medium text-xs leading-none ml-0.5"
+              >
+                <Check class="w-3.5 h-3.5 stroke-[2.2]" />
+                <span class="leading-none">100%</span>
+              </span>
+              <!-- 未完成：暖橙色行内进度标签 -->
+              <span
+                v-else
+                class="inline-flex items-center gap-1 text-[#ff7d00] font-medium text-xs leading-none ml-0.5"
+              >
+                <a-progress
+                  type="circle"
+                  size="mini"
+                  :percent="getLocalePercent(loc) / 100"
+                  status="normal"
+                  color="#ff7d00"
+                  track-color="rgba(255, 125, 0, 0.16)"
+                  :width="11"
+                  :stroke-width="2.2"
+                />
+                <span class="leading-none">{{ getLocalePercent(loc) }}%</span>
+              </span>
+            </template>
+            <!-- 英文版是法定合规核心语言，永远不允许被删除；主语言也不允许删除 -->
+            <span
+              v-if="loc !== primaryLocale && loc !== 'en'"
+              class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-400 hover:bg-red-500 text-white flex items-center justify-center shadow-2xs ring-1 ring-white transition-colors cursor-pointer z-10"
+              :title="t('trans.removeLanguage')"
+              @click.stop="handleRemoveTargetLanguage(loc)"
+            >
+              <X class="w-2.5 h-2.5 stroke-[2.5]" />
             </span>
-          </template>
-          <!-- 英文版是法定合规核心语言，永远不允许被删除；主语言也不允许删除 -->
-          <span
-            v-if="loc !== primaryLocale && loc !== 'en'"
-            class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-400 hover:bg-red-500 text-white flex items-center justify-center shadow-2xs ring-1 ring-white transition-colors cursor-pointer z-10"
-            :title="t('trans.removeLanguage')"
-            @click.stop="handleRemoveTargetLanguage(loc)"
-          >
-            <X class="w-2.5 h-2.5 stroke-[2.5]" />
-          </span>
-        </button>
+          </button>
+        </div>
 
-        <!-- 添加新语言下拉菜单 (统一 h-7 高度、px-2 与 rounded-[4px]) -->
-        <a-dropdown v-if="availableLocalesToAdd.length > 0" trigger="click" position="bl">
+        <!-- 添加新语言下拉菜单 (固定在滚动条右侧，始终可见) -->
+        <a-dropdown v-if="availableLocalesToAdd.length > 0" trigger="click" position="bl" :popup-max-height="false">
           <button
             type="button"
             class="inline-flex items-center gap-1 h-7 px-2 rounded-[4px] text-xs font-medium text-slate-600 hover:text-[#165dff] bg-white hover:bg-blue-50/40 border border-dashed border-slate-300 hover:border-[#165dff] transition-all cursor-pointer shrink-0 shadow-2xs leading-none"
           >
             <Plus class="w-3.5 h-3.5 stroke-[2.2]" />
-            <span class="text-xs leading-none">{{ t('trans.addLanguageShort') }}</span>
+            <span class="text-xs leading-none whitespace-nowrap">{{ t('trans.addLanguageShort') }}</span>
           </button>
           <template #content>
             <div class="max-h-[340px] overflow-y-auto custom-scrollbar">
@@ -533,6 +541,41 @@ import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } f
 defineEmits(['open-template-gallery', 'open-create-canvas']);
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
+const localeTabsBarRef = ref<HTMLElement | null>(null);
+
+function scrollLocaleTabIntoView(locale?: string, toEnd = false) {
+  const bar = localeTabsBarRef.value;
+  if (!bar) return;
+  if (toEnd) {
+    bar.scrollTo({ left: bar.scrollWidth, behavior: 'smooth' });
+    return;
+  }
+  const target = locale || store.activeTargetLocale;
+  if (!target) return;
+  const tabEl = bar.querySelector(`[data-locale-tab="${target}"]`) as HTMLElement | null;
+  if (tabEl) {
+    tabEl.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  }
+}
+
+function onLocaleBarWheel(e: WheelEvent) {
+  const bar = localeTabsBarRef.value;
+  if (!bar) return;
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  bar.scrollLeft += delta;
+}
+
+watch(
+  () => [store.activeTargetLocale, targetLocales.value.length] as const,
+  ([loc, len], [, prevLen]) => {
+    const added = prevLen !== undefined && len > prevLen;
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        scrollLocaleTabIntoView(loc, added);
+      });
+    });
+  }
+);
 
 const availableLocalesToAdd = computed(() => {
   const allowed = isRisk.value ? ['en', 'zh'] : SUPPORTED_FORM_LOCALES.map(l => l.code);
@@ -549,6 +592,7 @@ function handleAddTargetLanguage(locale: string) {
   Message.success(t('trans.addedLocaleSuccess', undefined, { name: getLocaleNativeName(locale) }));
   nextTick(() => {
     requestAnimationFrame(() => {
+      scrollLocaleTabIntoView(locale, true);
       resetCanvasView({ duration: 320 });
     });
   });

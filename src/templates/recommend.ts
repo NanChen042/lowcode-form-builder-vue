@@ -41,19 +41,19 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     descKey: 'wizard.tplCustomerDesc',
     image: tplCustomerImg,
     icon: tplCustomerIcon,
-    code: 'SG_CDD_CUSTOMER',
+    code: 'SG_CSP_CUSTOMER_2025',
     bannerBgClass: 'bg-[#faf5ff]',
     i18n: {
       zh: {
         title: '客户案例 KYC 模板',
         tag: '客户案例',
-        desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+        desc: '基于 ACRA 2025 年 CSP 指南的客户实体 KYC 问卷。',
         stats: '3 页面 · 9 字段'
       },
       en: {
         title: 'Customer KYC Template',
         tag: 'Customer',
-        desc: 'Covers business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+        desc: 'Client entity KYC questionnaire based on ACRA’s 2025 CSP Guidelines.',
         stats: '3 Pages · 9 Fields'
       }
     }
@@ -62,25 +62,25 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     key: 'kyc-individual',
     type: 'individual',
     tagColor: 'green',
-    pages: 5,
-    fields: 22,
+    pages: 6,
+    fields: 25,
     descKey: 'wizard.tplIndividualDesc',
     image: tplIndividualImg,
     icon: tplIndividualIcon,
-    code: 'SG_CDD_INDIVIDUAL',
+    code: 'SG_CSP_INDIVIDUAL_2025',
     bannerBgClass: 'bg-[#f0fdf4]',
     i18n: {
       zh: {
         title: '个人案例 KYC 模板',
         tag: '个人案例',
-        desc: '涵盖最终受益所有人(UBO)、PEP政治公众人物、犯罪记录声明与手写签名确认。',
-        stats: '5 页面 · 22 字段'
+        desc: '基于 ACRA 2025 年 CSP 指南的个人子案例 KYC 问卷。',
+        stats: '6 页面 · 25 字段'
       },
       en: {
         title: 'Individual KYC Template',
         tag: 'Individual',
-        desc: 'Covers Ultimate Beneficial Owner (UBO), PEP declaration, criminal records, and signature.',
-        stats: '5 Pages · 22 Fields'
+        desc: 'Individual sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines.',
+        stats: '6 Pages · 25 Fields'
       }
     }
   },
@@ -93,19 +93,19 @@ export const SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     descKey: 'wizard.tplEntityDesc',
     image: tplEntityImg,
     icon: tplEntityIcon,
-    code: 'SG_CDD_ENTITY',
+    code: 'SG_CSP_ENTITY_2025',
     bannerBgClass: 'bg-[#f0f9ff]',
     i18n: {
       zh: {
         title: '实体案例 KYC 模板',
         tag: '实体案例',
-        desc: '涵盖主营业务说明、年销售额、资金来源、上市公司股票代码联动及法人声明签署。',
+        desc: '基于 ACRA 2025 年 CSP 指南的实体子案例 KYC 问卷。',
         stats: '3 页面 · 9 字段'
       },
       en: {
         title: 'Entity KYC Template',
         tag: 'Entity',
-        desc: 'Covers corporate business activities, sales volume, funding source, listed company stock code linkage, and authorized signature.',
+        desc: 'Entity sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines.',
         stats: '3 Pages · 9 Fields'
       }
     }
@@ -118,24 +118,24 @@ export const RISK_SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     type: 'customer',
     tagColor: 'purple',
     pages: 1,
-    fields: 24,
+    fields: 34,
     descKey: 'wizard.tplRiskCustomerDesc',
     image: tplCustomerImg,
     icon: tplCustomerIcon,
-    code: 'SG_RISK_CUSTOMER',
+    code: 'SG_CSP_RA_CUSTOMER_2025',
     bannerBgClass: 'bg-[#faf5ff]',
     i18n: {
       zh: {
         title: '客户案例风险评估模板',
         tag: '客户案例',
-        desc: '涵盖客户、国家及服务交易三大风险维度，共 3 个分组 24 道合规评估项。',
-        stats: '1 页面 · 24 题'
+        desc: '基于 ACRA 2025 年 CSP 指南的客户实体风险评估。',
+        stats: '1 页面 · 34 题'
       },
       en: {
         title: 'Customer Risk Template',
         tag: 'Customer',
-        desc: 'Covers client, country, and service risk factors across 3 groups (24 compliance questions).',
-        stats: '1 Page · 24 Questions'
+        desc: 'Client entity risk assessment based on ACRA’s 2025 CSP Guidelines.',
+        stats: '1 Page · 34 Questions'
       }
     }
   },
@@ -148,19 +148,19 @@ export const RISK_SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     descKey: 'wizard.tplRiskIndividualDesc',
     image: tplIndividualImg,
     icon: tplIndividualIcon,
-    code: 'SG_RISK_INDIVIDUAL',
+    code: 'SG_CSP_RA_INDIVIDUAL_2025',
     bannerBgClass: 'bg-[#f0fdf4]',
     i18n: {
       zh: {
         title: '个人案例风险评估模板',
         tag: '个人案例',
-        desc: '涵盖 MHA 恐怖分子名单、MAS 制裁名单、PEP 及高风险国家等 5 道评估项。',
+        desc: '基于 ACRA 2025 年 CSP 指南的个人子案例风险评估。',
         stats: '1 页面 · 5 题'
       },
       en: {
         title: 'Individual Risk Template',
         tag: 'Individual',
-        desc: 'Covers MHA terrorist list, MAS sanctions list, PEP, and FATF high-risk checks (5 questions).',
+        desc: 'Individual sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
         stats: '1 Page · 5 Questions'
       }
     }
@@ -174,19 +174,19 @@ export const RISK_SCENARIO_TEMPLATES_META: ScenarioTemplateMeta[] = [
     descKey: 'wizard.tplRiskEntityDesc',
     image: tplEntityImg,
     icon: tplEntityIcon,
-    code: 'SG_RISK_ENTITY',
+    code: 'SG_CSP_RA_ENTITY_2025',
     bannerBgClass: 'bg-[#f0f9ff]',
     i18n: {
       zh: {
         title: '实体案例风险评估模板',
         tag: '实体案例',
-        desc: '涵盖 MHA 恐怖分子名单、MAS 制裁名单、FATF 名单及高风险客户特征 4 道评估项。',
+        desc: '基于 ACRA 2025 年 CSP 指南的实体子案例风险评估。',
         stats: '1 页面 · 4 题'
       },
       en: {
         title: 'Entity Risk Template',
         tag: 'Entity',
-        desc: 'Covers MHA terrorist list, MAS sanctions list, FATF list, and higher-risk entity checks (4 questions).',
+        desc: 'Entity sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
         stats: '1 Page · 4 Questions'
       }
     }
@@ -246,14 +246,32 @@ export function createBlankTemplate(
       (!new URLSearchParams(window.location.search).get('lang') &&
         (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
 
-  const defaultMetaMap: Record<string, { title: string; desc: string }> = {
-    customer: { title: 'SG_CDD_CUSTOMER', desc: '' },
-    client: { title: 'SG_CDD_CUSTOMER', desc: '' },
-    individual: { title: 'SG_CDD_INDIVIDUAL', desc: '' },
-    entity: { title: 'SG_CDD_ENTITY', desc: '' }
+  const defaultMetaMap: Record<string, { title: string; desc: string; descEn: string }> = {
+    customer: {
+      title: 'SG_CSP_CUSTOMER_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的客户实体 KYC 问卷。',
+      descEn: 'Client entity KYC questionnaire based on ACRA’s 2025 CSP Guidelines.'
+    },
+    client: {
+      title: 'SG_CSP_CUSTOMER_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的客户实体 KYC 问卷。',
+      descEn: 'Client entity KYC questionnaire based on ACRA’s 2025 CSP Guidelines.'
+    },
+    individual: {
+      title: 'SG_CSP_INDIVIDUAL_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的个人子案例 KYC 问卷。',
+      descEn: 'Individual sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines.'
+    },
+    entity: {
+      title: 'SG_CSP_ENTITY_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的实体子案例 KYC 问卷。',
+      descEn: 'Entity sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines.'
+    }
   };
-  const resolvedTitle = title || defaultMetaMap[normType]?.title || 'SG_CDD_CUSTOMER';
-  const resolvedDesc = description || '';
+  const fallbackMeta = defaultMetaMap[normType] || defaultMetaMap.customer;
+  const resolvedTitle = title || fallbackMeta.title;
+  const resolvedDesc = description || fallbackMeta.desc;
+  const resolvedDescEn = description_en || description || fallbackMeta.descEn;
 
   const defaultFields = normType === 'individual'
     ? presetIndividualProfileFields
@@ -270,13 +288,17 @@ export function createBlankTemplate(
         ? {
             en: {
               title: title_en || resolvedTitle,
-              ...(description_en ? { description: description_en } : {})
+              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
             }
           }
         : {
             zh: {
               title: resolvedTitle,
               ...(resolvedDesc ? { description: resolvedDesc } : {})
+            },
+            en: {
+              title: title_en || resolvedTitle,
+              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
             }
           }
     },
@@ -321,23 +343,29 @@ export function createRiskAssessmentTemplate(
   description_en = ''
 ): FormSchema {
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
-  const defaultMetaMap: Record<string, { title: string; pageTitle: string; pageTitleEn: string; pageDesc: string; pageDescEn: string }> = {
+  const defaultMetaMap: Record<string, { title: string; desc: string; descEn: string; pageTitle: string; pageTitleEn: string; pageDesc: string; pageDescEn: string }> = {
     customer: {
-      title: 'SG_RISK_CUSTOMER',
+      title: 'SG_CSP_RA_CUSTOMER_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的客户实体风险评估。',
+      descEn: 'Client entity risk assessment based on ACRA’s 2025 CSP Guidelines.',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置本表单的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
       pageDescEn: 'Configure risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
     },
     individual: {
-      title: 'SG_RISK_INDIVIDUAL',
+      title: 'SG_CSP_RA_INDIVIDUAL_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的个人子案例风险评估。',
+      descEn: 'Individual sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置个人成员的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
       pageDescEn: 'Configure individual risk assessment questions and weights. Answer options are fixed as Yes / No / Not Applicable.'
     },
     entity: {
-      title: 'SG_RISK_ENTITY',
+      title: 'SG_CSP_RA_ENTITY_2025',
+      desc: '基于 ACRA 2025 年 CSP 指南的实体子案例风险评估。',
+      descEn: 'Entity sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
       pageTitle: '风险评估',
       pageTitleEn: 'Risk Assessment',
       pageDesc: '设置实体机构的风险评估问题与权重；回答选项固定为 Yes / No / Not Applicable，选择“Yes”表示命中风险项并按权重扣分。',
@@ -347,6 +375,8 @@ export function createRiskAssessmentTemplate(
 
   const metaPreset = defaultMetaMap[normType] || defaultMetaMap.customer;
   const resolvedTitle = title || metaPreset.title;
+  const resolvedDesc = description || metaPreset.desc;
+  const resolvedDescEn = description_en || description || metaPreset.descEn;
 
   const presetGroups = [{ id: 'grp_risk_1', i18n: {} }];
   const isEnEntry =
@@ -367,13 +397,17 @@ export function createRiskAssessmentTemplate(
         ? {
             en: {
               title: title_en || resolvedTitle,
-              ...(description_en || description ? { description: description_en || description } : {})
+              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
             }
           }
         : {
             zh: {
               title: resolvedTitle,
-              ...(description ? { description } : {})
+              ...(resolvedDesc ? { description: resolvedDesc } : {})
+            },
+            en: {
+              title: title_en || resolvedTitle,
+              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
             }
           }
     },
@@ -429,12 +463,12 @@ export const kycCustomerTemplate: FormSchema = {
     "templateKey": "kyc-customer",
     "i18n": {
       "zh": {
-        "title": "SG_CDD_CUSTOMER",
-        "description": ""
+        "title": "SG_CSP_CUSTOMER_2025",
+        "description": "基于 ACRA 2025 年 CSP 指南的客户实体 KYC 问卷。"
       },
       "en": {
-        "title": "SG_CDD_CUSTOMER",
-        "description": ""
+        "title": "SG_CSP_CUSTOMER_2025",
+        "description": "Client entity KYC questionnaire based on ACRA’s 2025 CSP Guidelines."
       }
     }
   },
@@ -863,12 +897,12 @@ export const kycIndividualTemplate: FormSchema = {
     "templateKey": "kyc-individual",
     "i18n": {
       "zh": {
-        "title": "SG_CDD_INDIVIDUAL",
-        "description": ""
+        "title": "SG_CSP_INDIVIDUAL_2025",
+        "description": "基于 ACRA 2025 年 CSP 指南的个人子案例 KYC 问卷。"
       },
       "en": {
-        "title": "SG_CDD_INDIVIDUAL",
-        "description": ""
+        "title": "SG_CSP_INDIVIDUAL_2025",
+        "description": "Individual sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines."
       }
     }
   },
@@ -890,6 +924,92 @@ export const kycIndividualTemplate: FormSchema = {
       "profileFields": presetIndividualProfileFields
     },
     {
+      "id": "page_form_1",
+      "pageType": "form",
+      "showSkeleton": true,
+      "i18n": {
+        "zh": {
+          "title": "多重国籍"
+        },
+        "en": {
+          "title": "Multiple Nationalities"
+        }
+      },
+      "fields": [
+        {
+          "id": "cmp_1",
+          "type": "radio",
+          "key": "radio_1",
+          "layout": "inline",
+          "required": true,
+          "showLabel": true,
+          "helpPosition": "right",
+          "i18n": {
+            "zh": {
+              "label": "您是否拥有两个或以上国籍？"
+            },
+            "en": {
+              "label": "Do you hold more than one nationality?"
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": {
+                  "label": "是"
+                },
+                "en": {
+                  "label": "Yes"
+                }
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": {
+                  "label": "否"
+                },
+                "en": {
+                  "label": "No"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmp_2",
+          "type": "textarea",
+          "key": "textarea_2",
+          "required": true,
+          "showLabel": true,
+          "minRows": 3,
+          "maxRows": 6,
+          "maxLength": 800,
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_1",
+                "value": "option_1"
+              }
+            ]
+          },
+          "i18n": {
+            "zh": {
+              "label": "请列出您目前拥有的所有国籍及取得各国籍的日期。",
+              "placeholder": "例如：中国国籍 — 自出生起；加拿大国籍 — 2020年3月15日"
+            },
+            "en": {
+              "label": "Please list all your current nationalities and the date you acquired each nationality.",
+              "placeholder": "e.g. Chinese — Since birth; Canadian — 15 Mar 2020"
+            }
+          }
+        }
+      ]
+    },
+    {
       "id": "page_ubo",
       "pageType": "form",
       "showSkeleton": true,
@@ -903,9 +1023,9 @@ export const kycIndividualTemplate: FormSchema = {
       },
       "fields": [
         {
-          "id": "cmp_1",
+          "id": "cmp_3",
           "type": "alert",
-          "key": "alert_1",
+          "key": "alert_3",
           "required": false,
           "showLabel": true,
           "listStyle": "circle",
@@ -917,21 +1037,21 @@ export const kycIndividualTemplate: FormSchema = {
             },
             "en": {
               "label": "Note",
-              "content": "If a natural person directly or indirectly holds more than 25% of the shares in the company, or has significant influence or actual control over the company (even if not holding shares), the natural person should be considered as the ultimate beneficial owner (UBO) of the company. "
+              "content": "If a natural person directly or indirectly holds more than 25% of the shares in the company, or has significant influence or actual control over the company (even if not holding shares), the natural person should be considered as the ultimate beneficial owner (UBO) of the company."
             }
           }
         },
         {
-          "id": "cmp_2",
+          "id": "cmp_4",
           "type": "radio",
-          "key": "radio_2",
+          "key": "radio_4",
           "layout": "inline",
           "required": true,
           "showLabel": true,
           "helpPosition": "right",
           "i18n": {
             "zh": {
-              "label": "个人是否持有公司超过25%的股份? "
+              "label": "个人是否持有公司超过25%的股份?"
             },
             "en": {
               "label": "Does individual control more than 25% share of the company？"
@@ -963,9 +1083,130 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_3",
+          "id": "cmp_5",
+          "type": "select",
+          "key": "select_5",
+          "multiple": true,
+          "required": true,
+          "showLabel": true,
+          "maxSelections": 3,
+          "helpPosition": "right",
+          "linkage": {
+            "logic": "or",
+            "conditions": [
+              {
+                "fieldKey": "radio_4",
+                "value": "option_1"
+              }
+            ]
+          },
+          "i18n": {
+            "zh": {
+              "label": "您个人财富的主要来源有哪些？",
+              "placeholder": "请选择选项",
+              "help": "请最多选择三项主要来源。"
+            },
+            "en": {
+              "label": "What are the main sources of your wealth?",
+              "placeholder": "Please select an option",
+              "help": "Select up to three main sources."
+            }
+          },
+          "options": [
+            {
+              "value": "option_1",
+              "i18n": {
+                "zh": {
+                  "label": "工资／专业服务收入"
+                },
+                "en": {
+                  "label": "Employment / Professional Income"
+                }
+              }
+            },
+            {
+              "value": "option_2",
+              "i18n": {
+                "zh": {
+                  "label": "企业经营收入／出售企业所得"
+                },
+                "en": {
+                  "label": "Business Income / Sale of Business"
+                }
+              }
+            },
+            {
+              "value": "option_3_mwlk8pn9",
+              "i18n": {
+                "zh": {
+                  "label": "投资收益／出售投资所得"
+                },
+                "en": {
+                  "label": "Investments / Sale of Investments"
+                }
+              }
+            },
+            {
+              "value": "option_4_mwlk8qtt",
+              "i18n": {
+                "zh": {
+                  "label": "房产出售所得／租金收入"
+                },
+                "en": {
+                  "label": "Property Sales / Rental Income"
+                }
+              }
+            },
+            {
+              "value": "option_5_mwlk8rs7",
+              "i18n": {
+                "zh": {
+                  "label": "遗产继承"
+                },
+                "en": {
+                  "label": "Inheritance"
+                }
+              }
+            },
+            {
+              "value": "option_6_mwlk8sxc",
+              "i18n": {
+                "zh": {
+                  "label": "赠与／家庭资助"
+                },
+                "en": {
+                  "label": "Gifts / Family Support"
+                }
+              }
+            },
+            {
+              "value": "option_7_mwlk8tk4",
+              "i18n": {
+                "zh": {
+                  "label": "养老金／退休福利"
+                },
+                "en": {
+                  "label": "Pension / Retirement Benefits"
+                }
+              }
+            },
+            {
+              "value": "option_8_mwlk8uam",
+              "i18n": {
+                "zh": {
+                  "label": "其他"
+                },
+                "en": {
+                  "label": "Other"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmp_6",
           "type": "radio",
-          "key": "radio_3",
+          "key": "radio_6",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1019,9 +1260,9 @@ export const kycIndividualTemplate: FormSchema = {
       },
       "fields": [
         {
-          "id": "cmp_4",
+          "id": "cmp_7",
           "type": "alert",
-          "key": "alert_4",
+          "key": "alert_7",
           "required": false,
           "showLabel": true,
           "listStyle": "circle",
@@ -1038,9 +1279,9 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "id": "cmp_5",
+          "id": "cmp_8",
           "type": "radio",
-          "key": "radio_5",
+          "key": "radio_8",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1079,9 +1320,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_6",
+          "id": "cmp_9",
           "type": "radio",
-          "key": "radio_6",
+          "key": "radio_9",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1120,9 +1361,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_7",
+          "id": "cmp_10",
           "type": "radio",
-          "key": "radio_7",
+          "key": "radio_10",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1161,9 +1402,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_8",
+          "id": "cmp_11",
           "type": "checkbox",
-          "key": "checkbox_8",
+          "key": "checkbox_11",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1237,24 +1478,24 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
           }
         },
         {
-          "id": "cmp_9",
+          "id": "cmp_12",
           "type": "textarea",
-          "key": "textarea_9",
+          "key": "textarea_12",
           "required": true,
           "showLabel": true,
           "minRows": 3,
@@ -1265,15 +1506,15 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
@@ -1290,9 +1531,9 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "id": "cmp_10",
+          "id": "cmp_13",
           "type": "input",
-          "key": "input_10",
+          "key": "input_13",
           "inputType": "text",
           "required": true,
           "showLabel": true,
@@ -1301,15 +1542,15 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
@@ -1326,9 +1567,9 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "id": "cmp_11",
+          "id": "cmp_14",
           "type": "input",
-          "key": "input_11",
+          "key": "input_14",
           "inputType": "text",
           "required": true,
           "showLabel": true,
@@ -1337,15 +1578,15 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
@@ -1362,9 +1603,9 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "id": "cmp_12",
+          "id": "cmp_15",
           "type": "input",
-          "key": "input_12",
+          "key": "input_15",
           "inputType": "text",
           "required": true,
           "showLabel": true,
@@ -1373,15 +1614,15 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
@@ -1398,9 +1639,9 @@ export const kycIndividualTemplate: FormSchema = {
           }
         },
         {
-          "id": "cmp_13",
+          "id": "cmp_16",
           "type": "date",
-          "key": "date_13",
+          "key": "date_16",
           "endValue": "",
           "dateType": "date",
           "dateMode": "range",
@@ -1413,15 +1654,15 @@ export const kycIndividualTemplate: FormSchema = {
             "logic": "or",
             "conditions": [
               {
-                "fieldKey": "radio_5",
+                "fieldKey": "radio_8",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_6",
+                "fieldKey": "radio_9",
                 "value": "option_1"
               },
               {
-                "fieldKey": "radio_7",
+                "fieldKey": "radio_10",
                 "value": "option_1"
               }
             ]
@@ -1455,9 +1696,9 @@ export const kycIndividualTemplate: FormSchema = {
       },
       "fields": [
         {
-          "id": "cmp_14",
+          "id": "cmp_17",
           "type": "radio",
-          "key": "radio_14",
+          "key": "radio_17",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1496,9 +1737,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_15",
+          "id": "cmp_18",
           "type": "radio",
-          "key": "radio_15",
+          "key": "radio_18",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1537,9 +1778,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_16",
+          "id": "cmp_19",
           "type": "radio",
-          "key": "radio_16",
+          "key": "radio_19",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1578,9 +1819,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_17",
+          "id": "cmp_20",
           "type": "radio",
-          "key": "radio_17",
+          "key": "radio_20",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1619,9 +1860,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_18",
+          "id": "cmp_21",
           "type": "radio",
-          "key": "radio_18",
+          "key": "radio_21",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1660,9 +1901,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_19",
+          "id": "cmp_22",
           "type": "radio",
-          "key": "radio_19",
+          "key": "radio_22",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1701,9 +1942,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_20",
+          "id": "cmp_23",
           "type": "radio",
-          "key": "radio_20",
+          "key": "radio_23",
           "layout": "inline",
           "required": true,
           "showLabel": true,
@@ -1742,9 +1983,9 @@ export const kycIndividualTemplate: FormSchema = {
           ]
         },
         {
-          "id": "cmp_21",
+          "id": "cmp_24",
           "type": "input",
-          "key": "input_21",
+          "key": "input_24",
           "inputType": "text",
           "required": true,
           "showLabel": true,
@@ -1752,18 +1993,6 @@ export const kycIndividualTemplate: FormSchema = {
           "linkage": {
             "logic": "or",
             "conditions": [
-              {
-                "fieldKey": "radio_14",
-                "value": "option_1"
-              },
-              {
-                "fieldKey": "radio_15",
-                "value": "option_1"
-              },
-              {
-                "fieldKey": "radio_16",
-                "value": "option_1"
-              },
               {
                 "fieldKey": "radio_17",
                 "value": "option_1"
@@ -1778,6 +2007,18 @@ export const kycIndividualTemplate: FormSchema = {
               },
               {
                 "fieldKey": "radio_20",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_21",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_22",
+                "value": "option_1"
+              },
+              {
+                "fieldKey": "radio_23",
                 "value": "option_1"
               }
             ]
@@ -1809,9 +2050,9 @@ export const kycIndividualTemplate: FormSchema = {
       },
       "fields": [
         {
-          "id": "cmp_22",
+          "id": "cmp_25",
           "type": "signature",
-          "key": "signature_22",
+          "key": "signature_25",
           "showLabel": false,
           "required": true,
           "declarationRequired": true,
@@ -1861,12 +2102,12 @@ export const kycEntityTemplate: FormSchema = {
     "templateKey": "kyc-entity",
     "i18n": {
       "zh": {
-        "title": "SG_CDD_ENTITY",
-        "description": ""
+        "title": "SG_CSP_ENTITY_2025",
+        "description": "基于 ACRA 2025 年 CSP 指南的实体子案例 KYC 问卷。"
       },
       "en": {
-        "title": "SG_CDD_ENTITY",
-        "description": ""
+        "title": "SG_CSP_ENTITY_2025",
+        "description": "Entity sub-case KYC questionnaire based on ACRA’s 2025 CSP Guidelines."
       }
     }
   },
@@ -2809,6 +3050,8 @@ function createPresetRiskSchema(params: {
   profileType: ProfileType;
   templateKey: ScenarioTemplateKey;
   code: string;
+  descZh: string;
+  descEn: string;
   groups: RiskGroupSeed[];
   questions: RiskQuestionSeed[];
 }): FormSchema {
@@ -2822,8 +3065,8 @@ function createPresetRiskSchema(params: {
       source: 'template',
       templateKey: params.templateKey,
       i18n: {
-        zh: { title: params.code, description: '' },
-        en: { title: params.code, description: '' }
+        zh: { title: params.code, description: params.descZh },
+        en: { title: params.code, description: params.descEn }
       }
     },
     pages: [
@@ -2862,44 +3105,75 @@ function createPresetRiskSchema(params: {
 export const riskCustomerTemplate: FormSchema = createPresetRiskSchema({
   profileType: 'customer',
   templateKey: 'risk-customer',
-  code: 'SG_RISK_CUSTOMER',
+  code: 'SG_CSP_RA_CUSTOMER_2025',
+  descZh: '基于 ACRA 2025 年 CSP 指南的客户实体风险评估。',
+  descEn: 'Client entity risk assessment based on ACRA’s 2025 CSP Guidelines.',
   groups: [
-    { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' },
-    { id: 'grp_1793342667455_13', zh: '国家或地区风险因素', en: 'Country or Territory Risk Factors' },
-    { id: 'grp_1793342755246_19', zh: '服务或交易风险因素', en: 'Service or Transaction Risk Factors' }
+    { id: 'grp_risk_1', zh: '客户风险因素', en: 'Customer’s Risk Factors' },
+    { id: 'grp_risk_2', zh: '国家／地区风险因素', en: 'Country/Territory Risk Factors' },
+    { id: 'grp_risk_3', zh: '服务／交易风险因素', en: 'Services/ Transactions Risk Factors' }
   ],
   questions: [
-    { id: 'cmp_1', key: 'radio_1', groupId: 'grp_risk_1', zh: '该客户是否为新客户？', en: 'Is this client a new customer?' },
-    { id: 'cmp_2', key: 'radio_2', groupId: 'grp_risk_1', zh: '该客户是否使用提名董事或股东？', en: 'Does the client use nominee directors or shareholders?' },
-    { id: 'cmp_3', key: 'radio_3', groupId: 'grp_risk_1', zh: '如适用，挂名股东是否持有公司的多数股权？', en: 'Where applicable, do the nominee shareholders hold majority ownership in the company?' },
-    { id: 'cmp_4', key: 'radio_4', groupId: 'grp_risk_1', zh: '鉴于客户/委托人的业务性质，其股权结构是否显得异常或过于复杂？', en: 'Does the ownership structure of the customer/client appear unusual or excessively complex given the nature of its business?' },
-    { id: 'cmp_5', key: 'radio_5', groupId: 'grp_risk_1', zh: '客户/委托人的业务是否为现金密集型？', en: 'Is the customer/client’s business cash-intensive?' },
-    { id: 'cmp_6', key: 'radio_6', groupId: 'grp_risk_1', zh: '拟任董事、合伙人或股东是否曾因欺诈、失信或类似不当行为而被判刑？', en: 'Have any of the proposed directors, partners, or shareholders ever been convicted of a criminal offence involving fraud, dishonesty, or similar misconduct?' },
-    { id: 'cmp_7', key: 'radio_7', groupId: 'grp_risk_1', zh: '客户/委托人、任何实益拥有人或其代理人是否属于政治公众人物(PEP)？', en: 'Is the customer/client, any beneficial owner, or any of their agents a Politically Exposed Person (PEP)?' },
-    { id: 'cmp_8', key: 'radio_8', groupId: 'grp_risk_1', zh: '客户/委托人是否为未在新加坡注册的慈善或非营利组织？', en: 'Is the customer/client a charitable or non-profit organisation that is not registered in Singapore?' },
-    { id: 'cmp_9', key: 'radio_9', groupId: 'grp_risk_1', zh: '客户/委托人是否看起来像是一家空壳公司(即无实际业务活动或实体办公场所的公司)？', en: 'Does the customer/client appear to be a shell company (i.e., a company with no significant business activity or physical presence)?' },
-    { id: 'cmp_10', key: 'radio_10', groupId: 'grp_risk_1', zh: '客户/委托人是否从事高风险行业或领域？', en: 'Is the customer/client engaged in a high-risk industry or sector?' },
-    { id: 'cmp_11', key: 'radio_11', groupId: 'grp_risk_1', zh: '专业机构是否通过额外筛查(如使用 Google、美国财政部外国资产控制办公室发布的制裁名单，或其他第三方数据库)发现与客户/委托人、其实益拥有人、授权代表或关联方有关的不利信息或负面新闻？', en: 'Has the professional firm identified any adverse news or information through additional screening of the customer/client, its beneficial owner, authorised representative, or connected party using sources such as Google, OFAC sanctions lists, or third-party databases?' },
-    { id: 'cmp_12', key: 'radio_12', groupId: 'grp_risk_1', zh: '是否存在与客户/委托人、其实益拥有人、授权代表或关联方相关的异常情况，且无法被令人满意地解释或解决？', en: 'Are there any exceptions or irregularities related to the customer/client, its beneficial owner, authorised representative, or connected party that cannot be satisfactorily explained or resolved?' },
-    { id: 'cmp_14', key: 'radio_14', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被认定为缺乏充分反洗钱(AML)或反恐融资(CFT)措施的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or conducting transactions with, a country or territory identified as lacking adequate anti-money laundering (AML) or counter-financing of terrorism (CFT) measures?' },
-    { id: 'cmp_15', key: 'radio_15', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与与高风险司法管辖区有往来的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory that has dealings with high-risk jurisdictions?' },
-    { id: 'cmp_16', key: 'radio_16', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被联合国(UN)等监管机构制裁的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory that is subject to sanctions imposed by a regulatory body, such as the United Nations (UN)?' },
-    { id: 'cmp_17', key: 'radio_17', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与被认定为资助或支持恐怖活动，或其境内有被指定的恐怖组织活动的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory identified as financing or supporting terrorist activities, or as having designated terrorist organisations operating within its borders?' },
-    { id: 'cmp_18', key: 'radio_18', groupId: 'grp_1793342667455_13', zh: '客户/委托人是否与金融行动特别工作组(FATF)呼吁采取对策的国家或地区存在关联或交易行为？', en: 'Is the customer/client connected to, or transacting with, a country or territory for which the FATF has called for the application of countermeasures?' },
-    { id: 'cmp_20', key: 'radio_20', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否曾指示以匿名或不披露身份的方式进行交易(包括现金交易)？', en: 'Has the customer/client provided any instruction to conduct a transaction (including cash) anonymously or without disclosing their identity?' },
-    { id: 'cmp_21', key: 'radio_21', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否曾指示设立包含挂名股东和/或挂名董事的空壳公司？', en: 'Has the customer/client provided any instruction to incorporate shell companies with nominee shareholder(s) and/or nominee director(s)?' },
-    { id: 'cmp_22', key: 'radio_22', groupId: 'grp_1793342755246_19', zh: '本次业务关系是否在未与客户/委托人进行任何面对面会面的情况下建立？', en: 'Is this business relationship being established without any face-to-face (physical) meeting with the customer/client?' },
-    { id: 'cmp_23', key: 'radio_23', groupId: 'grp_1793342755246_19', zh: '客户/委托人所要求的交易是否与专业中介对其风险画像和业务性质的了解不一致？', en: 'Are the transactions requested by the customer/client inconsistent with the professional intermediary’s understanding of the customer/client’s risk profile and nature of business?' },
-    { id: 'cmp_24', key: 'radio_24', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否使用注册的 FA 地址或邮政信箱地址作为其注册或邮寄地址？', en: 'Does the customer/client use a registered FA address or a P.O. Box address as its registered or mailing address?' },
-    { id: 'cmp_25', key: 'radio_25', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否在客户尽职调查(CDD)过程中提供了可疑或不一致的信息？', en: 'Has the customer/client provided any suspicious or inconsistent information during the customer due diligence (CDD) process?' },
-    { id: 'cmp_26', key: 'radio_26', groupId: 'grp_1793342755246_19', zh: '客户/委托人是否不愿意或无法提供客户尽职调查(CDD)所需的信息？', en: 'Is the customer/client unwilling or unable to provide information required for customer due diligence (CDD)?' }
+    // A. 客户风险因素 (19 题: A1 ~ A18, 含 A4a / A4b)
+    { id: 'cmp_1', key: 'radio_1', groupId: 'grp_risk_1', zh: '该客户是否为新客户？', en: 'Is this a new customer?' },
+    { id: 'cmp_2', key: 'radio_2', groupId: 'grp_risk_1', zh: '客户是否为在任何证券交易所上市且获豁免披露要求的公众公司？', en: 'Is the customer a public company listed on any stock exchange and exempted from disclosure requirements?' },
+    { id: 'cmp_3', key: 'radio_3', groupId: 'grp_risk_1', zh: '客户是否为法人，或能够以自身名义持有资产的实体？', en: 'Is the customer a legal person or an entity that can hold assets in its own name?' },
+    { id: 'cmp_4', key: 'radio_4', groupId: 'grp_risk_1', zh: '客户是否使用挂名董事或挂名股东？', en: 'Does the customer use nominee director(s) or shareholder(s)?' },
+    { id: 'cmp_5', key: 'radio_5', groupId: 'grp_risk_1', zh: '如适用，挂名股东是否持有多数股权？', en: 'Where applicable, do the nominee shareholders represent majority ownership?' },
+    { id: 'cmp_6', key: 'radio_6', groupId: 'grp_risk_1', zh: '考虑到客户的业务性质，其所有权结构是否显得异常或过于复杂？', en: 'Does the ownership structure of the customer appear unusual or excessively complex given the nature of its business?' },
+    { id: 'cmp_7', key: 'radio_7', groupId: 'grp_risk_1', zh: '客户的业务是否为现金密集型？', en: 'Is the customer’s business cash-intensive?' },
+    { id: 'cmp_8', key: 'radio_8', groupId: 'grp_risk_1', zh: '客户是否频繁与相同或类似的收款方进行无法解释的现金交易？', en: 'Does the customer frequently make unaccounted cash transactions to similar recipient(s)?' },
+    { id: 'cmp_9', key: 'radio_9', groupId: 'grp_risk_1', zh: '拟任董事／合伙人／股东是否曾因涉及欺诈或不诚实行为的刑事罪行被定罪？', en: 'Do the proposed directors/partners/shareholders have prior criminal convictions involving fraud or dishonesty?' },
+    { id: 'cmp_10', key: 'radio_10', groupId: 'grp_risk_1', zh: '客户、实益拥有人或客户的代理人中，是否有任何一方属于政治公众人物？', en: 'Is any of the customer, beneficial owner or its agent a politically-exposed person?' },
+    { id: 'cmp_11', key: 'radio_11', groupId: 'grp_risk_1', zh: '客户的公司财务报表是否已过时？', en: 'Are the customer’s company financial statements outdated?' },
+    { id: 'cmp_12', key: 'radio_12', groupId: 'grp_risk_1', zh: '客户的股东和／或董事是否频繁变更，且这些变更在合理范围内？', en: 'Do the customer’s shareholders and/or directors frequently change, and the changes are within reason?' },
+    { id: 'cmp_13', key: 'radio_13', groupId: 'grp_risk_1', zh: '获取相关表格所要求的信息是否存在困难？', en: 'Is there any problem obtaining the required information in the relevant form?' },
+    { id: 'cmp_14', key: 'radio_14', groupId: 'grp_risk_1', zh: '所获取的信息能否通过独立且可靠的来源加以核实？', en: 'Can the information obtained be verified by independent and reliable sources?' },
+    { id: 'cmp_15', key: 'radio_15', groupId: 'grp_risk_1', zh: '客户是否为未在新加坡注册的慈善或非营利组织？', en: 'Is the customer a charitable or non-profit organisation which is not registered in Singapore?' },
+    { id: 'cmp_16', key: 'radio_16', groupId: 'grp_risk_1', zh: '客户是否看起来是一家空壳公司？', en: 'Does the customer appear to be a shell company?' },
+    { id: 'cmp_17', key: 'radio_17', groupId: 'grp_risk_1', zh: '客户是否从事高风险行业？', en: 'Is the customer in a high-risk industry?' },
+    {
+      id: 'cmp_18',
+      key: 'radio_18',
+      groupId: 'grp_risk_1',
+      zh: '注册 CSP 已根据所要求的信息来源，对客户、客户的实益拥有人、代表客户行事的人员及客户关联方的资料进行了筛查，即参考 ACRA 提供的警示名单、Google 搜索结果、美国财政部外国资产控制办公室发布的制裁名单、《2001年联合国法》项下的规例、《2002年恐怖主义（制止资助）法》第一附表，以及／或其他第三方筛查数据库。\n\n筛查是否发现负面新闻或不利信息？',
+      en: 'The registered CSP has performed screening of particulars of the customer, beneficial owners of the customer, persons acting on behalf of the customer, and connected parties of the customer against the required information sources, i.e., Alert list provided by ACRA, on Google, the sanctions lists published by the Office of Foreign Assets Control of the US Department of the Treasury, against the regulations under the United Nations Act 2001; First Schedule of the Terrorism (Suppression of Financing) Act 2002; and/or other third party screening database.\n\nAre there adverse news or information arising?'
+    },
+    { id: 'cmp_19', key: 'radio_19', groupId: 'grp_risk_1', zh: '在客户、客户的实益拥有人、代表客户行事的人员或客户关联方的资料中发现的异常事项，无法得到令人满意的处理。', en: 'Exceptions noted from particulars of the customer, beneficial owners of the customer, persons acting on behalf of the customer, or connected parties of the customer cannot be disposed of satisfactorily.' },
+
+    // B. 国家／地区风险因素 (4 题: B1 ~ B4)
+    { id: 'cmp_20', key: 'radio_20', groupId: 'grp_risk_2', zh: '客户是否与 FATF 呼吁采取对策的国家或地区存在关联或交易往来？', en: 'Is the customer connected to or transacting with a country or territory in relation to which the FATF has called for countermeasures?' },
+    { id: 'cmp_21', key: 'radio_21', groupId: 'grp_risk_2', zh: '客户是否与被 FATF 列入加强监控范围的国家或地区存在关联或交易往来？', en: 'Is the customer connected to or transacting with a country or territory in relation to which the FATF has subject to increased monitoring?' },
+    { id: 'cmp_22', key: 'radio_22', groupId: 'grp_risk_2', zh: '客户是否与受到联合国（UN）等监管机构制裁的国家或地区存在关联或交易往来？', en: 'Is the customer connected to or transacting with a country or a territory that is sanctioned by a regulatory body, such as the United Nations (UN)?' },
+    { id: 'cmp_23', key: 'radio_23', groupId: 'grp_risk_2', zh: '客户是否与被认定为资助或支持恐怖活动，或其境内有被指定的恐怖组织开展活动的国家或地区存在关联或交易往来？', en: 'Is the customer connected to or transacting with a country or a territory that is identified to be funding or supporting terrorist activities or that has designated terrorist organisations operating within their territories?' },
+
+    // C. 服务／交易风险因素 (11 题: C1 ~ C11)
+    { id: 'cmp_24', key: 'radio_24', groupId: 'grp_risk_3', zh: '客户是否曾指示以匿名方式进行交易（可能包括现金交易）？', en: 'Has the customer given any instruction to perform a transaction (which may include cash) anonymously?' },
+    { id: 'cmp_25', key: 'radio_25', groupId: 'grp_risk_3', zh: '客户是否曾在未提供相应基础服务或未发生相应基础交易的情况下转移资金？', en: 'Has the customer transferred any funds without providing underlying services or transactions?' },
+    { id: 'cmp_26', key: 'radio_26', groupId: 'grp_risk_3', zh: '是否存在无明显经济目的的异常交易模式，或在通常应使用其他付款方式（如支票、银行汇票等）的情况下进行大额现金付款？', en: 'Are there unusual patterns of transactions that have no apparent economic purpose or large cash payments, in which disbursement would have been normally made by other modes of payment (such as cheque, bank drafts etc.)?' },
+    { id: 'cmp_27', key: 'radio_27', groupId: 'grp_risk_3', zh: '是否存在因客户提供的服务和／或交易而收到的、来自身份不明或无关联第三方的无法解释的付款？', en: 'Are there unaccounted payments received from unknown or un-associated third parties for services and/or transactions provided by the customer?' },
+    { id: 'cmp_28', key: 'radio_28', groupId: 'grp_risk_3', zh: '客户是否指示设立使用挂名股东和／或挂名董事的“空壳”公司？', en: 'Is there instruction from the customer to incorporate “shell” companies with nominee shareholder(s) and/or director(s)?' },
+    {
+      id: 'cmp_29',
+      key: 'radio_29',
+      groupId: 'grp_risk_3',
+      zh: '客户是否有意在无明显商业目的的情况下购买公司或商业实体？这包括：\na) 多层级、跨多个国家且复杂的集团结构。\nb) 在新加坡设立实体，但该设立行为没有明显商业目的，或与客户没有任何其他个人或经济联系。',
+      en: 'Does the customer intend to purchase companies or business entities with no apparent commercial purpose? This would include:\na) Multi-layer, multi-country and complex group structures.\nb) Setting up entities in Singapore where there is no obvious commercial purpose, or any other personal or economic connection to the customer.'
+    },
+    { id: 'cmp_30', key: 'radio_30', groupId: 'grp_risk_3', zh: '本次业务关系是否在未进行任何线下面谈的情况下建立？', en: 'Is this business relationship being established without any physical meeting?' },
+    { id: 'cmp_31', key: 'radio_31', groupId: 'grp_risk_3', zh: '是否有任何交易在未进行线下面谈的情况下开展？', en: 'Are there any transactions being performed without any physical meeting?' },
+    { id: 'cmp_32', key: 'radio_32', groupId: 'grp_risk_3', zh: '客户要求进行的交易是否与专业中介对客户风险状况及业务性质的了解不一致？', en: 'Are the transactions required by the customer inconsistent with the professional intermediaries’ knowledge of the customer’s risk profile and nature of business?' },
+    { id: 'cmp_33', key: 'radio_33', groupId: 'grp_risk_3', zh: '在拟进行的注册成立交易中，客户是否亲自到场接受身份核验？', en: 'Is the customer physically present for identification purposes in a proposed incorporation transaction?' },
+    { id: 'cmp_34', key: 'radio_34', groupId: 'grp_risk_3', zh: '在拟进行的涉及管理权转移、所有权转移或现成公司出售的交易中，客户是否亲自到场接受身份核验？', en: 'Is the customer physically present for identification purposes in a proposed transaction involving the transfer of management or ownership or sale of a shelf company?' }
   ]
 });
 
 export const riskIndividualTemplate: FormSchema = createPresetRiskSchema({
   profileType: 'individual',
   templateKey: 'risk-individual',
-  code: 'SG_RISK_INDIVIDUAL',
+  code: 'SG_CSP_RA_INDIVIDUAL_2025',
+  descZh: '基于 ACRA 2025 年 CSP 指南的个人子案例风险评估。',
+  descEn: 'Individual sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
   groups: [
     { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' }
   ],
@@ -2915,7 +3189,9 @@ export const riskIndividualTemplate: FormSchema = createPresetRiskSchema({
 export const riskEntityTemplate: FormSchema = createPresetRiskSchema({
   profileType: 'entity',
   templateKey: 'risk-entity',
-  code: 'SG_RISK_ENTITY',
+  code: 'SG_CSP_RA_ENTITY_2025',
+  descZh: '基于 ACRA 2025 年 CSP 指南的实体子案例风险评估。',
+  descEn: 'Entity sub-case risk assessment based on ACRA’s 2025 CSP Guidelines.',
   groups: [
     { id: 'grp_risk_1', zh: '客户/委托人风险因素', en: 'Customer or Client Risk Factors' }
   ],

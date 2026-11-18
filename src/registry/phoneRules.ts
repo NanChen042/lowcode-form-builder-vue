@@ -1507,7 +1507,7 @@ export const allCountryPhoneRules: CountryPhoneRule[] = [
     "iso2": "tw",
     "dialCode": "886",
     "code": "+886",
-    "name": "Taiwan",
+    "name": "Taiwan, China",
     "zh": "中国台湾"
   },
   {
@@ -1836,20 +1836,68 @@ export function validatePhoneNumber(
 }
 
 /**
+ * 繁体中文重点国家与地区合规标准名称映射
+ */
+export const zhHantCountryNameMap: Record<string, string> = {
+  cn: '中國',
+  hk: '中國香港',
+  mo: '中國澳門',
+  tw: '中國台灣'
+};
+
+export function getCountryZhHantName(iso2: string, zhFallback: string): string {
+  return zhHantCountryNameMap[iso2.toLowerCase()] || zhFallback;
+}
+
+/**
  * 获取 intl-tel-input v25 原生支持的多语言国家名称与搜索占位符映射
  */
-export function getCountryI18nMap(locale: 'zh' | 'en'): Record<string, string> {
-  if (locale === 'en') {
-    return {
-      searchPlaceholder: 'Search country or code...'
+export function getCountryI18nMap(locale: string = 'zh'): Record<string, string> {
+  const norm = String(locale || 'zh').trim().toLowerCase().replace(/_/g, '-');
+  const isZhHant =
+    norm === 'zh-hant' ||
+    norm === 'zh-hk' ||
+    norm === 'zh-tw' ||
+    norm === 'zh-mo' ||
+    norm.startsWith('zh-hant');
+  const isZhHans =
+    !isZhHant &&
+    (norm === 'zh' ||
+      norm === 'zh-cn' ||
+      norm === 'zh-sg' ||
+      norm === 'zh-hans' ||
+      norm.startsWith('zh-hans'));
+
+  if (isZhHant) {
+    const map: Record<string, string> = {
+      searchPlaceholder: '搜尋國家或區號...'
     };
+    for (const rule of allCountryPhoneRules) {
+      if (rule.iso2 && rule.zh) {
+        map[rule.iso2] = getCountryZhHantName(rule.iso2, rule.zh);
+      }
+    }
+    return map;
   }
+
+  if (isZhHans) {
+    const map: Record<string, string> = {
+      searchPlaceholder: '搜索国家或区号...'
+    };
+    for (const rule of allCountryPhoneRules) {
+      if (rule.iso2 && rule.zh) {
+        map[rule.iso2] = rule.zh;
+      }
+    }
+    return map;
+  }
+
   const map: Record<string, string> = {
-    searchPlaceholder: '搜索国家或区号...'
+    searchPlaceholder: 'Search country or code...'
   };
   for (const rule of allCountryPhoneRules) {
-    if (rule.iso2 && rule.zh) {
-      map[rule.iso2] = rule.zh;
+    if (rule.iso2 && rule.name) {
+      map[rule.iso2] = rule.name;
     }
   }
   return map;

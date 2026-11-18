@@ -137,6 +137,8 @@ onUnmounted(() => {
   }
 });
 
+const effectiveLocale = computed(() => props.locale || store.currentLocale || 'zh');
+
 function initIntlTel() {
   if (!inputRef.value) return;
   if (typeof window === 'undefined' || !window.intlTelInput) {
@@ -155,7 +157,7 @@ function initIntlTel() {
     nationalMode: true,
     autoInsertDialCode: false,
     countrySearch: true,
-    i18n: getCountryI18nMap(store.currentLocale)
+    i18n: getCountryI18nMap(effectiveLocale.value)
   };
 
   iti = window.intlTelInput(inputRef.value, options);
@@ -288,7 +290,7 @@ watch(
 );
 
 watch(
-  () => store.currentLocale,
+  effectiveLocale,
   () => {
     if (iti && inputRef.value) {
       const currentVal = inputRef.value.value;

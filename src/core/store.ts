@@ -1034,6 +1034,8 @@ export function buildSchema(): FormSchema {
   if (!store.meta.serialNo) store.meta.serialNo = ensuredId;
 
   const defaultTemplateTitles = [
+    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
+    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
@@ -1400,6 +1402,8 @@ export function createNewCanvas(options: {
 }) {
   const profileType = options.profileType || store.meta.profileType || 'customer';
   const defaultTemplateTitles = [
+    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
+    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
@@ -1409,8 +1413,8 @@ export function createNewCanvas(options: {
     'Corporate Customer CDD Questionnaire', 'Individual CDD Questionnaire', 'Corporate Entity CDD Questionnaire'
   ];
   const defaultTitle = isRisk.value
-    ? (profileType === 'individual' ? 'SG_RISK_INDIVIDUAL' : profileType === 'entity' ? 'SG_RISK_ENTITY' : 'SG_RISK_CUSTOMER')
-    : (profileType === 'individual' ? 'SG_CDD_INDIVIDUAL' : profileType === 'entity' ? 'SG_CDD_ENTITY' : 'SG_CDD_CUSTOMER');
+    ? (profileType === 'individual' ? 'SG_CSP_RA_INDIVIDUAL_2025' : profileType === 'entity' ? 'SG_CSP_RA_ENTITY_2025' : 'SG_CSP_RA_CUSTOMER_2025')
+    : (profileType === 'individual' ? 'SG_CSP_INDIVIDUAL_2025' : profileType === 'entity' ? 'SG_CSP_ENTITY_2025' : 'SG_CSP_CUSTOMER_2025');
   const persistedUrlId = typeof window !== 'undefined'
     ? (new URLSearchParams(window.location.search).get('id') || '').toLowerCase().trim()
     : '';
@@ -1473,37 +1477,39 @@ export function applyTemplateKey(
 ) {
   let templateSource: FormSchema = kycCustomerTemplate;
   let pType: ProfileType = 'customer';
-  let defaultTitle = 'SG_CDD_CUSTOMER';
-  let defaultTitleEn = 'SG_CDD_CUSTOMER';
+  let defaultTitle = 'SG_CSP_CUSTOMER_2025';
+  let defaultTitleEn = 'SG_CSP_CUSTOMER_2025';
 
   if (tplKey === 'kyc-individual') {
     templateSource = kycIndividualTemplate;
     pType = 'individual';
-    defaultTitle = 'SG_CDD_INDIVIDUAL';
-    defaultTitleEn = 'SG_CDD_INDIVIDUAL';
+    defaultTitle = 'SG_CSP_INDIVIDUAL_2025';
+    defaultTitleEn = 'SG_CSP_INDIVIDUAL_2025';
   } else if (tplKey === 'kyc-entity') {
     templateSource = kycEntityTemplate;
     pType = 'entity';
-    defaultTitle = 'SG_CDD_ENTITY';
-    defaultTitleEn = 'SG_CDD_ENTITY';
+    defaultTitle = 'SG_CSP_ENTITY_2025';
+    defaultTitleEn = 'SG_CSP_ENTITY_2025';
   } else if (tplKey === 'risk-individual') {
     templateSource = riskIndividualTemplate;
     pType = 'individual';
-    defaultTitle = 'SG_RISK_INDIVIDUAL';
-    defaultTitleEn = 'SG_RISK_INDIVIDUAL';
+    defaultTitle = 'SG_CSP_RA_INDIVIDUAL_2025';
+    defaultTitleEn = 'SG_CSP_RA_INDIVIDUAL_2025';
   } else if (tplKey === 'risk-entity') {
     templateSource = riskEntityTemplate;
     pType = 'entity';
-    defaultTitle = 'SG_RISK_ENTITY';
-    defaultTitleEn = 'SG_RISK_ENTITY';
+    defaultTitle = 'SG_CSP_RA_ENTITY_2025';
+    defaultTitleEn = 'SG_CSP_RA_ENTITY_2025';
   } else if (tplKey === 'risk-customer') {
     templateSource = riskCustomerTemplate;
     pType = 'customer';
-    defaultTitle = 'SG_RISK_CUSTOMER';
-    defaultTitleEn = 'SG_RISK_CUSTOMER';
+    defaultTitle = 'SG_CSP_RA_CUSTOMER_2025';
+    defaultTitleEn = 'SG_CSP_RA_CUSTOMER_2025';
   }
 
   const defaultTemplateTitles = [
+    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
+    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
@@ -1893,6 +1899,8 @@ export function addTargetLocale(locale?: string) {
   // 默认模板启用新目标语种时，自动同步默认英文模板名称（避免切换中文时名称空白）
   const baseTitle = (store.meta.i18n?.[base]?.title || '').trim();
   const defaultCodeTitles = [
+    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
+    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY'
   ];

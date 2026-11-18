@@ -453,6 +453,8 @@ function handleConfirmTitle() {
   const fallback = t('header.untitledForm');
   const newTitle = trimmed || fallback;
   const defaultTemplateTitles = [
+    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
+    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
     'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
     'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
     'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
