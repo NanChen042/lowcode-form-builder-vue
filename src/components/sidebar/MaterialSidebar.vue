@@ -529,13 +529,13 @@
             <div class="pt-1.5">
               <button
                 type="button"
-                class="group flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300/90 bg-white py-2 px-3 text-[12px] font-medium text-slate-600 transition-all duration-180 hover:border-[#1677ff] hover:bg-blue-50/40 hover:text-[#1677ff] hover:shadow-xs active:scale-[0.99] cursor-pointer"
+                class="group flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300/90 bg-white py-2 px-3 text-[12px] text-slate-600 transition-all duration-180 hover:border-[#1677ff] hover:bg-blue-50/40 hover:text-[#1677ff] hover:shadow-xs active:scale-[0.99] cursor-pointer"
                 @click="handleAddNewPage"
               >
                 <span class="flex h-4.5 w-4.5 items-center justify-center rounded bg-slate-100 text-slate-500 transition-all duration-200 group-hover:bg-[#1677ff] group-hover:text-white group-hover:rotate-90">
-                  <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+                  <Plus class="h-3 w-3 stroke-[2.5]" />
                 </span>
-                <span>{{ t('sidebar.addCanvasPage') }}</span>
+                <span class="text-[13px]">{{ t('sidebar.addCanvasPage') }}</span>
               </button>
             </div>
           </div>

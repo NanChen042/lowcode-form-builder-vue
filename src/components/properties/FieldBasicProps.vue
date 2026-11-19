@@ -234,12 +234,48 @@
       <a-switch v-model="isElementRequired" size="small" />
     </div>
 
+    <CollapseTransition
+      v-if="!isRisk && element.type !== 'alert'"
+      :key="`${element.id}-req`"
+      :show="Boolean(isElementRequired)"
+    >
+      <div class="pt-2 pb-1">
+        <ValidationErrorItem
+          :label="element.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg')"
+          v-model="fieldCustomErrorModel"
+          :default-text="rawDefaultErrorMessage"
+          input-id="prop-custom-error-input"
+          :is-focused="isFieldFocused('customErrorMessage')"
+          @focus="setFocus('customErrorMessage')"
+          @blur="clearFocus"
+        />
+      </div>
+    </CollapseTransition>
+
     <div v-if="element.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
       </div>
       <a-switch v-model="isDeclarationRequired" size="small" />
     </div>
+
+    <CollapseTransition
+      v-if="element.type === 'signature'"
+      :key="`${element.id}-decl`"
+      :show="Boolean(isDeclarationRequired)"
+    >
+      <div class="pt-2 pb-1">
+        <ValidationErrorItem
+          :label="t('prop.declarationErrorMsg')"
+          v-model="fieldDeclarationErrorModel"
+          :default-text="rawDeclarationErrorMessage"
+          input-id="prop-declaration-error-input"
+          :is-focused="isFieldFocused('declarationErrorMessage')"
+          @focus="setFocus('declarationErrorMessage')"
+          @blur="clearFocus"
+        />
+      </div>
+    </CollapseTransition>
 
     <div v-if="['select', 'country', 'nationality'].includes(element.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
@@ -281,9 +317,10 @@
 import { computed, ref, watch, nextTick } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, isRisk, markDirty, isBilingual, primaryLocale } from '@/core/store';
-import { t, getFieldText, setFieldText } from '@/core/i18n';
+import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText, getEffectiveFormLocale } from '@/core/i18n';
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
+import ValidationErrorItem from './ValidationErrorItem.vue';
 import { HelpCircle, CornerDownRight, Minus, Plus } from '@lucide/vue';
 
 const props = defineProps<{
@@ -507,6 +544,40 @@ const isDeclarationRequired = computed({
   set(val: boolean) {
     props.element.declarationRequired = val;
     markDirty();
+  }
+});
+
+const rawDefaultErrorMessage = computed(() => {
+  return getFieldDefaultErrorMessage(
+    props.element,
+    props.element.type === 'signature' ? 'signature' : undefined,
+    getEffectiveFormLocale()
+  );
+});
+
+const rawDeclarationErrorMessage = computed(() => {
+  return getFieldDefaultErrorMessage(
+    props.element,
+    'declaration',
+    getEffectiveFormLocale()
+  );
+});
+
+const fieldCustomErrorModel = computed({
+  get() {
+    return getFieldText(props.element, 'customErrorMessage');
+  },
+  set(val: string) {
+    setFieldText(props.element, 'customErrorMessage', val);
+  }
+});
+
+const fieldDeclarationErrorModel = computed({
+  get() {
+    return getFieldText(props.element, 'declarationErrorMessage');
+  },
+  set(val: string) {
+    setFieldText(props.element, 'declarationErrorMessage', val);
   }
 });
 

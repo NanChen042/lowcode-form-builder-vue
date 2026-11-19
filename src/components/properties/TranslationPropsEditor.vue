@@ -322,6 +322,40 @@
         />
       </div>
 
+      <!-- 未填/必填校验提示 (支持多语言翻译，未配置自定义文案时自动透传系统默认提示) -->
+      <div v-if="supportsCustomError">
+        <ValidationErrorItem
+          :label="selectedElement.type === 'signature' ? t('prop.signatureErrorMsg') : t('prop.customErrorMsg')"
+          :is-translation-mode="true"
+          :source-lang-name="getLocaleNativeName(primaryLocale)"
+          :source-text="effectiveSourceCustomError"
+          :model-value="targetCustomError"
+          :default-text="defaultTargetCustomError"
+          input-id="prop-custom-error-input"
+          :is-focused="isFieldFocused('customErrorMessage')"
+          @update:model-value="handleTargetCustomErrorInput"
+          @focus="setFocus('customErrorMessage')"
+          @blur="clearFocus"
+        />
+      </div>
+
+      <!-- 签名声明条款未勾选校验提示 (签名开启声明必填时支持多语言翻译) -->
+      <div v-if="supportsDeclarationError">
+        <ValidationErrorItem
+          :label="t('prop.declarationErrorMsg')"
+          :is-translation-mode="true"
+          :source-lang-name="getLocaleNativeName(primaryLocale)"
+          :source-text="effectiveSourceDeclarationError"
+          :model-value="targetDeclarationError"
+          :default-text="defaultTargetDeclarationError"
+          input-id="prop-declaration-error-input"
+          :is-focused="isFieldFocused('declarationErrorMessage')"
+          @update:model-value="handleTargetDeclarationErrorInput"
+          @focus="setFocus('declarationErrorMessage')"
+          @blur="clearFocus"
+        />
+      </div>
+
       <!-- 提示区块正文 (Alert) -->
       <div v-if="selectedElement.type === 'alert'" class="space-y-1.5">
         <div class="flex items-center justify-between">
@@ -601,10 +635,12 @@ import {
   getOptionLabel,
   setOptionLabel,
   getLocaleNativeName,
+  getFieldDefaultErrorMessage,
   SUPPORTED_FORM_LOCALES
 } from '@/core/i18n';
 import { isOptionTranslated } from '@/utils/translationHelper';
 import type { FormElementOption } from '@/types/schema';
+import ValidationErrorItem from './ValidationErrorItem.vue';
 import { CheckCircle2, Languages, Plus } from '@lucide/vue';
 
 const availableLocalesToAdd = computed(() => {
@@ -732,6 +768,96 @@ function handleTargetHelpInput(val: string) {
   if (!selectedElement.value) return;
   setFieldText(selectedElement.value, 'help', val, store.activeTargetLocale);
 }
+
+// 未填/必填校验提示
+const supportsCustomError = computed(() => {
+  if (!selectedElement.value) return false;
+  const el = selectedElement.value;
+  if (el.type === 'alert') return false;
+  const hasAnyCustom = Boolean(
+    Object.values(el.i18n || {}).some(loc => loc?.customErrorMessage?.trim())
+  );
+  return Boolean(el.required || el.type === 'signature' || hasAnyCustom);
+});
+
+const sourceCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'customErrorMessage', primaryLocale.value);
+});
+const targetCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'customErrorMessage', store.activeTargetLocale);
+});
+function handleTargetCustomErrorInput(val: string) {
+  if (!selectedElement.value) return;
+  setFieldText(selectedElement.value, 'customErrorMessage', val, store.activeTargetLocale);
+}
+
+const effectiveSourceCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  const custom = sourceCustomError.value?.trim();
+  if (custom) return custom;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    selectedElement.value.type === 'signature' ? 'signature' : undefined,
+    primaryLocale.value
+  );
+});
+
+const defaultTargetCustomError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    selectedElement.value.type === 'signature' ? 'signature' : undefined,
+    store.activeTargetLocale
+  );
+});
+
+// 签名声明条款未勾选校验提示
+const supportsDeclarationError = computed(() => {
+  if (!selectedElement.value) return false;
+  const el = selectedElement.value;
+  if (el.type !== 'signature') return false;
+  const hasAnyDecl = Boolean(
+    Object.values(el.i18n || {}).some(loc => loc?.declarationErrorMessage?.trim())
+  );
+  return Boolean(el.declarationRequired || hasAnyDecl);
+});
+
+const sourceDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'declarationErrorMessage', primaryLocale.value);
+});
+
+const targetDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldText(selectedElement.value, 'declarationErrorMessage', store.activeTargetLocale);
+});
+
+function handleTargetDeclarationErrorInput(val: string) {
+  if (!selectedElement.value) return;
+  setFieldText(selectedElement.value, 'declarationErrorMessage', val, store.activeTargetLocale);
+}
+
+const effectiveSourceDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  const custom = sourceDeclarationError.value?.trim();
+  if (custom) return custom;
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    'declaration',
+    primaryLocale.value
+  );
+});
+
+const defaultTargetDeclarationError = computed(() => {
+  if (!selectedElement.value) return '';
+  return getFieldDefaultErrorMessage(
+    selectedElement.value,
+    'declaration',
+    store.activeTargetLocale
+  );
+});
 
 // 提示框内容
 const sourceContent = computed(() => {

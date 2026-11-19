@@ -1,10 +1,10 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="isLockedMode ? 'min(720px, 94vw)' : 'min(840px, 94vw)'"
+    :width="isLockedMode ? 'min(620px, 94vw)' : 'min(840px, 94vw)'"
     :align-center="true"
     :footer="false"
-    :header="false"
+    :hide-title="true"
     :closable="false"
     draggable
     unmount-on-close
@@ -39,56 +39,57 @@
           <span class="text-[12.5px] text-slate-600 font-medium select-none">
             {{ isRisk ? t('wizard.brandSubtitleRisk') : t('wizard.brandSubtitle') }}
           </span>
-          <a-tag
-            v-if="isLockedMode && lockedTpl"
-            :color="lockedTpl.tagColor"
-            size="medium"
-            class="rounded font-medium px-2.5 text-[11px] ml-1"
-          >
-            {{ getTemplateTag(lockedTpl) }}
-          </a-tag>
         </div>
-
-        <!-- 右上角关闭按钮：风险评估模式或强制引导时不展示关闭按钮 -->
-        <button
-          v-if="!mandatory && !isRisk"
-          type="button"
-          class="flex h-7 w-7 items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-          :title="t('common.close') || '关闭'"
-          @click="modalVisible = false"
-        >
-          <X class="w-4 h-4" />
-        </button>
       </header>
 
-      <!-- 适用对象已锁定：简洁版欢迎页，仅「空白新建」与「推荐模板」两张对称卡片 -->
+      <!-- 适用对象已锁定：扁平化双长条布局（空白新建 + 推荐模板），纯白底色、结构对齐、无臃肿方块 -->
       <div v-if="isLockedMode && lockedTpl" class="p-5 select-none">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+        <div class="flex items-center justify-between mb-3 px-0.5">
+          <div class="flex items-center gap-1.5">
+            <LayoutGrid class="w-4 h-4 text-[#1677ff] shrink-0" />
+            <span class="text-[13px] font-bold text-slate-800 tracking-tight">
+              {{ t('wizard.selectTemplate') }}
+            </span>
+          </div>
+          <span class="text-[11.5px] text-slate-400">
+            {{ isRisk ? '支持空白自定义或选用预置模型' : '支持空白自定义或选用场景模板' }}
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- 长条 1：新建空白画布 -->
           <div
-            class="group flex flex-col rounded-xl border border-blue-100/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 overflow-hidden text-left"
+            class="group relative overflow-hidden rounded-xl p-4 px-4.5 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
             @click="handleCreateBlank"
           >
-            <div class="h-[132px] w-full flex items-center justify-center bg-gradient-to-b from-[#f2f7fe] to-[#deebfe] px-4">
-              <img
-                :src="isRisk ? tplRiskHeroImg : tplBlankHeroImg"
-                :alt="isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank')"
-                class="max-h-[110px] w-full object-contain select-none pointer-events-none group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              />
-            </div>
-            <div class="flex flex-1 flex-col justify-between gap-3 p-4">
-              <div>
-                <h3 class="text-[15px] font-bold text-slate-900 m-0 leading-tight group-hover:text-[#1677ff] transition-colors">
+            <!-- 右上角点缀背景图（轻量水印，hover 时微放大增色） -->
+            <img
+              :src="isRisk ? tplRiskHeroImg : tplBlankHeroImg"
+              alt=""
+              class="absolute -right-3 -top-4 w-32 h-32 object-contain pointer-events-none select-none opacity-15 group-hover:opacity-25 group-hover:scale-105 transition-all duration-300"
+              loading="lazy"
+            />
+
+            <div class="flex items-center gap-3.5 min-w-0 flex-1 relative z-10">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1677ff] to-blue-600 flex items-center justify-center shrink-0 text-white shadow-xs group-hover:from-blue-600 group-hover:to-blue-700 transition-all">
+                <Plus class="w-4 h-4 stroke-[2.8]" />
+              </div>
+
+              <div class="min-w-0 flex-1 pr-2">
+                <h4 class="text-[14px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight">
                   {{ isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank') }}
-                </h3>
-                <p class="text-[12px] text-slate-500 mt-1.5 m-0 leading-normal">
+                </h4>
+                <p class="text-[11.5px] text-slate-400 mt-1 m-0 leading-normal line-clamp-1">
                   {{ isRisk ? t('wizard.lockedBlankRiskDesc') : t('wizard.lockedBlankDesc') }}
                 </p>
               </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 shrink-0 pl-2 relative z-10">
               <a-button
-                type="primary"
+                type="outline"
                 shape="round"
-                class="self-start px-5 h-7.5 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12px] flex items-center gap-1.5 shadow-sm"
+                class="px-4 h-7.5 font-medium text-[12px] flex items-center gap-1.5 bg-white/90 backdrop-blur-xs group-hover:bg-[#1677ff] group-hover:text-white group-hover:border-[#1677ff] transition-all"
               >
                 <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>{{ t('wizard.createNowBtn') }}</span>
@@ -97,42 +98,61 @@
             </div>
           </div>
 
+          <!-- 长条 2：场景预置模板 -->
           <div
-            class="group flex flex-col rounded-xl border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 overflow-hidden text-left"
+            class="group relative overflow-hidden rounded-xl p-4 px-4.5 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
             @click="handleSelectTemplate(lockedTpl.key)"
           >
-            <div class="h-[132px] w-full flex items-center justify-center overflow-hidden" :class="lockedTpl.bannerBgClass">
+            <!-- 右上角点缀背景图（轻量水印，hover 时微放大增色） -->
+            <img
+              :src="lockedTpl.image"
+              alt=""
+              class="absolute -right-3 -top-4 w-32 h-32 object-contain pointer-events-none select-none opacity-15 mix-blend-multiply group-hover:opacity-25 group-hover:scale-105 transition-all duration-300"
+              loading="lazy"
+            />
+
+            <div class="flex items-center gap-3.5 min-w-0 flex-1 relative z-10">
               <img
-                :src="lockedTpl.image"
+                :src="lockedTpl.icon || lockedTpl.image"
                 :alt="getTemplateTitle(lockedTpl)"
-                class="h-full w-full object-cover select-none pointer-events-none group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
+                class="w-7 h-7 object-contain shrink-0 select-none pointer-events-none group-hover:scale-105 transition-transform"
               />
-            </div>
-            <div class="flex flex-1 flex-col justify-between gap-3 p-4">
-              <div>
-                <h3 class="text-[15px] font-bold text-slate-900 m-0 leading-tight group-hover:text-[#1677ff] transition-colors">
-                  {{ getTemplateTitle(lockedTpl) }}
-                </h3>
-                <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-1.5 leading-none">
+
+              <div class="min-w-0 flex-1 pr-2">
+                <div class="flex items-center gap-2">
+                  <h4 class="text-[14px] font-bold text-slate-800 group-hover:text-[#1677ff] transition-colors m-0 leading-tight truncate">
+                    {{ getTemplateTitle(lockedTpl) }}
+                  </h4>
+                  <a-tag
+                    :color="lockedTpl.tagColor"
+                    size="small"
+                    class="rounded font-medium px-2 text-[10.5px]"
+                  >
+                    {{ getTemplateTag(lockedTpl) }}
+                  </a-tag>
+                </div>
+
+                <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-1 m-0 leading-none">
                   <span class="flex items-center gap-1">
-                    <FileText class="w-3.5 h-3.5 shrink-0" />
+                    <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{{ getPagesText(lockedTpl) }}</span>
                   </span>
                   <span class="text-slate-300">·</span>
                   <span class="flex items-center gap-1">
-                    <Layers class="w-3.5 h-3.5 shrink-0" />
+                    <Layers class="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{{ getFieldsText(lockedTpl) }}</span>
                   </span>
+                  <span class="text-slate-300">·</span>
+                  <span class="truncate text-slate-500">{{ t(lockedTpl.descKey) }}</span>
                 </div>
-                <p class="text-[12px] text-slate-500 mt-1.5 m-0 leading-normal">
-                  {{ t(lockedTpl.descKey) }}
-                </p>
               </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 shrink-0 pl-2 relative z-10">
               <a-button
-                type="outline"
+                type="primary"
                 shape="round"
-                class="self-start px-5 h-7.5 font-medium text-[12px] flex items-center gap-1.5"
+                class="px-4 h-7.5 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12px] flex items-center gap-1.5 shadow-sm"
               >
                 <span>{{ t('sidebar.useTemplate') }}</span>
                 <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -315,8 +335,7 @@ import {
   FileText,
   Layers,
   ArrowRight,
-  Plus,
-  X
+  Plus
 } from '@lucide/vue';
 
 const props = withDefaults(
@@ -432,5 +451,10 @@ function executeApplyTemplate() {
   padding: 0 !important;
   overflow: hidden;
   border-radius: 8px;
+}
+
+:deep(.clean-welcome-modal .arco-modal-header),
+:deep(.clean-welcome-modal .arco-modal-close-btn) {
+  display: none !important;
 }
 </style>

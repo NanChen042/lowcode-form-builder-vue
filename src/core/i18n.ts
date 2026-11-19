@@ -1800,21 +1800,196 @@ export function getInvalidFormatErrorMessage(locale?: string): string {
   return SYSTEM_INVALID_FORMAT_MESSAGES[current] || SYSTEM_INVALID_FORMAT_MESSAGES.en;
 }
 
+/**
+ * 字段默认语义化校验报错提示（支持 16 种语言体系）
+ */
+export const defaultValidationMessages: Record<string, Record<string, string>> = {
+  declaration: {
+    zh: '请确认并同意声明条款',
+    'zh-Hant': '請確認並同意聲明條款',
+    en: 'Please agree to the declarations',
+    ms: 'Sila sahkan dan bersetuju dengan pengisytiharan',
+    id: 'Harap konfirmasi dan setujui ketentuan pernyataan',
+    ta: 'அறிவிப்பு விதிமுறைகளை உறுதிசெய்து ஒப்புக்கொள்ளவும்',
+    th: 'โปรดยืนยันและยอมรับข้อกำหนดในคำชี้แจง',
+    vi: 'Vui lòng xác nhận và đồng ý với các điều khoản tuyên bố',
+    ja: '誓約事項を確認し、同意してください',
+    ko: '선언 조항을 확인하고 동의해 주세요',
+    hi: 'कृपया घोषणा की शर्तों की पुष्टि करें और सहमत हों',
+    es: 'Por favor, confirme y acepte los términos de la declaración',
+    fr: 'Veuillez confirmer et accepter les termes de la déclaration',
+    de: 'Bitte bestätigen Sie die Erklärung und stimmen Sie den Bedingungen zu',
+    pt: 'Por favor, confirme e concorde com os termos da declaração',
+    ru: 'Пожалуйста, подтвердите и согласитесь с условиями заявления'
+  },
+  signature: {
+    zh: '请完成手写签名',
+    'zh-Hant': '請完成手寫簽名',
+    en: 'Please complete handwritten signature',
+    ms: 'Sila lengkapkan tandatangan',
+    id: 'Harap lengkapi tanda tangan tulisan tangan',
+    ta: 'கையொப்பமிட்டு முடிக்கவும்',
+    th: 'โปรดลงลายมือชื่อให้สมบูรณ์',
+    vi: 'Vui lòng hoàn thành chữ ký viết tay',
+    ja: '手書き署名を完了してください',
+    ko: '자필 서명을 완료해 주세요',
+    hi: 'कृपया हस्तलिखित हस्ताक्षर पूरा करें',
+    es: 'Por favor, complete la firma manuscrita',
+    fr: 'Veuillez compléter votre signature manuscrite',
+    de: 'Bitte vervollständigen Sie Ihre handschriftliche Unterschrift',
+    pt: 'Por favor, conclua a assinatura manuscrita',
+    ru: 'Пожалуйста, поставьте рукописную подпись'
+  },
+  selectOne: {
+    zh: '请选择一个选项',
+    'zh-Hant': '請選擇一個選項',
+    en: 'Please select an option',
+    ms: 'Sila pilih satu pilihan',
+    id: 'Harap pilih satu opsi',
+    ta: 'ஒரு விருப்பத்தைத் தேர்ந்தெடுக்கவும்',
+    th: 'โปรดเลือกหนึ่งตัวเลือก',
+    vi: 'Vui lòng chọn một tùy chọn',
+    ja: '項目を1つ選択してください',
+    ko: '옵션을 하나 선택해 주세요',
+    hi: 'कृपया एक विकल्प चुनें',
+    es: 'Por favor, seleccione una opción',
+    fr: 'Veuillez sélectionner une option',
+    de: 'Bitte wählen Sie eine Option',
+    pt: 'Por favor, selecione uma opção',
+    ru: 'Пожалуйста, выберите один вариант'
+  },
+  selectAtLeastOne: {
+    zh: '请至少选择一个选项',
+    'zh-Hant': '請至少選擇一個選項',
+    en: 'Please select at least one option',
+    ms: 'Sila pilih sekurang-kurangnya satu pilihan',
+    id: 'Harap pilih setidaknya satu opsi',
+    ta: 'குறைந்தது ஒரு விருப்பத்தையாவது தேர்ந்தெடுக்கவும்',
+    th: 'โปรดเลือกอย่างน้อยหนึ่งตัวเลือก',
+    vi: 'Vui lòng chọn ít nhất một tùy chọn',
+    ja: '項目を1つ以上選択してください',
+    ko: '하나 이상의 옵션을 선택해 주세요',
+    hi: 'कृपया कम से कम एक विकल्प चुनें',
+    es: 'Por favor, seleccione al menos una opción',
+    fr: 'Veuillez sélectionner au moins une option',
+    de: 'Bitte wählen Sie mindestens eine Option',
+    pt: 'Por favor, selecione pelo menos uma opção',
+    ru: 'Пожалуйста, выберите хотя бы один вариант'
+  },
+  selectDate: {
+    zh: '请选择日期',
+    'zh-Hant': '請選擇日期',
+    en: 'Please select a date',
+    ms: 'Sila pilih tarikh',
+    id: 'Harap pilih tanggal',
+    ta: 'தேதியைத் தேர்ந்தெடுக்கவும்',
+    th: 'โปรดเลือกวันที่',
+    vi: 'Vui lòng chọn ngày',
+    ja: '日付を選択してください',
+    ko: '날짜를 선택해 주세요',
+    hi: 'कृपया दिनांक चुनें',
+    es: 'Por favor, seleccione una fecha',
+    fr: 'Veuillez sélectionner une date',
+    de: 'Bitte wählen Sie ein Datum',
+    pt: 'Por favor, selecione uma data',
+    ru: 'Пожалуйста, выберите дату'
+  },
+  required: {
+    zh: '必填项不能为空',
+    'zh-Hant': '必填項不能為空',
+    en: 'This required field cannot be empty',
+    ms: 'Medan ini diperlukan',
+    id: 'Kolom ini wajib diisi',
+    ta: 'இந்த புலம் அவசியமானது',
+    th: 'ช่องนี้จำเป็นต้องกรอก',
+    vi: 'Trường này là bắt buộc',
+    ja: 'この項目は必須です',
+    ko: '이 항목은 필수입니다',
+    hi: 'यह फ़ील्ड आवश्यक है',
+    es: 'Este campo es obligatorio',
+    fr: 'Ce champ est obligatoire',
+    de: 'Dieses Feld ist erforderlich',
+    pt: 'Este campo é obrigatório',
+    ru: 'Это поле обязательно для заполнения'
+  }
+};
+
+function resolveDefaultMsg(type: keyof typeof defaultValidationMessages, loc?: string): string {
+  const current = getEffectiveFormLocale(loc);
+  const norm = normalizeLocaleKey(current);
+  const dict = defaultValidationMessages[type];
+  if (!dict) return SYSTEM_REQUIRED_MESSAGES[norm] || SYSTEM_REQUIRED_MESSAGES.en;
+  return dict[norm] || dict[current] || dict[norm.split('-')[0]] || dict.en || dict.zh;
+}
+
 export function getFieldDefaultErrorMessage(
-  _element?: FormElement,
-  _subType?: 'declaration' | 'signature',
+  element?: FormElement,
+  subType?: 'declaration' | 'signature',
   locale?: string
 ): string {
-  return getRequiredErrorMessage(locale);
+  const current = getEffectiveFormLocale(locale);
+
+  if (subType === 'declaration') {
+    return resolveDefaultMsg('declaration', current);
+  }
+
+  if (subType === 'signature' || element?.type === 'signature') {
+    return resolveDefaultMsg('signature', current);
+  }
+
+  if (!element) {
+    return resolveDefaultMsg('required', current);
+  }
+
+  switch (element.type) {
+    case 'radio':
+      return resolveDefaultMsg('selectOne', current);
+    case 'checkbox':
+      return resolveDefaultMsg('selectAtLeastOne', current);
+    case 'select':
+    case 'country':
+    case 'nationality':
+      if (element.multiple) {
+        return resolveDefaultMsg('selectAtLeastOne', current);
+      }
+      return resolveDefaultMsg('selectOne', current);
+    case 'date':
+      return resolveDefaultMsg('selectDate', current);
+    case 'input':
+    case 'textarea':
+    case 'phone':
+    case 'email':
+    default:
+      return resolveDefaultMsg('required', current);
+  }
 }
 
 /**
- * 解析字段的有效必填校验错误提示（自动匹配 16 国语言，无需人工配置）
+ * 解析字段的有效校验错误提示（三级降级：用户自定义 > 组件语义默认兜底 > 系统通用提示）
  */
 export function getFieldValidationMessage(
-  _element?: FormElement,
-  _subType?: 'declaration' | 'signature',
+  element?: FormElement,
+  subType?: 'declaration' | 'signature',
   locale?: string
 ): string {
-  return getRequiredErrorMessage(locale);
+  const current = getEffectiveFormLocale(locale);
+
+  if (subType === 'declaration') {
+    if (element) {
+      const customDecl = readI18nField(element, 'declarationErrorMessage', current) ||
+        (current === 'zh' || current === primaryLocale.value ? (element as any).declarationErrorMessage : '');
+      if (customDecl && customDecl.trim()) return customDecl.trim();
+    }
+    return getFieldDefaultErrorMessage(element, 'declaration', current);
+  }
+
+  // 第一优先级：用户配置的自定义提示
+  if (element) {
+    const customErr = readI18nField(element, 'customErrorMessage', current) ||
+      (current === 'zh' || current === primaryLocale.value ? (element as any).customErrorMessage : '');
+    if (customErr && customErr.trim()) return customErr.trim();
+  }
+
+  // 第二优先级：组件语义化智能兜底
+  return getFieldDefaultErrorMessage(element, subType, current);
 }

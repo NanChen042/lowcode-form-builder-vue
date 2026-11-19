@@ -1353,12 +1353,6 @@ body.is-dragging-component .canvas-element .component-placeholder-text {
     padding: 0;
 }
 
-#components-basic .sortable-ghost[data-type="radio"],
-.sidebar-drag-group .sortable-ghost[data-type="radio"] {
-    height: 96px;
-    min-height: 96px;
-    border-radius: 8px;
-}
 
 #components-basic .sortable-ghost > *,
 #components-business .sortable-ghost > *,
@@ -2181,4 +2175,10 @@ body.tour-active.driver-active .driver-overlay {
 .sortable-ghost .drag-group-svg circle {
     fill: #60a5fa;
     opacity: 0.85;
+}
+
+/* 欢迎向导弹窗：彻底禁用 Arco 默认的 header 和关闭按钮，防止未选模板直接关闭导致空画布异常 */
+.clean-welcome-modal .arco-modal-header,
+.clean-welcome-modal .arco-modal-close-btn {
+    display: none !important;
 }
