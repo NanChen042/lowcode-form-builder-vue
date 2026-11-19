@@ -9,7 +9,7 @@ const nationalityEnMap: Record<string, string> = {
   cn: 'Chinese',
   hk: 'Hong Kong SAR China',
   mo: 'Macao SAR China',
-  tw: 'Taiwan, China',
+  tw: 'Taiwan (Province of China)',
   my: 'Malaysian',
   us: 'American',
   gb: 'British',

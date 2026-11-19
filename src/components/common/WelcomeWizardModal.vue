@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="'min(840px, 94vw)'"
+    :width="isLockedMode ? 'min(720px, 94vw)' : 'min(840px, 94vw)'"
     :align-center="true"
     :footer="false"
     :header="false"
@@ -39,6 +39,14 @@
           <span class="text-[12.5px] text-slate-600 font-medium select-none">
             {{ isRisk ? t('wizard.brandSubtitleRisk') : t('wizard.brandSubtitle') }}
           </span>
+          <a-tag
+            v-if="isLockedMode && lockedTpl"
+            :color="lockedTpl.tagColor"
+            size="medium"
+            class="rounded font-medium px-2.5 text-[11px] ml-1"
+          >
+            {{ getTemplateTag(lockedTpl) }}
+          </a-tag>
         </div>
 
         <!-- 右上角关闭按钮：风险评估模式或强制引导时不展示关闭按钮 -->
@@ -53,8 +61,89 @@
         </button>
       </header>
 
+      <!-- 适用对象已锁定：简洁版欢迎页，仅「空白新建」与「推荐模板」两张对称卡片 -->
+      <div v-if="isLockedMode && lockedTpl" class="p-5 select-none">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+          <div
+            class="group flex flex-col rounded-xl border border-blue-100/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 overflow-hidden text-left"
+            @click="handleCreateBlank"
+          >
+            <div class="h-[132px] w-full flex items-center justify-center bg-gradient-to-b from-[#f2f7fe] to-[#deebfe] px-4">
+              <img
+                :src="isRisk ? tplRiskHeroImg : tplBlankHeroImg"
+                :alt="isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank')"
+                class="max-h-[110px] w-full object-contain select-none pointer-events-none group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </div>
+            <div class="flex flex-1 flex-col justify-between gap-3 p-4">
+              <div>
+                <h3 class="text-[15px] font-bold text-slate-900 m-0 leading-tight group-hover:text-[#1677ff] transition-colors">
+                  {{ isRisk ? t('wizard.createBlankRisk') : t('wizard.createBlank') }}
+                </h3>
+                <p class="text-[12px] text-slate-500 mt-1.5 m-0 leading-normal">
+                  {{ isRisk ? t('wizard.lockedBlankRiskDesc') : t('wizard.lockedBlankDesc') }}
+                </p>
+              </div>
+              <a-button
+                type="primary"
+                shape="round"
+                class="self-start px-5 h-7.5 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12px] flex items-center gap-1.5 shadow-sm"
+              >
+                <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{{ t('wizard.createNowBtn') }}</span>
+                <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a-button>
+            </div>
+          </div>
+
+          <div
+            class="group flex flex-col rounded-xl border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 overflow-hidden text-left"
+            @click="handleSelectTemplate(lockedTpl.key)"
+          >
+            <div class="h-[132px] w-full flex items-center justify-center overflow-hidden" :class="lockedTpl.bannerBgClass">
+              <img
+                :src="lockedTpl.image"
+                :alt="getTemplateTitle(lockedTpl)"
+                class="h-full w-full object-cover select-none pointer-events-none group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </div>
+            <div class="flex flex-1 flex-col justify-between gap-3 p-4">
+              <div>
+                <h3 class="text-[15px] font-bold text-slate-900 m-0 leading-tight group-hover:text-[#1677ff] transition-colors">
+                  {{ getTemplateTitle(lockedTpl) }}
+                </h3>
+                <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-1.5 leading-none">
+                  <span class="flex items-center gap-1">
+                    <FileText class="w-3.5 h-3.5 shrink-0" />
+                    <span>{{ getPagesText(lockedTpl) }}</span>
+                  </span>
+                  <span class="text-slate-300">·</span>
+                  <span class="flex items-center gap-1">
+                    <Layers class="w-3.5 h-3.5 shrink-0" />
+                    <span>{{ getFieldsText(lockedTpl) }}</span>
+                  </span>
+                </div>
+                <p class="text-[12px] text-slate-500 mt-1.5 m-0 leading-normal">
+                  {{ t(lockedTpl.descKey) }}
+                </p>
+              </div>
+              <a-button
+                type="outline"
+                shape="round"
+                class="self-start px-5 h-7.5 font-medium text-[12px] flex items-center gap-1.5"
+              >
+                <span>{{ t('sidebar.useTemplate') }}</span>
+                <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 左侧快捷空白新建 + 右侧场景预置模板（KYC 与风险评估统一两栏结构） -->
-      <div class="p-5 select-none">
+      <div v-else class="p-5 select-none">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           
           <div class="md:col-span-5 flex">
@@ -98,7 +187,7 @@
           </div>
 
           <div class="md:col-span-7 flex flex-col justify-between">
-            <div>
+            <div class="flex flex-1 flex-col">
               <div class="flex items-start gap-2 mb-3">
                 <LayoutGrid class="w-4 h-4 text-[#1677ff] shrink-0 mt-0.5" />
                 <div>
@@ -255,9 +344,14 @@ const modalVisible = computed({
   }
 });
 
-const scenarioTemplates = computed<ScenarioTemplateMeta[]>(() =>
-  isRisk.value ? RISK_SCENARIO_TEMPLATES_META : SCENARIO_TEMPLATES_META
-);
+const scenarioTemplates = computed<ScenarioTemplateMeta[]>(() => {
+  const list = isRisk.value ? RISK_SCENARIO_TEMPLATES_META : SCENARIO_TEMPLATES_META;
+  // 适用对象已锁定（带 type 新建或编辑已有表单）时，仅提供该对象的模板
+  return store.lockedProfileType ? list.filter(tpl => tpl.type === store.lockedProfileType) : list;
+});
+
+const isLockedMode = computed(() => Boolean(store.lockedProfileType) && scenarioTemplates.value.length > 0);
+const lockedTpl = computed<ScenarioTemplateMeta | null>(() => scenarioTemplates.value[0] || null);
 
 function getTemplateTitle(tpl: ScenarioTemplateMeta) {
   return getFieldText(tpl, 'title', store.currentLocale);
@@ -310,6 +404,11 @@ function handleSelectTemplate(tplKey: ScenarioTemplateKey) {
 function executeApplyTemplate() {
   if (!pendingTemplateKey.value) return;
   const tplKey = pendingTemplateKey.value;
+  // 每个适用对象仅对应一个模板：选择模板即确定适用对象（编辑已有表单时保持原对象锁定）
+  if (!store.lockedProfileType) {
+    const picked = scenarioTemplates.value.find(t => t.key === tplKey);
+    if (picked) store.preferredProfileType = picked.type as any;
+  }
   applyTemplateKey(tplKey);
 
   Message.success(t('sidebar.templateLoaded') || '场景模板已成功载入');

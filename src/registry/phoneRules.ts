@@ -1507,7 +1507,7 @@ export const allCountryPhoneRules: CountryPhoneRule[] = [
     "iso2": "tw",
     "dialCode": "886",
     "code": "+886",
-    "name": "Taiwan, China",
+    "name": "Taiwan (Province of China)",
     "zh": "中国台湾"
   },
   {

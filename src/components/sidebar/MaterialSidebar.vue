@@ -851,7 +851,8 @@ const searchQuery = ref('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
 const filteredTemplates = computed(() => {
-  const list = scenarioTemplates.value;
+  const subject = store.lockedProfileType || store.preferredProfileType || store.meta.profileType || 'customer';
+  const list = scenarioTemplates.value.filter(tpl => tpl.type === subject);
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return list;
   return list.filter(tpl =>

@@ -113,6 +113,29 @@
 
       <a-form :model="formModel" layout="vertical">
         <a-form-item
+          :label="t('publish.profileType')"
+          required
+          class="mb-3"
+        >
+          <div class="w-full space-y-1.5">
+            <a-radio-group
+              v-model="formModel.profileType"
+              type="button"
+              size="small"
+              :disabled="true"
+              class="w-full grid grid-cols-3"
+            >
+              <a-radio value="customer" class="text-center">{{ t('modal.createForm.customer') }}</a-radio>
+              <a-radio value="individual" class="text-center">{{ t('modal.createForm.individual') }}</a-radio>
+              <a-radio value="entity" class="text-center">{{ t('modal.createForm.entity') }}</a-radio>
+            </a-radio-group>
+            <div class="text-[11px] text-slate-400 leading-normal">
+              {{ t('publish.profileTypeHint') }}
+            </div>
+          </div>
+        </a-form-item>
+
+        <a-form-item
           :label="activeLocale === 'zh' ? t('publish.formName') : t('publish.formNameEn')"
           required
           class="mb-3"
@@ -185,7 +208,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
-import { store, buildSchema, primaryLocale, establishBaseline, syncUrlParams, isRisk } from '@/core/store';
+import { store, buildSchema, primaryLocale, establishBaseline, syncUrlParams, isRisk, setFormProfileType } from '@/core/store';
+import type { ProfileType } from '@/types/schema';
 import { t } from '@/core/i18n';
 import { FormAPI } from '@/core/api';
 import { Message } from '@arco-design/web-vue';
@@ -216,7 +240,10 @@ const activeLocale = computed<'zh' | 'en'>({
     localPublishLocale.value = val;
   }
 });
+const isProfileTypeLocked = computed(() => Boolean(store.lockedProfileType));
+
 const formModel = reactive({
+  profileType: 'customer' as ProfileType,
   titleZh: '',
   titleEn: '',
   descZh: '',
@@ -258,6 +285,8 @@ watch(
       isSuccess.value = false;
       nameError.value = false;
       localPublishLocale.value = primaryLocale.value === 'en' ? 'en' : 'zh';
+      const curProfile = store.lockedProfileType || store.meta.profileType || store.preferredProfileType || 'customer';
+      formModel.profileType = (curProfile === 'client' || curProfile === 'customer') ? 'customer' : curProfile;
 
       let initZh = (store.meta.i18n.zh?.title || '').trim();
       let initEn = (store.meta.i18n.en?.title || '').trim();
@@ -348,6 +377,10 @@ async function handleConfirmPublish() {
     rawEn = rawZh;
   }
 
+  if (!isProfileTypeLocked.value && formModel.profileType) {
+    setFormProfileType(formModel.profileType);
+  }
+
   if (hasZhEnabled.value) {
     setMetaField('zh', 'title', rawZh);
     setMetaField('zh', 'description', formModel.descZh.trim());
@@ -368,6 +401,8 @@ async function handleConfirmPublish() {
       }
       isSuccess.value = true;
       const savedId = store.meta.formId || store.meta.serialNo;
+      store.lockedProfileType = (store.meta.profileType === 'client' || store.meta.profileType === 'customer') ? 'customer' : store.meta.profileType;
+      store.preferredProfileType = store.lockedProfileType;
       if (savedId) {
         syncUrlParams(savedId);
       }

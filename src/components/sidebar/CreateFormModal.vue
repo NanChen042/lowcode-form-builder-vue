@@ -22,13 +22,16 @@
             v-for="item in profileOptions"
             :key="item.value"
             type="button"
-            class="flex flex-col items-center justify-center py-2.5 px-2 rounded border transition-colors cursor-pointer select-none text-center"
+            :disabled="Boolean(store.lockedProfileType && store.lockedProfileType !== item.value)"
+            class="flex flex-col items-center justify-center py-2.5 px-2 rounded border transition-colors select-none text-center"
             :class="[
               selectedProfile === item.value
-                ? 'border-[#1677ff] bg-blue-50/40 text-[#1677ff] font-medium'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50'
+                ? 'border-[#1677ff] bg-blue-50/40 text-[#1677ff] font-medium cursor-pointer'
+                : (store.lockedProfileType && store.lockedProfileType !== item.value
+                  ? 'border-slate-200 bg-slate-50 text-slate-300 cursor-not-allowed opacity-60'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50 cursor-pointer')
             ]"
-            @click="selectedProfile = item.value"
+            @click="!store.lockedProfileType && (selectedProfile = item.value)"
           >
             <component :is="item.icon" class="w-4 h-4 mb-1" />
             <span class="text-[12px] leading-tight">{{ item.label }}</span>
@@ -164,7 +167,7 @@ watch(
     if (val) {
       customTitle.value = '';
       nameError.value = false;
-      selectedProfile.value = store.meta.profileType || 'customer';
+      selectedProfile.value = store.lockedProfileType || store.preferredProfileType || store.meta.profileType || 'customer';
       nextTick(() => {
         titleInputRef.value?.focus();
       });

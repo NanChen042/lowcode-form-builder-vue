@@ -1,7 +1,7 @@
 <template>
   <div class="system-profile-view w-full flex flex-col gap-3 text-left select-none">
     <div class="w-full">
-      <div class="relative overflow-hidden rounded-xl border border-[#bae0ff] bg-[#f0f7ff]/90 p-4 shadow-[0_1px_3px_rgba(22,119,255,0.06)] border-t-[3.5px] border-t-[#1677ff]">
+      <div class="relative overflow-hidden rounded-lg border border-[#bae0ff] bg-[#f0f7ff]/90 p-4 shadow-[0_1px_3px_rgba(22,119,255,0.06)] border-t-[3.5px] border-t-[#1677ff]">
         <div class="flex items-center gap-2 mb-2.5">
           <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
           <span class="text-[14px] font-bold text-slate-800 leading-5">
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+    <div class="rounded-lg border border-slate-100 bg-white p-4 shadow-xs">
       <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
         <div class="flex items-center gap-2">
           <Building2 v-if="profileType === 'entity' || profileType === 'client' || profileType === 'customer'" class="h-4 w-4 text-[#1677ff]" />
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div v-if="profileType === 'entity' || profileType === 'client' || profileType === 'customer'" class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+    <div v-if="profileType === 'entity' || profileType === 'client' || profileType === 'customer'" class="rounded-lg border border-slate-100 bg-white p-4 shadow-xs">
       <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
         <div class="flex items-center gap-2">
           <User class="h-4 w-4 text-[#1677ff]" />
@@ -73,7 +73,7 @@
       </div>
     </div>
 
-    <div v-if="profileType === 'individual' || profileType === 'entity'" class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+    <div v-if="profileType === 'individual' || profileType === 'entity'" class="rounded-lg border border-slate-100 bg-white p-4 shadow-xs">
       <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
         <div class="flex items-center gap-2">
           <Link2 class="h-4 w-4 text-[#1677ff]" />
@@ -123,7 +123,7 @@
     </div>
 
     <!-- 股份与出资信息卡片 (针对 individual / entity 展示) -->
-    <div v-if="hasCapital" class="rounded-xl border border-slate-100 bg-white p-4 shadow-xs">
+    <div v-if="hasCapital" class="rounded-lg border border-slate-100 bg-white p-4 shadow-xs">
       <div class="flex items-center justify-between border-b border-slate-100/80 pb-3 mb-3.5">
         <div class="flex items-center gap-2">
           <CircleDollarSign class="h-4 w-4 text-[#1677ff]" />

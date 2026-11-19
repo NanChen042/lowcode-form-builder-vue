@@ -159,12 +159,17 @@ function handleWelcomeWizardClosed() {
     return;
   }
   if (store.pages.length === 0) {
+    const fallbackType = store.lockedProfileType || store.preferredProfileType || 'customer';
     if (isRisk.value) {
-      const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType || 'customer', '', '', '', '');
+      const riskSchema = createRiskAssessmentTemplate(fallbackType, '', '', '', '');
       loadSchema(riskSchema);
     } else {
-      loadSchema(blankTemplate);
+      const blankSchema = createBlankTemplate(fallbackType, '', '', '');
+      loadSchema(blankSchema);
     }
+    const newFormId = generateFormId(fallbackType, 'diy');
+    store.meta.formId = newFormId;
+    store.meta.serialNo = newFormId;
     establishBaseline();
     store.lastSavedTime = '';
   }
@@ -241,42 +246,31 @@ onMounted(async () => {
 
   window.addEventListener('message', handleWindowMessage);
 
-  if (typeParam === 'individual') {
-    store.lockedProfileType = 'individual';
-  } else if (typeParam === 'entity') {
-    store.lockedProfileType = 'entity';
-  } else if (typeParam === 'customer' || typeParam === 'client') {
-    store.lockedProfileType = 'customer';
-  } else {
-    store.lockedProfileType = null;
-  }
+  const parsedType =
+    typeParam === 'individual'
+      ? 'individual'
+      : typeParam === 'entity'
+        ? 'entity'
+        : (typeParam === 'customer' || typeParam === 'client')
+          ? 'customer'
+          : null;
+
+  // 新建表单不硬锁类型，仅作为默认预选倾向；编辑已有持久化模板时在载入后锁定其原归属类型
+  // 带 type 参数新建（如从「设置模板」弹窗进入）时锁定该适用对象：向导/模板库/空白新建都只提供该对象的内容；
+  // 不带 type（如从列表新建）则可在欢迎页自由选择，选定后确定适用对象
+  store.lockedProfileType = rawId ? null : parsedType;
+  store.preferredProfileType = parsedType || (rawId ? null : 'customer');
 
   let targetTemplate: FormSchema = blankTemplate;
   let targetTemplateKey = 'blank';
 
   const resetToBlankState = () => {
-    if (store.lockedProfileType) {
-      if (isRisk.value) {
-        const riskSchema = createRiskAssessmentTemplate(store.lockedProfileType, '', '', '', '');
-        loadSchema(riskSchema, { duration: 0 });
-      } else {
-        const blankSchema = createBlankTemplate(store.lockedProfileType, '', '', '');
-        loadSchema(blankSchema, { duration: 0 });
-      }
-      store.selectedType = null;
-      store.selectedId = null;
-      store.meta.formId = '';
-      store.meta.serialNo = '';
-      syncUrlParams('');
-      store.activeTemplateKey = 'blank';
-      store.sidebarTab = 'components';
-      return;
-    }
     // 首次进入欢迎弹窗前，彻底清空画布（pages: []），防止背景残留 KYC 「基本资料」模板
     loadSchema({
       schemaVersion: '1.0.0',
       meta: {
         i18n: {},
+        profileType: store.lockedProfileType || store.preferredProfileType || 'customer',
         formType: isRisk.value ? 'risk' : 'kyc',
         baseLocale: store.currentLocale === 'en' ? 'en' : 'zh',
         enabledLocales: store.currentLocale === 'en' ? ['en'] : ['zh', 'en'],
@@ -330,13 +324,13 @@ onMounted(async () => {
         resetToBlankState();
         targetTemplateKey = 'blank';
       }
-    } else if (tplParam === 'kyc-customer' || tplParam === 'kyc-client' || typeParam === 'customer' || typeParam === 'client') {
+    } else if (tplParam === 'kyc-customer' || tplParam === 'kyc-client') {
       targetTemplate = kycCustomerTemplate;
       targetTemplateKey = 'kyc-customer';
-    } else if (tplParam === 'kyc-individual' || typeParam === 'individual') {
+    } else if (tplParam === 'kyc-individual') {
       targetTemplate = kycIndividualTemplate;
       targetTemplateKey = 'kyc-individual';
-    } else if (tplParam === 'kyc-entity' || typeParam === 'entity') {
+    } else if (tplParam === 'kyc-entity') {
       targetTemplate = kycEntityTemplate;
       targetTemplateKey = 'kyc-entity';
     } else {
@@ -417,6 +411,9 @@ onMounted(async () => {
       const effectiveId = rawId;
       store.meta.formId = effectiveId;
       store.meta.serialNo = effectiveId;
+      const loadedProfile = store.meta.profileType || parsedType || 'customer';
+      store.lockedProfileType = (loadedProfile === 'client' || loadedProfile === 'customer') ? 'customer' : loadedProfile;
+      store.preferredProfileType = store.lockedProfileType;
       syncUrlParams(effectiveId);
     } else {
       const newFormId = generateFormId(store.meta.profileType || 'customer', store.meta.source || 'template');

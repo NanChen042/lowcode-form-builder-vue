@@ -1,15 +1,14 @@
 # 系统多语言翻译对照表
 
 > **多语言架构说明**：
-> 1. **低代码表单设计器（PC 端工作台）**：系统界面固定且仅支持 **中英文双语** (`zh` 简体中文 / `en` 英语)。
-> 2. **表单组件、默认移动端样例与移动端填报端**：面向业务填报与终端用户，支持 **4 种标准多语言**：
+> 1. 低代码表单设计：界面支持 中英文双语 
+> 2. **表单组件、默认移动端样例与移动端填报端**：面向业务填报与终端用户，支持 **4 种翻译**：
 >    - **简体中文 (`zh`)**
 >    - **英语 (`en`)**
->    - **繁体中文 (`zh-Hant`)**：统一归一化为 `zh-Hant`，全面兼容香港 (`zh-HK`) 与台湾 (`zh-TW`) 等繁体语种分支
->    - **马来语 (`ms`)**：标准 Bahasa Melayu 语种
->    *(系统内不包含且不维护日语、韩语等其他非目标小语种)*。
+>    - **繁体中文 (`zh-Hant`)**
+>    - **马来语 (`ms`)**
 > 
-> 本表前半部分整理了 PC 端低代码设计器界面的中英对照文案；后半部分整理了系统预设资料卡片、表单组件默认文案、校验报错及移动端填报端的 4 语对照文案。如需业务定制，可在对应的“替换成”列中直接填写。
+> 2. 前半部分整理了 PC 端低代码设计器界面的中英对照文案；后半部分整理了系统预设资料卡片、表单组件默认文案、校验报错及移动端填报端的 4 语对照文案。如调整，可在对应的“替换成”列中直接填写。
 
 
 >
@@ -554,8 +553,8 @@
 | 检查多语言完整度，并将表单正式保存发布。 | Verify translation completeness and publish the form. | | | |
 | 1. 风险评估组件 | 1. Risk Question Component | | | |
 | 欢迎来到风险评估！点击或拖拽该组件添加到画布，选项固定为 Yes / No / NA 并支持配置扣分权重。 | Welcome to Risk Assessment! Click or drag this component to the canvas. Fixed Yes/No/NA logic with weight scoring. | | | |
-| 2. 画布与标题编辑 | 2. Canvas & Title Editing | | | |
-| 点击画布标题与说明文字即可直接修改，即改即显；亦可在右侧面板同步调整画布设置。 | Click directly on the canvas title and description to edit inline. You can also edit them in the right settings panel. | | | |
+| 2. 画布概览与快捷操作 | 2. Canvas Overview & Quick Actions | | | |
+| 点击画布空白区域即可在右侧面板查看问卷概览与评分规则，并可快捷新增分组或问题。 | Click the canvas to view the form overview and scoring rules in the right panel, and quickly add groups or questions. | | | |
 | 3. 问题分组与题目管理 | 3. Question Group & Management | | | |
 | 支持直接修改组名，按住左侧把手可上下拖拽排序；可在分组内点击“+ 添加问题”，或在右侧面板快捷加题加组。 | Edit group names inline and drag the left handle to reorder. Click "+ Add Question" inside the group or use the right panel to add questions and groups. | | | |
 | 4. 翻译管理 | 4. Translation Management | | | |

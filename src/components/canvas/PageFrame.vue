@@ -9,7 +9,7 @@
     class="mobile-frame absolute min-h-[720px] flex flex-col"
     :class="[
       isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white',
-      isRisk ? 'rounded-none shadow-[0_1px_4px_rgba(0,0,0,0.06),0_12px_32px_-6px_rgba(0,0,0,0.08)]' : 'w-[390px] rounded-2xl shadow-sm',
+      isRisk ? 'rounded-none shadow-[0_1px_4px_rgba(0,0,0,0.06),0_12px_32px_-6px_rgba(0,0,0,0.08)]' : 'w-[390px] rounded-xl shadow-sm',
       !inTranslationWorkspace && isPageSelected && isCurrentLocaleFocused
         ? (isRisk ? 'is-selected ring-2 ring-blue-500 shadow-lg' : 'is-selected ring-2 ring-blue-500 ring-offset-1 shadow-md')
         : (inTranslationWorkspace
@@ -35,12 +35,10 @@
       <div class="flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-black/40 transition-colors min-w-0" :class="inTranslationWorkspace ? 'cursor-default' : 'cursor-grab active:cursor-grabbing hover:text-black/70'">
         <Smartphone v-if="!isRisk" class="h-3.5 w-3.5 shrink-0" />
         <template v-if="isSystemProfile">
-          <span class="font-mono font-medium text-slate-700">01 · {{ t('common.basicInfo') }}</span>
-          <span class="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 border border-blue-200/60 ml-0.5">
-            <Lock class="h-2.5 w-2.5" />
-            {{ t('common.systemPreset') }}
-          </span>
-          <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
+          <span class="font-mono font-bold text-[13px] tracking-normal shrink-0 text-slate-700">01</span>
+          <span class="text-slate-400 font-normal shrink-0">·</span>
+          <span class="font-medium max-w-[160px] truncate text-slate-600">{{ t('common.basicInfo') }}</span>
+          <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded-[4px] bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
             {{ t('common.cannotDrop') }}
           </span>
         </template>
@@ -81,10 +79,10 @@
       <span>{{ t('canvas.droppable') }}</span>
     </div>
 
-    <div class="flex-auto flex flex-col w-full relative" :class="isRisk ? 'rounded-none' : 'rounded-2xl'">
+    <div class="flex-auto flex flex-col w-full relative" :class="isRisk ? 'rounded-none' : 'rounded-xl'">
       <div
         v-if="store.isDraggingComponent && isSystemProfile"
-        class="absolute inset-0 z-30 rounded-2xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
+        class="absolute inset-0 z-30 rounded-xl bg-slate-900/10 backdrop-blur-[1px] flex flex-col items-center justify-center p-6 text-center select-none pointer-events-none transition-all duration-200 border-2 border-dashed border-slate-300"
       >
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-md mb-2.5 text-slate-500">
           <Lock class="h-5 w-5 text-slate-400" />
@@ -124,7 +122,7 @@
         v-else
         :id="isTranslationFrame ? undefined : (pageIndex === 0 ? 'tour-risk-page-header' : undefined)"
         class="page-header-area pb-4 shrink-0"
-        :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', 'px-6 pt-6 rounded-t-2xl']"
+        :class="[isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white', 'px-6 pt-6 rounded-t-xl']"
         @click.stop="handleSelectPage"
       >
         <template v-if="isSystemProfile">
@@ -132,8 +130,8 @@
             <h2 class="text-xl font-bold tracking-tight text-slate-800 m-0 leading-7">
               {{ getPageText(page, 'title', frameLocale) || t('common.basicInfo') }}
             </h2>
-            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-              <Lock class="h-3 w-3" />
+            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-[4px] border border-slate-200/80 select-none">
+              <Lock class="h-3 w-3 text-slate-400" />
               {{ t('common.readOnly') }}
             </span>
           </div>
@@ -161,7 +159,7 @@
         </template>
       </div>
 
-      <div v-if="isSystemProfile" class="flex-auto bg-white p-3 rounded-b-2xl" @click="handleSelectPage">
+      <div v-if="isSystemProfile" class="flex-auto bg-white p-3 rounded-b-xl" @click="handleSelectPage">
         <SystemProfileView
           :profile-type="page.profileType || store.meta.profileType || 'customer'"
           :show-skeleton="page.showSkeleton !== false"
@@ -299,8 +297,8 @@
         </div>
       </div>
 
-      <div v-else class="canvas-pages-container relative flex-auto flex flex-col rounded-b-2xl" :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'">
-        <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
+      <div v-else class="canvas-pages-container relative flex-auto flex flex-col rounded-b-xl" :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'">
+        <div v-if="page.fields.length === 0" class="empty-state canvas-empty-state pointer-events-none absolute inset-3 z-0 flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200/80 bg-slate-50/30 transition-opacity duration-200" :class="{ 'opacity-0': store.isDraggingComponent }">
           <div class="relative mb-6 grid h-20 w-24 grid-cols-2 gap-2">
             <div class="col-span-2 rounded-md border border-slate-200 bg-white shadow-sm"></div>
             <div class="rounded-md border border-slate-200 bg-white shadow-sm"></div>

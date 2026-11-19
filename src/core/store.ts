@@ -148,6 +148,7 @@ export const store = reactive({
   },
 
   lockedProfileType: null as ProfileType | null,
+  preferredProfileType: null as ProfileType | null,
   editorMode: 'standard' as 'standard' | 'risk',
   riskPageWidth: 860,
   isRiskPageWidthCustomized: false
@@ -1363,6 +1364,9 @@ export function syncUrlParams(id?: string) {
       url.searchParams.set('id', formId);
     } else {
       url.searchParams.delete('id');
+      if (store.lockedProfileType) {
+        url.searchParams.set('type', store.lockedProfileType);
+      }
     }
     if (store.currentLocale) {
       url.searchParams.set('lang', store.currentLocale);
@@ -1395,12 +1399,47 @@ if (typeof window !== 'undefined') {
   );
 }
 
+export function getDefaultTemplateCode(profileType: ProfileType, riskMode = isRisk.value): string {
+  const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
+  if (riskMode) {
+    return normType === 'individual'
+      ? 'SG_CSP_RA_INDIVIDUAL_2025'
+      : normType === 'entity'
+        ? 'SG_CSP_RA_ENTITY_2025'
+        : 'SG_CSP_RA_CUSTOMER_2025';
+  }
+  return normType === 'individual'
+    ? 'SG_CSP_INDIVIDUAL_2025'
+    : normType === 'entity'
+      ? 'SG_CSP_ENTITY_2025'
+      : 'SG_CSP_CUSTOMER_2025';
+}
+
+export function setFormProfileType(newType: ProfileType) {
+  if (store.lockedProfileType) return;
+  const normType: ProfileType = (newType === 'client' || newType === 'customer') ? 'customer' : newType;
+  store.meta.profileType = normType;
+  store.preferredProfileType = normType;
+  if (!isRisk.value && store.pages.length > 0) {
+    const sysPage = store.pages.find(p => p.pageType === 'system_profile');
+    if (sysPage && sysPage.profileType !== normType) {
+      const refSysPage = createBlankTemplate(normType).pages[0];
+      sysPage.profileType = normType;
+      sysPage.profileFields = JSON.parse(JSON.stringify(refSysPage?.profileFields || []));
+    }
+  }
+}
+
 export function createNewCanvas(options: {
   title: string;
   description?: string;
   profileType?: ProfileType;
 }) {
-  const profileType = options.profileType || store.meta.profileType || 'customer';
+  const rawProfile = store.lockedProfileType || options.profileType || store.preferredProfileType || store.meta.profileType || 'customer';
+  const profileType: ProfileType = (rawProfile === 'client' || rawProfile === 'customer') ? 'customer' : rawProfile;
+  if (!store.lockedProfileType && options.profileType) {
+    store.preferredProfileType = profileType;
+  }
   const defaultTemplateTitles = [
     'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
     'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
@@ -1523,10 +1562,21 @@ export function applyTemplateKey(
     : '';
   const isPersisted = Boolean((persistedUrlId && !persistedUrlId.startsWith('preset-cdd-')) || store.lastSavedTime);
 
+  const effectiveProfileType: ProfileType = store.lockedProfileType || store.preferredProfileType || pType;
+  const effectiveDefaultTitle = getDefaultTemplateCode(effectiveProfileType);
+
   const clonedSchema: FormSchema = JSON.parse(JSON.stringify(templateSource));
+  if (!isRisk.value && effectiveProfileType !== pType && Array.isArray(clonedSchema.pages)) {
+    // 借用其他模板问卷页时，保留当前归属类型的第 1 页「基本资料」骨架
+    const refSysPage = createBlankTemplate(effectiveProfileType).pages[0];
+    const sysIdx = clonedSchema.pages.findIndex(p => p.pageType === 'system_profile');
+    if (sysIdx >= 0 && refSysPage) {
+      clonedSchema.pages[sysIdx] = JSON.parse(JSON.stringify(refSysPage));
+    }
+  }
   // 保留已持久化保存的 ID，切换模板时不重新生成 ID，保存时直接原地覆盖 (Update)
   const existingId = store.meta.formId || store.meta.serialNo;
-  const formId = (isPersisted && existingId) ? existingId : generateFormId(pType, 'template');
+  const formId = (isPersisted && existingId) ? existingId : generateFormId(effectiveProfileType, 'template');
   const now = Date.now();
 
   const curTitle = (store.meta.i18n?.zh?.title || '').trim();
@@ -1535,8 +1585,10 @@ export function applyTemplateKey(
   const shouldKeepTitleEn = isPersisted || Boolean(curTitleEn && !defaultTemplateTitles.includes(curTitleEn));
 
   // 若用户已手动修改过标题或表单已保存，则保留原标题；否则随模板切换自动同步为新模板默认名称
-  const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : (store.currentLocale === 'en' ? defaultTitleEn : defaultTitle));
-  const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : defaultTitleEn);
+  const targetTitle = effectiveProfileType !== pType ? effectiveDefaultTitle : defaultTitle;
+  const targetTitleEn = effectiveProfileType !== pType ? effectiveDefaultTitle : defaultTitleEn;
+  const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : (store.currentLocale === 'en' ? targetTitleEn : targetTitle));
+  const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : targetTitleEn);
 
   const isEnEntry = store.currentLocale === 'en';
   clonedSchema.meta.baseLocale = isEnEntry ? 'en' : 'zh';
@@ -1549,7 +1601,7 @@ export function applyTemplateKey(
     clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
     clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
   }
-  clonedSchema.meta.profileType = pType;
+  clonedSchema.meta.profileType = effectiveProfileType;
   clonedSchema.meta.source = 'template';
   clonedSchema.meta.templateKey = tplKey;
   clonedSchema.meta.formId = formId;
@@ -1564,7 +1616,7 @@ export function applyTemplateKey(
     store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
     store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
   }
-  store.meta.profileType = pType;
+  store.meta.profileType = effectiveProfileType;
   store.meta.source = 'template';
   store.meta.templateKey = tplKey;
   store.meta.formId = formId;

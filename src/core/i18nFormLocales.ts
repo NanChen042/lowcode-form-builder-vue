@@ -13,7 +13,7 @@ export const formRuntimeMultiMessages: Record<string, Record<string, string>> = 
     'common.nextStep': '下一步',
     'common.prefilledBaseline': '預置核驗節點',
     'common.fieldsUnit': '個欄位',
-    'common.systemPreset': '系統預設',
+    'common.systemPreset': '系統內置',
     'common.startDate': '開始日期',
     'common.endDate': '結束日期',
     'common.longTerm': '長期',
