@@ -1,5 +1,5 @@
 <template>
-  <div id="options-editor" class="options-editor space-y-1.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
+  <div id="options-editor" class="options-editor space-y-1.5 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
     <template v-if="isDisplayOnly">
       <div
         v-for="(option, idx) in options"
@@ -13,11 +13,11 @@
         <div class="flex-1 relative">
           <a-textarea
             :model-value="getOptionLabel(option)"
-            :auto-size="{ minRows: 1, maxRows: 5 }"
+            :auto-size="{ minRows: 2, maxRows: 8 }"
             size="small"
             allow-clear
-            :placeholder="t('options.noticePlaceholder')"
-            class="w-full !rounded-md !text-[12px]"
+            :placeholder="props.element?.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : t('options.noticePlaceholder')"
+            class="w-full !rounded-md !text-[12px] custom-scrollbar"
             :class="{ 'prop-field-focused': isOptionFocused(idx) }"
             @focus="onFocus(idx)"
             @blur="onBlur"

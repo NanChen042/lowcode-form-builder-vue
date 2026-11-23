@@ -20,8 +20,11 @@
             <Search class="w-3.5 h-3.5 text-slate-400" />
           </template>
         </a-input>
-        <div class="text-[12px] text-slate-500 whitespace-nowrap px-2.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-md shrink-0 font-medium font-mono">
-          {{ filteredUnifiedList.length }} / 244
+        <div
+          v-if="countrySearchKeyword.trim()"
+          class="text-[12px] text-slate-500 whitespace-nowrap px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-md shrink-0 font-medium font-mono"
+        >
+          {{ filteredUnifiedList.length }} / {{ unifiedDirectoryList.length }}
         </div>
       </div>
 
@@ -85,9 +88,9 @@
 
       <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
         <span>
-          {{ t('dir.totalCountPrefix') }} 244 {{ t('dir.totalCountSuffix') }}
+          {{ t('dir.totalCountPrefix') }} {{ unifiedDirectoryList.length }} {{ t('dir.totalCountSuffix') }}
         </span>
-        <span class="font-mono text-slate-400">244 Total</span>
+        <span class="font-mono text-slate-400">ISO 3166-1 / E.164</span>
       </div>
 
       <div class="px-3 py-2 rounded-md bg-slate-50/90 border border-slate-200/70 text-[11px] leading-relaxed text-slate-400">
@@ -165,7 +168,7 @@ const unifiedDirectoryList = computed(() => {
 });
 
 const countryModalTitle = computed(() => {
-  return `${t('dir.presetList')} (244)`;
+  return t('dir.presetList');
 });
 
 const filteredUnifiedList = computed(() => {

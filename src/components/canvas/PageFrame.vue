@@ -37,7 +37,7 @@
         <template v-if="isSystemProfile">
           <span class="font-mono font-bold text-[13px] tracking-normal shrink-0 text-slate-700">01</span>
           <span class="text-slate-400 font-normal shrink-0">·</span>
-          <span class="font-medium max-w-[160px] truncate text-slate-600">{{ t('common.basicInfo') }}</span>
+          <span class="font-medium max-w-[160px] truncate text-slate-600">{{ getPageText(page, 'title', frameLocale) || t('common.basicInfo') }}</span>
           <span v-if="store.isDraggingComponent" class="inline-flex items-center gap-1 rounded-[4px] bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600 border border-rose-200/80 ml-0.5 animate-pulse">
             {{ t('common.cannotDrop') }}
           </span>

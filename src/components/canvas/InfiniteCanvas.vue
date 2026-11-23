@@ -18,6 +18,22 @@
   >
     <div id="tour-canvas-viewport" class="absolute inset-0 pointer-events-none" />
 
+    <!-- 画布模式默认母版语言（英文）操作提示横幅 (Arco a-alert 组件 + 平滑折叠动画) -->
+    <transition name="alert-slide">
+      <a-alert
+        v-if="store.workspaceMode === 'builder' && !isDefaultLangTipDismissed"
+        type="info"
+        banner
+        closable
+        class="builder-lang-tip-alert absolute top-0 left-0 right-0 z-30 !py-1.5 !px-4 border-b border-[#b9d9fc]/70 select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        @close="dismissDefaultLangTip"
+        @mousedown.stop
+        @wheel.stop
+      >
+        <span class="text-xs text-slate-700 leading-normal">{{ t('canvas.defaultLangTip') }}</span>
+      </a-alert>
+    </transition>
+
     <!-- 翻译管理模式顶部语言切换与进度栏 (紧凑高阶微圆角风格) -->
     <div
       v-if="store.workspaceMode === 'translation'"
@@ -383,7 +399,7 @@
 
     <div
       v-if="store.pages.length > 0"
-      class="absolute bottom-8 right-8 z-50 flex items-center gap-2 select-none"
+      class="absolute bottom-8 right-8 z-50 flex items-center gap-1.5 select-none"
     >
       <a-tooltip :content="t('canvas.zoomFit') + (isMac ? ' (⇧1)' : ' (Shift+1)')" position="top">
         <button
@@ -404,72 +420,84 @@
         </button>
       </a-tooltip>
 
-      <a-dropdown
-        v-model:popup-visible="isZoomMenuOpen"
-        trigger="click"
-        position="top"
-        :popup-max-height="false"
-      >
-        <button
-          type="button"
-          class="flex h-8 min-w-[64px] cursor-pointer items-center justify-center rounded-full border border-slate-200/90 bg-white/90 px-3.5 text-[13px] font-semibold text-slate-700 shadow-sm shadow-black/5 backdrop-blur-md transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-[#1677ff] hover:shadow-md active:scale-95"
-          :class="{ 'border-blue-400/80 bg-white text-[#1677ff] shadow-md': isZoomMenuOpen }"
+      <div class="flex items-center h-8 rounded-full border border-slate-200/90 bg-white/95 shadow-sm shadow-black/5 backdrop-blur-md p-0.5">
+        <a-tooltip :content="t('canvas.zoomOut') + (isMac ? ' (⌘-)' : ' (Ctrl-)')" position="top">
+          <button
+            type="button"
+            class="flex items-center justify-center w-7 h-7 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+            @click="handleZoomAction('out')"
+          >
+            <Minus class="w-3.5 h-3.5" />
+          </button>
+        </a-tooltip>
+
+        <a-dropdown
+          v-model:popup-visible="isZoomMenuOpen"
+          trigger="click"
+          position="top"
+          :popup-max-height="false"
         >
-          {{ Math.round(store.canvasState.scale * 100) }}%
-        </button>
-        <template #content>
-          <a-doption value="in" @click="handleZoomAction('in')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
-              <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ t('canvas.zoomIn') }}
-              </span>
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                {{ isMac ? '⌘+' : 'Ctrl+' }}
-              </span>
+          <button
+            type="button"
+            class="flex h-7 min-w-[58px] cursor-pointer items-center justify-center rounded-full px-2 text-[12.5px] font-semibold text-slate-700 transition-all duration-200 hover:bg-blue-50/80 hover:text-[#1677ff] active:scale-95"
+            :class="{ 'bg-blue-50 text-[#1677ff] font-bold': isZoomMenuOpen }"
+            :title="t('canvas.zoom100') + ' (双击 100%)'"
+            @dblclick.stop="handleZoomAction('100')"
+          >
+            {{ Math.round(store.canvasState.scale * 100) }}%
+          </button>
+          <template #content>
+            <div class="zoom-dropdown-panel min-w-[160px] py-0.5">
+              <a-doption value="in" class="zoom-dropdown-option" @click="handleZoomAction('in')">
+                <span class="text-[12px] text-slate-700 font-medium">{{ t('canvas.zoomIn') }}</span>
+                <template #suffix>
+                  <span class="text-[11px] text-slate-400 font-mono">{{ isMac ? '⌘+' : 'Ctrl+' }}</span>
+                </template>
+              </a-doption>
+
+              <a-doption value="out" class="zoom-dropdown-option" @click="handleZoomAction('out')">
+                <span class="text-[12px] text-slate-700 font-medium">{{ t('canvas.zoomOut') }}</span>
+                <template #suffix>
+                  <span class="text-[11px] text-slate-400 font-mono">{{ isMac ? '⌘-' : 'Ctrl-' }}</span>
+                </template>
+              </a-doption>
+
+              <div class="my-1 border-t border-slate-100"></div>
+
+              <a-doption value="100" class="zoom-dropdown-option" @click="handleZoomAction('100')">
+                <span class="text-[12px] text-slate-700 font-medium">{{ t('canvas.zoom100') }}</span>
+                <template #suffix>
+                  <span class="text-[11px] text-slate-400 font-mono">{{ isMac ? '⇧0' : 'Shift+0' }}</span>
+                </template>
+              </a-doption>
+
+              <a-doption value="fit" class="zoom-dropdown-option" @click="handleZoomAction('fit')">
+                <span class="text-[12px] text-slate-700 font-medium">{{ t('canvas.zoomFit') }}</span>
+                <template #suffix>
+                  <span class="text-[11px] text-slate-400 font-mono">{{ isMac ? '⇧1' : 'Shift+1' }}</span>
+                </template>
+              </a-doption>
+
+              <a-doption value="selection" class="zoom-dropdown-option" @click="handleZoomAction('selection')">
+                <span class="text-[12px] text-slate-700 font-medium">{{ t('canvas.zoomSelection') }}</span>
+                <template #suffix>
+                  <span class="text-[11px] text-slate-400 font-mono">{{ isMac ? '⇧2' : 'Shift+2' }}</span>
+                </template>
+              </a-doption>
             </div>
-          </a-doption>
-          <a-doption value="out" @click="handleZoomAction('out')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
-              <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ t('canvas.zoomOut') }}
-              </span>
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                {{ isMac ? '⌘-' : 'Ctrl-' }}
-              </span>
-            </div>
-          </a-doption>
-          <a-doption value="100" @click="handleZoomAction('100')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
-              <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ t('canvas.zoom100') }}
-              </span>
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                {{ isMac ? '⇧0' : 'Shift+0' }}
-              </span>
-            </div>
-          </a-doption>
-          <a-doption value="fit" @click="handleZoomAction('fit')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
-              <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ t('canvas.zoomFit') }}
-              </span>
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                {{ isMac ? '⇧1' : 'Shift+1' }}
-              </span>
-            </div>
-          </a-doption>
-          <a-doption value="selection" @click="handleZoomAction('selection')">
-            <div class="flex items-center justify-between gap-6 w-full min-w-[185px] py-0.5 whitespace-nowrap">
-              <span class="text-[13px] text-slate-700 font-medium whitespace-nowrap">
-                {{ t('canvas.zoomSelection') }}
-              </span>
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                {{ isMac ? '⇧2' : 'Shift+2' }}
-              </span>
-            </div>
-          </a-doption>
-        </template>
-      </a-dropdown>
+          </template>
+        </a-dropdown>
+
+        <a-tooltip :content="t('canvas.zoomIn') + (isMac ? ' (⌘+)' : ' (Ctrl+)')" position="top">
+          <button
+            type="button"
+            class="flex items-center justify-center w-7 h-7 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+            @click="handleZoomAction('in')"
+          >
+            <Plus class="w-3.5 h-3.5" />
+          </button>
+        </a-tooltip>
+      </div>
     </div>
 
 
@@ -533,12 +561,18 @@ import {
   ChevronUp,
   X,
   Plus,
+  Minus,
   Check
 } from '@lucide/vue';
 import { Message } from '@arco-design/web-vue';
 import { translationStats, navigateToUntranslatedItem, type UntranslatedItem } from '@/utils/translationHelper';
 
 defineEmits(['open-template-gallery', 'open-create-canvas']);
+
+const isDefaultLangTipDismissed = ref(false);
+function dismissDefaultLangTip() {
+  isDefaultLangTipDismissed.value = true;
+}
 
 const canvasContainerRef = ref<HTMLElement | null>(null);
 const localeTabsBarRef = ref<HTMLElement | null>(null);
@@ -903,10 +937,13 @@ const offScreenDirection = computed(() => {
 });
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform || '');
 
-function zoomTo100() {
+function zoomToScale(targetScale: number) {
   const oldScale = store.canvasState.scale;
-  if (Math.abs(oldScale - 1.0) < 0.001) return;
-  animateCanvasTransition(300);
+  if (Math.abs(oldScale - targetScale) < 0.001) {
+    isZoomMenuOpen.value = false;
+    return;
+  }
+  animateCanvasTransition(240);
   const container = canvasContainerRef.value;
   const viewportWidth = container?.clientWidth || Math.max(320, window.innerWidth - (store.leftSidebarVisible ? store.leftSidebarWidth : 0) - (store.rightSidebarVisible ? store.rightSidebarWidth : 0));
   const viewportHeight = container?.clientHeight || Math.max(320, window.innerHeight - 56);
@@ -914,9 +951,14 @@ function zoomTo100() {
   const centerY = viewportHeight / 2;
   const worldX = (centerX - store.canvasState.x) / oldScale;
   const worldY = (centerY - store.canvasState.y) / oldScale;
-  store.canvasState.scale = 1.0;
-  store.canvasState.x = centerX - worldX;
-  store.canvasState.y = centerY - worldY;
+  store.canvasState.scale = targetScale;
+  store.canvasState.x = centerX - worldX * targetScale;
+  store.canvasState.y = centerY - worldY * targetScale;
+  isZoomMenuOpen.value = false;
+}
+
+function zoomTo100() {
+  zoomToScale(1.0);
 }
 
 function zoomToSelection() {
@@ -941,8 +983,10 @@ function zoomToSelection() {
 
 function handleZoomAction(action: 'in' | 'out' | '100' | 'fit' | 'selection') {
   if (action === 'in') {
+    animateCanvasTransition(160);
     adjustZoom(0.1);
   } else if (action === 'out') {
+    animateCanvasTransition(160);
     adjustZoom(-0.1);
   } else if (action === '100') {
     zoomTo100();
@@ -1279,6 +1323,38 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.builder-lang-tip-alert {
+  align-items: center !important;
+}
+.builder-lang-tip-alert :deep(.arco-alert-icon) {
+  margin-top: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+}
+.builder-lang-tip-alert :deep(.arco-alert-body),
+.builder-lang-tip-alert :deep(.arco-alert-content) {
+  display: flex;
+  align-items: center;
+  line-height: 18px;
+}
+.builder-lang-tip-alert :deep(.arco-alert-close-btn) {
+  top: 0 !important;
+  margin-top: 0 !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.alert-slide-enter-active,
+.alert-slide-leave-active {
+  transition: all 0.28s cubic-bezier(0.3, 0, 0.2, 1);
+}
+.alert-slide-enter-from,
+.alert-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
 .pill-bounce-enter-active,
 .pill-bounce-leave-active {
   transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);

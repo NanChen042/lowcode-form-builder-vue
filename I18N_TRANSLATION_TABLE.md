@@ -44,10 +44,6 @@
 | 预置核验节点 | Pre-filled Baseline |  |  |  |
 | 开始日期 | Start Date |  |  |  |
 | 结束日期 | End Date |  |  |  |
-| 选择日期 | Select Date |  |  |  |
-| 选择日期范围 | Select Date Range |  |  |  |
-| 请输入有效数字 | Please enter a valid number |  |  |  |
-| 请输入有效的邮箱地址 | Please enter a valid email |  |  |  |
 | 最多只能选择 {count} 项 | Maximum {count} items allowed |  |  |  |
 | 最多只能选择 {count} 项 | Maximum {count} items allowed |  |  |  |
 | 搜索国家/地区、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)... | Search by country/region, nationality, code or dial code (e.g. Singapore, SG, +65)... |  |  |  |
@@ -138,6 +134,7 @@
 ## 画布与画板交互
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
+| 提示：画布模式下编辑的是默认语言（英文）内容，请使用英文填写所有组件内容。 | Note: In canvas mode, you are editing content in the default language (English). Please enter all component content in English. |  |  |  |
 | 请在此处手写签名 | Please sign here |  |  |  |
 | 可放置画布 | Droppable Canvas |  |  |  |
 | 系统预设步骤 · 不可添加组件 | System Preset · Cannot Drop |  |  |  |
@@ -472,12 +469,10 @@
 | 涵盖 MHA 恐怖分子名单、MAS 制裁名单、FATF 名单及高风险客户特征 4 道评估项。 | Covers MHA terrorist list, MAS sanctions list, FATF list, and higher-risk entity checks (4 questions). |  |  |  |
 | 1 页面 · 4 题 | 1 Page · 4 Questions |  |  |  |
 | 涵盖客户、国家及服务交易三大风险维度（34 题）。 | Covers client, country, and service risk dimensions (34 questions). |  |  |  |
-| 当前默认 | Current Context |  |  |  |
 | 从空白画布开始，自由搭建当前案例的 KYC 问卷。 | Start from a blank canvas and build the KYC questionnaire for this subject. |  |  |  |
 | 从空白画布开始，自由配置当前案例的风险评估问题与权重。 | Start from a blank canvas and configure risk questions and weights for this subject. |  |  |  |
-| 适用对象 | Applicable Subject |  |  |  |
-| 当前工作台为中文界面，需设置双语表单才可发布；若仅需要英文表单，可选择进入英文工作台创建。 | Current workspace is in Chinese and requires bilingual form configuration. If you only need an English form, switch to the English workspace. |  |  |  |
-| 切换到英文版 | Switch to English |  |  |  |
+| 支持空白自定义或选用场景模板 | Start from scratch or use scenario templates |  |  |  |
+| 支持空白自定义或选用预置模型 | Start from scratch or use preset models |  |  |  |
 
 ## 新建表单弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -582,6 +577,10 @@
 | 设计完成后可随时保存草稿；点击“发布表单”系统将校验问卷并正式上线。 | Save progress to draft anytime, or click "Publish" to validate and deploy your form. |  |  |  |
 | 5. 基本资料页 | 5. Basic Info Page |  |  |  |
 | 首页为客户基本资料展示页（不可编辑），后续页面可自由添加字段。 | First page displays read-only basic information; subsequent pages are customizable. |  |  |  |
+| 9. 随时重新开启指南 | 9. Reopen Guide Anytime |  |  |  |
+| 如果后续需要再次查看操作指南，可随时点击左下角此处的问号图标重新唤起。 | Click this help icon here on the bottom-left bar at any time to reopen this interactive guide. |  |  |  |
+| 6. 随时重新开启指南 | 6. Reopen Guide Anytime |  |  |  |
+| 如果后续需要再次查看操作指南，可随时点击左下角此处的问号图标重新唤起。 | Click this help icon here on the bottom-left bar at any time to reopen this interactive guide. |  |  |  |
 
 ## API 接口错误提示
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -645,6 +644,11 @@
 | 添加分组 | Add Group |  |  |  |
 | 添加新问题分组 | Add Question Group |  |  |  |
 | 已添加新问题分组 | New question group added |  |  |  |
+| 多语言风险评估问卷操作演示 | Multilingual Risk Assessment Video Tutorial |  |  |  |
+| 温馨提示：进入翻译管理后，可对照配置风险评估题目与选项语言版本。 | Tip: In Translation Management, you can configure risk questions and options across languages. |  |  |  |
+| 拖拽至分组或直接点击添加，用于构建客户合规审查项。 | Drag or click to add into groups to build compliance questions. |  |  |  |
+| 选项: | Options: |  |  |  |
+| 按住拖拽添加至分组 | Drag to add to group |  |  |  |
 
 ## 标准组件类型名称
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
@@ -689,7 +693,6 @@
 | 请填写第 {page} 页中未命名组件的标题 | Please enter the label for the untitled field on Page {page} |  |  |  |
 | 已保存至草稿 {time} | Draft saved {time} |  |  |  |
 | 必填项不能为空 | This required field cannot be empty |  |  |  |
-| 请输入有效的手机号码 | Please enter a valid phone number |  |  |  |
 | 请填写「{group}」第 {index} 题的题目内容 | Please enter question text for Question {index} in "{group}" |  |  |  |
 | 请填写「{group}」第 {index} 题的题目内容（共 {total} 题未填写） | Please enter question text for Question {index} in "{group}" ({total} unfilled) |  |  |  |
 

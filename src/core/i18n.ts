@@ -237,6 +237,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.confirmOverwriteBtn': '确定覆盖',
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
+    'canvas.defaultLangTip': '提示：画布模式下编辑的是默认语言（英文）内容，请使用英文填写所有组件内容。',
     'canvas.signatureArea': '请在此处手写签名',
     'canvas.droppable': '可放置画布',
     'canvas.presetCannotDrop': '固定页面 · 不可添加组件',
@@ -876,6 +877,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'sidebar.confirmOverwriteBtn': 'Confirm Overwrite',
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
+    'canvas.defaultLangTip': 'Note: In canvas mode, you are editing content in the default language (English). Please enter all component content in English.',
     'canvas.signatureArea': 'Please sign here',
     'canvas.droppable': 'Droppable Canvas',
     'canvas.presetCannotDrop': 'Fixed Page · Cannot Add Fields',

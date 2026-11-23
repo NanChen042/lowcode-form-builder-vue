@@ -301,13 +301,32 @@
             <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
           </a-tooltip>
         </div>
-        <a-input-number
-          v-model="currentMaxSelections"
-          :min="1"
-          :max="maxAllowedLimit"
-          size="small"
-          style="width: 100px"
-        />
+        <div class="inline-flex items-center h-7 rounded border border-slate-200 bg-slate-50/50 overflow-hidden shadow-2xs">
+          <button
+            type="button"
+            class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            :disabled="(currentMaxSelections ?? 1) <= 1"
+            @click="currentMaxSelections = Math.max(1, (currentMaxSelections ?? 1) - 1)"
+          >
+            <Minus class="w-3 h-3 stroke-[2.2]" />
+          </button>
+          <input
+            type="number"
+            :value="currentMaxSelections ?? 1"
+            min="1"
+            :max="maxAllowedLimit"
+            class="w-11 h-full bg-white border-x border-slate-200 text-center text-[13px] font-semibold text-slate-700 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            @change="onMaxSelectionsInputChange"
+          />
+          <button
+            type="button"
+            class="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            :disabled="(currentMaxSelections ?? 1) >= maxAllowedLimit"
+            @click="currentMaxSelections = Math.min(maxAllowedLimit, (currentMaxSelections ?? 1) + 1)"
+          >
+            <Plus class="w-3 h-3 stroke-[2.2]" />
+          </button>
+        </div>
       </div>
     </CollapseTransition>
   </div>
@@ -646,6 +665,19 @@ const currentMaxSelections = computed<number | undefined>({
     markDirty();
   }
 });
+
+function onMaxSelectionsInputChange(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const val = parseInt(target.value, 10);
+  if (isNaN(val) || val < 1) {
+    currentMaxSelections.value = 1;
+    target.value = '1';
+  } else {
+    const clamped = Math.min(maxAllowedLimit.value, Math.max(1, val));
+    currentMaxSelections.value = clamped;
+    target.value = String(clamped);
+  }
+}
 
 function isFieldFocused(
   field: 'label' | 'placeholder' | 'help' | 'default' | 'endPlaceholder' | 'signPlaceholder' | 'customErrorMessage' | 'declarationErrorMessage'

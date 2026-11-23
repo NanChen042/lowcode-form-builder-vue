@@ -69,20 +69,12 @@
       @click="startEditing"
     >
       <div class="flex items-center gap-1.5 min-w-0 flex-1 pr-1.5">
-        <svg
-          class="h-3 w-3 text-[#f53f3f] shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+        <AlertCircle class="w-3.5 h-3.5 text-slate-400 group-hover/err-preview:text-slate-500 shrink-0 transition-colors" />
+        <span
+          class="text-[12px] break-words truncate select-none"
+          :class="isCustomized ? 'font-medium text-slate-700' : 'font-normal text-slate-500'"
+          :title="displayText"
         >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <span class="text-[12px] font-normal text-[#f53f3f] break-words truncate" :title="displayText">
           {{ displayText }}
         </span>
       </div>
@@ -138,7 +130,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
-import { MessageSquare, HelpCircle, Pencil, RotateCcw, Check, CheckCircle2 } from '@lucide/vue';
+import { MessageSquare, HelpCircle, AlertCircle, Pencil, RotateCcw, Check, CheckCircle2 } from '@lucide/vue';
 import { t } from '@/core/i18n';
 
 interface Props {
