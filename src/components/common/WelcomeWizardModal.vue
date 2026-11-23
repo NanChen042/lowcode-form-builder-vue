@@ -52,7 +52,7 @@
             </span>
           </div>
           <span class="text-[11.5px] text-slate-400">
-            {{ isRisk ? '支持空白自定义或选用预置模型' : '支持空白自定义或选用场景模板' }}
+            {{ isRisk ? t('wizard.lockedSubtextRisk') : t('wizard.lockedSubtext') }}
           </span>
         </div>
 
