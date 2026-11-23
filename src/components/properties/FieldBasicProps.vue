@@ -23,18 +23,22 @@
           <a-switch v-model="isShowLabel" size="small" />
         </div>
       </div>
-      <a-textarea
-        id="prop-label-input"
-        v-model="fieldLabelModel"
-        :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 5 }"
-        allow-clear
-        :placeholder="element.type === 'alert' ? t('common.notice', primaryLocale) : (isRisk ? t('risk.enterQuestionPlaceholder', primaryLocale) : t('prop.fieldLabelPlaceholder', primaryLocale))"
-        class="w-full"
-        :class="{ 'prop-field-focused': isFieldFocused('label') }"
-        @focus="setFocus('label')"
-        @blur="clearFocus"
-        @input="markDirty"
-      />
+      <CollapseTransition :show="Boolean(isShowLabel)">
+        <div>
+          <a-textarea
+            id="prop-label-input"
+            v-model="fieldLabelModel"
+            :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 5 }"
+            allow-clear
+            :placeholder="element.type === 'alert' ? t('common.notice', primaryLocale) : (isRisk ? t('risk.enterQuestionPlaceholder', primaryLocale) : t('prop.fieldLabelPlaceholder', primaryLocale))"
+            class="w-full"
+            :class="{ 'prop-field-focused': isFieldFocused('label') }"
+            @focus="setFocus('label')"
+            @blur="clearFocus"
+            @input="markDirty"
+          />
+        </div>
+      </CollapseTransition>
     </div>
 
     <template v-if="isRisk">
@@ -160,14 +164,89 @@
       </CollapseTransition>
     </div>
 
+    <!-- 电子签名特有：声明条款配置与必填 (位于标题下方、签名板上方，与画布完全对齐) -->
+    <div v-if="element.type === 'signature'" class="pt-3 border-t border-slate-100 space-y-2.5 mb-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[12px] font-semibold text-slate-700">
+            {{ t('prop.clauseConfig') }}
+          </span>
+          <a-tooltip :content="t('prop.clauseConfigTip')" position="top">
+            <HelpCircle class="h-3.5 w-3.5 text-slate-400 hover:text-[#1677ff] cursor-help transition-colors" />
+          </a-tooltip>
+        </div>
+        <span class="text-[11px] text-slate-400">
+          {{ store.currentLocale === 'en'
+            ? `${element.options?.length || 0} items`
+            : `共 ${element.options?.length || 0} 条`
+          }}
+        </span>
+      </div>
+
+      <OptionsEditor :element="element" />
+
+      <!-- 声明条款必填校验 -->
+      <div class="flex items-center justify-between py-1.5 border-t border-slate-50">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
+        </div>
+        <a-switch v-model="isDeclarationRequired" size="small" />
+      </div>
+
+      <CollapseTransition
+        :key="`${element.id}-decl`"
+        :show="Boolean(isDeclarationRequired)"
+      >
+        <div class="pt-2 pb-1">
+          <ValidationErrorItem
+            :label="t('prop.declarationErrorMsg')"
+            v-model="fieldDeclarationErrorModel"
+            :default-text="rawDeclarationErrorMessage"
+            input-id="prop-declaration-error-input"
+            :is-focused="isFieldFocused('declarationErrorMessage')"
+            @focus="setFocus('declarationErrorMessage')"
+            @blur="clearFocus"
+          />
+        </div>
+      </CollapseTransition>
+    </div>
+
+    <!-- 电子签名手写签名板分区小标题 -->
+    <div v-if="element.type === 'signature'" class="pt-3 border-t border-slate-100 mb-2">
+      <div class="flex items-center justify-between">
+        <span class="text-[12px] font-semibold text-slate-700">{{ t('canvas.signatureArea') }}</span>
+      </div>
+    </div>
+
     <div v-if="hasPlaceholder" class="mb-3">
       <div class="flex items-center justify-between mb-1">
         <span class="text-[12px] font-medium text-slate-700">{{ placeholderFieldLabel }}</span>
-        <a-tag v-if="isFieldPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
+        <div v-if="element.type === 'signature'" class="flex items-center gap-1.5 font-normal select-none">
+          <span class="text-[11px] text-slate-400">{{ t('prop.showSignPrompt') }}</span>
+          <a-switch v-model="isShowSignPrompt" size="small" />
+        </div>
+        <a-tag v-else-if="isFieldPlaceholderMissing" color="orange" size="small" class="text-[10px] scale-90 origin-right">
           {{ t('prop.untranslated') }}
         </a-tag>
       </div>
+      <CollapseTransition v-if="element.type === 'signature'" :show="Boolean(isShowSignPrompt)">
+        <div>
+          <a-textarea
+            id="prop-placeholder-input"
+            v-model="fieldPlaceholderModel"
+            :auto-size="{ minRows: 1, maxRows: 4 }"
+            allow-clear
+            :placeholder="placeholderInputDefault"
+            class="w-full"
+            :class="{ 'prop-field-focused': isFieldFocused('placeholder') }"
+            @focus="setFocus('placeholder')"
+            @blur="clearFocus"
+            @input="markDirty"
+          />
+        </div>
+      </CollapseTransition>
       <a-textarea
+        v-else
         id="prop-placeholder-input"
         v-model="fieldPlaceholderModel"
         :auto-size="{ minRows: 1, maxRows: 4 }"
@@ -252,31 +331,6 @@
       </div>
     </CollapseTransition>
 
-    <div v-if="element.type === 'signature'" class="flex items-center justify-between py-1.5 border-t border-slate-50">
-      <div class="flex items-center gap-1.5">
-        <span class="text-[12px] font-medium text-slate-600">{{ t('prop.declarationRequired') }}</span>
-      </div>
-      <a-switch v-model="isDeclarationRequired" size="small" />
-    </div>
-
-    <CollapseTransition
-      v-if="element.type === 'signature'"
-      :key="`${element.id}-decl`"
-      :show="Boolean(isDeclarationRequired)"
-    >
-      <div class="pt-2 pb-1">
-        <ValidationErrorItem
-          :label="t('prop.declarationErrorMsg')"
-          v-model="fieldDeclarationErrorModel"
-          :default-text="rawDeclarationErrorMessage"
-          input-id="prop-declaration-error-input"
-          :is-focused="isFieldFocused('declarationErrorMessage')"
-          @focus="setFocus('declarationErrorMessage')"
-          @blur="clearFocus"
-        />
-      </div>
-    </CollapseTransition>
-
     <div v-if="['select', 'country', 'nationality'].includes(element.type)" class="flex items-center justify-between py-1.5 border-t border-slate-50">
       <div class="flex items-center gap-1.5">
         <span class="text-[12px] font-medium text-slate-600">{{ t('prop.allowMultiple') }}</span>
@@ -340,6 +394,7 @@ import { t, getFieldDefaultErrorMessage, getFieldText, setFieldText, getEffectiv
 import { componentRegistry } from '@/registry/components';
 import CollapseTransition from '@/components/common/CollapseTransition.vue';
 import ValidationErrorItem from './ValidationErrorItem.vue';
+import OptionsEditor from './OptionsEditor.vue';
 import { HelpCircle, CornerDownRight, Minus, Plus } from '@lucide/vue';
 
 const props = defineProps<{
@@ -388,6 +443,16 @@ const isShowLabel = computed({
   },
   set(val: boolean) {
     props.element.showLabel = val;
+    markDirty();
+  }
+});
+
+const isShowSignPrompt = computed({
+  get() {
+    return props.element.showSignPrompt !== false;
+  },
+  set(val: boolean) {
+    props.element.showSignPrompt = val;
     markDirty();
   }
 });

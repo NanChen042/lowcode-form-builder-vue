@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <div class="signature-pad-label mb-2 flex items-center gap-1">
+      <div v-if="element.showSignPrompt !== false" class="signature-pad-label mb-2 flex items-center gap-1">
         <span v-if="element.required" class="signature-pad-required text-red-500 font-bold">*</span>
         <EditableText
           :model-value="getFieldText(element, 'placeholder', frameLocale)"

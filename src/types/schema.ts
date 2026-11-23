@@ -64,6 +64,7 @@ export interface FormElement {
   maxSelections?: number | null;
   layout?: 'inline' | 'stack';
   declarationRequired?: boolean;
+  showSignPrompt?: boolean;
   // 提示区块列表样式 (文本内容见 i18n.*.content，支持换行、- 列表、[文字](链接))
   listStyle?: 'circle' | 'number';
   // 条件联动显示规则（支持单父或多父组合联动）

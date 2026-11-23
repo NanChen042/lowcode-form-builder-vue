@@ -804,12 +804,12 @@ export const kycCustomerTemplate: FormSchema = {
           "helpPosition": "right",
           "i18n": {
             "zh": {
-              "label": "声明",
+              "label": "",
               "placeholder": "请在下方指定区域签名",
               "signPlaceholder": "请在此处手写签名"
             },
             "en": {
-              "label": "Declaration",
+              "label": "",
               "placeholder": "Please sign in the designated area below",
               "signPlaceholder": "Please sign here"
             }
@@ -2020,12 +2020,12 @@ export const kycIndividualTemplate: FormSchema = {
           "helpPosition": "right",
           "i18n": {
             "zh": {
-              "label": "声明",
+              "label": "",
               "placeholder": "请在下方指定区域签名",
               "signPlaceholder": "请在此处手写签名"
             },
             "en": {
-              "label": "Applicant's Declaration",
+              "label": "",
               "placeholder": "Please sign in the designated area below",
               "signPlaceholder": "Please sign here"
             }
@@ -2443,12 +2443,12 @@ export const kycEntityTemplate: FormSchema = {
           "helpPosition": "right",
           "i18n": {
             "zh": {
-              "label": "声明",
+              "label": "",
               "placeholder": "请在下方指定区域签名",
               "signPlaceholder": "请在此处手写签名"
             },
             "en": {
-              "label": "Declaration",
+              "label": "",
               "placeholder": "Please sign in the designated area below",
               "signPlaceholder": "Please sign here"
             }
@@ -2938,19 +2938,19 @@ export const multilingualMockTemplate: FormSchema = {
           "helpPosition": "right",
           "i18n": {
             "zh": {
-              "label": "声明",
+              "label": "",
               "placeholder": "请在下方指定区域签名",
               "signPlaceholder": "请在此处手写签名",
               "declarationErrorMessage": "请先阅读并勾选全部法定声明条款"
             },
             "en": {
-              "label": "Declaration",
+              "label": "",
               "placeholder": "Please sign in the designated area below",
               "signPlaceholder": "Please sign here",
               "declarationErrorMessage": "Please read and accept all statutory declaration terms first"
             },
             "zh-Hant": {
-              "label": "聲明",
+              "label": "",
               "placeholder": "請在下方指定區域簽名",
               "signPlaceholder": "請在此處手寫簽名",
               "declarationErrorMessage": "請先閱讀並勾選全部法定聲明條款"

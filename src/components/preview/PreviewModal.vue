@@ -134,11 +134,11 @@
                     <a-dropdown trigger="click" position="br">
                       <button
                         type="button"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11.5px] font-semibold border border-slate-200/80 cursor-pointer transition-colors"
+                        class="inline-flex items-center justify-center gap-1.5 px-2.5 h-[26px] rounded-full bg-slate-100 hover:bg-slate-200/80 active:bg-slate-200 text-slate-700 text-[11.5px] font-medium border-0 cursor-pointer transition-colors select-none"
                       >
-                        <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(activePreviewLocale)"></span>
-                        <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
-                        <ChevronDown class="w-2.5 h-2.5 text-slate-400 stroke-[2.2]" />
+                        <Languages class="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <span class="leading-none tracking-tight font-medium inline-block relative -top-[0.5px]">{{ getLocaleShortBadge(activePreviewLocale) }}</span>
+                        <ChevronDown class="w-3 h-3 text-slate-400 stroke-[2.2] shrink-0 -mr-0.5 relative -top-[0.5px]" />
                       </button>
                       <template #content>
                         <a-doption
@@ -199,10 +199,10 @@
                 </div>
 
                 <div v-else class="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  <div class="shrink-0 px-4 py-2 border-b border-slate-100 bg-white z-20 flex items-center justify-between relative">
+                  <div class="shrink-0 px-4 h-12 border-b border-slate-100 bg-white z-20 flex items-center justify-between relative">
                     <div
                       v-if="pages.length > 1"
-                      class="absolute bottom-0 left-0 right-0 h-[2.5px] bg-slate-100 overflow-hidden pointer-events-none"
+                      class="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-100 overflow-hidden pointer-events-none"
                     >
                       <div
                         class="h-full bg-[#1677ff] transition-all duration-300 ease-out"
@@ -211,27 +211,20 @@
                     </div>
                     <div class="flex items-center gap-2 min-w-0 flex-1 mr-2.5">
                       <img :src="logoUrl" alt="Brand Logo" class="w-5 h-5 rounded-full object-contain shrink-0" />
-                      <span class="text-xs font-semibold text-slate-800 truncate leading-snug">
+                      <span class="text-xs font-semibold text-slate-800 truncate leading-none">
                         {{ formBrandTitle }}
                       </span>
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
-                      <span
-                        v-if="pages.length > 1"
-                        class="text-[11px] font-medium text-slate-400 font-mono tabular-nums select-none"
-                      >
-                        {{ currentStep + 1 }} / {{ pages.length }}
-                      </span>
-
                       <a-dropdown v-if="isBilingual" trigger="click" position="br">
                         <button
                           type="button"
-                          class="inline-flex items-center gap-1.5 px-2 py-0.5 h-[24px] rounded-[6px] bg-[#ebedf2] hover:bg-slate-200/90 text-[#1677ff] text-[11.5px] font-semibold border-0 cursor-pointer transition-colors select-none"
+                          class="inline-flex items-center justify-center gap-1.5 px-2.5 h-[26px] rounded-full bg-slate-100 hover:bg-slate-200/80 active:bg-slate-200 text-slate-700 text-[11.5px] font-medium border-0 cursor-pointer transition-colors select-none"
                         >
-                          <span class="iti__flag shrink-0 scale-90" :class="'iti__' + getLocaleFlag(activePreviewLocale)"></span>
-                          <span>{{ getLocaleShortBadge(activePreviewLocale) }}</span>
-                          <ChevronDown class="w-2.5 h-2.5 text-[#1677ff]/70 stroke-[2.2]" />
+                          <Languages class="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                          <span class="leading-none tracking-tight font-medium inline-block relative -top-[0.5px]">{{ getLocaleShortBadge(activePreviewLocale) }}</span>
+                          <ChevronDown class="w-3 h-3 text-slate-400 stroke-[2.2] shrink-0 -mr-0.5 relative -top-[0.5px]" />
                         </button>
                         <template #content>
                           <a-doption
@@ -367,7 +360,8 @@ import {
   CheckCircle,
   CloudUpload,
   Info,
-  ChevronDown
+  ChevronDown,
+  Languages
 } from '@lucide/vue';
 
 const props = defineProps<{

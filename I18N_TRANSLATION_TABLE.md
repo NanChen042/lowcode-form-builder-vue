@@ -1,21 +1,5 @@
 # 系统多语言翻译对照表
 
-> **多语言体系与架构说明**：
-> 1. **PC 端低代码表单设计器（管理端）**：面向企业管理员与表单设计者，支持 **中英文双语 (`zh` / `en`)** 自由切换，Arco Design 组件库全套语言包联动。
-> 2. **表单组件、默认移动端样例与移动端填报端（运行端）**：面向全球跨国业务填报与终端客户，底层架构**完整支持 16 种国际语言**，覆盖标准 BCP 47 语言码：
->    - **亚太核心 4 语**：简体中文 (`zh`)、英语 (`en`)、繁体中文 (`zh-Hant`)、马来语 (`ms`)
->    - **东南亚本地化 4 语**：印度尼西亚语 (`id`)、泰语 (`th`)、越南语 (`vi`)、泰米尔语 (`ta`)
->    - **东亚与南亚高潜 3 语**：日语 (`ja`)、韩语 (`ko`)、印地语 (`hi`)
->    - **欧美与全球主要 5 语**：西班牙语 (`es`)、法语 (`fr`)、德语 (`de`)、葡萄牙语 (`pt`)、俄语 (`ru`)
-> 3. **表单发布与终端呈现联动机制**：
->    - 移动端顶部多语言切换器根据表单发布时配置的 `enabledLocales`（已启用语言列表）动态呈现国旗与母语原生名称。
->    - 切换语言后，所有系统级按钮（上一步/下一步/提交/重新浏览等）、预审基本资料卡片、手写签名板、国家/地区/区号级联搜索以及系统内置校验提示均 100% 自动匹配对应母语，无缝适配。
-> 4. **文档查阅指引**：
->    - **第 1 ~ 27 节**：PC 端设计器界面的中英对照文案（已同步补充最新欢迎向导卡片、适用对象锁定提示、固定页面说明等 19 个最新词条）。
->    - **第 28.1 节**：移动端亚太核心 4 语精细化校对表（包含业务日常最高频的审核与“替换成”建议列）。
->    - **第 28.2 节**：移动端全球 12 语拓展对照表（按出海目标市场大区分为 3 张独立子表，并支持展开/折叠，防止横向爆版）。
->    - **第 29 节**：系统统一校验提示（16 国语言内置映射，无需人工配置）。
-
 ## 通用与状态
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |
 | :--- | :--- | :--- | :--- | :--- |
@@ -30,7 +14,7 @@
 | 系统预设 | System Preset |  |  |  |
 | 不可放置 | Cannot Drop |  |  |  |
 | 基础资料 | Basic Info |  |  |  |
-| 只读核验 | Read-only |  |  |  |
+| 不可编辑 | Read-only |  |  |  |
 | 取消 | Cancel |  |  |  |
 | 确定 | Confirm |  |  |  |
 | 页 | Pages |  |  |  |
@@ -44,7 +28,7 @@
 | 预置核验节点 | Pre-filled Baseline |  |  |  |
 | 开始日期 | Start Date |  |  |  |
 | 结束日期 | End Date |  |  |  |
-| 最多只能选择 {count} 项 | Maximum {count} items allowed |  |  |  |
+| 最多只能选择 {count} 项 | Maximum {count} options allowed |  |  |  |
 | 最多只能选择 {count} 项 | Maximum {count} items allowed |  |  |  |
 | 搜索国家/地区、国籍名称、代码或区号 (如 中国, 新加坡籍, SG, +86)... | Search by country/region, nationality, code or dial code (e.g. Singapore, SG, +65)... |  |  |  |
 | 国家 | Country |  |  |  |
@@ -177,7 +161,7 @@
 | 复制组件 | Duplicate |  |  |  |
 | 插入组件 | Insert Component |  |  |  |
 | 关联组件 | Link Component |  |  |  |
-| 解除关联 | Unlink |  |  |  |
+| 解除关联 | Unlink Rule |  |  |  |
 | 删除组件 | Delete Component |  |  |  |
 | 系统预设资料 | System Preset |  |  |  |
 | 添加表单组件 | Add Component |  |  |  |
@@ -211,6 +195,7 @@
 | 标题下方换行显示 | Below title (new line) |  |  |  |
 | 控制副标题排布方式：可选标题右侧显示（默认同排浅灰色小字）或标题下方换行显示。 | Control subtitle placement: inline beside title or on a new line below title. |  |  |  |
 | 显示标题 | Show Label |  |  |  |
+| 显示文案 | Show Prompt |  |  |  |
 | 关闭后，表单页面上将隐藏该标题；但在数据导出、后台报表和联动条件选择时，仍会使用此字段标题作为唯一标识。 | When disabled, the title is hidden on the form, but still used for backend auditing, data export headers, and logic rules. |  |  |  |
 | 前台已隐藏展示，此名称仅用于后台数据导出与联动识别 | Hidden on form; used only for data export and logic references |  |  |  |
 | 设为必填 | Required |  |  |  |
@@ -256,7 +241,7 @@
 | 展开规则 | Display Rule |  |  |  |
 | 当 | When |  |  |  |
 | 选择 | selects |  |  |  |
-| 时展开 | reveal this field |  |  |  |
+| 时展开 | to show |  |  |  |
 | 且 | AND |  |  |  |
 | 或 | OR |  |  |  |
 | 全部满足 | Match All |  |  |  |
@@ -479,7 +464,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | 新建表单画布 | New Form Canvas |  |  |  |
 | 业务主体 | Profile Type |  |  |  |
-| 表单名称 | Form Name |  |  |  |
+| 表单名称 | Form Title |  |  |  |
 | 客户案例 | Customer |  |  |  |
 | 个人案例 | Individual Case |  |  |  |
 | 实体案例 | Entity Case |  |  |  |
@@ -661,7 +646,7 @@
 | 日期选择 | Date Picker |  |  |  |
 | 手机号码 | Phone Number |  |  |  |
 | 电子邮箱 | Email Address |  |  |  |
-| 国家/地区 | Country/Region |  |  |  |
+| 国家/地区 | Country / Region |  |  |  |
 | 国籍选择 | Nationality |  |  |  |
 | 电子签名 | Electronic Signature |  |  |  |
 | 提示说明 | Alert / Notice |  |  |  |
@@ -808,127 +793,122 @@
 | 必填项不能为空 | This field is required | 必填項不能為空 | Medan ini diperlukan |  |  |  |  |  |
 | 选项一 ~ 选项十（超过十项为 选项N） | Option 1 ~ Option N | 選項一 ~ 選項十（超過十項為 選項N） | Option 1 ~ Option N |  |  |  |  |  |
 
-## 移动端填报端（全量 16 国语言对照体系）
+## 移动端填报端（16 语对照体系）
 
-### 28.1 亚太核心 4 语精细化校对表（中 / 英 / 繁 / 马）
-> 专供日常亚太核心业务核对与修改，支持在“替换成”列直接填写调整建议。
+### 28.1 亚太（中文 / 英文 / 繁体 / 马来语）
 
-| 字段Key / 词条 | 简体中文 (`zh`) | 英语 (`en`) | 繁体中文 (`zh-Hant`) | 马来语 (`ms`) | 中文替换成 | 英文替换成 | 繁体替换成 | 马来替换成 | 详情（截图） |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `app.title` | 在线表单填报 | Online Form | 線上表單填報 | Borang Dalam Talian | | | | | |
-| `form.prevStep` | 上一步 | Back | 上一步 | Kembali | | | | | |
-| `form.nextStep` | 下一步 | Next | 下一步 | Seterusnya | | | | | |
-| `form.submit` | 确认提交 | Submit Form | 確認提交 | Hantar Borang | | | | | |
-| `form.submitting` | 提交中... | Submitting... | 提交中... | Menghantar... | | | | | |
-| `form.submitSuccess` | 表单已提交 | Form Submitted | 表單已提交 | Borang Berjaya Dihantar | | | | | |
-| `form.submitFailed` | 提交失败，请检查网络后重试 | Submission failed. Please check network and retry. | 提交失敗，請檢查網路後重試 | Penghantaran gagal. Sila semak rangkaian dan cuba lagi. | | | | | |
-| `form.requiredError` | 必填项不能为空 | This field is required | 必填項不能為空 | Medan ini wajib diisi | | | | | |
-| `form.emailError` | 请输入有效的电子邮箱地址 | Please enter a valid email address | 請輸入有效的電子郵件地址 | Sila masukkan alamat e-mel yang sah | | | | | |
-| `form.phoneError` | 请输入有效的手机号码 | Please enter a valid phone number | 請輸入有效的手機號碼 | Sila masukkan nombor telefon yang sah | | | | | |
-| `form.signatureRequired` | 请在下方签名板完成电子手写签名 | Please sign in the signature pad below | 請在下方簽名板完成電子手寫簽名 | Sila lengkapkan tandatangan elektronik pada pad tandatangan di bawah | | | | | |
-| `form.clearSignature` | 重新签名 | Clear Signature | 重新簽名 | Padam Tandatangan | | | | | |
-| `form.finishSign` | 完成签名 | Done | 完成簽名 | Selesai | | | | | |
-| `form.reSign` | 修改签名 | Edit | 修改簽名 | Edit | | | | | |
-| `form.signPlaceholder` | 请在此处手写签名 | Please sign here | 請在此處手寫簽名 | Sila tandatangan di sini | | | | | |
-| `form.selectPlaceholder` | 请点击选择 | Select an option | 請點擊選擇 | Sila pilih satu pilihan | | | | | |
-| `form.inputPlaceholder` | 请输入 | Enter here | 請輸入 | Sila masukkan | | | | | |
-| `form.dateLongTerm` | 长期 | Long-term | 長期 | Jangka panjang | | | | | |
-| `form.dateLongTermDisplay` | 长期有效 | Permanent | 長期有效 | Sah kekal | | | | | |
-| `form.loadFailed` | 获取表单数据失败，请检查链接有效性 | Failed to load form schema. Invalid link. | 獲取表單資料失敗，請檢查連結有效性 | Gagal memuatkan data borang. Sila semak kesahan pautan. | | | | | |
-| `form.successDesc` | 您的填报资料已成功送达，请勿重复提交。 | Your submission has been received. Please do not submit again. | 您的填報資料已成功送達，請勿重複提交。 | Maklumat anda telah berjaya dihantar. Sila jangan hantar lagi. | | | | | |
-| `form.submitTime` | 提交时间 | Submission Time | 提交時間 | Masa Penghantaran | | | | | |
-| `form.statusLabel` | 当前状态 | Status | 當前狀態 | Status | | | | | |
-| `form.statusCompleted` | 已完成 | Completed | 已完成 | Selesai | | | | | |
-| `form.closePage` | 关闭页面 | Close Page | 關閉頁面 | Tutup Halaman | | | | | |
-| `form.returnToList` | 返回待办列表 | Back to Task List | 返回待辦清單 | Kembali ke Senarai Tugasan | | | | | |
-| `form.notFoundTitle` | 链接无效或已失效 | Link Invalid or Expired | 連結無效或已失效 | Pautan Tidak Sah atau Telah Tamat Tempoh | | | | | |
-| `form.notFoundDesc` | 未找到对应的填报任务，该链接可能已过期或已被处理 | Task not found. The link may have expired or already been processed. | 未找到對應的填報任務，該連結可能已過期或已被處理 | Tugasan tidak ditemui. Pautan mungkin telah tamat tempoh atau telah diproses. | | | | | |
-| `form.confirm` | 确认 | Confirm | 確認 | Sahkan | | | | | |
-| `form.cancel` | 取消 | Cancel | 取消 | Batal | | | | | |
-| `form.confirmSubmitTitle` | 确认提交表单？ | Confirm Submission? | 確認提交表單？ | Sahkan penghantaran borang? | | | | | |
-| `form.confirmSubmitDesc` | 提交后表单资料将进入正式审核流程，无法撤回或修改，请确认所填信息真实有效。 | Once submitted, your information will be processed and cannot be edited. Please ensure all details are accurate. | 提交後表單資料將進入正式審核流程，無法撤回或修改，請確認所填資訊真實有效。 | Maklumat anda akan diproses dan tidak boleh diedit selepas dihantar. Sila pastikan semua maklumat adalah tepat. | | | | | |
-| `form.confirmSubmitBtn` | 确认提交 | Confirm Submit | 確認提交 | Sahkan Hantar | | | | | |
-| `form.checkAgainBtn` | 再检查下 | Check Again | 再檢查下 | Semak Semula | | | | | |
-| `form.checkRequired` | 请检查并完善标红的必填项 | Please check and complete the required fields | 請檢查並完善標紅的必填項 | Sila semak dan lengkapkan medan wajib yang ditandakan merah | | | | | |
-| `form.backToFirst` | 回到第一页 (重新浏览) | Back to Step 1 | 回到第一頁 (重新瀏覽) | Kembali ke Langkah 1 (Semak Semula) | | | | | |
-| `form.backToFirstToast` | 已回到第一页 | Returned to Step 1 | 已回到第一頁 | Kembali ke Langkah 1 | | | | | |
-| `preview.notice` | 当前为表单预览模式，所填内容仅供体验，不会被保存或提交。 | This is a form preview. Information entered here will not be saved or submitted. |  |  | | | | | |
-| `preview.scanQrTitle` | 手机扫码预览 | Mobile Preview |  |  | | | | | |
-| `preview.scanQrDesc` | 手机扫码即可体验 | Scan to preview |  |  | | | | | |
-| `common.selectLanguage` | 选择语言 | Select Language | 選擇語言 | Pilih Bahasa | | | | | |
-| `common.cancel` | 取消 | Cancel | 取消 | Batal | | | | | |
-| `common.add` | 添加 | Add | 新增 | Tambah | | | | | |
-| `common.selected` | 已选 | Selected | 已選 | Dipilih | | | | | |
-| `common.selectedColon` | 已选: | Selected: | 已選: | Dipilih: | | | | | |
-| `common.confirm` | 确定 | Confirm | 確定 | Sahkan | | | | | |
-| `common.remove` | 移除 | Remove | 移除 | Padam | | | | | |
-| `common.undo` | 撤销 | Undo | 復原 | Buat asal | | | | | |
-| `common.searchOptions` | 请输入关键字搜索... | Search options... | 請輸入關鍵字搜尋... | Cari pilihan... | | | | | |
-| `common.noMatchingOptions` | 未找到相关选项 | No matching options found | 未找到相關選項 | Tiada pilihan ditemui | | | | | |
-| `common.noMatchingCountry` | 暂无匹配国家、地区或区号 | No matching country, region or code found | 查無相符國家、地區或國碼 | Tiada negara, wilayah atau kod yang sepadan ditemui | | | | | |
-| `common.selectCountryRegion` | 选择国家/地区 | Select Country/Region | 選擇國家/地區 | Pilih Negara/Wilayah | | | | | |
-| `common.selectCountryDialCode` | 选择国家/地区区号 | Select Country/Region Code | 選擇國家/地區國碼 | Pilih Kod Negara/Wilayah | | | | | |
-| `common.selectNationality` | 选择国籍 | Select Nationality | 選擇國籍 | Pilih Kewarganegaraan | | | | | |
-| `common.pleaseSelectNationality` | 请选择国籍 | Please select nationality | 請選擇國籍 | Sila pilih kewarganegaraan | | | | | |
-| `common.pleaseSelectCountry` | 请选择国家/地区 | Please select country/region | 請選擇國家/地區 | Sila pilih negara/wilayah | | | | | |
-| `common.clickToLocate` | 点击在下方列表中定位 | Click to locate in list | 點擊在下方列表中定位 | Klik untuk cari dalam senarai | | | | | |
-| `common.startDate` | 开始日期 | Start Date | 開始日期 | Tarikh Mula | | | | | |
-| `common.endDate` | 截止日期 | End Date | 截止日期 | Tarikh Tamat | | | | | |
-| `common.selectDate` | 选择日期 | Select Date | 選擇日期 | Pilih Tarikh | | | | | |
-| `common.selectDateRange` | 选择日期范围 | Select Date Range | 選擇日期範圍 | Pilih Julat Tarikh | | | | | |
-| `common.searchCountryOrCode` | 搜索国家、地区或区号... | Search by country or dial code... | 搜尋國家、地區或國碼... | Cari mengikut negara, wilayah atau kod panggilan... | | | | | |
-| `common.searchCountryName` | 搜索国家或地区名称... | Search country or region... | 搜尋國家或地區名稱... | Cari negara atau wilayah... | | | | | |
-| `common.signAreaPlaceholder` | 请在下方指定区域签名 | Please sign in the designated area below | 請在下方指定區域簽名 | Sila tandatangan di kawasan yang ditetapkan di bawah | | | | | |
-| `common.maxSelectLimit` | 最多只能选择 {max} 项 | Up to {max} items allowed | 最多只能選擇 {max} 項 | Sehingga {max} item dibenarkan | | | | | |
-| `profile.noticeTitle` | 提示 | Notice | 提示 | Notis | | | | | |
-| `profile.noticeDesc1` | 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | 根據合規監管要求，您需要完成KYC問卷填寫。 | Selaras dengan keperluan pematuhan peraturan, anda dikehendaki melengkapkan soal selidik KYC. | | | | | |
-| `profile.noticeDesc2` | 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | 請確認以下資訊是否準確，如需修改，請聯繫服務商修改後再進行下一步。 | Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan sebelum meneruskan. | | | | | |
-| `profile.basicDetails` | 基本资料 | Basic Details | 基本資料 | Butiran Asas | | | | | |
-| `profile.relationshipInfo` | 关联信息 | Relationship Information | 關聯資訊 | Maklumat Hubungan | | | | | |
-| `profile.associatedEntity` | 关联实体 | Associated Entity | 關聯實體 | Entiti Berkaitan | | | | | |
-| `profile.relationshipType` | 关联类型 | Relationship Type | 關聯類型 | Jenis Hubungan | | | | | |
-| `profile.shareholdingInfo` | 股份与出资信息 | Shareholding & Capital Information | 股份與出資資訊 | Maklumat Pegangan Saham & Modal | | | | | |
-| `profile.sharesHeld` | 持有股份数 | Number of Shares Held | 持有股份數 | Bilangan Saham Dipegang | | | | | |
-| `profile.allocatedPaidUpAmount` | 对应已缴股本金额 | Allocated Paid-up Amount | 對應已繳股本金額 | Jumlah Modal Berbayar Diperuntukkan | | | | | |
-| `profile.companyName` | 企业注册全称 | Company Name | 企業註冊全稱 | Nama Syarikat | | | | | |
-| `profile.uen` | 统一机构识别码 (UEN) | UEN | 統一機構識別碼 (UEN) | Nombor Pengenalan Entiti Unik (UEN) | | | | | |
-| `profile.countryOfIncorporation` | 注册设立国家 | Country of Incorporation | 註冊設立國家 | Negara Pemerbadanan | | | | | |
-| `profile.entityType` | 法律实体形式 | Entity Type | 法律實體形式 | Jenis Entiti Undang-Undang | | | | | |
-| `profile.entityName` | 实体名称 | Entity Name | 實體名稱 | Nama Entiti | | | | | |
-| `profile.entityRegNo` | 实体注册号码 | Registration Number | 實體註冊號碼 | Nombor Pendaftaran Entiti | | | | | |
-| `profile.formerName` | 曾用名(如有) | Former Name (if any) | 曾用名(如有) | Nama Dahulu (jika ada) | | | | | |
-| `profile.jurisdiction` | 注册地 | Place of Incorporation | 註冊地 | Bidang Kuasa Pemerbadanan | | | | | |
-| `profile.repCapacity` | 授权代表身份 | Authorised Representative Role | 授權代表身份 | Kapasiti / Peranan Wakil Sah | | | | | |
-| `profile.authorizedRep` | 授权代表姓名 | Authorized Representative | 授權代表姓名 | Nama Wakil Diberi Kuasa | | | | | |
-| `profile.contactEmail` | 官方联络邮箱 | Contact Email | 官方聯絡信箱 | E-mel Rasmi | | | | | |
-| `profile.registeredAddress` | 企业注册地址 | Registered Address | 企業註冊地址 | Alamat Berdaftar Syarikat | | | | | |
-| `profile.residentialAddress` | 居住地址 | Residential Address | 居住地址 | Alamat Kediaman | | | | | |
-| `profile.contactAddress` | 联系地址 | Contact Address | 聯絡地址 | Alamat Surat-menyurat | | | | | |
-| `profile.name` | 姓名 | Name | 姓名 | Nama | | | | | |
-| `profile.nativeName` | 国籍语言姓名 | Native Name | 國籍語言姓名 | Nama Bahasa Asal | | | | | |
-| `profile.nationality` | 国籍 | Nationality | 國籍 | Kewarganegaraan | | | | | |
-| `profile.singaporeIdentityStatus` | 新加坡身份类型 | Singapore Identity Status | 新加坡身分類型 | Status Identiti Singapura | | | | | |
-| `profile.nricFin` | NRIC/FIN(如适用) | NRIC/FIN | NRIC/FIN(如適用) | NRIC/FIN (jika berkenaan) | | | | | |
-| `profile.idType` | 证件类型 | ID Type | 證件類型 | Jenis Pengenalan | | | | | |
-| `profile.idNumber` | 证件号码 | ID Number | 證件號碼 | Nombor Dokumen | | | | | |
-| `profile.dob` | 出生日期 | Date of Birth | 出生日期 | Tarikh Lahir | | | | | |
-| `profile.gender` | 性别 | Gender | 性別 | Jantina | | | | | |
-| `profile.mobilePhone` | 手机号码 | Mobile Phone | 手機號碼 | Nombor Telefon Mudah Alih | | | | | |
-| `profile.email` | 电子邮箱 | Email | 電子郵件 | E-mel | | | | | |
-| `profile.roleDirector` | 董事 | Director | 董事 | Pengarah | | | | | |
-| `profile.roleShareholder` | 股东 | Shareholder | 股東 | Pemegang Saham | | | | | |
-| `profile.roleUbo` | 最终受益人 | Ultimate Beneficial Owner | 最終受益人 | Pemilik Manfaat Muktamad | | | | | |
-| `profile.shareClass` | 股份类别 | Share Class | 股份類別 | Kelas Saham | | | | | |
-| `profile.ordinaryShares` | 普通股 | Ordinary Shares | 普通股 | Saham Biasa | | | | | |
-| `profile.preferenceShares` | 优先股 | Preference Shares | 優先股 | Saham Keutamaan | | | | | |
+| 词条 | 中文 | 英文 | 繁体 | 马来语 |
+| :--- | :--- | :--- | :--- | :--- |
+| `app.title` | 在线表单填报 | Online Form | 線上表單填報 | Borang Dalam Talian |
+| `form.prevStep` | 上一步 | Back | 上一步 | Kembali |
+| `form.nextStep` | 下一步 | Next | 下一步 | Seterusnya |
+| `form.submit` | 确认提交 | Submit Form | 確認提交 | Hantar Borang |
+| `form.submitting` | 提交中... | Submitting... | 提交中... | Menghantar... |
+| `form.submitSuccess` | 表单已提交 | Form Submitted | 表單已提交 | Borang Berjaya Dihantar |
+| `form.submitFailed` | 提交失败，请检查网络后重试 | Submission failed. Please check network and retry. | 提交失敗，請檢查網路後重試 | Penghantaran gagal. Sila semak rangkaian dan cuba lagi. |
+| `form.requiredError` | 必填项不能为空 | This field is required | 必填項不能為空 | Medan ini wajib diisi |
+| `form.emailError` | 请输入有效的电子邮箱地址 | Please enter a valid email address | 請輸入有效的電子郵件地址 | Sila masukkan alamat e-mel yang sah |
+| `form.phoneError` | 请输入有效的手机号码 | Please enter a valid phone number | 請輸入有效的手機號碼 | Sila masukkan nombor telefon yang sah |
+| `form.signatureRequired` | 请在下方签名板完成电子手写签名 | Please sign in the signature pad below | 請在下方簽名板完成電子手寫簽名 | Sila lengkapkan tandatangan elektronik pada pad tandatangan di bawah |
+| `form.clearSignature` | 重新签名 | Clear Signature | 重新簽名 | Padam Tandatangan |
+| `form.finishSign` | 完成签名 | Done | 完成簽名 | Selesai |
+| `form.reSign` | 修改签名 | Edit | 修改簽名 | Edit |
+| `form.signPlaceholder` | 请在此处手写签名 | Please sign here | 請在此處手寫簽名 | Sila tandatangan di sini |
+| `form.selectPlaceholder` | 请点击选择 | Select an option | 請點擊選擇 | Sila pilih satu pilihan |
+| `form.inputPlaceholder` | 请输入 | Enter here | 請輸入 | Sila masukkan |
+| `form.dateLongTerm` | 长期 | Long-term | 長期 | Jangka panjang |
+| `form.dateLongTermDisplay` | 长期有效 | Permanent | 長期有效 | Sah kekal |
+| `form.loadFailed` | 获取表单数据失败，请检查链接有效性 | Failed to load form schema. Invalid link. | 獲取表單資料失敗，請檢查連結有效性 | Gagal memuatkan data borang. Sila semak kesahan pautan. |
+| `form.successDesc` | 您的填报资料已成功送达，请勿重复提交。 | Your submission has been received. Please do not submit again. | 您的填報資料已成功送達，請勿重複提交。 | Maklumat anda telah berjaya dihantar. Sila jangan hantar lagi. |
+| `form.submitTime` | 提交时间 | Submission Time | 提交時間 | Masa Penghantaran |
+| `form.statusLabel` | 当前状态 | Status | 當前狀態 | Status |
+| `form.statusCompleted` | 已完成 | Completed | 已完成 | Selesai |
+| `form.closePage` | 关闭页面 | Close Page | 關閉頁面 | Tutup Halaman |
+| `form.returnToList` | 返回待办列表 | Back to Task List | 返回待辦清單 | Kembali ke Senarai Tugasan |
+| `form.notFoundTitle` | 链接无效或已失效 | Link Invalid or Expired | 連結無效或已失效 | Pautan Tidak Sah atau Telah Tamat Tempoh |
+| `form.notFoundDesc` | 未找到对应的填报任务，该链接可能已过期或已被处理 | Task not found. The link may have expired or already been processed. | 未找到對應的填報任務，該連結可能已過期或已被處理 | Tugasan tidak ditemui. Pautan mungkin telah tamat tempoh atau telah diproses. |
+| `form.confirm` | 确认 | Confirm | 確認 | Sahkan |
+| `form.cancel` | 取消 | Cancel | 取消 | Batal |
+| `form.confirmSubmitTitle` | 确认提交表单？ | Confirm Submission? | 確認提交表單？ | Sahkan penghantaran borang? |
+| `form.confirmSubmitDesc` | 提交后表单资料将进入正式审核流程，无法撤回或修改，请确认所填信息真实有效。 | Once submitted, your information will be processed and cannot be edited. Please ensure all details are accurate. | 提交後表單資料將進入正式審核流程，無法撤回或修改，請確認所填資訊真實有效。 | Maklumat anda akan diproses dan tidak boleh diedit selepas dihantar. Sila pastikan semua maklumat adalah tepat. |
+| `form.confirmSubmitBtn` | 确认提交 | Confirm Submit | 確認提交 | Sahkan Hantar |
+| `form.checkAgainBtn` | 再检查下 | Check Again | 再檢查下 | Semak Semula |
+| `form.checkRequired` | 请检查并完善标红的必填项 | Please check and complete the required fields | 請檢查並完善標紅的必填項 | Sila semak dan lengkapkan medan wajib yang ditandakan merah |
+| `form.backToFirst` | 回到第一页 (重新浏览) | Back to Step 1 | 回到第一頁 (重新瀏覽) | Kembali ke Langkah 1 (Semak Semula) |
+| `form.backToFirstToast` | 已回到第一页 | Returned to Step 1 | 已回到第一頁 | Kembali ke Langkah 1 |
+| `preview.notice` | 当前为表单预览模式，所填内容仅供体验，不会被保存或提交。 | This is a form preview. Information entered here will not be saved or submitted. |  |  |
+| `preview.scanQrTitle` | 手机扫码预览 | Mobile Preview |  |  |
+| `preview.scanQrDesc` | 手机扫码即可体验 | Scan to preview |  |  |
+| `common.selectLanguage` | 选择语言 | Select Language | 選擇語言 | Pilih Bahasa |
+| `common.cancel` | 取消 | Cancel | 取消 | Batal |
+| `common.add` | 添加 | Add | 新增 | Tambah |
+| `common.selected` | 已选 | Selected | 已選 | Dipilih |
+| `common.selectedColon` | 已选: | Selected: | 已選: | Dipilih: |
+| `common.confirm` | 确定 | Confirm | 確定 | Sahkan |
+| `common.remove` | 移除 | Remove | 移除 | Padam |
+| `common.undo` | 撤销 | Undo | 復原 | Buat asal |
+| `common.searchOptions` | 请输入关键字搜索... | Search options... | 請輸入關鍵字搜尋... | Cari pilihan... |
+| `common.noMatchingOptions` | 未找到相关选项 | No matching options found | 未找到相關選項 | Tiada pilihan ditemui |
+| `common.noMatchingCountry` | 暂无匹配国家、地区或区号 | No matching country, region or code found | 查無相符國家、地區或國碼 | Tiada negara, wilayah atau kod yang sepadan ditemui |
+| `common.selectCountryRegion` | 选择国家/地区 | Select Country/Region | 選擇國家/地區 | Pilih Negara/Wilayah |
+| `common.selectCountryDialCode` | 选择国家/地区区号 | Select Country/Region Code | 選擇國家/地區國碼 | Pilih Kod Negara/Wilayah |
+| `common.selectNationality` | 选择国籍 | Select Nationality | 選擇國籍 | Pilih Kewarganegaraan |
+| `common.pleaseSelectNationality` | 请选择国籍 | Please select nationality | 請選擇國籍 | Sila pilih kewarganegaraan |
+| `common.pleaseSelectCountry` | 请选择国家/地区 | Please select country/region | 請選擇國家/地區 | Sila pilih negara/wilayah |
+| `common.clickToLocate` | 点击在下方列表中定位 | Click to locate in list | 點擊在下方列表中定位 | Klik untuk cari dalam senarai |
+| `common.startDate` | 开始日期 | Start Date | 開始日期 | Tarikh Mula |
+| `common.endDate` | 截止日期 | End Date | 截止日期 | Tarikh Tamat |
+| `common.selectDate` | 选择日期 | Select Date | 選擇日期 | Pilih Tarikh |
+| `common.selectDateRange` | 选择日期范围 | Select Date Range | 選擇日期範圍 | Pilih Julat Tarikh |
+| `common.searchCountryOrCode` | 搜索国家、地区或区号... | Search by country or dial code... | 搜尋國家、地區或國碼... | Cari mengikut negara, wilayah atau kod panggilan... |
+| `common.searchCountryName` | 搜索国家或地区名称... | Search country or region... | 搜尋國家或地區名稱... | Cari negara atau wilayah... |
+| `common.signAreaPlaceholder` | 请在下方指定区域签名 | Please sign in the designated area below | 請在下方指定區域簽名 | Sila tandatangan di kawasan yang ditetapkan di bawah |
+| `common.maxSelectLimit` | 最多只能选择 {max} 项 | Up to {max} items allowed | 最多只能選擇 {max} 項 | Sehingga {max} item dibenarkan |
+| `profile.noticeTitle` | 提示 | Notice | 提示 | Notis |
+| `profile.noticeDesc1` | 根据合规监管要求，您需要完成KYC问卷填写。 | In accordance with regulatory compliance requirements, you are required to complete the KYC questionnaire. | 根據合規監管要求，您需要完成KYC問卷填寫。 | Selaras dengan keperluan pematuhan peraturan, anda dikehendaki melengkapkan soal selidik KYC. |
+| `profile.noticeDesc2` | 请确认以下信息是否准确，如需修改，请联系服务商修改后再进行下一步。 | Please confirm whether the following information is accurate. If modifications are required, please contact the service provider before proceeding. | 請確認以下資訊是否準確，如需修改，請聯繫服務商修改後再進行下一步。 | Sila sahkan sama ada maklumat berikut adalah tepat. Jika pengubahsuaian diperlukan, sila hubungi pembekal perkhidmatan sebelum meneruskan. |
+| `profile.basicDetails` | 基本资料 | Basic Details | 基本資料 | Butiran Asas |
+| `profile.relationshipInfo` | 关联信息 | Relationship Information | 關聯資訊 | Maklumat Hubungan |
+| `profile.associatedEntity` | 关联实体 | Associated Entity | 關聯實體 | Entiti Berkaitan |
+| `profile.relationshipType` | 关联类型 | Relationship Type | 關聯類型 | Jenis Hubungan |
+| `profile.shareholdingInfo` | 股份与出资信息 | Shareholding & Capital Information | 股份與出資資訊 | Maklumat Pegangan Saham & Modal |
+| `profile.sharesHeld` | 持有股份数 | Number of Shares Held | 持有股份數 | Bilangan Saham Dipegang |
+| `profile.allocatedPaidUpAmount` | 对应已缴股本金额 | Allocated Paid-up Amount | 對應已繳股本金額 | Jumlah Modal Berbayar Diperuntukkan |
+| `profile.companyName` | 企业注册全称 | Company Name | 企業註冊全稱 | Nama Syarikat |
+| `profile.uen` | 统一机构识别码 (UEN) | UEN | 統一機構識別碼 (UEN) | Nombor Pengenalan Entiti Unik (UEN) |
+| `profile.countryOfIncorporation` | 注册设立国家 | Country of Incorporation | 註冊設立國家 | Negara Pemerbadanan |
+| `profile.entityType` | 法律实体形式 | Entity Type | 法律實體形式 | Jenis Entiti Undang-Undang |
+| `profile.entityName` | 实体名称 | Entity Name | 實體名稱 | Nama Entiti |
+| `profile.entityRegNo` | 实体注册号码 | Registration Number | 實體註冊號碼 | Nombor Pendaftaran Entiti |
+| `profile.formerName` | 曾用名(如有) | Former Name (if any) | 曾用名(如有) | Nama Dahulu (jika ada) |
+| `profile.jurisdiction` | 注册地 | Place of Incorporation | 註冊地 | Bidang Kuasa Pemerbadanan |
+| `profile.repCapacity` | 授权代表身份 | Authorised Representative Role | 授權代表身份 | Kapasiti / Peranan Wakil Sah |
+| `profile.authorizedRep` | 授权代表姓名 | Authorized Representative | 授權代表姓名 | Nama Wakil Diberi Kuasa |
+| `profile.contactEmail` | 官方联络邮箱 | Contact Email | 官方聯絡信箱 | E-mel Rasmi |
+| `profile.registeredAddress` | 企业注册地址 | Registered Address | 企業註冊地址 | Alamat Berdaftar Syarikat |
+| `profile.residentialAddress` | 居住地址 | Residential Address | 居住地址 | Alamat Kediaman |
+| `profile.contactAddress` | 联系地址 | Contact Address | 聯絡地址 | Alamat Surat-menyurat |
+| `profile.name` | 姓名 | Name | 姓名 | Nama |
+| `profile.nativeName` | 国籍语言姓名 | Native Name | 國籍語言姓名 | Nama Bahasa Asal |
+| `profile.nationality` | 国籍 | Nationality | 國籍 | Kewarganegaraan |
+| `profile.singaporeIdentityStatus` | 新加坡身份类型 | Singapore Identity Status | 新加坡身分類型 | Status Identiti Singapura |
+| `profile.nricFin` | NRIC/FIN(如适用) | NRIC/FIN | NRIC/FIN(如適用) | NRIC/FIN (jika berkenaan) |
+| `profile.idType` | 证件类型 | ID Type | 證件類型 | Jenis Pengenalan |
+| `profile.idNumber` | 证件号码 | ID Number | 證件號碼 | Nombor Dokumen |
+| `profile.dob` | 出生日期 | Date of Birth | 出生日期 | Tarikh Lahir |
+| `profile.gender` | 性别 | Gender | 性別 | Jantina |
+| `profile.mobilePhone` | 手机号码 | Mobile Phone | 手機號碼 | Nombor Telefon Mudah Alih |
+| `profile.email` | 电子邮箱 | Email | 電子郵件 | E-mel |
+| `profile.roleDirector` | 董事 | Director | 董事 | Pengarah |
+| `profile.roleShareholder` | 股东 | Shareholder | 股東 | Pemegang Saham |
+| `profile.roleUbo` | 最终受益人 | Ultimate Beneficial Owner | 最終受益人 | Pemilik Manfaat Muktamad |
+| `profile.shareClass` | 股份类别 | Share Class | 股份類別 | Kelas Saham |
+| `profile.ordinaryShares` | 普通股 | Ordinary Shares | 普通股 | Saham Biasa |
+| `profile.preferenceShares` | 优先股 | Preference Shares | 優先股 | Saham Keutamaan |
 
-### 28.2 全球 12 语拓展对照表（出海三大区域市场分组）
-> 覆盖出海全球业务场景，采用三大地理大区独立子表呈现，点击即可展开对应语系核对，页面宽度自适应且绝不横向爆版。
+### 28.2 东南亚（印尼语 / 泰语 / 越南语 / 泰米尔语）
 
-<details>
-<summary><b>🌏 子表 A：东南亚本地化市场（4 语：印尼语 id / 泰语 th / 越南语 vi / 泰米尔语 ta）▶ 点击展开</b></summary>
-
-| 字段Key / 词条 | 简体中文参考 | 英语参考 | 印度尼西亚语 (`id`) | 泰语 (`th`) | 越南语 (`vi`) | 泰米尔语 (`ta`) |
+| 词条 | 中文 | 英文 | 印尼语 | 泰语 | 越南语 | 泰米尔语 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `app.title` | 在线表单填报 | Online Form | Formulir Online | แบบฟอร์มออนไลน์ | Biểu mẫu trực tuyến | ஆன்லைன் படிவம் |
 | `form.prevStep` | 上一步 | Back | Sebelumnya | ย้อนกลับ | Quay lại | முந்தையது |
@@ -1037,12 +1017,9 @@
 | `profile.ordinaryShares` | 普通股 | Ordinary Shares | Saham Biasa | หุ้นสามัญ | Cổ phần phổ thông | சாதாரண பங்குகள் |
 | `profile.preferenceShares` | 优先股 | Preference Shares | Saham Preferen | หุ้นบุริมสิทธิ | Cổ phần ưu đãi | முன்னுரிமைப் பங்குகள் |
 
-</details>
+### 28.3 东亚与南亚（日语 / 韩语 / 印地语）
 
-<details>
-<summary><b>🗾 子表 B：东亚与南亚高潜市场（3 语：日语 ja / 韩语 ko / 印地语 hi）▶ 点击展开</b></summary>
-
-| 字段Key / 词条 | 简体中文参考 | 英语参考 | 日语 (`ja`) | 韩国语 (`ko`) | 印地语 (`hi`) |
+| 词条 | 中文 | 英文 | 日语 | 韩语 | 印地语 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `app.title` | 在线表单填报 | Online Form | オンラインフォーム | 온라인 양식 | ऑनलाइन फ़ॉर्म |
 | `form.prevStep` | 上一步 | Back | 戻る | 이전 | पिछला |
@@ -1151,12 +1128,9 @@
 | `profile.ordinaryShares` | 普通股 | Ordinary Shares | 普通株式 | 보통주 | साधारण शेयर |
 | `profile.preferenceShares` | 优先股 | Preference Shares | 優先株式 | 우선주 | अधिमान्य शेयर |
 
-</details>
+### 28.4 欧美与其它（西班牙语 / 法语 / 德语 / 葡萄牙语 / 俄语）
 
-<details>
-<summary><b>🌍 子表 C：欧美与全球主要语种（5 语：西班牙语 es / 法语 fr / 德语 de / 葡萄牙语 pt / 俄语 ru）▶ 点击展开</b></summary>
-
-| 字段Key / 词条 | 简体中文参考 | 英语参考 | 西班牙语 (`es`) | 法语 (`fr`) | 德语 (`de`) | 葡萄牙语 (`pt`) | 俄语 (`ru`) |
+| 词条 | 中文 | 英文 | 西班牙语 | 法语 | 德语 | 葡萄牙语 | 俄语 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `app.title` | 在线表单填报 | Online Form | Formulario en línea | Formulaire en ligne | Online-Formular | Formulário Online | Онлайн-форма |
 | `form.prevStep` | 上一步 | Back | Atrás | Précédent | Zurück | Voltar | Назад |
@@ -1265,10 +1239,8 @@
 | `profile.ordinaryShares` | 普通股 | Ordinary Shares | Acciones ordinarias | Actions ordinaires | Stammaktien | Ações Ordinárias | Обыкновенные акции |
 | `profile.preferenceShares` | 优先股 | Preference Shares | Acciones preferentes | Actions de préférence | Vorzugsaktien | Ações Preferenciais | Привилегированные акции |
 
-</details>
-
-## 统一校验提示（16 国语言内置映射，无需人工设置与翻译）
-| 序号 | 语言 | 显示名称 | 语言代码 | 必填统一提示 | 格式错误提示 |
+## 统一校验提示
+| 序号 | 语言 | 本地名称 | 代码 | 必填提示 | 格式错误提示 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | 英语（默认） | English | en | Please complete all required fields. | Invalid format. |
 | 2 | 简体中文 | 简体中文 | zh-Hans (内部兼容 zh) | 请填写所有必填项。 | 格式无效。 |

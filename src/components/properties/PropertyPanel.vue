@@ -171,7 +171,7 @@
               <FieldBasicProps :element="selectedElement" />
 
               <FieldSpecificProps
-                v-if="!isRisk"
+                v-if="!isRisk && selectedElement.type !== 'signature'"
                 :element="selectedElement"
                 @open-country-modal="openCountryListModal"
               />

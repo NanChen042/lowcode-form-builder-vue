@@ -679,6 +679,7 @@ const componentTitle = computed(() => {
 const supportsPlaceholder = computed(() => {
   if (!selectedElement.value) return false;
   const el = selectedElement.value;
+  if (el.type === 'signature' && el.showSignPrompt === false) return false;
   if (el.type === 'date') {
     return !el.defaultLongTerm;
   }

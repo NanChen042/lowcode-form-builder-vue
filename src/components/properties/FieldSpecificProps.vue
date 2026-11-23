@@ -541,7 +541,7 @@ function handleAlertTextareaKeydown(e: KeyboardEvent) {
 }
 
 const hasOptionsConfig = computed(() => {
-  return ['select', 'radio', 'checkbox', 'signature'].includes(
+  return ['select', 'radio', 'checkbox'].includes(
     props.element.type
   );
 });

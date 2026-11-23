@@ -66,8 +66,8 @@ export function normalizeLocaleKey(loc?: string): string {
 
 export const SUPPORTED_FORM_LOCALES: SupportedFormLocaleItem[] = [
   { code: 'en', labelZh: '英语 (English)', labelEn: 'English', nativeLabel: 'English', shortBadge: 'EN', flag: 'gb' },
-  { code: 'zh', displayCode: 'zh-Hans', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: '中', flag: 'cn' },
-  { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: '繁', flag: 'hk' },
+  { code: 'zh', displayCode: 'zh-Hans', labelZh: '简体中文', labelEn: 'Simplified Chinese', nativeLabel: '简体中文', shortBadge: 'ZH', flag: 'cn' },
+  { code: 'zh-Hant', labelZh: '繁体中文', labelEn: 'Traditional Chinese', nativeLabel: '繁體中文', shortBadge: 'ZH', flag: 'hk' },
   { code: 'ms', labelZh: '马来语 (Bahasa Melayu)', labelEn: 'Malay (Bahasa Melayu)', nativeLabel: 'Bahasa Melayu', shortBadge: 'MS', flag: 'my' },
   { code: 'id', labelZh: '印度尼西亚语 (Bahasa Indonesia)', labelEn: 'Indonesian (Bahasa Indonesia)', nativeLabel: 'Bahasa Indonesia', shortBadge: 'ID', flag: 'id' },
   { code: 'ta', labelZh: '泰米尔语 (தமிழ்)', labelEn: 'Tamil (தமிழ்)', nativeLabel: 'தமிழ்', shortBadge: 'TA', flag: 'sg' },
@@ -105,7 +105,7 @@ export function getLocaleNativeName(loc: string): string {
 
 export function getLocaleShortBadge(loc: string): string {
   const norm = (loc || '').trim().toLowerCase();
-  if (norm === 'zh-hk' || norm === 'hk') return '港';
+  if (norm === 'zh-hk' || norm === 'hk') return 'ZH';
   const normalized = normalizeLocaleKey(loc);
   const item = SUPPORTED_FORM_LOCALES.find(l => l.code.toLowerCase() === normalized.toLowerCase());
   return item ? item.shortBadge : loc.toUpperCase();
@@ -309,6 +309,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.helpPositionBottomDesc': '标题下方换行显示',
     'prop.helpPositionTip': '控制副标题排布方式：可选标题右侧显示（默认同排浅灰色小字）或标题下方换行显示。',
     'prop.showLabel': '显示标题',
+    'prop.showSignPrompt': '显示文案',
     'prop.required': '设为必填',
     'prop.declarationRequired': '声明条款必填',
     'prop.customErrorMsg': '未填校验提示',
@@ -949,6 +950,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.helpPositionBottomDesc': 'Below title (new line)',
     'prop.helpPositionTip': 'Control subtitle placement: inline beside title or on a new line below title.',
     'prop.showLabel': 'Show Label',
+    'prop.showSignPrompt': 'Show Prompt',
     'prop.required': 'Required',
     'prop.declarationRequired': 'Declarations Required',
     'prop.customErrorMsg': 'Validation Message',

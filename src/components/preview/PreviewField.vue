@@ -365,7 +365,7 @@
         </div>
 
         <div class="space-y-1.5">
-          <div v-if="localizedPlaceholder || field.required" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+          <div v-if="field.showSignPrompt !== false && (localizedPlaceholder || field.required)" class="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             <span v-if="field.required" class="text-[#ff4d4f] font-bold mr-0.5">*</span>
             <span>{{ localizedPlaceholder || t('preview.signatureArea', previewLoc) }}</span>
           </div>
