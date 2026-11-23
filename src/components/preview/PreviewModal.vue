@@ -79,7 +79,7 @@
                   {{ getPageTitleDisplay(p, i) }}
                 </span>
                 <span class="text-[11px] text-slate-400 mt-0.5">
-                  {{ p.pageType === 'system_profile' ? t('common.prefilledBaseline', activePreviewLocale) : `${p.fields?.length || 0} ${t('common.fieldsUnit', activePreviewLocale)}` }}
+                  {{ p.pageType === 'system_profile' ? t('common.prefilledBaseline') : `${p.fields?.length || 0} ${t('common.fieldsUnit')}` }}
                 </span>
               </div>
             </div>
@@ -743,9 +743,9 @@ function getStepNumber(idx: number): string {
 function getPageTitleDisplay(p: any, _idx?: number): string {
   if (p.pageType === 'system_profile') {
     const loc = activePreviewLocale.value;
-    return `${t('profile.basicTitle', loc)} [${t('common.systemPreset', loc)}]`;
+    return `${t('profile.basicTitle', loc)} [${t('common.systemPreset')}]`;
   }
-  return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage', activePreviewLocale.value);
+  return getLocalizedPageText(p, 'title', activePreviewLocale.value) || t('common.untitledPage');
 }
 
 const currentLocalizedTitle = computed(() => {

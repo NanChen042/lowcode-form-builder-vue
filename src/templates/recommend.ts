@@ -265,7 +265,6 @@ export function createBlankTemplate(
   };
   const fallbackMeta = defaultMetaMap[normType] || defaultMetaMap.customer;
   const resolvedTitle = title || fallbackMeta.title;
-  const resolvedDesc = description || fallbackMeta.desc;
   const resolvedDescEn = description_en || description || fallbackMeta.descEn;
 
   const defaultFields = normType === 'individual'
@@ -283,10 +282,6 @@ export function createBlankTemplate(
         en: {
           title: title_en || resolvedTitle,
           ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-        },
-        zh: {
-          title: resolvedTitle,
-          ...(resolvedDesc ? { description: resolvedDesc } : {})
         }
       }
     },
@@ -297,8 +292,7 @@ export function createBlankTemplate(
         profileType: normType,
         showSkeleton: true,
         i18n: {
-          en: { title: 'Basic Information' },
-          zh: { title: '基本资料' }
+          en: { title: 'Basic Information' }
         },
         fields: [],
         profileFields: defaultFields
@@ -307,8 +301,7 @@ export function createBlankTemplate(
         id: 'page_form_1',
         pageType: 'form',
         i18n: {
-          en: { title: 'Questionnaire' },
-          zh: { title: '问卷表单' }
+          en: { title: 'Questionnaire' }
         },
         fields: []
       }
@@ -367,7 +360,6 @@ export function createRiskAssessmentTemplate(
 
   const metaPreset = defaultMetaMap[normType] || defaultMetaMap.customer;
   const resolvedTitle = title || metaPreset.title;
-  const resolvedDesc = description || metaPreset.desc;
   const resolvedDescEn = description_en || description || metaPreset.descEn;
 
   const presetGroups = [{ id: 'grp_risk_1', i18n: {} }];
@@ -384,10 +376,6 @@ export function createRiskAssessmentTemplate(
         en: {
           title: title_en || resolvedTitle,
           ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-        },
-        zh: {
-          title: resolvedTitle,
-          ...(resolvedDesc ? { description: resolvedDesc } : {})
         }
       }
     },
@@ -399,10 +387,6 @@ export function createRiskAssessmentTemplate(
           en: {
             title: metaPreset.pageTitleEn,
             description: metaPreset.pageDescEn
-          },
-          zh: {
-            title: metaPreset.pageTitle,
-            description: metaPreset.pageDesc
           }
         },
         groups: presetGroups,

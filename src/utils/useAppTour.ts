@@ -61,6 +61,15 @@ export function getRiskTourSteps(locale?: Locale): DriveStep[] {
         side: 'bottom',
         align: 'end'
       }
+    },
+    {
+      element: '#tour-guide-btn',
+      popover: {
+        title: t('tour.risk.step6Title', locale),
+        description: t('tour.risk.step6Desc', locale),
+        side: 'right',
+        align: 'center'
+      }
     }
   ];
   return steps.filter(step => typeof step.element !== 'string' || document.querySelector(step.element));
@@ -147,6 +156,15 @@ export function getTourSteps(localeOrIsEn?: Locale | boolean): DriveStep[] {
         side: 'bottom',
         align: 'end'
       }
+    },
+    {
+      element: '#tour-guide-btn',
+      popover: {
+        title: t('tour.step9Title', locale),
+        description: t('tour.step9Desc', locale),
+        side: 'right',
+        align: 'center'
+      }
     }
   ];
 }
@@ -225,6 +243,11 @@ export function startAppTour(initialIndex = 0) {
             closeTranslationWorkspace({ immediate: true });
           }
           store.sidebarTab = 'components';
+        } else if (activeIdx === 5) {
+          // 第 6 步：指向左下角重新唤起指南入口
+          if (!store.leftSidebarVisible) {
+            store.leftSidebarVisible = true;
+          }
         }
         nextTick(() => {
           requestAnimationFrame(() => {
@@ -258,6 +281,15 @@ export function startAppTour(initialIndex = 0) {
         }
         if (!store.rightSidebarVisible) {
           store.rightSidebarVisible = true;
+        }
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            driverInstance?.refresh();
+          });
+        });
+      } else if (idx === 8) {
+        if (!store.leftSidebarVisible) {
+          store.leftSidebarVisible = true;
         }
         nextTick(() => {
           requestAnimationFrame(() => {

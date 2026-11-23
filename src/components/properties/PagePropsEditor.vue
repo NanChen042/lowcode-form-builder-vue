@@ -7,7 +7,7 @@
           <span class="block text-[11px] text-slate-400">{{ t('prop.pageSubtitle') }}</span>
         </div>
         <a-tag color="arcoblue" size="small" class="text-[11px] font-normal">
-          {{ t('prop.systemPreset') }}
+          {{ t('common.readOnly') }}
         </a-tag>
       </div>
 

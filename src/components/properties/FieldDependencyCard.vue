@@ -3,32 +3,32 @@
     v-if="conditionItems.length > 0"
     class="pt-3.5 border-t border-slate-100 space-y-2.5"
   >
-    <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-1.5">
-        <Link2 class="h-3.5 w-3.5 text-slate-400" />
-        <span class="text-[12px] font-medium text-slate-700">{{ t('prop.linkageRuleTitle') }}</span>
+    <div class="flex items-center justify-between gap-1.5 whitespace-nowrap">
+      <div class="flex items-center gap-1.5 shrink-0">
+        <Link2 class="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <span class="text-[12px] font-medium text-slate-700 whitespace-nowrap">{{ t('prop.linkageRuleTitle') }}</span>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <div
           v-if="conditionItems.length > 1 && element.linkage"
-          class="inline-flex items-center p-0.5 rounded bg-slate-100 border border-slate-200/80 text-[10.5px] select-none"
+          class="inline-flex items-center p-0.5 rounded-[5px] bg-slate-100 border border-slate-200/80 shadow-2xs shrink-0 select-none h-6"
         >
           <button
             type="button"
-            class="px-1.5 py-0.5 rounded transition-colors cursor-pointer leading-none"
+            class="flex items-center justify-center h-5 px-2 rounded-[3.5px] transition-all cursor-pointer whitespace-nowrap !text-[11px] leading-none"
             :class="element.linkage.logic !== 'and' ? 'bg-[#1677ff] text-white font-semibold shadow-2xs' : 'text-slate-500 hover:text-slate-800'"
             @click="setLinkageLogic('or')"
           >
-            {{ t('prop.linkageLogicOr') }}
+            <span class="!text-[11px] leading-none whitespace-nowrap">{{ t('prop.linkageLogicOr') }}</span>
           </button>
           <button
             type="button"
-            class="px-1.5 py-0.5 rounded transition-colors cursor-pointer leading-none"
+            class="flex items-center justify-center h-5 px-2 rounded-[3.5px] transition-all cursor-pointer whitespace-nowrap !text-[11px] leading-none"
             :class="element.linkage.logic === 'and' ? 'bg-[#1677ff] text-white font-semibold shadow-2xs' : 'text-slate-500 hover:text-slate-800'"
             @click="setLinkageLogic('and')"
           >
-            {{ t('prop.linkageLogicAnd') }}
+            <span class="!text-[11px] leading-none whitespace-nowrap">{{ t('prop.linkageLogicAnd') }}</span>
           </button>
         </div>
 
@@ -40,11 +40,11 @@
         >
           <button
             type="button"
-            class="flex items-center gap-1 text-[11px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1 !text-[11px] leading-none text-slate-400 hover:text-red-500 transition-colors cursor-pointer whitespace-nowrap shrink-0"
             :title="t('prop.unlink')"
           >
-            <Unlink class="w-3 h-3" />
-            <span>{{ t('prop.unlink') }}</span>
+            <Unlink class="w-3 h-3 shrink-0" />
+            <span class="!text-[11px] leading-none whitespace-nowrap">{{ t('prop.unlink') }}</span>
           </button>
         </a-popconfirm>
       </div>
@@ -54,36 +54,36 @@
       <div
         v-for="(item, idx) in conditionItems"
         :key="item.rawCond.fieldKey + '_' + item.rawCond.value"
-        class="text-[12px] text-slate-600 leading-normal flex items-center gap-1.5 flex-wrap py-0.5 select-none"
+        class="text-[12px] text-slate-600 leading-normal flex items-center gap-1 py-0.5 select-none min-w-0"
       >
-        <span class="text-slate-400 font-medium">
+        <span class="text-slate-400 font-medium shrink-0">
           {{ idx === 0 ? t('prop.linkageWhen') : (element.linkage?.logic === 'and' ? t('prop.linkageAndJoin') : t('prop.linkageOrJoin')) }}
         </span>
 
         <button
           type="button"
-          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#1677ff] hover:bg-blue-100 hover:text-blue-700 font-medium border border-blue-200/80 transition-colors cursor-pointer max-w-[140px] truncate group"
+          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#1677ff] hover:bg-blue-100 hover:text-blue-700 font-medium border border-blue-200/80 transition-colors cursor-pointer min-w-0 shrink max-w-[140px] truncate group !text-[12px]"
           :title="t('prop.locateParentTip')"
           @click="locateParentField(item.parentField)"
         >
-          <span class="truncate">{{ item.parentLabel }}</span>
+          <span class="truncate !text-[12px]">{{ item.parentLabel }}</span>
           <ExternalLink class="w-2.5 h-2.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
         </button>
 
-        <span class="text-slate-400">{{ t('prop.linkageEquals') }}</span>
+        <span class="text-slate-400 shrink-0">{{ t('prop.linkageEquals') }}</span>
 
-        <span class="font-medium text-slate-800">
+        <span class="font-medium text-slate-800 shrink-0 max-w-[72px] truncate" :title="item.optLabel">
           “{{ item.optLabel }}”
         </span>
 
-        <span v-if="idx === conditionItems.length - 1" class="text-slate-500">
+        <span v-if="idx === conditionItems.length - 1" class="text-slate-500 shrink-0">
           {{ t('prop.linkageThenShow') }}
         </span>
 
         <button
           v-if="conditionItems.length > 1"
           type="button"
-          class="ml-auto text-slate-300 hover:text-red-500 transition-colors cursor-pointer px-1 text-xs leading-none"
+          class="ml-auto text-slate-300 hover:text-red-500 transition-colors cursor-pointer px-1 !text-xs leading-none shrink-0"
           :title="t('prop.removeSingleCondition')"
           @click="removeCondition(item.origIdx)"
         >

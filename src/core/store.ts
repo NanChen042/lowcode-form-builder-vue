@@ -1478,21 +1478,16 @@ export function createNewCanvas(options: {
   schema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(schema);
-  if (primaryLocale.value === 'en') {
-    store.meta.i18n = {
-      en: {
-        ...(store.meta.i18n.en || {}),
-        title: initialTitleEn
-      }
-    };
-  } else {
-    store.meta.i18n.zh = {
-      ...(store.meta.i18n.zh || {}),
-      title: initialTitle,
+  store.meta.baseLocale = 'en';
+  store.meta.enabledLocales = ['en'];
+  store.activeTargetLocale = '';
+  store.editingLocale = 'en';
+  store.meta.i18n = {
+    en: {
+      title: initialTitleEn,
       ...(options.description ? { description: options.description } : {})
-    };
-    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: initialTitleEn };
-  }
+    }
+  };
   store.meta.profileType = profileType;
   store.meta.source = 'diy';
   store.meta.serialNo = formId;
@@ -1641,44 +1636,14 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
   store.meta.baseLocale = baseLoc;
   store.meta.i18n = metaI18n || {};
 
-  if (schema.meta?.enabledLocales && schema.meta.enabledLocales.length > 0) {
+  if (schema.meta?.enabledLocales && Array.isArray(schema.meta.enabledLocales) && schema.meta.enabledLocales.length > 0) {
     const loadedLocales = [...schema.meta.enabledLocales];
     if (!loadedLocales.includes(baseLoc)) {
       loadedLocales.unshift(baseLoc);
     }
-    // 自动扫描 schema 中表单内容实际包含的多语言（排除 system_profile 固有中英文骨架，避免仅有系统骨架导致非启用语种自动冒出）
-    schema.pages?.forEach(p => {
-      if (p.pageType === 'system_profile') return;
-      if (p.i18n) {
-        Object.entries(p.i18n).forEach(([loc, content]: [string, any]) => {
-          if (!loadedLocales.includes(loc)) {
-            if (content && (content.title?.trim() || content.description?.trim())) {
-              loadedLocales.push(loc);
-            }
-          }
-        });
-      }
-      p.fields?.forEach(f => {
-        if (f.i18n) {
-          Object.entries(f.i18n).forEach(([loc, content]: [string, any]) => {
-            if (!loadedLocales.includes(loc)) {
-              const hasText = content && (
-                content.label?.trim() ||
-                content.placeholder?.trim() ||
-                content.help?.trim() ||
-                content.content?.trim()
-              );
-              if (hasText) {
-                loadedLocales.push(loc);
-              }
-            }
-          });
-        }
-      });
-    });
     store.meta.enabledLocales = Array.from(new Set(loadedLocales));
   } else {
-    store.meta.enabledLocales = baseLoc === 'zh' ? ['zh', 'en'] : ['en'];
+    store.meta.enabledLocales = [baseLoc];
   }
   const rawProfileType = schema.meta?.profileType
     || (schema.pages?.[0]?.profileType)

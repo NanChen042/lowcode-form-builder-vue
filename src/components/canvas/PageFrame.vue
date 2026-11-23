@@ -102,19 +102,10 @@
         :class="isReadOnlyReference ? 'bg-[#f8fafc]' : 'bg-white'"
         @click.stop="handleSelectPage"
       >
-        <div class="flex items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-1 h-5 rounded-full bg-[#1677ff] shrink-0"></span>
-            <h2 class="text-[19px] font-bold tracking-tight text-slate-800 m-0 leading-7 truncate">
-              {{ frameLocale.startsWith('zh') ? (frameLocale === 'zh-TW' ? '風險評估' : '风险评估') : 'Risk Assessment' }}
-            </h2>
-          </div>
-          <span
-            v-if="store.meta.i18n?.[frameLocale]?.title?.trim() || store.meta.i18n?.[primaryLocale]?.title?.trim()"
-            class="text-[11.5px] font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded border border-slate-200/70 truncate max-w-[240px]"
-          >
-            {{ (store.meta.i18n?.[frameLocale]?.title || store.meta.i18n?.[primaryLocale]?.title || '').trim() }}
-          </span>
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100/80">
+          <h2 class="text-[17px] font-semibold tracking-tight text-slate-800 m-0 leading-6">
+            {{ frameLocale.startsWith('zh') ? (frameLocale === 'zh-TW' ? '風險評估' : '风险评估') : 'Risk Assessment' }}
+          </h2>
         </div>
       </div>
 

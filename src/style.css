@@ -310,6 +310,7 @@ body {
 
 button:not(.arco-btn) {
     font-family: inherit;
+    font-size: inherit;
     line-height: normal;
 }
 

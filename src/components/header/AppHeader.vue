@@ -155,11 +155,11 @@
       </template>
     </a-modal>
 
-    <a-modal v-model:visible="isVideoModalVisible" :title="t('header.bilingualVideoTitle')" :title-align="'start'" :width="820" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
+    <a-modal v-model:visible="isVideoModalVisible" :title="isRisk ? t('risk.bilingualVideoTitle') : t('header.bilingualVideoTitle')" :title-align="'start'" :width="820" :footer="false" :lock-scroll="false" draggable unmount-on-close @before-close="handleCloseVideoModal">
       <div class="py-1">
-        <video ref="videoPlayerRef" :src="helpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[520px] rounded-lg bg-black object-contain shadow-sm" />
+        <video ref="videoPlayerRef" :src="currentHelpVideoUrl" controls autoplay playsinline class="w-full h-auto max-h-[520px] rounded-lg bg-black object-contain shadow-sm" />
         <div class="mt-3 px-1 flex items-center justify-between text-xs text-slate-500">
-          <span>{{ t('header.bilingualVideoTip') }}</span>
+          <span>{{ isRisk ? t('risk.bilingualVideoTip') : t('header.bilingualVideoTip') }}</span>
           <a-button size="small" type="primary" class="bg-[#1677ff]" @click="handleCloseVideoModal">
             {{ t('common.close') }}
           </a-button>
@@ -215,7 +215,10 @@ import {
 import logoUrl from '@/assets/logo.png';
 import companyIcon from '@/assets/gs.png';
 import helpVideoUrl from '@/help.mp4';
+import helpRiskVideoUrl from '@/help-risk.mp4';
 import TranslationEntry from './TranslationEntry.vue';
+
+const currentHelpVideoUrl = computed(() => (isRisk.value ? helpRiskVideoUrl : helpVideoUrl));
 
 const emit = defineEmits(['open-preview', 'open-deploy']);
 

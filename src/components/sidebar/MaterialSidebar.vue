@@ -296,30 +296,50 @@
                   :title="isRisk ? t('risk.cmpQuestion') : getFieldText(item, 'label', store.currentLocale)"
                   @click="handleComponentClick(item.type)"
                 >
-                  <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden">
-                    <!-- 标题栏 -->
-                    <div class="flex items-center gap-1.5 min-w-0 w-full">
-                      <div class="flex h-5 w-5 items-center justify-center rounded bg-blue-50 text-[#1677ff] shrink-0">
-                        <ListOrdered class="h-3.5 w-3.5" />
+                  <div v-if="isRisk" class="sidebar-btn-view flex w-full flex-col gap-2 overflow-hidden text-left">
+                    <!-- 标题栏：左侧图标与题目类型，右侧轻量拖拽手柄 -->
+                    <div class="flex items-center justify-between gap-1.5 w-full">
+                      <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <div class="flex h-5 w-5 items-center justify-center rounded bg-blue-50 text-[#1677ff] shrink-0 border border-blue-100/60">
+                          <ListOrdered class="h-3.5 w-3.5" />
+                        </div>
+                        <span class="truncate text-[12.5px] font-semibold text-slate-800 transition-colors group-hover:text-[#1677ff]">
+                          {{ t('risk.cmpQuestion') }}
+                        </span>
                       </div>
-                      <span class="truncate text-[12px] font-semibold text-slate-800 transition-colors group-hover:text-[#1677ff]">
-                        {{ t('risk.cmpQuestion') }}
-                      </span>
+                      <div
+                        class="flex h-5 w-5 items-center justify-center rounded text-slate-300 group-hover:text-slate-500 group-hover:bg-slate-100/80 transition-colors shrink-0"
+                        :title="t('risk.dragToAddTip')"
+                      >
+                        <GripVertical class="h-3.5 w-3.5" />
+                      </div>
                     </div>
 
-                    <!-- 极简清单行示意（与画布新样式一致：序号 + 题干骨架 + Yes · 分值胶囊） -->
-                    <div class="flex items-center justify-between gap-2 w-full rounded-md border border-slate-200/80 bg-slate-50/70 group-hover:border-blue-200/80 group-hover:bg-blue-50/30 transition-colors px-2 py-2">
-                      <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                        <span class="text-[10.5px] font-semibold text-slate-400 group-hover:text-[#1677ff] leading-none shrink-0 transition-colors">1.</span>
-                        <div class="flex flex-col gap-1 flex-1 min-w-0">
-                          <span class="h-1.5 w-4/5 rounded-full bg-slate-200/90 group-hover:bg-blue-200/80 transition-colors"></span>
-                          <span class="h-1.5 w-3/5 rounded-full bg-slate-200/60 group-hover:bg-blue-100/80 transition-colors"></span>
+                    <!-- 简短说明 -->
+                    <p class="text-[11px] text-slate-500 leading-relaxed m-0 break-words">
+                      {{ t('risk.cmpQuestionCardDesc') }}
+                    </p>
+
+                    <!-- 特性标签栏：选项微缩药丸 + 计分规则 -->
+                    <div class="flex items-center justify-between gap-1 w-full pt-1.5 border-t border-slate-100/90">
+                      <div class="flex items-center gap-1 min-w-0">
+                        <span class="text-slate-400 text-[10px] shrink-0 select-none">
+                          {{ t('risk.cmpOptLabel') }}
+                        </span>
+                        <div class="flex items-center gap-1 shrink-0">
+                          <span class="inline-flex items-center rounded-full bg-slate-100 border border-slate-200/80 px-1.5 py-0.2 text-[9.5px] font-medium text-slate-600 leading-tight">
+                            Yes
+                          </span>
+                          <span class="inline-flex items-center rounded-full bg-slate-100 border border-slate-200/80 px-1.5 py-0.2 text-[9.5px] font-medium text-slate-600 leading-tight">
+                            No
+                          </span>
+                          <span class="inline-flex items-center rounded-full bg-slate-100 border border-slate-200/80 px-1.5 py-0.2 text-[9.5px] font-medium text-slate-600 leading-tight">
+                            NA
+                          </span>
                         </div>
                       </div>
-                      <span class="inline-flex items-center gap-0.5 shrink-0 rounded-full border border-blue-200/80 bg-blue-50/90 px-2 py-0.5 text-[10px] font-semibold leading-none text-[#1677ff] tabular-nums">
-                        <span class="opacity-80">Yes</span>
-                        <span class="opacity-60">·</span>
-                        <span>1 {{ t('risk.ptsUnit') }}</span>
+                      <span class="inline-flex items-center shrink-0 rounded bg-blue-50 border border-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-[#1677ff] leading-none">
+                        {{ t('risk.cmpScoringRule') }}
                       </span>
                     </div>
                   </div>
@@ -378,7 +398,7 @@
               <div
                 v-for="(grp, gIdx) in store.pages[0].groups"
                 :key="grp.id"
-                class="sidebar-risk-group-item group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
+                class="sidebar-risk-group-item group relative flex items-start justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
                 :class="[
                   store.selectedType === 'group' && store.selectedId === grp.id
                     ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
@@ -388,10 +408,10 @@
                 ]"
                 @click="selectGroup(grp.id)"
               >
-                <div class="flex items-center gap-2 min-w-0 flex-1 pr-1">
-                  <GripVertical class="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 shrink-0 cursor-grab active:cursor-grabbing" />
+                <div class="flex items-start gap-2 min-w-0 flex-1 pr-1">
+                  <GripVertical class="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 shrink-0 cursor-grab active:cursor-grabbing mt-0.5" />
                   <span
-                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
+                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors mt-0.5"
                     :class="[
                       store.selectedType === 'group' && store.selectedId === grp.id
                         ? 'bg-[#1677ff] text-white'
@@ -404,12 +424,13 @@
                   </span>
                   <div class="min-w-0 flex-1">
                     <div
-                      class="text-[12px] truncate leading-snug"
+                      class="text-[12px] break-words leading-snug"
                       :class="[
                         store.selectedType === 'group' && store.selectedId === grp.id
                           ? 'font-bold text-[#1677ff]'
                           : 'font-medium text-slate-700'
                       ]"
+                      :title="getRiskGroupDisplayTitle(grp, Number(gIdx))"
                     >
                       {{ getRiskGroupDisplayTitle(grp, Number(gIdx)) }}
                     </div>
@@ -430,7 +451,7 @@
                 >
                   <button
                     type="button"
-                    class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
+                    class="flex h-6 w-6 items-center justify-center rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0 mt-0.5"
                     @click.stop
                   >
                     <Trash2 class="h-3.5 w-3.5" />
@@ -457,7 +478,7 @@
             <div
               v-for="(page, idx) in store.pages"
               :key="page.id"
-              class="figma-page-row group relative flex items-center justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
+              class="figma-page-row group relative flex items-start justify-between p-2 rounded-md border cursor-pointer transition-all duration-150"
               :class="[
                 (store.selectedType === 'page' && store.selectedId === page.id)
                   ? 'border-[#1677ff] bg-blue-50/50 shadow-xs ring-1 ring-[#1677ff]/25'
@@ -467,9 +488,9 @@
               ]"
               @click="focusPage(page.id)"
             >
-              <div class="flex items-center gap-2 min-w-0 flex-1 pr-2">
+              <div class="flex items-start gap-2 min-w-0 flex-1 pr-2">
                 <span
-                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors"
+                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-[10.5px] font-semibold transition-colors mt-0.5"
                   :class="[
                     (store.selectedType === 'page' && store.selectedId === page.id)
                       ? 'bg-[#1677ff] text-white shadow-2xs'
@@ -484,7 +505,7 @@
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5 min-w-0">
                     <span
-                      class="text-[12px] truncate leading-snug transition-colors"
+                      class="text-[12px] break-words leading-snug transition-colors"
                       :class="[
                         (store.selectedType === 'page' && store.selectedId === page.id)
                           ? 'font-bold text-[#1677ff]'
@@ -496,7 +517,7 @@
                     >
                       {{ getPageDisplayInfo(page, idx).mainTitle }}
                     </span>
-                    <Lock v-if="page.pageType === 'system_profile'" class="w-3 h-3 text-slate-400 shrink-0" />
+                    <Lock v-if="page.pageType === 'system_profile'" class="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
                   </div>
                   <div class="text-[10.5px] text-slate-400 mt-0.5 truncate">
                     {{ getPageDisplayInfo(page, idx).subtitle }}
