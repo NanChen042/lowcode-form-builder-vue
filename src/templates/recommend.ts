@@ -240,11 +240,6 @@ export function createBlankTemplate(
   description_en = ''
 ): FormSchema {
   const normType = (profileType === 'client' || profileType === 'customer') ? 'customer' : profileType;
-  const isEnEntry =
-    typeof window !== 'undefined' &&
-    (new URLSearchParams(window.location.search).get('lang')?.toLowerCase() === 'en' ||
-      (!new URLSearchParams(window.location.search).get('lang') &&
-        (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
 
   const defaultMetaMap: Record<string, { title: string; desc: string; descEn: string }> = {
     customer: {
@@ -281,26 +276,19 @@ export function createBlankTemplate(
     schemaVersion: '1.0.0',
     meta: {
       profileType: normType,
-      baseLocale: isEnEntry ? 'en' : 'zh',
-      enabledLocales: isEnEntry ? ['en'] : ['zh', 'en'],
+      baseLocale: 'en',
+      enabledLocales: ['en'],
       source: 'diy',
-      i18n: isEnEntry
-        ? {
-            en: {
-              title: title_en || resolvedTitle,
-              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-            }
-          }
-        : {
-            zh: {
-              title: resolvedTitle,
-              ...(resolvedDesc ? { description: resolvedDesc } : {})
-            },
-            en: {
-              title: title_en || resolvedTitle,
-              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-            }
-          }
+      i18n: {
+        en: {
+          title: title_en || resolvedTitle,
+          ...(resolvedDescEn ? { description: resolvedDescEn } : {})
+        },
+        zh: {
+          title: resolvedTitle,
+          ...(resolvedDesc ? { description: resolvedDesc } : {})
+        }
+      }
     },
     pages: [
       {
@@ -308,16 +296,20 @@ export function createBlankTemplate(
         pageType: 'system_profile',
         profileType: normType,
         showSkeleton: true,
-        i18n: isEnEntry
-          ? { en: { title: 'Basic Information' } }
-          : { zh: { title: '基本资料' } },
+        i18n: {
+          en: { title: 'Basic Information' },
+          zh: { title: '基本资料' }
+        },
         fields: [],
         profileFields: defaultFields
       },
       {
         id: 'page_form_1',
         pageType: 'form',
-        i18n: {},
+        i18n: {
+          en: { title: 'Questionnaire' },
+          zh: { title: '问卷表单' }
+        },
         fields: []
       }
     ]
@@ -379,55 +371,40 @@ export function createRiskAssessmentTemplate(
   const resolvedDescEn = description_en || description || metaPreset.descEn;
 
   const presetGroups = [{ id: 'grp_risk_1', i18n: {} }];
-  const isEnEntry =
-    typeof window !== 'undefined' &&
-    (new URLSearchParams(window.location.search).get('lang')?.toLowerCase() === 'en' ||
-      (!new URLSearchParams(window.location.search).get('lang') &&
-        (localStorage.getItem('builder_current_locale') === 'en' || localStorage.getItem('lowcode_current_locale') === 'en')));
 
   return {
     schemaVersion: '1.0.0',
     meta: {
       profileType: normType,
       formType: 'risk',
-      baseLocale: isEnEntry ? 'en' : 'zh',
-      enabledLocales: isEnEntry ? ['en'] : ['zh', 'en'],
+      baseLocale: 'en',
+      enabledLocales: ['en'],
       source: 'diy',
-      i18n: isEnEntry
-        ? {
-            en: {
-              title: title_en || resolvedTitle,
-              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-            }
-          }
-        : {
-            zh: {
-              title: resolvedTitle,
-              ...(resolvedDesc ? { description: resolvedDesc } : {})
-            },
-            en: {
-              title: title_en || resolvedTitle,
-              ...(resolvedDescEn ? { description: resolvedDescEn } : {})
-            }
-          }
+      i18n: {
+        en: {
+          title: title_en || resolvedTitle,
+          ...(resolvedDescEn ? { description: resolvedDescEn } : {})
+        },
+        zh: {
+          title: resolvedTitle,
+          ...(resolvedDesc ? { description: resolvedDesc } : {})
+        }
+      }
     },
     pages: [
       {
         id: 'page_risk_0',
         pageType: 'form',
-        i18n: isEnEntry
-          ? {
-              en: {
-                title: metaPreset.pageTitleEn,
-                description: metaPreset.pageDescEn
-              }
-            }
-          : {
-              zh: {
-                title: metaPreset.pageTitle,
-                description: metaPreset.pageDesc
-              }
-            },
+        i18n: {
+          en: {
+            title: metaPreset.pageTitleEn,
+            description: metaPreset.pageDescEn
+          },
+          zh: {
+            title: metaPreset.pageTitle,
+            description: metaPreset.pageDesc
+          }
+        },
         groups: presetGroups,
         fields: [
           {
@@ -454,10 +431,10 @@ export const kycCustomerTemplate: FormSchema = {
   "meta": {
     "profileType": "customer",
     "formType": "kyc",
-    "baseLocale": "zh",
+    "baseLocale": "en",
     "enabledLocales": [
-      "zh",
-      "en"
+      "en",
+      "zh"
     ],
     "source": "template",
     "templateKey": "kyc-customer",
@@ -888,10 +865,10 @@ export const kycIndividualTemplate: FormSchema = {
   "meta": {
     "profileType": "individual",
     "formType": "kyc",
-    "baseLocale": "zh",
+    "baseLocale": "en",
     "enabledLocales": [
-      "zh",
-      "en"
+      "en",
+      "zh"
     ],
     "source": "template",
     "templateKey": "kyc-individual",
@@ -2093,10 +2070,10 @@ export const kycEntityTemplate: FormSchema = {
   "meta": {
     "profileType": "entity",
     "formType": "kyc",
-    "baseLocale": "zh",
+    "baseLocale": "en",
     "enabledLocales": [
-      "zh",
-      "en"
+      "en",
+      "zh"
     ],
     "source": "template",
     "templateKey": "kyc-entity",
@@ -2527,10 +2504,10 @@ export const multilingualMockTemplate: FormSchema = {
   "meta": {
     "profileType": "customer",
     "formType": "kyc",
-    "baseLocale": "zh",
+    "baseLocale": "en",
     "enabledLocales": [
-      "zh",
       "en",
+      "zh",
       "zh-Hant"
     ],
     "source": "template",
@@ -3060,8 +3037,8 @@ function createPresetRiskSchema(params: {
     meta: {
       profileType: params.profileType,
       formType: 'risk',
-      baseLocale: 'zh',
-      enabledLocales: ['zh', 'en'],
+      baseLocale: 'en',
+      enabledLocales: ['en', 'zh'],
       source: 'template',
       templateKey: params.templateKey,
       i18n: {

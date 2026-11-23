@@ -114,9 +114,9 @@ export function getLocaleShortBadge(loc: string): string {
 export function getEffectiveFormLocale(locale?: string): string {
   if (locale) return normalizeLocaleKey(locale);
   if (store.workspaceMode === 'translation') {
-    return normalizeLocaleKey(store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'zh');
+    return normalizeLocaleKey(store.activeTargetLocale || store.editingLocale || primaryLocale.value || 'en');
   }
-  return normalizeLocaleKey(primaryLocale.value || 'zh');
+  return normalizeLocaleKey(primaryLocale.value || 'en');
 }
 
 /**
@@ -514,6 +514,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.lockedBlankDesc': '从空白画布开始，自由搭建当前案例的 KYC 问卷。',
     'wizard.lockedBlankRiskDesc': '从空白画布开始，自由配置当前案例的风险评估问题与权重。',
     'wizard.subjectLabel': '适用对象',
+    'wizard.zhBilingualNotice': '当前工作台为中文界面，需设置双语表单才可发布；若仅需要英文表单，可选择进入英文工作台创建。',
+    'wizard.switchToEnBtn': '切换到英文版',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': '新建表单画布',
@@ -1166,6 +1168,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'wizard.lockedBlankDesc': 'Start from a blank canvas and build the KYC questionnaire for this subject.',
     'wizard.lockedBlankRiskDesc': 'Start from a blank canvas and configure risk questions and weights for this subject.',
     'wizard.subjectLabel': 'Applicable Subject',
+    'wizard.zhBilingualNotice': 'Current workspace is in Chinese and requires bilingual form configuration. If you only need an English form, switch to the English workspace.',
+    'wizard.switchToEnBtn': 'Switch to English',
 
     // 新建表单弹窗 (CreateFormModal)
     'modal.createForm.title': 'New Form Canvas',

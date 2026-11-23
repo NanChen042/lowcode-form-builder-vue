@@ -102,7 +102,7 @@
           v-model="pageTitleModel"
           :auto-size="{ minRows: 1, maxRows: 3 }"
           allow-clear
-          :placeholder="t('prop.pageTitlePlaceholder')"
+          :placeholder="t('prop.pageTitlePlaceholder', primaryLocale)"
           class="w-full"
           @focus="setPageFocus('title')"
           @blur="clearFocus"
@@ -125,7 +125,7 @@
           v-model="pageDescModel"
           :auto-size="{ minRows: 3, maxRows: 6 }"
           allow-clear
-          :placeholder="t('prop.pageDescPlaceholder')"
+          :placeholder="t('prop.pageDescPlaceholder', primaryLocale)"
           class="w-full"
           @focus="setPageFocus('description')"
           @blur="clearFocus"

@@ -120,19 +120,11 @@
         <a-alert type="warning" class="rounded">
           <template #title>
             <span class="font-medium text-xs">
-              {{
-                isEnBlocked
-                  ? t('header.warnCount', undefined, { count: enMissingCount })
-                  : t('header.warnMultiCount', undefined, { count: translationStats.untranslatedCount })
-              }}
+              {{ t('header.warnMultiCount', undefined, { count: translationStats.untranslatedCount }) }}
             </span>
           </template>
           <div class="text-[12px] text-slate-600 leading-relaxed mt-0.5">
-            {{
-              isEnBlocked
-                ? t('header.warnEnRequiredDesc')
-                : t('header.warnMultiDesc')
-            }}
+            {{ t('header.warnMultiDesc') }}
           </div>
         </a-alert>
 
@@ -156,7 +148,7 @@
           <a-button type="primary" class="bg-[#1677ff]" @click="handleGoToTranslate">
             {{ t('header.warnComplete') }}
           </a-button>
-          <a-button v-if="!isEnBlocked" @click="handleProceedPublish">
+          <a-button @click="handleProceedPublish">
             {{ t('header.warnPublishAnyway') }}
           </a-button>
         </div>
@@ -194,7 +186,6 @@ import {
   syncUrlParams,
   primaryLocale,
   targetLocales,
-  addTargetLocale,
   openTranslationWorkspace,
   selectPage,
   selectElement,
@@ -361,37 +352,21 @@ function validateFormBeforePublish(): boolean {
   return true;
 }
 
-const enMissingCount = computed(() => {
-  if (primaryLocale.value !== 'zh') return 0;
-  if (!targetLocales.value.includes('en')) {
-    return translationStats.value.total || 1;
-  }
-  return translationStats.value.enMissingCount;
-});
-
-const isEnBlocked = computed(() => {
-  return primaryLocale.value === 'zh' && enMissingCount.value > 0;
-});
-
 const publishWarningItems = computed(() => {
-  if (isEnBlocked.value) {
-    return translationStats.value.localeStats?.['en']?.missingItems || translationStats.value.untranslatedItems;
-  }
   return translationStats.value.untranslatedItems;
 });
 
 function handleDeployClick() {
   if (!validateFormBeforePublish()) return;
 
-  // 1. 中文版缺少英文或英文未完成：强拦截提示（不可无视）
-  // 2. 启用了任何其他多语言且未翻译完整：弹窗提示未翻译项，但允许无视后继续发布
-  if (isEnBlocked.value || translationStats.value.untranslatedCount > 0) {
+  // 启用了任何其他多语言且未翻译完整：弹窗提示未翻译项，但允许无视后继续发布
+  if (translationStats.value.untranslatedCount > 0) {
     store.showPublishValidation = true;
     publishCheckModalVisible.value = true;
     return;
   }
 
-  // 3. 所有启用的多语言均已 100% 完成或没有未翻译项：直接发布
+  // 所有启用的多语言均已 100% 完成或单语言表单：直接发布
   store.showPublishValidation = false;
   emit('open-deploy');
 }
@@ -404,12 +379,7 @@ function handleProceedPublish() {
 
 function handleGoToTranslate() {
   publishCheckModalVisible.value = false;
-  if (primaryLocale.value === 'zh' && !targetLocales.value.includes('en')) {
-    addTargetLocale('en');
-  }
-  const targetLoc = isEnBlocked.value
-    ? 'en'
-    : (publishWarningItems.value[0]?.targetLocale || targetLocales.value[0] || 'en');
+  const targetLoc = publishWarningItems.value[0]?.targetLocale || targetLocales.value[0] || 'zh';
 
   openTranslationWorkspace(targetLoc);
   const items = publishWarningItems.value;

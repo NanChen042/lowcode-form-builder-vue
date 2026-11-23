@@ -68,14 +68,14 @@ const labelPlaceholder = computed(() => {
   if (isTranslationFrame.value && sourceLabel.value) {
     return sourceLabel.value;
   }
-  return t('prop.fieldLabelPlaceholder');
+  return t('prop.fieldLabelPlaceholder', frameLocale.value);
 });
 
 const helpPlaceholder = computed(() => {
   if (isTranslationFrame.value && sourceHelp.value) {
     return sourceHelp.value;
   }
-  return t('prop.fieldHelpPlaceholder');
+  return t('prop.fieldHelpPlaceholder', frameLocale.value);
 });
 
 const showHelpSlot = computed(() => {

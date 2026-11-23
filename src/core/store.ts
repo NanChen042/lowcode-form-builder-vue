@@ -1590,17 +1590,20 @@ export function applyTemplateKey(
   const title = customTitle?.trim() || (shouldKeepTitle && curTitle ? curTitle : (store.currentLocale === 'en' ? targetTitleEn : targetTitle));
   const titleEn = customTitle?.trim() || (shouldKeepTitleEn && curTitleEn ? curTitleEn : targetTitleEn);
 
-  const isEnEntry = store.currentLocale === 'en';
-  clonedSchema.meta.baseLocale = isEnEntry ? 'en' : 'zh';
-  clonedSchema.meta.enabledLocales = isEnEntry ? ['en'] : ['zh', 'en'];
-  if (!clonedSchema.meta.i18n) clonedSchema.meta.i18n = {};
-  if (isEnEntry) {
-    clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
-    delete clonedSchema.meta.i18n.zh;
+  // 无论当前界面操作语言（store.currentLocale）如何，表单底层母版语言统一固定为英文 (en)
+  clonedSchema.meta.baseLocale = 'en';
+  // 场景预置模板内置中英双语，统一包含 en 与 zh，且 en 为母版基准
+  if (!clonedSchema.meta.enabledLocales || clonedSchema.meta.enabledLocales.length === 0) {
+    clonedSchema.meta.enabledLocales = ['en', 'zh'];
   } else {
-    clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
-    clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
+    const locSet = new Set(clonedSchema.meta.enabledLocales);
+    locSet.add('en');
+    locSet.add('zh');
+    clonedSchema.meta.enabledLocales = Array.from(locSet);
   }
+  if (!clonedSchema.meta.i18n) clonedSchema.meta.i18n = {};
+  clonedSchema.meta.i18n.en = { ...(clonedSchema.meta.i18n.en || {}), title: titleEn };
+  clonedSchema.meta.i18n.zh = { ...(clonedSchema.meta.i18n.zh || {}), title };
   clonedSchema.meta.profileType = effectiveProfileType;
   clonedSchema.meta.source = 'template';
   clonedSchema.meta.templateKey = tplKey;
@@ -1609,13 +1612,8 @@ export function applyTemplateKey(
   clonedSchema.meta.createdAt = store.meta.createdAt || now;
 
   loadSchema(clonedSchema);
-  if (isEnEntry) {
-    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
-    delete store.meta.i18n.zh;
-  } else {
-    store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
-    store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
-  }
+  store.meta.i18n.en = { ...(store.meta.i18n.en || {}), title: titleEn };
+  store.meta.i18n.zh = { ...(store.meta.i18n.zh || {}), title };
   store.meta.profileType = effectiveProfileType;
   store.meta.source = 'template';
   store.meta.templateKey = tplKey;
@@ -1639,7 +1637,7 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
     store.editorMode = 'risk';
   }
   const metaI18n = schema.meta?.i18n ? JSON.parse(JSON.stringify(schema.meta.i18n)) : undefined;
-  const baseLoc = schema.meta?.baseLocale || (store.currentLocale === 'en' ? 'en' : 'zh');
+  const baseLoc = schema.meta?.baseLocale || 'en';
   store.meta.baseLocale = baseLoc;
   store.meta.i18n = metaI18n || {};
 
@@ -1647,10 +1645,6 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
     const loadedLocales = [...schema.meta.enabledLocales];
     if (!loadedLocales.includes(baseLoc)) {
       loadedLocales.unshift(baseLoc);
-    }
-    // 中文基准下强制默认追加英文版
-    if (baseLoc === 'zh' && !loadedLocales.includes('en')) {
-      loadedLocales.push('en');
     }
     // 自动扫描 schema 中表单内容实际包含的多语言（排除 system_profile 固有中英文骨架，避免仅有系统骨架导致非启用语种自动冒出）
     schema.pages?.forEach(p => {
@@ -1901,7 +1895,7 @@ export function highlightPropertyField(
 }
 
 export const primaryLocale = computed<string>(() => {
-  return store.meta.baseLocale || store.currentLocale || 'zh';
+  return store.meta.baseLocale || 'en';
 });
 
 export const targetLocales = computed<string[]>(() => {

@@ -752,7 +752,7 @@ function getGroupTitlePlaceholder(grp?: FormQuestionGroup, _idx?: number): strin
     const srcTitle = getGroupText(grp, 'title', primaryLocale.value);
     if (srcTitle) return srcTitle;
   }
-  return t('risk.groupNamePlaceholder');
+  return t('risk.groupNamePlaceholder', frameLocale.value);
 }
 
 function setGroupTitle(grp: FormQuestionGroup, val: string) {
@@ -1017,14 +1017,14 @@ const pageTitlePlaceholder = computed(() => {
   if (props.isTranslationFrame && sourcePageTitle.value) {
     return sourcePageTitle.value;
   }
-  return t('prop.pageTitlePlaceholder');
+  return t('prop.pageTitlePlaceholder', frameLocale.value);
 });
 
 const pageDescPlaceholder = computed(() => {
   if (props.isTranslationFrame && sourcePageDesc.value) {
     return sourcePageDesc.value;
   }
-  return t('prop.pageDescPlaceholder');
+  return t('prop.pageDescPlaceholder', frameLocale.value);
 });
 
 const isPageSelected = computed(() => {

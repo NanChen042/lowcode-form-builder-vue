@@ -84,8 +84,6 @@ import {
   store,
   isRisk,
   isBilingual,
-  primaryLocale,
-  targetLocales,
   openTranslationWorkspace,
   closeTranslationWorkspace
 } from '@/core/store';
@@ -105,9 +103,6 @@ const label = computed(() => {
 });
 
 const missingItemsCount = computed(() => {
-  if (primaryLocale.value === 'zh' && !targetLocales.value.includes('en')) {
-    return translationStats.value.total || 1;
-  }
   return translationStats.value.untranslatedCount;
 });
 

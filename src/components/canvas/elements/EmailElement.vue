@@ -52,7 +52,7 @@ const currentPlaceholder = computed({
 });
 
 const placeholderFallback = computed(() => {
-  return getFieldText(props.element, 'placeholder', primaryLocale.value) || t('prop.emailPlaceholder');
+  return getFieldText(props.element, 'placeholder', primaryLocale.value) || t('prop.emailPlaceholder', frameLocale.value);
 });
 
 const isFocusedPlaceholder = computed(() => {

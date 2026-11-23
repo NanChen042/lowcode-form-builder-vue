@@ -28,7 +28,7 @@
         v-model="fieldLabelModel"
         :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 5 }"
         allow-clear
-        :placeholder="element.type === 'alert' ? t('common.notice') : (isRisk ? t('risk.enterQuestionPlaceholder') : t('prop.fieldLabelPlaceholder'))"
+        :placeholder="element.type === 'alert' ? t('common.notice', primaryLocale) : (isRisk ? t('risk.enterQuestionPlaceholder', primaryLocale) : t('prop.fieldLabelPlaceholder', primaryLocale))"
         class="w-full"
         :class="{ 'prop-field-focused': isFieldFocused('label') }"
         @focus="setFocus('label')"
@@ -109,7 +109,7 @@
             v-model="fieldHelpModel"
             :auto-size="{ minRows: 1, maxRows: 3 }"
             allow-clear
-            :placeholder="t('prop.fieldHelpPlaceholder')"
+            :placeholder="t('prop.fieldHelpPlaceholder', primaryLocale)"
             class="w-full"
             :class="{ 'prop-field-focused': isFieldFocused('help') }"
             @focus="setFocus('help')"
@@ -194,7 +194,7 @@
         v-model="fieldEndPlaceholderModel"
         :auto-size="{ minRows: 1, maxRows: 4 }"
         allow-clear
-        :placeholder="t('common.endDate')"
+        :placeholder="t('common.endDate', primaryLocale)"
         class="w-full"
         :class="{ 'prop-field-focused': isFieldFocused('endPlaceholder') }"
         @focus="setFocus('endPlaceholder')"
@@ -495,17 +495,17 @@ const isFieldSignPlaceholderMissing = computed(() => {
 
 const placeholderInputDefault = computed(() => {
   if (props.element.type === 'date' && props.element.dateMode === 'range') {
-    return t('common.startDate');
+    return t('common.startDate', primaryLocale.value);
   }
   if (props.element.type === 'email') {
-    return t('prop.emailPlaceholder');
+    return t('prop.emailPlaceholder', primaryLocale.value);
   }
   if (props.element.type === 'signature') {
-    return t('common.clickToSign');
+    return t('common.clickToSign', primaryLocale.value);
   }
   const defaultData = componentRegistry[props.element.type]?.defaultData();
   if (defaultData) {
-    const defaultPlaceholder = defaultData.i18n?.[store.currentLocale === 'en' ? 'en' : 'zh']?.placeholder;
+    const defaultPlaceholder = defaultData.i18n?.[primaryLocale.value]?.placeholder || defaultData.i18n?.en?.placeholder;
     if (defaultPlaceholder) return defaultPlaceholder;
   }
   return placeholderFieldLabel.value;

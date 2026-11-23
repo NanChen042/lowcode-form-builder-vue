@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="modalVisible"
-    :width="isLockedMode ? 'min(620px, 94vw)' : 'min(840px, 94vw)'"
+    :width="isLockedMode ? 'min(660px, 94vw)' : 'min(840px, 94vw)'"
     :align-center="true"
     :footer="false"
     :hide-title="true"
@@ -59,18 +59,10 @@
         <div class="flex flex-col gap-3">
           <!-- 长条 1：新建空白画布 -->
           <div
-            class="group relative overflow-hidden rounded-xl p-4 px-4.5 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
+            class="group rounded-xl p-3.5 px-4 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:bg-blue-50/20 hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
             @click="handleCreateBlank"
           >
-            <!-- 右上角点缀背景图（轻量水印，hover 时微放大增色） -->
-            <img
-              :src="isRisk ? tplRiskHeroImg : tplBlankHeroImg"
-              alt=""
-              class="absolute -right-3 -top-4 w-32 h-32 object-contain pointer-events-none select-none opacity-15 group-hover:opacity-25 group-hover:scale-105 transition-all duration-300"
-              loading="lazy"
-            />
-
-            <div class="flex items-center gap-3.5 min-w-0 flex-1 relative z-10">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
               <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1677ff] to-blue-600 flex items-center justify-center shrink-0 text-white shadow-xs group-hover:from-blue-600 group-hover:to-blue-700 transition-all">
                 <Plus class="w-4 h-4 stroke-[2.8]" />
               </div>
@@ -85,14 +77,14 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-2.5 shrink-0 pl-2 relative z-10">
+            <div class="flex items-center gap-2.5 shrink-0 pl-2">
               <a-button
                 type="outline"
                 shape="round"
-                class="px-4 h-7.5 font-medium text-[12px] flex items-center gap-1.5 bg-white/90 backdrop-blur-xs group-hover:bg-[#1677ff] group-hover:text-white group-hover:border-[#1677ff] transition-all"
+                class="px-4 h-7.5 font-medium text-[12px] flex items-center gap-1.5 group-hover:bg-[#1677ff] group-hover:text-white group-hover:border-[#1677ff] transition-all"
               >
                 <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>{{ t('wizard.createNowBtn') }}</span>
+                <span class="whitespace-nowrap">{{ t('wizard.createNowBtn') }}</span>
                 <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </a-button>
             </div>
@@ -100,18 +92,10 @@
 
           <!-- 长条 2：场景预置模板 -->
           <div
-            class="group relative overflow-hidden rounded-xl p-4 px-4.5 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
+            class="group rounded-xl p-4 px-4.5 flex items-center justify-between border border-slate-200/90 bg-white hover:border-[#1677ff] hover:bg-blue-50/20 hover:shadow-xs cursor-pointer transition-all duration-150 select-none"
             @click="handleSelectTemplate(lockedTpl.key)"
           >
-            <!-- 右上角点缀背景图（轻量水印，hover 时微放大增色） -->
-            <img
-              :src="lockedTpl.image"
-              alt=""
-              class="absolute -right-3 -top-4 w-32 h-32 object-contain pointer-events-none select-none opacity-15 mix-blend-multiply group-hover:opacity-25 group-hover:scale-105 transition-all duration-300"
-              loading="lazy"
-            />
-
-            <div class="flex items-center gap-3.5 min-w-0 flex-1 relative z-10">
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
               <img
                 :src="lockedTpl.icon || lockedTpl.image"
                 :alt="getTemplateTitle(lockedTpl)"
@@ -126,35 +110,37 @@
                   <a-tag
                     :color="lockedTpl.tagColor"
                     size="small"
-                    class="rounded font-medium px-2 text-[10.5px]"
+                    class="rounded font-medium px-2 text-[10.5px] shrink-0"
                   >
                     {{ getTemplateTag(lockedTpl) }}
                   </a-tag>
                 </div>
 
-                <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-1 m-0 leading-none">
-                  <span class="flex items-center gap-1">
+                <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-1 leading-normal">
+                  <span class="inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
                     <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{{ getPagesText(lockedTpl) }}</span>
+                    <span class="whitespace-nowrap">{{ getPagesText(lockedTpl) }}</span>
                   </span>
-                  <span class="text-slate-300">·</span>
-                  <span class="flex items-center gap-1">
+                  <span class="text-slate-300 shrink-0">·</span>
+                  <span class="inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
                     <Layers class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{{ getFieldsText(lockedTpl) }}</span>
+                    <span class="whitespace-nowrap">{{ getFieldsText(lockedTpl) }}</span>
                   </span>
-                  <span class="text-slate-300">·</span>
-                  <span class="truncate text-slate-500">{{ t(lockedTpl.descKey) }}</span>
                 </div>
+
+                <p class="text-[12px] text-slate-500 mt-1.5 m-0 leading-normal line-clamp-2">
+                  {{ t(lockedTpl.descKey) }}
+                </p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2.5 shrink-0 pl-2 relative z-10">
+            <div class="flex items-center gap-2.5 shrink-0 pl-2">
               <a-button
                 type="primary"
                 shape="round"
                 class="px-4 h-7.5 bg-[#1677ff] hover:bg-blue-600 font-medium text-[12px] flex items-center gap-1.5 shadow-sm"
               >
-                <span>{{ t('sidebar.useTemplate') }}</span>
+                <span class="whitespace-nowrap">{{ t('sidebar.useTemplate') }}</span>
                 <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </a-button>
             </div>
@@ -240,15 +226,15 @@
                         {{ getTemplateTitle(tpl) }}
                       </h5>
                       
-                      <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-0.5 m-0 leading-none">
-                        <span class="flex items-center gap-1">
+                      <div class="flex items-center gap-2 text-[11.5px] text-slate-400 mt-0.5 m-0 leading-normal">
+                        <span class="inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
                           <FileText class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{{ getPagesText(tpl) }}</span>
+                          <span class="whitespace-nowrap">{{ getPagesText(tpl) }}</span>
                         </span>
-                        <span class="text-slate-300">·</span>
-                        <span class="flex items-center gap-1">
+                        <span class="text-slate-300 shrink-0">·</span>
+                        <span class="inline-flex items-center gap-1 shrink-0 whitespace-nowrap">
                           <Layers class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{{ getFieldsText(tpl) }}</span>
+                          <span class="whitespace-nowrap">{{ getFieldsText(tpl) }}</span>
                         </span>
                       </div>
 

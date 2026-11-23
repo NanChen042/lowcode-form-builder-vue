@@ -68,15 +68,17 @@ const currentPlaceholder = computed({
 const placeholderFallback = computed(() => {
   const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
   if (src) return src;
-  return props.element.type === 'nationality' ? t('prop.defaultNatPlaceholder') : t('prop.defaultCountryPlaceholder');
+  return props.element.type === 'nationality'
+    ? t('prop.defaultNatPlaceholder', frameLocale.value)
+    : t('prop.defaultCountryPlaceholder', frameLocale.value);
 });
 
 const placeholderText = computed(() => {
   const custom = getFieldText(props.element, 'placeholder', frameLocale.value);
   if (custom) return custom;
   if (props.element.type === 'nationality') {
-    return t('prop.defaultNatPlaceholder');
+    return t('prop.defaultNatPlaceholder', frameLocale.value);
   }
-  return t('prop.defaultCountryPlaceholder');
+  return t('prop.defaultCountryPlaceholder', frameLocale.value);
 });
 </script>

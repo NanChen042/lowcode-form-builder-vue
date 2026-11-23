@@ -476,6 +476,8 @@
 | 从空白画布开始，自由搭建当前案例的 KYC 问卷。 | Start from a blank canvas and build the KYC questionnaire for this subject. |  |  |  |
 | 从空白画布开始，自由配置当前案例的风险评估问题与权重。 | Start from a blank canvas and configure risk questions and weights for this subject. |  |  |  |
 | 适用对象 | Applicable Subject |  |  |  |
+| 当前工作台为中文界面，需设置双语表单才可发布；若仅需要英文表单，可选择进入英文工作台创建。 | Current workspace is in Chinese and requires bilingual form configuration. If you only need an English form, switch to the English workspace. |  |  |  |
+| 切换到英文版 | Switch to English |  |  |  |
 
 ## 新建表单弹窗
 | 中文 | 英文 | 中文替换成 | 英文替换成 | 详情（截图） |

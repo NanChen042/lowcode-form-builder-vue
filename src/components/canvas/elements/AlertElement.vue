@@ -7,7 +7,7 @@
         <Info class="h-4 w-4 text-[#1677ff] shrink-0" />
         <EditableText
           :model-value="getFieldText(element, 'label', frameLocale)"
-          :placeholder="(isTranslationFrame && getFieldText(element, 'label', primaryLocale)) ? getFieldText(element, 'label', primaryLocale) : t('common.notice')"
+          :placeholder="(isTranslationFrame && getFieldText(element, 'label', primaryLocale)) ? getFieldText(element, 'label', primaryLocale) : t('common.notice', frameLocale)"
           :element-id="element.id"
           field="label"
           custom-class="label-text text-[14px] font-bold text-slate-800 m-0 leading-5"
@@ -45,7 +45,7 @@
         v-else
         ref="editableTextRef"
         :model-value="rawContent"
-        :placeholder="(isTranslationFrame && getFieldText(element, 'content', primaryLocale)) ? getFieldText(element, 'content', primaryLocale) : t('prop.alertEmptyContentPlaceholder')"
+        :placeholder="(isTranslationFrame && getFieldText(element, 'content', primaryLocale)) ? getFieldText(element, 'content', primaryLocale) : t('prop.alertEmptyContentPlaceholder', frameLocale)"
         :element-id="element.id"
         field="content"
         tag="div"

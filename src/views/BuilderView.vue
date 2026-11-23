@@ -272,8 +272,8 @@ onMounted(async () => {
         i18n: {},
         profileType: store.lockedProfileType || store.preferredProfileType || 'customer',
         formType: isRisk.value ? 'risk' : 'kyc',
-        baseLocale: store.currentLocale === 'en' ? 'en' : 'zh',
-        enabledLocales: store.currentLocale === 'en' ? ['en'] : ['zh', 'en'],
+        baseLocale: 'en',
+        enabledLocales: ['en'],
         source: 'diy'
       },
       pages: []
