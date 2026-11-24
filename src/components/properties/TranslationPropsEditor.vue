@@ -219,7 +219,7 @@
             <CheckCircle2 class="w-3.5 h-3.5 stroke-[2] shrink-0" />
             {{ t('trans.translated') }}
           </span>
-          <span v-else-if="sourceEndPlaceholder" class="text-[10.5px] text-[#ff7d00] font-medium inline-flex items-center gap-1">
+          <span v-else-if="isCustomEndPlaceholder" class="text-[10.5px] text-[#ff7d00] font-medium inline-flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-[#ff7d00] shrink-0"></span>
             {{ t('trans.pending') }}
           </span>
@@ -264,7 +264,7 @@
             <CheckCircle2 class="w-3.5 h-3.5 stroke-[2] shrink-0" />
             {{ t('trans.translated') }}
           </span>
-          <span v-else-if="sourceLongTermText" class="text-[10.5px] text-[#ff7d00] font-medium inline-flex items-center gap-1">
+          <span v-else-if="isCustomLongTermText" class="text-[10.5px] text-[#ff7d00] font-medium inline-flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-[#ff7d00] shrink-0"></span>
             {{ t('trans.pending') }}
           </span>
@@ -717,11 +717,16 @@ const supportsPlaceholder = computed(() => {
 });
 
 // 截止日期占位符
+const isCustomEndPlaceholder = computed(() => {
+  if (!selectedElement.value) return false;
+  const val = getFieldText(selectedElement.value, 'endPlaceholder', primaryLocale.value);
+  return Boolean(val && !isDefaultInputPlaceholder('date', val));
+});
 const sourceEndPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
   const val = getFieldText(selectedElement.value, 'endPlaceholder', primaryLocale.value);
   if (val && !isDefaultInputPlaceholder('date', val)) return val;
-  return '';
+  return t('common.endDate', primaryLocale.value);
 });
 const targetEndPlaceholderFallback = computed(() => {
   if (!selectedElement.value) return t('common.endDate', store.activeTargetLocale);
@@ -741,11 +746,16 @@ function handleTargetEndPlaceholderInput(val: string) {
 }
 
 // 长期选项文案
+const isCustomLongTermText = computed(() => {
+  if (!selectedElement.value) return false;
+  const val = getFieldText(selectedElement.value, 'longTermText', primaryLocale.value);
+  return Boolean(val && !isDefaultLongTermText(val));
+});
 const sourceLongTermText = computed(() => {
   if (!selectedElement.value) return '';
   const val = getFieldText(selectedElement.value, 'longTermText', primaryLocale.value);
   if (val && !isDefaultLongTermText(val)) return val;
-  return '';
+  return t('common.longTerm', primaryLocale.value);
 });
 const targetLongTermPlaceholder = computed(() => {
   if (!selectedElement.value) return t('common.longTerm', store.activeTargetLocale);
