@@ -237,7 +237,7 @@
         <a-textarea
           id="prop-end-placeholder-input"
           :model-value="targetEndPlaceholder"
-          :placeholder="t('common.endDate', store.activeTargetLocale)"
+          :placeholder="targetEndPlaceholderFallback"
           :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
@@ -282,7 +282,7 @@
         <a-textarea
           id="prop-long-term-text-input"
           :model-value="targetLongTermText"
-          :placeholder="t('common.longTermValid', store.activeTargetLocale)"
+          :placeholder="targetLongTermPlaceholder"
           :auto-size="{ minRows: 1, maxRows: 3 }"
           size="small"
           allow-clear
@@ -662,6 +662,7 @@ import {
   isDefaultOptionLabel,
   isDefaultClauseLabel,
   isDefaultInputPlaceholder,
+  isDefaultLongTermText,
   placeholderDisplayValue,
   getLocaleNativeName,
   getFieldDefaultErrorMessage,
@@ -718,11 +719,21 @@ const supportsPlaceholder = computed(() => {
 // 截止日期占位符
 const sourceEndPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'endPlaceholder', primaryLocale.value) || t('common.endDate');
+  const val = getFieldText(selectedElement.value, 'endPlaceholder', primaryLocale.value);
+  if (val && !isDefaultInputPlaceholder('date', val)) return val;
+  return '';
+});
+const targetEndPlaceholderFallback = computed(() => {
+  if (!selectedElement.value) return t('common.endDate', store.activeTargetLocale);
+  const src = getFieldText(selectedElement.value, 'endPlaceholder', primaryLocale.value);
+  if (src && !isDefaultInputPlaceholder('date', src)) {
+    return src;
+  }
+  return t('common.endDate', store.activeTargetLocale);
 });
 const targetEndPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'endPlaceholder', store.activeTargetLocale);
+  return placeholderDisplayValue(getFieldText(selectedElement.value, 'endPlaceholder', store.activeTargetLocale));
 });
 function handleTargetEndPlaceholderInput(val: string) {
   if (!selectedElement.value) return;
@@ -732,11 +743,21 @@ function handleTargetEndPlaceholderInput(val: string) {
 // 长期选项文案
 const sourceLongTermText = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'longTermText', primaryLocale.value) || t('common.longTerm');
+  const val = getFieldText(selectedElement.value, 'longTermText', primaryLocale.value);
+  if (val && !isDefaultLongTermText(val)) return val;
+  return '';
+});
+const targetLongTermPlaceholder = computed(() => {
+  if (!selectedElement.value) return t('common.longTerm', store.activeTargetLocale);
+  const src = getFieldText(selectedElement.value, 'longTermText', primaryLocale.value);
+  if (src && !isDefaultLongTermText(src)) {
+    return src;
+  }
+  return t('common.longTerm', store.activeTargetLocale);
 });
 const targetLongTermText = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'longTermText', store.activeTargetLocale);
+  return placeholderDisplayValue(getFieldText(selectedElement.value, 'longTermText', store.activeTargetLocale));
 });
 function handleTargetLongTermTextInput(val: string) {
   if (!selectedElement.value) return;

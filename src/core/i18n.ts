@@ -1523,14 +1523,17 @@ let defaultPlaceholderSet: Set<string> | null = null;
 const DEFAULT_PLACEHOLDER_KEYS = [
   'prop.inputPlaceholder', 'prop.textareaPlaceholder', 'prop.selectPlaceholder', 'prop.datePlaceholder',
   'prop.emailPlaceholder', 'prop.defaultCountryPlaceholder', 'prop.defaultNatPlaceholder',
-  'common.signAreaPlaceholder', 'canvas.signatureArea', 'common.startDate', 'common.endDate'
+  'common.signAreaPlaceholder', 'canvas.signatureArea', 'common.startDate', 'common.endDate',
+  'common.longTerm', 'common.longTermValid'
 ];
 function getDefaultPlaceholderSet(): Set<string> {
   if (defaultPlaceholderSet) return defaultPlaceholderSet;
   const set = new Set<string>([
     'Please enter', 'Please enter details', 'Please select a country', '请选择国家', '請選擇國家',
     'Please enter email', '请输入邮箱', '請輸入郵箱', '请输入电子邮箱',
-    'Please sign in the designated area below', 'Please sign here', '请输入详细内容'
+    'Please sign in the designated area below', 'Please sign here', '请输入详细内容',
+    '长期', '長期', '长期有效', '長期有效', 'Long-term', 'Permanent', 'long-term', 'permanent',
+    'Jangka panjang', 'Jangka Panjang', 'Sah kekal', 'Sah Kekal'
   ]);
   const dicts: Record<string, string>[] = [systemMessages.zh, systemMessages.en, ...Object.values(formRuntimeMultiMessages)];
   for (const d of dicts) {
@@ -1549,6 +1552,13 @@ function getDefaultPlaceholderSet(): Set<string> {
 export function isDefaultInputPlaceholder(_type: string, placeholder?: string): boolean {
   if (!placeholder || !placeholder.trim()) return true;
   return getDefaultPlaceholderSet().has(placeholder.trim());
+}
+
+/**
+ * 判断长期选项文案是否仅为系统默认文案
+ */
+export function isDefaultLongTermText(val?: string): boolean {
+  return isDefaultInputPlaceholder('date', val);
 }
 
 /** 画布输入框展示值：系统默认占位文案按空值处理 */

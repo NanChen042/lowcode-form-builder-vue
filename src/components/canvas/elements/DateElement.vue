@@ -81,7 +81,7 @@
         />
         <EditableText
           v-if="!isReadOnlyFrame"
-          :model-value="getFieldText(element, 'longTermText', frameLocale)"
+          :model-value="placeholderDisplayValue(getFieldText(element, 'longTermText', frameLocale))"
           :placeholder="longTermFallback"
           :element-id="element.id"
           field="longTermText"
@@ -104,7 +104,7 @@ import { ref, computed, inject, type ComputedRef } from 'vue';
 import { Calendar } from '@lucide/vue';
 import type { FormElement } from '@/types/schema';
 import { store, markDirty, primaryLocale } from '@/core/store';
-import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
+import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, isDefaultLongTermText, placeholderDisplayValue } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
@@ -148,9 +148,11 @@ const placeholderFallback = computed(() => {
 });
 
 const longTermFallback = computed(() => {
-  return (isTranslationFrame.value && getFieldText(props.element, 'longTermText', primaryLocale.value))
-    ? getFieldText(props.element, 'longTermText', primaryLocale.value)
-    : t('common.longTerm', frameLocale.value);
+  const src = getFieldText(props.element, 'longTermText', primaryLocale.value);
+  if (isTranslationFrame.value && src && !isDefaultLongTermText(src)) {
+    return src;
+  }
+  return t('common.longTerm', frameLocale.value);
 });
 
 function onToggleLongTerm(val: boolean | (string | number | boolean)[]) {

@@ -240,7 +240,7 @@
             size="small"
             class="!w-[130px]"
             :class="{ 'prop-field-focused': isFieldFocused('longTermText') }"
-            :placeholder="t('common.longTerm')"
+            :placeholder="t('common.longTerm', primaryLocale)"
             allow-clear
             @focus="setFocus('longTermText')"
             @blur="clearFocus"
