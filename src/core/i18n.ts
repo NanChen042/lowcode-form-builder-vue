@@ -238,6 +238,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.defaultLangTip': '提示：画布模式下编辑的是默认语言（英文）内容，请使用英文填写所有组件内容。',
+    'common.signAreaPlaceholder': '请在下方指定区域签名',
     'canvas.signatureArea': '请在此处手写签名',
     'canvas.droppable': '可放置画布',
     'canvas.presetCannotDrop': '固定页面 · 不可添加组件',
@@ -300,6 +301,11 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.deletePage': '删除当前页面',
     'prop.fieldLabel': '字段标题',
     'prop.fieldLabelPlaceholder': '请输入字段标题',
+    'prop.inputPlaceholder': '请输入内容',
+    'prop.textareaPlaceholder': '请输入详细描述...',
+    'prop.selectPlaceholder': '请选择选项',
+    'prop.datePlaceholder': '请选择日期',
+    'prop.agreeDeclarationHint': '请同意声明条款',
     'prop.fieldHelp': '副标题',
     'prop.fieldHelpPlaceholder': '请输入副标题或补充说明',
     'prop.helpLayout': '排布方式',
@@ -368,6 +374,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.untranslated': '未翻译',
 
     // 属性面板：特定组件属性 (FieldSpecificProps)
+    'prop.handwrittenSignPad': '手写签名板',
     'prop.signatureRequired': '签名板必填',
     'prop.signatureErrorMsg': '未签名提示',
     'prop.sigPadLabel': '签名提示文案',
@@ -425,6 +432,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.expandedTag': '展开: {name}',
     'options.thisOption': '此项',
     'options.declarationPlaceholder': '请输入声明条款内容（条款 {index}）',
+    'options.clauseLabel': '条款 {index}',
     'options.unlink': '解除关联',
     'options.maxDepthReached': '已达到最大追问层级（最多支持 2 级嵌套）。为保障移动端填写体验与表单性能，不可继续向下嵌套。',
     'options.maxDepthReachedShort': '已达最大追问层级（最多支持2级嵌套）',
@@ -879,6 +887,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.defaultLangTip': 'Note: In canvas mode, you are editing content in the default language (English). Please enter all component content in English.',
+    'common.signAreaPlaceholder': 'Please sign in the designated area below',
     'canvas.signatureArea': 'Please sign here',
     'canvas.droppable': 'Droppable Canvas',
     'canvas.presetCannotDrop': 'Fixed Page · Cannot Add Fields',
@@ -941,6 +950,11 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.deletePage': 'Delete Page',
     'prop.fieldLabel': 'Field Label',
     'prop.fieldLabelPlaceholder': 'Enter field label',
+    'prop.inputPlaceholder': 'Please enter content',
+    'prop.textareaPlaceholder': 'Please enter detailed description...',
+    'prop.selectPlaceholder': 'Please select an option',
+    'prop.datePlaceholder': 'Please select a date',
+    'prop.agreeDeclarationHint': 'Please agree to the declarations',
     'prop.fieldHelp': 'Subtitle',
     'prop.fieldHelpPlaceholder': 'Enter subtitle or explanation',
     'prop.helpLayout': 'Layout',
@@ -1009,6 +1023,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'prop.untranslated': 'Untranslated',
 
     // 属性面板：特定组件属性 (FieldSpecificProps)
+    'prop.handwrittenSignPad': 'Handwritten Signature Pad',
     'prop.signatureRequired': 'Signature Required',
     'prop.signatureErrorMsg': 'Missing Signature Message',
     'prop.sigPadLabel': 'Signature Prompt Text',
@@ -1066,6 +1081,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'options.expandedTag': 'Reveal: {name}',
     'options.thisOption': 'This option',
     'options.declarationPlaceholder': 'Enter declaration terms (Clause {index})',
+    'options.clauseLabel': 'Clause {index}',
     'options.unlink': 'Unlink',
     'options.maxDepthReached': 'Maximum nesting depth reached (up to 2 levels). Cannot add deeper sub-questions to ensure optimal form performance and mobile usability.',
     'options.maxDepthReachedShort': 'Max nesting depth reached (up to 2 levels)',
@@ -1440,19 +1456,104 @@ const CHINESE_NUMS = ['一', '二', '三', '四', '五', '六', '七', '八', '�
 
 export function formatOptionLabel(index: number, locale?: string): string {
   const current = getEffectiveFormLocale(locale);
-  if (current === 'en' || current === 'ms') {
-    return `Option ${index}`;
-  }
   if (isTraditionalChineseLocale(current)) {
-    if (index >= 1 && index <= 10) {
-      return `選項${CHINESE_NUMS[index - 1]}`;
-    }
+    if (index >= 1 && index <= 10) return `選項${CHINESE_NUMS[index - 1]}`;
     return `選項${index}`;
   }
-  if (index >= 1 && index <= 10) {
-    return `选项${CHINESE_NUMS[index - 1]}`;
+  if (current === 'zh' || current.startsWith('zh')) {
+    if (index >= 1 && index <= 10) return `选项${CHINESE_NUMS[index - 1]}`;
+    return `选项${index}`;
   }
-  return `选项${index}`;
+  if (current === 'ja') return `選択肢 ${index}`;
+  if (current === 'ko') return `선택지 ${index}`;
+  if (current === 'ms') return `Pilihan ${index}`;
+  if (current === 'id') return `Opsi ${index}`;
+  if (current === 'ta') return `விருப்பம் ${index}`;
+  if (current === 'th') return `ตัวเลือก ${index}`;
+  if (current === 'vi') return `Tùy chọn ${index}`;
+  if (current === 'hi') return `विकल्प ${index}`;
+  if (current === 'es') return `Opción ${index}`;
+  if (current === 'pt') return `Opção ${index}`;
+  if (current === 'ru') return `Вариант ${index}`;
+  return `Option ${index}`;
+}
+
+export function formatClauseLabel(index: number, locale?: string): string {
+  const current = getEffectiveFormLocale(locale);
+  if (isTraditionalChineseLocale(current)) return `條款 ${index}`;
+  if (current === 'zh' || current.startsWith('zh')) return `条款 ${index}`;
+  if (current === 'ja') return `条項 ${index}`;
+  if (current === 'ko') return `조항 ${index}`;
+  if (current === 'ms') return `Klausa ${index}`;
+  if (current === 'id') return `Klausul ${index}`;
+  if (current === 'ta') return `விதி ${index}`;
+  if (current === 'th') return `ข้อกำหนด ${index}`;
+  if (current === 'vi') return `Điều khoản ${index}`;
+  if (current === 'hi') return `खंड ${index}`;
+  if (current === 'es') return `Cláusula ${index}`;
+  if (current === 'fr') return `Clause ${index}`;
+  if (current === 'de') return `Klausel ${index}`;
+  if (current === 'pt') return `Cláusula ${index}`;
+  if (current === 'ru') return `Пункт ${index}`;
+  return `Clause ${index}`;
+}
+
+/**
+ * 判断某个选项文本是否仅为系统默认生成的选项文案（例如 Option 1, 选项一, 選択肢 1）
+ */
+export function isDefaultOptionLabel(label?: string): boolean {
+  if (!label || !label.trim()) return true;
+  const s = label.trim();
+  return /^(Option\s*\d+|选项[一二三四五六七八九十\d]+|選項[一二三四五六七八九十\d]+|選択肢\s*\d+|선택지\s*\d+|Pilihan\s*\d+|Opsi\s*\d+|Opción\s*\d+|Opção\s*\d+|Вариант\s*\d+|Tùy\s*chọn\s*\d+|ตัวเลือก\s*\d+|विकल्प\s*\d+|விருப்பம்\s*\d+)$/i.test(s);
+}
+
+/**
+ * 判断声明条款文案是否仅为系统默认占位文案
+ */
+export function isDefaultClauseLabel(label?: string): boolean {
+  if (!label || !label.trim()) return true;
+  const s = label.trim();
+  return /^(Clause\s*\d+|条款\s*\d+|條款\s*\d+|条項\s*\d+|조항\s*\d+|Klausa\s*\d+|Klausul\s*\d+|Cláusula\s*\d+|Klausel\s*\d+|Пункт\s*\d+|Điều\s*khoản\s*\d+|ข้อกำหนด\s*\d+|खंड\s*\d+|விதி\s*\d+)$/i.test(s);
+}
+
+/**
+ * 判断输入框占位符是否仅为系统默认占位文案（而非用户定制内容）
+ */
+let defaultPlaceholderSet: Set<string> | null = null;
+const DEFAULT_PLACEHOLDER_KEYS = [
+  'prop.inputPlaceholder', 'prop.textareaPlaceholder', 'prop.selectPlaceholder', 'prop.datePlaceholder',
+  'prop.emailPlaceholder', 'prop.defaultCountryPlaceholder', 'prop.defaultNatPlaceholder',
+  'common.signAreaPlaceholder', 'canvas.signatureArea', 'common.startDate', 'common.endDate'
+];
+function getDefaultPlaceholderSet(): Set<string> {
+  if (defaultPlaceholderSet) return defaultPlaceholderSet;
+  const set = new Set<string>([
+    'Please enter', 'Please enter details', 'Please select a country', '请选择国家', '請選擇國家',
+    'Please enter email', '请输入邮箱', '請輸入郵箱', '请输入电子邮箱',
+    'Please sign in the designated area below', 'Please sign here', '请输入详细内容'
+  ]);
+  const dicts: Record<string, string>[] = [systemMessages.zh, systemMessages.en, ...Object.values(formRuntimeMultiMessages)];
+  for (const d of dicts) {
+    for (const k of DEFAULT_PLACEHOLDER_KEYS) {
+      const v = d?.[k];
+      if (v) set.add(v.trim());
+    }
+  }
+  defaultPlaceholderSet = set;
+  return set;
+}
+
+/**
+ * 判断占位符是否仅为系统默认文案（任一语种），此类文案视为「空值」，显示时按目标语种取系统默认
+ */
+export function isDefaultInputPlaceholder(_type: string, placeholder?: string): boolean {
+  if (!placeholder || !placeholder.trim()) return true;
+  return getDefaultPlaceholderSet().has(placeholder.trim());
+}
+
+/** 画布输入框展示值：系统默认占位文案按空值处理 */
+export function placeholderDisplayValue(val?: string): string {
+  return isDefaultInputPlaceholder('', val) ? '' : (val || '');
 }
 
 function readI18nField(obj: any, field: string, loc: string, allowWhitespaceOnly = false): string {

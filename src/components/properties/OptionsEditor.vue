@@ -16,7 +16,7 @@
             :auto-size="{ minRows: 2, maxRows: 8 }"
             size="small"
             allow-clear
-            :placeholder="props.element?.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : t('options.noticePlaceholder')"
+            :placeholder="props.element?.type === 'signature' ? t('options.declarationPlaceholder', getEffectiveFormLocale(), { index: idx + 1 }) : t('options.noticePlaceholder', getEffectiveFormLocale())"
             class="w-full !rounded-md !text-[12px] custom-scrollbar"
             :class="{ 'prop-field-focused': isOptionFocused(idx) }"
             @focus="onFocus(idx)"
@@ -57,7 +57,7 @@
               :auto-size="{ minRows: 1, maxRows: 5 }"
               size="small"
               allow-clear
-              :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', undefined, { index: idx + 1 }) : formatOptionLabel(idx + 1)"
+              :placeholder="props.element.type === 'signature' ? t('options.declarationPlaceholder', getEffectiveFormLocale(), { index: idx + 1 }) : formatOptionLabel(idx + 1, getEffectiveFormLocale())"
               class="flex-1 rounded-[4px] text-[12px]"
               :class="{ 'prop-field-focused': isOptionFocused(idx) }"
               @focus="onFocus(idx)"
@@ -203,7 +203,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import type { FormElement, FormElementOption, ComponentType } from '@/types/schema';
 import { store, markDirty, createElement, selectElement } from '@/core/store';
-import { t, formatOptionLabel, getOptionLabel, setOptionLabel, getFieldText } from '@/core/i18n';
+import { t, formatOptionLabel, getOptionLabel, setOptionLabel, getFieldText, getEffectiveFormLocale } from '@/core/i18n';
 import { Trash2, GripVertical, Plus, Link2, CornerDownRight } from '@lucide/vue';
 import {
   parseMultiValue,
@@ -342,11 +342,12 @@ function addOption() {
     props.element.options = [];
   }
   const nextIdx = props.element.options.length + 1;
+  const isSignature = props.element.type === 'signature';
   props.element.options.push({
-    value: `option_${nextIdx}_${Date.now().toString(36)}`,
+    value: isSignature ? `dec_${nextIdx}_${Date.now().toString(36)}` : `option_${nextIdx}_${Date.now().toString(36)}`,
     i18n: {
-      zh: { label: formatOptionLabel(nextIdx, 'zh') },
-      en: { label: formatOptionLabel(nextIdx, 'en') }
+      zh: { label: '' },
+      en: { label: '' }
     }
   });
   markDirty();
@@ -360,11 +361,12 @@ function addOptionAt(targetIndex: number) {
     props.element.options = [];
   }
   const nextIdx = props.element.options.length + 1;
+  const isSignature = props.element.type === 'signature';
   const newOpt = {
-    value: `option_${nextIdx}_${Date.now().toString(36)}`,
+    value: isSignature ? `dec_${nextIdx}_${Date.now().toString(36)}` : `option_${nextIdx}_${Date.now().toString(36)}`,
     i18n: {
-      zh: { label: formatOptionLabel(nextIdx, 'zh') },
-      en: { label: formatOptionLabel(nextIdx, 'en') }
+      zh: { label: '' },
+      en: { label: '' }
     }
   };
   props.element.options.splice(targetIndex, 0, newOpt);

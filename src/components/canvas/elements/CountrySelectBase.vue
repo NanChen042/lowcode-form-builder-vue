@@ -35,7 +35,7 @@
 import { ref, computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, primaryLocale } from '@/core/store';
-import { t, getFieldText, setFieldText } from '@/core/i18n';
+import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import { ChevronDown } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -46,6 +46,7 @@ const props = defineProps<{
 
 const placeholderInputRef = ref<InstanceType<typeof EditableText> | null>(null);
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
 const isFocusedPlaceholder = computed(() => {
@@ -58,7 +59,7 @@ const isFocusedPlaceholder = computed(() => {
 
 const currentPlaceholder = computed({
   get() {
-    return getFieldText(props.element, 'placeholder', frameLocale.value);
+    return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
   },
   set(val: string) {
     setFieldText(props.element, 'placeholder', val, frameLocale.value);
@@ -67,7 +68,9 @@ const currentPlaceholder = computed({
 
 const placeholderFallback = computed(() => {
   const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
-  if (src) return src;
+  if (isTranslationFrame.value && src && !isDefaultInputPlaceholder(props.element.type, src)) {
+    return src;
+  }
   return props.element.type === 'nationality'
     ? t('prop.defaultNatPlaceholder', frameLocale.value)
     : t('prop.defaultCountryPlaceholder', frameLocale.value);
@@ -76,9 +79,6 @@ const placeholderFallback = computed(() => {
 const placeholderText = computed(() => {
   const custom = getFieldText(props.element, 'placeholder', frameLocale.value);
   if (custom) return custom;
-  if (props.element.type === 'nationality') {
-    return t('prop.defaultNatPlaceholder', frameLocale.value);
-  }
-  return t('prop.defaultCountryPlaceholder', frameLocale.value);
+  return placeholderFallback.value;
 });
 </script>

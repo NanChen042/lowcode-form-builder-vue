@@ -95,7 +95,7 @@
         <a-textarea
           id="prop-label-input"
           :model-value="targetLabel"
-          :placeholder="t('trans.enterTarget')"
+          :placeholder="sourceLabel ? sourceLabel : t('prop.fieldLabelPlaceholder', store.activeTargetLocale)"
           :auto-size="{ minRows: isRisk ? 3 : 1, maxRows: 6 }"
           size="small"
           allow-clear
@@ -104,7 +104,61 @@
           @focus="setFocus('label')"
           @blur="clearFocus"
           @input="handleTargetLabelInput"
+          @update:model-value="handleTargetLabelInput"
+          @clear="handleTargetLabelInput('')"
         />
+      </div>
+
+      <!-- 选项列表翻译 (下拉框 / 单选 / 多选 / 签名声明勾选项，风险评估固定选项除外) -->
+      <div v-if="!isRisk && selectedElement.options && selectedElement.options.length > 0" class="space-y-2 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between mb-0.5">
+          <label class="text-[12px] font-medium text-slate-700">
+            {{ selectedElement.type === 'signature' ? t('trans.declarationOptionsTitle') : t('trans.optionsTitle') }}
+          </label>
+          <span class="text-[11px] font-mono text-slate-400">
+            {{ selectedElement.options.length }} {{ t('common.optionsUnit') }}
+          </span>
+        </div>
+
+        <div id="options-editor" class="space-y-2.5">
+          <div
+            v-for="(opt, optIdx) in selectedElement.options"
+            :key="optIdx"
+            class="space-y-1.5"
+          >
+            <div class="flex items-center justify-between text-[11.5px] px-0.5">
+              <span class="text-[12px] font-medium text-slate-700 break-words truncate flex-1 min-w-0 pr-2" :title="getOptionLabel(opt, primaryLocale)">
+                {{ getOptionLabel(opt, primaryLocale) || (selectedElement.type === 'signature' ? formatClauseLabel(optIdx + 1, primaryLocale) : formatOptionLabel(optIdx + 1, primaryLocale)) }}
+              </span>
+              <span
+                v-if="isOptionTranslated(opt, store.activeTargetLocale, primaryLocale)"
+                class="text-[10.5px] text-[#00b42a] font-medium inline-flex items-center gap-1 shrink-0"
+              >
+                <CheckCircle2 class="w-3.5 h-3.5 stroke-[2] shrink-0" />
+                <span>{{ t('trans.translated') }}</span>
+              </span>
+              <span v-else class="text-[10.5px] text-[#ff7d00] font-medium shrink-0 inline-flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#ff7d00] shrink-0"></span>
+                <span>{{ t('trans.pending') }}</span>
+              </span>
+            </div>
+
+            <a-textarea
+              :model-value="getOptionLabel(opt, store.activeTargetLocale)"
+              :placeholder="(getOptionLabel(opt, primaryLocale) && (selectedElement.type === 'signature' ? !isDefaultClauseLabel(getOptionLabel(opt, primaryLocale)) : !isDefaultOptionLabel(getOptionLabel(opt, primaryLocale)))) ? getOptionLabel(opt, primaryLocale) : (selectedElement.type === 'signature' ? formatClauseLabel(optIdx + 1, store.activeTargetLocale) : formatOptionLabel(optIdx + 1, store.activeTargetLocale))"
+              :auto-size="{ minRows: 1, maxRows: 6 }"
+              size="small"
+              allow-clear
+              class="w-full !rounded-[4px]"
+              :class="{ 'prop-field-focused': isOptionFocused(optIdx) }"
+              @focus="setOptionFocus(optIdx)"
+              @blur="clearFocus"
+              @input="(val) => handleOptionLabelInput(opt, val)"
+              @update:model-value="(val) => handleOptionLabelInput(opt, val)"
+              @clear="handleOptionLabelInput(opt, '')"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- 输入占位符 / 签名提示文案 / 开始日期提示 -->
@@ -138,7 +192,7 @@
         <a-textarea
           id="prop-placeholder-input"
           :model-value="targetPlaceholder"
-          :placeholder="t('trans.enterTarget')"
+          :placeholder="targetPlaceholderFallback"
           :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
@@ -147,6 +201,8 @@
           @focus="setFocus('placeholder')"
           @blur="clearFocus"
           @input="handleTargetPlaceholderInput"
+          @update:model-value="handleTargetPlaceholderInput"
+          @clear="handleTargetPlaceholderInput('')"
         />
       </div>
 
@@ -181,7 +237,7 @@
         <a-textarea
           id="prop-end-placeholder-input"
           :model-value="targetEndPlaceholder"
-          :placeholder="t('trans.enterTarget')"
+          :placeholder="t('common.endDate', store.activeTargetLocale)"
           :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
@@ -190,6 +246,8 @@
           @focus="setFocus('endPlaceholder')"
           @blur="clearFocus"
           @input="handleTargetEndPlaceholderInput"
+          @update:model-value="handleTargetEndPlaceholderInput"
+          @clear="handleTargetEndPlaceholderInput('')"
         />
       </div>
 
@@ -224,7 +282,7 @@
         <a-textarea
           id="prop-long-term-text-input"
           :model-value="targetLongTermText"
-          :placeholder="t('trans.enterTarget')"
+          :placeholder="t('common.longTermValid', store.activeTargetLocale)"
           :auto-size="{ minRows: 1, maxRows: 3 }"
           size="small"
           allow-clear
@@ -233,6 +291,8 @@
           @focus="setFocus('longTermText')"
           @blur="clearFocus"
           @input="handleTargetLongTermTextInput"
+          @update:model-value="handleTargetLongTermTextInput"
+          @clear="handleTargetLongTermTextInput('')"
         />
       </div>
 
@@ -267,7 +327,7 @@
         <a-textarea
           id="prop-sign-placeholder-input"
           :model-value="targetSignPlaceholder"
-          :placeholder="t('trans.enterTarget')"
+          :placeholder="t('canvas.signatureArea', store.activeTargetLocale)"
           :auto-size="{ minRows: 1, maxRows: 4 }"
           size="small"
           allow-clear
@@ -276,6 +336,8 @@
           @focus="setFocus('signPlaceholder')"
           @blur="clearFocus"
           @input="handleTargetSignPlaceholderInput"
+          @update:model-value="handleTargetSignPlaceholderInput"
+          @clear="handleTargetSignPlaceholderInput('')"
         />
       </div>
 
@@ -319,6 +381,8 @@
           @focus="setFocus('help')"
           @blur="clearFocus"
           @input="handleTargetHelpInput"
+          @update:model-value="handleTargetHelpInput"
+          @clear="handleTargetHelpInput('')"
         />
       </div>
 
@@ -395,58 +459,11 @@
           @focus="setFocus('content')"
           @blur="clearFocus"
           @input="handleTargetContentInput"
+          @update:model-value="handleTargetContentInput"
+          @clear="handleTargetContentInput('')"
         />
       </div>
 
-      <!-- 选项列表翻译 (下拉框 / 单选 / 多选 / 签名声明勾选项，风险评估固定选项除外) -->
-      <div v-if="!isRisk && selectedElement.options && selectedElement.options.length > 0" class="space-y-2 pt-3 border-t border-slate-100">
-        <div class="flex items-center justify-between mb-0.5">
-          <label class="text-[12px] font-medium text-slate-700">
-            {{ selectedElement.type === 'signature' ? t('trans.declarationOptionsTitle') : t('trans.optionsTitle') }}
-          </label>
-          <span class="text-[11px] font-mono text-slate-400">
-            {{ selectedElement.options.length }} {{ t('common.optionsUnit') }}
-          </span>
-        </div>
-
-        <div id="options-editor" class="space-y-2.5">
-          <div
-            v-for="(opt, optIdx) in selectedElement.options"
-            :key="optIdx"
-            class="space-y-1.5"
-          >
-            <div class="flex items-center justify-between text-[11.5px] px-0.5">
-              <span class="text-[12px] font-medium text-slate-700 break-words truncate flex-1 min-w-0 pr-2" :title="getOptionLabel(opt, primaryLocale)">
-                {{ getOptionLabel(opt, primaryLocale) || `Option ${optIdx + 1}` }}
-              </span>
-              <span
-                v-if="isOptionTranslated(opt, store.activeTargetLocale, primaryLocale)"
-                class="text-[10.5px] text-[#00b42a] font-medium inline-flex items-center gap-1 shrink-0"
-              >
-                <CheckCircle2 class="w-3.5 h-3.5 stroke-[2] shrink-0" />
-                <span>{{ t('trans.translated') }}</span>
-              </span>
-              <span v-else class="text-[10.5px] text-[#ff7d00] font-medium shrink-0 inline-flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#ff7d00] shrink-0"></span>
-                <span>{{ t('trans.pending') }}</span>
-              </span>
-            </div>
-
-            <a-textarea
-              :model-value="getOptionLabel(opt, store.activeTargetLocale)"
-              :placeholder="getOptionLabel(opt, primaryLocale) || t('trans.enterTarget')"
-              :auto-size="{ minRows: 1, maxRows: 6 }"
-              size="small"
-              allow-clear
-              class="w-full !rounded-[4px]"
-              :class="{ 'prop-field-focused': isOptionFocused(optIdx) }"
-              @focus="setOptionFocus(optIdx)"
-              @blur="clearFocus"
-              @input="(val) => handleOptionLabelInput(opt, val)"
-            />
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- 风险评估题目分组翻译 -->
@@ -498,6 +515,8 @@
           @focus="setGroupFocus('title')"
           @blur="clearFocus"
           @input="handleTargetGroupTitleInput"
+          @update:model-value="handleTargetGroupTitleInput"
+          @clear="handleTargetGroupTitleInput('')"
         />
       </div>
     </div>
@@ -556,6 +575,8 @@
           @focus="setPageFocus('title')"
           @blur="clearFocus"
           @input="handleTargetPageTitleInput"
+          @update:model-value="handleTargetPageTitleInput"
+          @clear="handleTargetPageTitleInput('')"
         />
       </div>
 
@@ -599,6 +620,8 @@
           @focus="setPageFocus('description')"
           @blur="clearFocus"
           @input="handleTargetPageDescInput"
+          @update:model-value="handleTargetPageDescInput"
+          @clear="handleTargetPageDescInput('')"
         />
       </div>
     </div>
@@ -634,6 +657,12 @@ import {
   setGroupText,
   getOptionLabel,
   setOptionLabel,
+  formatOptionLabel,
+  formatClauseLabel,
+  isDefaultOptionLabel,
+  isDefaultClauseLabel,
+  isDefaultInputPlaceholder,
+  placeholderDisplayValue,
   getLocaleNativeName,
   getFieldDefaultErrorMessage,
   SUPPORTED_FORM_LOCALES
@@ -717,11 +746,11 @@ function handleTargetLongTermTextInput(val: string) {
 // 签名手写区内提示
 const sourceSignPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'signPlaceholder', primaryLocale.value) || t('canvas.signatureArea');
+  return getFieldText(selectedElement.value, 'signPlaceholder', primaryLocale.value) || t('canvas.signatureArea', primaryLocale.value);
 });
 const targetSignPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'signPlaceholder', store.activeTargetLocale);
+  return placeholderDisplayValue(getFieldText(selectedElement.value, 'signPlaceholder', store.activeTargetLocale));
 });
 function handleTargetSignPlaceholderInput(val: string) {
   if (!selectedElement.value) return;
@@ -745,11 +774,36 @@ function handleTargetLabelInput(val: string) {
 // 占位符
 const sourcePlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'placeholder', primaryLocale.value);
+  const val = getFieldText(selectedElement.value, 'placeholder', primaryLocale.value);
+  if (val) return val;
+  if (selectedElement.value.type === 'signature') {
+    return t('common.signAreaPlaceholder', primaryLocale.value);
+  }
+  return '';
 });
+
+const targetPlaceholderFallback = computed(() => {
+  if (!selectedElement.value) return t('trans.enterTarget');
+  const el = selectedElement.value;
+  const src = getFieldText(el, 'placeholder', primaryLocale.value);
+  if (src && !isDefaultInputPlaceholder(el.type, src)) {
+    return src;
+  }
+  const loc = store.activeTargetLocale;
+  if (el.type === 'input') return t('prop.inputPlaceholder', loc);
+  if (el.type === 'textarea') return t('prop.textareaPlaceholder', loc);
+  if (el.type === 'select') return t('prop.selectPlaceholder', loc);
+  if (el.type === 'nationality') return t('prop.defaultNatPlaceholder', loc);
+  if (el.type === 'country') return t('prop.defaultCountryPlaceholder', loc);
+  if (el.type === 'date') return t('prop.datePlaceholder', loc);
+  if (el.type === 'email') return t('prop.emailPlaceholder', loc);
+  if (el.type === 'signature') return t('common.signAreaPlaceholder', loc);
+  return t('trans.enterTarget');
+});
+
 const targetPlaceholder = computed(() => {
   if (!selectedElement.value) return '';
-  return getFieldText(selectedElement.value, 'placeholder', store.activeTargetLocale);
+  return placeholderDisplayValue(getFieldText(selectedElement.value, 'placeholder', store.activeTargetLocale));
 });
 function handleTargetPlaceholderInput(val: string) {
   if (!selectedElement.value) return;

@@ -31,7 +31,7 @@
 import { ref, computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, primaryLocale } from '@/core/store';
-import { t, getFieldText, setFieldText } from '@/core/i18n';
+import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import { Mail } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -40,11 +40,12 @@ const props = defineProps<{ element: FormElement }>();
 
 const placeholderInputRef = ref<InstanceType<typeof EditableText> | null>(null);
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
 const currentPlaceholder = computed({
   get() {
-    return getFieldText(props.element, 'placeholder', frameLocale.value);
+    return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
   },
   set(val: string) {
     setFieldText(props.element, 'placeholder', val, frameLocale.value);
@@ -52,7 +53,11 @@ const currentPlaceholder = computed({
 });
 
 const placeholderFallback = computed(() => {
-  return getFieldText(props.element, 'placeholder', primaryLocale.value) || t('prop.emailPlaceholder', frameLocale.value);
+  const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
+  if (isTranslationFrame.value && src && !isDefaultInputPlaceholder('email', src)) {
+    return src;
+  }
+  return t('prop.emailPlaceholder', frameLocale.value);
 });
 
 const isFocusedPlaceholder = computed(() => {

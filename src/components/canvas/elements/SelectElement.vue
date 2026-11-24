@@ -49,7 +49,7 @@
             <EditableText
               :ref="(el) => setOptionInputRef(el, idx)"
               :model-value="getOptionLabel(opt, frameLocale)"
-              :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale)) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
+              :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale) && !isDefaultOptionLabel(getOptionLabel(opt, primaryLocale))) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
               :element-id="element.id"
               field="option"
               :option-index="idx"
@@ -81,7 +81,7 @@
 import { ref, computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, primaryLocale } from '@/core/store';
-import { getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
+import { t, getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel, isDefaultOptionLabel, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import { ChevronDown } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
@@ -126,7 +126,7 @@ function isOptionFocused(idx: number) {
 
 const currentPlaceholder = computed({
   get() {
-    return getFieldText(props.element, 'placeholder', frameLocale.value);
+    return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
   },
   set(val: string) {
     setFieldText(props.element, 'placeholder', val, frameLocale.value);
@@ -135,7 +135,9 @@ const currentPlaceholder = computed({
 
 const placeholderFallback = computed(() => {
   const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
-  if (src) return src;
-  return store.currentLocale === 'en' ? 'Please select an option' : '请选择选项';
+  if (isTranslationFrame.value && src && !isDefaultInputPlaceholder('select', src)) {
+    return src;
+  }
+  return t('prop.selectPlaceholder', frameLocale.value);
 });
 </script>

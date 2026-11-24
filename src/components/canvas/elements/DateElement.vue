@@ -25,8 +25,8 @@
         class="flex-1 min-w-0 h-[32px] px-2.5 rounded-[4px] border border-[#d9d9d9] bg-white flex items-center justify-between gap-1.5 text-[13px] transition-all"
       >
         <EditableText
-          :model-value="getFieldText(element, 'placeholder', frameLocale)"
-          :placeholder="(isTranslationFrame && getFieldText(element, 'placeholder', primaryLocale)) ? getFieldText(element, 'placeholder', primaryLocale) : t('common.startDate', frameDictLocale)"
+          :model-value="placeholderDisplayValue(getFieldText(element, 'placeholder', frameLocale))"
+          :placeholder="(isTranslationFrame && getFieldText(element, 'placeholder', primaryLocale) && !isDefaultInputPlaceholder('date', getFieldText(element, 'placeholder', primaryLocale))) ? getFieldText(element, 'placeholder', primaryLocale) : t('common.startDate', frameLocale)"
           :element-id="element.id"
           field="placeholder"
           custom-class="component-placeholder-text flex-1 min-w-0 block text-[12px] text-slate-700 truncate"
@@ -34,8 +34,8 @@
         />
         <span class="text-slate-400 text-xs shrink-0 select-none">~</span>
         <EditableText
-          :model-value="getFieldText(element, 'endPlaceholder', frameLocale)"
-          :placeholder="(isTranslationFrame && getFieldText(element, 'endPlaceholder', primaryLocale)) ? getFieldText(element, 'endPlaceholder', primaryLocale) : t('common.endDate', frameDictLocale)"
+          :model-value="placeholderDisplayValue(getFieldText(element, 'endPlaceholder', frameLocale))"
+          :placeholder="(isTranslationFrame && getFieldText(element, 'endPlaceholder', primaryLocale) && !isDefaultInputPlaceholder('date', getFieldText(element, 'endPlaceholder', primaryLocale))) ? getFieldText(element, 'endPlaceholder', primaryLocale) : t('common.endDate', frameLocale)"
           :element-id="element.id"
           field="endPlaceholder"
           custom-class="component-placeholder-text flex-1 min-w-0 block text-[12px] text-slate-700 truncate"
@@ -49,14 +49,14 @@
           v-if="element.dateMode === 'range'"
           class="w-full"
           :placeholder="[
-            getFieldText(element, 'placeholder', frameLocale) || t('common.startDate', frameDictLocale),
-            getFieldText(element, 'endPlaceholder', frameLocale) || t('common.endDate', frameDictLocale)
+            getFieldText(element, 'placeholder', frameLocale) || t('common.startDate', frameLocale),
+            getFieldText(element, 'endPlaceholder', frameLocale) || t('common.endDate', frameLocale)
           ]"
           :model-value="element.defaultValue && element.endValue ? [element.defaultValue, element.endValue] : undefined"
         />
         <a-input
           v-else-if="element.defaultLongTerm"
-          :model-value="getFieldText(element, 'longTermText', frameLocale) || t('common.longTermValid', frameDictLocale)"
+          :model-value="getFieldText(element, 'longTermText', frameLocale) || t('common.longTermValid', frameLocale)"
           disabled
           class="w-full !bg-slate-50 !text-slate-600 font-medium select-none"
         >
@@ -67,7 +67,7 @@
         <a-date-picker
           v-else
           class="w-full"
-          :placeholder="displayPlaceholder || t('prop.datePickerLabel', frameDictLocale)"
+          :placeholder="displayPlaceholder || t('prop.datePlaceholder', frameLocale)"
           :model-value="element.defaultValue || undefined"
         />
       </div>
@@ -92,7 +92,7 @@
           v-else
           class="text-[13px] font-medium text-slate-700 cursor-default"
         >
-          {{ getFieldText(element, 'longTermText', frameLocale) || t('common.longTerm', frameDictLocale) }}
+          {{ getFieldText(element, 'longTermText', frameLocale) || t('common.longTerm', frameLocale) }}
         </span>
       </div>
     </div>
@@ -104,7 +104,7 @@ import { ref, computed, inject, type ComputedRef } from 'vue';
 import { Calendar } from '@lucide/vue';
 import type { FormElement } from '@/types/schema';
 import { store, markDirty, primaryLocale } from '@/core/store';
-import { t, TRADITIONAL_LOCALE, getFieldText, setFieldText } from '@/core/i18n';
+import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
@@ -114,9 +114,6 @@ const placeholderInputRef = ref<InstanceType<typeof EditableText> | null>(null);
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
 const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
-const frameDictLocale = computed<'zh' | 'en'>(() =>
-  frameLocale.value === 'zh' || frameLocale.value === TRADITIONAL_LOCALE ? 'zh' : 'en'
-);
 
 const isFocusedPlaceholder = computed(() => {
   return (
@@ -127,12 +124,12 @@ const isFocusedPlaceholder = computed(() => {
 });
 
 const displayPlaceholder = computed(() => {
-  return getFieldText(props.element, 'placeholder', frameLocale.value);
+  return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
 });
 
 const currentPlaceholder = computed({
   get() {
-    return getFieldText(props.element, 'placeholder', frameLocale.value);
+    return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
   },
   set(val: string) {
     setFieldText(props.element, 'placeholder', val, frameLocale.value);
@@ -141,15 +138,19 @@ const currentPlaceholder = computed({
 
 const placeholderFallback = computed(() => {
   if (props.element.dateMode === 'range') {
-    return t('common.startDate', frameDictLocale.value);
+    return t('common.startDate', frameLocale.value);
   }
-  return getFieldText(props.element, 'placeholder', primaryLocale.value) || t('prop.datePickerLabel', frameDictLocale.value);
+  const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
+  if (isTranslationFrame.value && src && !isDefaultInputPlaceholder('date', src)) {
+    return src;
+  }
+  return t('prop.datePlaceholder', frameLocale.value);
 });
 
 const longTermFallback = computed(() => {
   return (isTranslationFrame.value && getFieldText(props.element, 'longTermText', primaryLocale.value))
     ? getFieldText(props.element, 'longTermText', primaryLocale.value)
-    : t('common.longTerm', frameDictLocale.value);
+    : t('common.longTerm', frameLocale.value);
 });
 
 function onToggleLongTerm(val: boolean | (string | number | boolean)[]) {

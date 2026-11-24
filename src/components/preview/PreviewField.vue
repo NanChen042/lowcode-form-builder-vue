@@ -398,7 +398,7 @@
                 :class="signatureError ? 'text-red-500 font-medium' : 'text-slate-400'"
               >
                 <PenLine class="w-3.5 h-3.5" :class="signatureError ? 'text-red-500' : 'opacity-60'" />
-                <span>{{ localizedSignPlaceholder || t('common.clickToSign', previewLoc) }}</span>
+                <span>{{ localizedSignPlaceholder || (previewLoc === 'zh' || previewLoc === 'zh-Hant' ? '请在此处手写签名' : 'Please sign here') }}</span>
               </span>
             </template>
           </div>

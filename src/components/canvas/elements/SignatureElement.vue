@@ -3,12 +3,12 @@
     <ElementLabel :element="element" />
 
     <div class="signature-canvas-mock rounded-lg p-1">
-      <div class="signature-options-container mb-4 flex flex-col gap-2.5">
+      <div v-if="element.options && element.options.length > 0" class="signature-options-container mb-4 flex flex-col gap-2.5">
         <div v-for="(opt, idx) in element.options" :key="idx" class="flex items-start gap-2.5">
           <a-checkbox disabled class="mt-0.5 flex-shrink-0" />
           <EditableText
             :model-value="getOptionLabel(opt, frameLocale)"
-            :placeholder="getOptionLabel(opt, primaryLocale) || t('options.declarationPlaceholder', frameDictLocale, { index: idx + 1 })"
+            :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale) && !isDefaultClauseLabel(getOptionLabel(opt, primaryLocale))) ? getOptionLabel(opt, primaryLocale) : t('options.declarationPlaceholder', frameLocale, { index: idx + 1 })"
             :element-id="element.id"
             field="option"
             :option-index="idx"
@@ -22,8 +22,8 @@
       <div v-if="element.showSignPrompt !== false" class="signature-pad-label mb-2 flex items-center gap-1">
         <span v-if="element.required" class="signature-pad-required text-red-500 font-bold">*</span>
         <EditableText
-          :model-value="getFieldText(element, 'placeholder', frameLocale)"
-          :placeholder="getFieldText(element, 'placeholder', primaryLocale) || (frameDictLocale === 'zh' ? '请在下方指定区域签名' : 'Please sign in the designated area below')"
+          :model-value="placeholderDisplayValue(getFieldText(element, 'placeholder', frameLocale))"
+          :placeholder="(isTranslationFrame && getFieldText(element, 'placeholder', primaryLocale) && !isDefaultInputPlaceholder('signature', getFieldText(element, 'placeholder', primaryLocale))) ? getFieldText(element, 'placeholder', primaryLocale) : t('common.signAreaPlaceholder', frameLocale)"
           :element-id="element.id"
           field="placeholder"
           :allow-empty="true"
@@ -36,8 +36,8 @@
         <span class="flex items-center gap-1.5 text-slate-400 text-xs font-normal">
           <PenLine class="w-3.5 h-3.5 opacity-60" />
           <EditableText
-            :model-value="getFieldText(element, 'signPlaceholder', frameLocale)"
-            :placeholder="getFieldText(element, 'signPlaceholder', primaryLocale) || (frameDictLocale === 'zh' ? '请在此处手写签名' : 'Please sign here')"
+            :model-value="placeholderDisplayValue(getFieldText(element, 'signPlaceholder', frameLocale))"
+            :placeholder="(isTranslationFrame && getFieldText(element, 'signPlaceholder', primaryLocale) && !isDefaultInputPlaceholder('signature', getFieldText(element, 'signPlaceholder', primaryLocale))) ? getFieldText(element, 'signPlaceholder', primaryLocale) : t('canvas.signatureArea', frameLocale)"
             :element-id="element.id"
             field="signPlaceholder"
             :allow-empty="true"
@@ -62,7 +62,7 @@
 import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { primaryLocale } from '@/core/store';
-import { t, TRADITIONAL_LOCALE, getFieldText, getOptionLabel, setFieldText, setOptionLabel } from '@/core/i18n';
+import { t, getFieldText, getOptionLabel, setFieldText, setOptionLabel, isDefaultClauseLabel, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 import { Eraser, PenLine } from '@lucide/vue';
@@ -70,7 +70,5 @@ import { Eraser, PenLine } from '@lucide/vue';
 defineProps<{ element: FormElement }>();
 
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
-const frameDictLocale = computed<'zh' | 'en'>(() =>
-  frameLocale.value === 'zh' || frameLocale.value === TRADITIONAL_LOCALE ? 'zh' : 'en'
-);
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 </script>

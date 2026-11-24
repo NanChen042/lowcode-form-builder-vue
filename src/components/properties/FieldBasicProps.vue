@@ -91,7 +91,7 @@
       </div>
     </template>
 
-    <div v-if="!isRisk && element.type !== 'alert'" class="mb-3">
+    <div v-if="!isRisk && element.type !== 'alert' && isShowLabel" class="mb-3">
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5">
           <label for="prop-help-input" class="text-[12px] font-medium text-slate-700">
@@ -214,7 +214,7 @@
     <!-- 电子签名手写签名板分区小标题 -->
     <div v-if="element.type === 'signature'" class="pt-3 border-t border-slate-100 mb-2">
       <div class="flex items-center justify-between">
-        <span class="text-[12px] font-semibold text-slate-700">{{ t('canvas.signatureArea') }}</span>
+        <span class="text-[12px] font-semibold text-slate-700">{{ t('prop.handwrittenSignPad') }}</span>
       </div>
     </div>
 
@@ -295,7 +295,7 @@
         v-model="fieldSignPlaceholderModel"
         :auto-size="{ minRows: 1, maxRows: 4 }"
         allow-clear
-        :placeholder="t('canvas.signatureArea')"
+        :placeholder="signPlaceholderDefault"
         class="w-full"
         :class="{ 'prop-field-focused': isFieldFocused('signPlaceholder') }"
         @focus="setFocus('signPlaceholder')"
@@ -578,21 +578,27 @@ const isFieldSignPlaceholderMissing = computed(() => {
 });
 
 const placeholderInputDefault = computed(() => {
+  const formLoc = getEffectiveFormLocale();
   if (props.element.type === 'date' && props.element.dateMode === 'range') {
-    return t('common.startDate', primaryLocale.value);
+    return t('common.startDate', formLoc);
   }
   if (props.element.type === 'email') {
-    return t('prop.emailPlaceholder', primaryLocale.value);
+    return t('prop.emailPlaceholder', formLoc);
   }
   if (props.element.type === 'signature') {
-    return t('common.clickToSign', primaryLocale.value);
+    return t('common.signAreaPlaceholder', formLoc);
   }
   const defaultData = componentRegistry[props.element.type]?.defaultData();
   if (defaultData) {
-    const defaultPlaceholder = defaultData.i18n?.[primaryLocale.value]?.placeholder || defaultData.i18n?.en?.placeholder;
+    const defaultPlaceholder = defaultData.i18n?.[formLoc]?.placeholder || defaultData.i18n?.en?.placeholder || defaultData.i18n?.zh?.placeholder;
     if (defaultPlaceholder) return defaultPlaceholder;
   }
   return placeholderFieldLabel.value;
+});
+
+const signPlaceholderDefault = computed(() => {
+  const formLoc = getEffectiveFormLocale();
+  return t('canvas.signatureArea', formLoc);
 });
 
 const fieldPlaceholderModel = computed({

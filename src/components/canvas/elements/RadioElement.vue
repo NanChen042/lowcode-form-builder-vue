@@ -129,10 +129,11 @@
         </span>
         <EditableText
           :model-value="getOptionLabel(opt, frameLocale)"
-          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale)) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
+          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale) && !isDefaultOptionLabel(getOptionLabel(opt, primaryLocale))) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
           :element-id="element.id"
           field="option"
           :option-index="idx"
+          :allow-empty="true"
           custom-class="option-text text-sm text-slate-700"
           @update:model-value="(val) => setOptionLabel(opt, val, frameLocale)"
         />
@@ -145,7 +146,7 @@
 import { computed, ref, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, isRisk, primaryLocale, selectElement, duplicateElement, deleteElement, markDirty } from '@/core/store';
-import { t, getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
+import { t, getFieldText, setFieldText, getOptionLabel, setOptionLabel, formatOptionLabel, isDefaultOptionLabel } from '@/core/i18n';
 import { GripVertical, Copy, Trash2 } from '@lucide/vue';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';

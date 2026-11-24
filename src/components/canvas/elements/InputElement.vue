@@ -29,7 +29,7 @@
 import { ref, computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { store, primaryLocale } from '@/core/store';
-import { getFieldText, setFieldText } from '@/core/i18n';
+import { t, getFieldText, setFieldText, isDefaultInputPlaceholder, placeholderDisplayValue } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 
@@ -37,15 +37,16 @@ const props = defineProps<{ element: FormElement }>();
 
 const placeholderInputRef = ref<InstanceType<typeof EditableText> | null>(null);
 const frameLocale = inject<ComputedRef<string>>('frameLocale', computed(() => primaryLocale.value));
+const isTranslationFrame = inject<ComputedRef<boolean>>('isTranslationFrame', computed(() => false));
 const isReadOnlyFrame = inject<ComputedRef<boolean>>('isReadOnlyFrame', computed(() => false));
 
 const displayPlaceholder = computed(() => {
-  return getFieldText(props.element, 'placeholder', frameLocale.value);
+  return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
 });
 
 const currentPlaceholder = computed({
   get() {
-    return getFieldText(props.element, 'placeholder', frameLocale.value);
+    return placeholderDisplayValue(getFieldText(props.element, 'placeholder', frameLocale.value));
   },
   set(val: string) {
     setFieldText(props.element, 'placeholder', val, frameLocale.value);
@@ -54,8 +55,10 @@ const currentPlaceholder = computed({
 
 const placeholderFallback = computed(() => {
   const src = getFieldText(props.element, 'placeholder', primaryLocale.value);
-  if (src) return src;
-  return store.currentLocale === 'en' ? 'Please enter' : '请输入内容';
+  if (isTranslationFrame.value && src && !isDefaultInputPlaceholder('input', src)) {
+    return src;
+  }
+  return t('prop.inputPlaceholder', frameLocale.value);
 });
 
 const isFocusedPlaceholder = computed(() => {

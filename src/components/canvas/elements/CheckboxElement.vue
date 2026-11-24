@@ -16,10 +16,11 @@
         <EditableText
           v-else
           :model-value="getOptionLabel(opt, frameLocale)"
-          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale)) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
+          :placeholder="(isTranslationFrame && getOptionLabel(opt, primaryLocale) && !isDefaultOptionLabel(getOptionLabel(opt, primaryLocale))) ? getOptionLabel(opt, primaryLocale) : formatOptionLabel(idx + 1, frameLocale)"
           :element-id="element.id"
           field="option"
           :option-index="idx"
+          :allow-empty="true"
           custom-class="option-text text-sm text-slate-700"
           @update:model-value="(val) => setOptionLabel(opt, val, frameLocale)"
         />
@@ -33,7 +34,7 @@ import { computed, inject, type ComputedRef } from 'vue';
 import type { FormElement } from '@/types/schema';
 import { parseMultiValue, stringifyMultiValue } from '@/utils/helpers';
 import { isRisk, primaryLocale, selectElement, markDirty } from '@/core/store';
-import { t, getOptionLabel, setOptionLabel, formatOptionLabel } from '@/core/i18n';
+import { t, getOptionLabel, setOptionLabel, formatOptionLabel, isDefaultOptionLabel } from '@/core/i18n';
 import ElementLabel from './ElementLabel.vue';
 import EditableText from '@/components/common/EditableText.vue';
 

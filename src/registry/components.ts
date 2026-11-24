@@ -195,14 +195,14 @@ export const componentRegistry: Record<ComponentType, ComponentMeta> = {
     icon: 'Signature',
     defaultData: () => ({
       i18n: {
-        zh: { label: '电子签名', placeholder: '请在下方指定区域签名', signPlaceholder: '请在此处手写签名' },
-        en: { label: 'E-Signature', placeholder: 'Please sign in the designated area below', signPlaceholder: 'Please sign here' }
+        zh: { label: '', placeholder: '请在下方指定区域签名', signPlaceholder: '请在此处手写签名' },
+        en: { label: '', placeholder: 'Please sign in the designated area below', signPlaceholder: 'Please sign here' }
       },
-      showLabel: true,
+      showLabel: false,
       required: true,
       declarationRequired: true,
       options: [
-        { value: 'dec_1', i18n: { zh: { label: '本人保证以上填写的信息真实、准确、有效。' }, en: { label: 'I confirm that all information provided is true, accurate and valid.' } } }
+        { value: 'dec_1', i18n: { zh: { label: '' }, en: { label: '' } } }
       ]
     })
   },

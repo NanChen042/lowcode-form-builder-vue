@@ -108,8 +108,8 @@ export function parseAlertContent(content?: string, _listStyle: 'circle' | 'numb
       return;
     }
 
-    // 检查是否为列表项：以 "- ", "* ", "• " 开头，或以 "1. ", "1、" 数字编号开头
-    const bulletMatch = line.match(/^\s*[-*•](?:\s+(.*)|\s*$)/);
+    // 检查是否为列表项：以 "- ", "* ", "• ", "· " 开头，或以 "1. ", "1、" 数字编号开头
+    const bulletMatch = line.match(/^\s*[-*•·](?:\s+(.*)|\s*$)/);
     const numberMatch = line.match(/^\s*(\d+)[\.、](?:\s+(.*)|\s*$)/);
 
     if (numberMatch) {

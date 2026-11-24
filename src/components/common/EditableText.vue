@@ -233,6 +233,15 @@ defineExpose({
   font-weight: 400 !important;
   font-style: normal;
 }
+.editable-text-node {
+  caret-color: #1677ff;
+}
+.editable-text-node:empty {
+  display: inline-block;
+  min-width: 2px;
+  min-height: 1em;
+  vertical-align: bottom;
+}
 .editable-text-node:empty::before {
   content: attr(data-placeholder);
   color: #94a3b8;
