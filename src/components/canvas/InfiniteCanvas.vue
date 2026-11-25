@@ -30,7 +30,7 @@
         @mousedown.stop
         @wheel.stop
       >
-        <span class="text-xs text-slate-700 leading-normal">{{ t('canvas.defaultLangTip') }}</span>
+        <span class="text-xs text-slate-700 leading-normal">{{ isRisk ? t('canvas.defaultLangTipRisk') : t('canvas.defaultLangTip') }}</span>
       </a-alert>
     </transition>
 

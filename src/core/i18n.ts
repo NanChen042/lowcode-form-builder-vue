@@ -238,6 +238,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.defaultLangTip': '提示：画布模式下编辑的是默认语言（英文）内容，请使用英文填写所有组件内容。',
+    'canvas.defaultLangTipRisk': '画布模式下，请使用默认语言（英语）编辑风险评估问卷内容。',
     'common.signAreaPlaceholder': '请在下方指定区域签名',
     'canvas.signatureArea': '请在此处手写签名',
     'canvas.droppable': '可放置画布',
@@ -545,8 +546,8 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
     'publish.formNamePlaceholder': '请输入表单名称 (50字以内)',
     'publish.formNameEn': '英文表单名称',
     'publish.formNameEnPlaceholder': 'Enter English form name',
-    'publish.formDesc': '表单描述 / 介绍',
-    'publish.formDescPlaceholder': '向填表人介绍该表单的用途、填表须知或隐私声明（将展示在表单首屏）...',
+    'publish.formDesc': '表单描述',
+    'publish.formDescPlaceholder': '介绍表单用途、填写须知或注意事项（将在首屏展示）...',
     'publish.formDescEn': '英文表单描述',
     'publish.formDescEnPlaceholder': 'Introduce the purpose of the form, guidelines, or notices...',
     'publish.nameRequired': '表单名称不能为空',
@@ -887,6 +888,7 @@ export const systemMessages: Record<Locale, Record<string, string>> = {
 
     // 画布与画板交互 (InfiniteCanvas & PageFrame)
     'canvas.defaultLangTip': 'Note: In canvas mode, you are editing content in the default language (English). Please enter all component content in English.',
+    'canvas.defaultLangTipRisk': 'In canvas mode, please edit the risk assessment questionnaire in the default language (English).',
     'common.signAreaPlaceholder': 'Please sign in the designated area below',
     'canvas.signatureArea': 'Please sign here',
     'canvas.droppable': 'Droppable Canvas',

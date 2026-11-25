@@ -10,13 +10,11 @@
     :mask-closable="!isSubmitting"
     @cancel="handleClose"
   >
-
+    <!-- 发布成功结果界面 -->
     <div v-if="isSuccess" class="py-4 flex flex-col items-center text-center">
-
       <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 ring-8 ring-emerald-50/60 shrink-0">
         <Check class="w-6 h-6 stroke-[2.5]" />
       </div>
-
 
       <h3 class="text-base font-semibold text-slate-800 m-0 mb-1.5">
         {{ t('publish.successTitle') }}
@@ -93,47 +91,22 @@
       </template>
     </div>
 
-
+    <!-- 发布前表单信息核对确认界面（界面语言跟随系统语言，无需中英文切换，统一维护单一名称与描述） -->
     <div v-else class="space-y-3.5 py-1">
-      <div class="flex items-center justify-between pb-0.5">
-        <p class="text-xs text-slate-500 m-0 leading-relaxed pr-3">
-          {{ isRisk ? t('publish.riskModalDesc') : t('publish.modalDesc') }}
-        </p>
-        <a-radio-group v-if="showLocaleSwitch" v-model="activeLocale" type="button" size="small" class="shrink-0">
-          <template v-if="primaryLocale === 'en'">
-            <a-radio value="en" class="whitespace-nowrap">English</a-radio>
-            <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
-          </template>
-          <template v-else>
-            <a-radio value="zh" class="whitespace-nowrap">中文</a-radio>
-            <a-radio value="en" class="whitespace-nowrap">English</a-radio>
-          </template>
-        </a-radio-group>
-      </div>
+      <p class="text-xs text-slate-500 m-0 leading-relaxed pb-0.5">
+        {{ isRisk ? t('publish.riskModalDesc') : t('publish.modalDesc') }}
+      </p>
 
       <a-form :model="formModel" layout="vertical">
         <a-form-item
-          :label="activeLocale === 'zh' ? t('publish.formName') : t('publish.formNameEn')"
+          :label="t('publish.formName')"
           required
           class="mb-3"
         >
           <a-input
-            v-if="activeLocale === 'zh'"
-            ref="titleInputZhRef"
-            v-model="formModel.titleZh"
+            ref="titleInputRef"
+            v-model="formModel.title"
             :placeholder="t('publish.formNamePlaceholder')"
-            :max-length="50"
-            :error="nameError"
-            show-word-limit
-            allow-clear
-            @input="nameError = false"
-            @keydown.enter="handleConfirmPublish"
-          />
-          <a-input
-            v-else
-            ref="titleInputEnRef"
-            v-model="formModel.titleEn"
-            :placeholder="t('publish.formNameEnPlaceholder')"
             :max-length="50"
             :error="nameError"
             show-word-limit
@@ -144,22 +117,12 @@
         </a-form-item>
 
         <a-form-item
-          :label="activeLocale === 'zh' ? t('publish.formDesc') : t('publish.formDescEn')"
+          :label="t('publish.formDesc')"
           class="mb-3"
         >
           <a-textarea
-            v-if="activeLocale === 'zh'"
-            v-model="formModel.descZh"
+            v-model="formModel.description"
             :placeholder="t('publish.formDescPlaceholder')"
-            :max-length="200"
-            show-word-limit
-            :auto-size="{ minRows: 3, maxRows: 4 }"
-            allow-clear
-          />
-          <a-textarea
-            v-else
-            v-model="formModel.descEn"
-            :placeholder="t('publish.formDescEnPlaceholder')"
             :max-length="200"
             show-word-limit
             :auto-size="{ minRows: 3, maxRows: 4 }"
@@ -169,7 +132,7 @@
       </a-form>
     </div>
 
-
+    <!-- 底部按钮区 -->
     <template #footer>
       <div v-if="!isSuccess" class="flex items-center justify-end gap-2">
         <a-button type="primary" :loading="isSubmitting" class="bg-[#1677ff]" @click="handleConfirmPublish">
@@ -202,58 +165,41 @@ const emit = defineEmits<{
   (e: 'published', data: { url: string }): void;
 }>();
 
-const hasZhEnabled = computed(() =>
-  primaryLocale.value === 'zh' || (store.meta.enabledLocales || []).includes('zh')
-);
-const hasEnEnabled = computed(() =>
-  primaryLocale.value === 'en' || (store.meta.enabledLocales || []).includes('en')
-);
-const showLocaleSwitch = computed(() => hasZhEnabled.value && hasEnEnabled.value);
-
-const localPublishLocale = ref<'zh' | 'en'>(primaryLocale.value === 'en' ? 'en' : 'zh');
-const activeLocale = computed<'zh' | 'en'>({
-  get: () => (showLocaleSwitch.value ? localPublishLocale.value : (primaryLocale.value === 'en' ? 'en' : 'zh')),
-  set: (val: 'zh' | 'en') => {
-    localPublishLocale.value = val;
-  }
-});
 const isProfileTypeLocked = computed(() => Boolean(store.lockedProfileType));
 
 const formModel = reactive({
   profileType: 'customer' as ProfileType,
-  titleZh: '',
-  titleEn: '',
-  descZh: '',
-  descEn: ''
+  title: '',
+  description: ''
 });
-const initialTitles = reactive({
-  zh: '',
-  en: ''
-});
-
-const defaultTemplateCodeTitles = [
-  'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
-  'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
-  'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
-  'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY'
-];
 
 const nameError = ref(false);
 const isSubmitting = ref(false);
 const isSuccess = ref(false);
 const publishedUrl = ref('');
 
-const titleInputZhRef = ref<any>(null);
-const titleInputEnRef = ref<any>(null);
+const titleInputRef = ref<any>(null);
 
 function handleClose() {
   emit('update:visible', false);
   emit('close');
 }
 
-function setMetaField(loc: string, key: 'title' | 'description', val: string) {
-  store.meta.i18n[loc] = { ...(store.meta.i18n[loc] || {}), [key]: val };
-}
+const defaultMockDescs = [
+  '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
+  'Comprehensive test suite covering all 12 form components and attributes',
+  '客户母案例专用KYC问卷',
+  '客户案例专用KYC问卷',
+  'Dedicated KYC questionnaire for customer cases',
+  '个人成员专用KYC问卷',
+  'Dedicated KYC questionnaire for individual members',
+  '实体成员专用KYC问卷',
+  'Dedicated KYC questionnaire for entity members',
+  '空白画布新建自定义表单',
+  'Custom form created from blank canvas',
+  '覆盖全量组件完整配置项、多行文本字数/行数、单多选/国家国籍、条件显隐及多语言联动测试',
+  'Comprehensive test suite for all form components, multiline row/char limits, selectors, conditional logic, and i18n'
+];
 
 watch(
   () => props.visible,
@@ -261,54 +207,37 @@ watch(
     if (val) {
       isSuccess.value = false;
       nameError.value = false;
-      localPublishLocale.value = primaryLocale.value === 'en' ? 'en' : 'zh';
       const curProfile = store.lockedProfileType || store.meta.profileType || store.preferredProfileType || 'customer';
       formModel.profileType = (curProfile === 'client' || curProfile === 'customer') ? 'customer' : curProfile;
 
-      let initZh = (store.meta.i18n.zh?.title || '').trim();
-      let initEn = (store.meta.i18n.en?.title || '').trim();
-      if (!initZh && defaultTemplateCodeTitles.includes(initEn)) {
-        initZh = initEn;
-      } else if (!initEn && defaultTemplateCodeTitles.includes(initZh)) {
-        initEn = initZh;
+      // 读取当前表单名称，优先取 meta.title，次优取当前系统语言或主语言
+      const currentTitle =
+        store.meta.title ||
+        store.meta.i18n?.[store.currentLocale]?.title ||
+        store.meta.i18n?.[primaryLocale.value]?.title ||
+        store.meta.i18n?.zh?.title ||
+        store.meta.i18n?.en?.title ||
+        Object.values(store.meta.i18n || {}).map((item: any) => item?.title).find((t: any) => Boolean(t)) ||
+        '';
+
+      formModel.title = currentTitle.trim();
+
+      let currentDesc =
+        store.meta.description ||
+        store.meta.i18n?.[store.currentLocale]?.description ||
+        store.meta.i18n?.[primaryLocale.value]?.description ||
+        store.meta.i18n?.zh?.description ||
+        store.meta.i18n?.en?.description ||
+        Object.values(store.meta.i18n || {}).map((item: any) => item?.description).find((d: any) => Boolean(d)) ||
+        '';
+
+      if (defaultMockDescs.includes(currentDesc.trim())) {
+        currentDesc = '';
       }
-
-      formModel.titleZh = initZh;
-      formModel.titleEn = initEn;
-      initialTitles.zh = initZh;
-      initialTitles.en = initEn;
-
-      const defaultMockDescs = [
-        '涵盖全部12种低代码组件、属性测试及中英双语国际化验证',
-        'Comprehensive test suite covering all 12 form components and attributes',
-        '客户母案例专用KYC问卷',
-        '客户案例专用KYC问卷',
-        'Dedicated KYC questionnaire for customer cases',
-        '个人成员专用KYC问卷',
-        'Dedicated KYC questionnaire for individual members',
-        '实体成员专用KYC问卷',
-        'Dedicated KYC questionnaire for entity members',
-        '空白画布新建自定义表单',
-        'Custom form created from blank canvas',
-        '覆盖全量组件完整配置项、多行文本字数/行数、单多选/国家国籍、条件显隐及多语言联动测试',
-        'Comprehensive test suite for all form components, multiline row/char limits, selectors, conditional logic, and i18n'
-      ];
-
-      const curDescZh = store.meta.i18n.zh?.description || '';
-      const curDescEn = store.meta.i18n.en?.description || '';
-
-      if (defaultMockDescs.includes(curDescZh)) setMetaField('zh', 'description', '');
-      if (defaultMockDescs.includes(curDescEn)) setMetaField('en', 'description', '');
-
-      formModel.descZh = store.meta.i18n.zh?.description || '';
-      formModel.descEn = store.meta.i18n.en?.description || '';
+      formModel.description = currentDesc.trim();
 
       nextTick(() => {
-        if (activeLocale.value === 'zh') {
-          titleInputZhRef.value?.focus?.();
-        } else {
-          titleInputEnRef.value?.focus?.();
-        }
+        titleInputRef.value?.focus?.();
       });
     }
   },
@@ -317,54 +246,39 @@ watch(
 
 async function handleConfirmPublish() {
   nameError.value = false;
-  let rawZh = formModel.titleZh.trim();
-  let rawEn = formModel.titleEn.trim();
-  const activeTitle = activeLocale.value === 'zh' ? rawZh : rawEn;
-  const fallbackTitle = activeTitle || rawZh || rawEn;
+  const rawTitle = formModel.title.trim();
+  const rawDesc = formModel.description.trim();
 
-  if (!fallbackTitle) {
+  if (!rawTitle) {
     nameError.value = true;
     Message.warning(t('publish.nameRequired'));
-    if (activeLocale.value === 'zh') {
-      titleInputZhRef.value?.focus?.();
-    } else {
-      titleInputEnRef.value?.focus?.();
-    }
+    titleInputRef.value?.focus?.();
     return;
-  }
-
-  // 若只编辑了一侧标题，另一侧留空或仍是未改动的默认模板编码，则双语统一对齐为同一名称；若两侧各自翻译则分别保留
-  if (!rawZh && rawEn) {
-    rawZh = rawEn;
-  } else if (!rawEn && rawZh) {
-    rawEn = rawZh;
-  } else if (
-    rawZh === initialTitles.zh &&
-    defaultTemplateCodeTitles.includes(rawZh) &&
-    rawEn &&
-    rawEn !== initialTitles.en
-  ) {
-    rawZh = rawEn;
-  } else if (
-    rawEn === initialTitles.en &&
-    defaultTemplateCodeTitles.includes(rawEn) &&
-    rawZh &&
-    rawZh !== initialTitles.zh
-  ) {
-    rawEn = rawZh;
   }
 
   if (!isProfileTypeLocked.value && formModel.profileType) {
     setFormProfileType(formModel.profileType);
   }
 
-  if (hasZhEnabled.value) {
-    setMetaField('zh', 'title', rawZh);
-    setMetaField('zh', 'description', formModel.descZh.trim());
+  // 表单名称与描述不区分中英文，直接保存到 store.meta，并同步至全部多语言节点，避免任何运行时及端上缺失
+  store.meta.title = rawTitle;
+  store.meta.description = rawDesc;
+
+  if (!store.meta.i18n) {
+    store.meta.i18n = {};
   }
-  if (hasEnEnabled.value) {
-    setMetaField('en', 'title', rawEn);
-    setMetaField('en', 'description', formModel.descEn.trim());
+  const allLocales = new Set<string>([
+    'zh',
+    'en',
+    ...(store.meta.enabledLocales || []),
+    ...Object.keys(store.meta.i18n)
+  ]);
+  for (const loc of allLocales) {
+    store.meta.i18n[loc] = {
+      ...(store.meta.i18n[loc] || {}),
+      title: rawTitle,
+      description: rawDesc
+    };
   }
 
   const schema = buildSchema();
@@ -393,11 +307,7 @@ async function handleConfirmPublish() {
         nameError.value = true;
         Message.error(t('publish.nameDuplicate'));
         nextTick(() => {
-          if (activeLocale.value === 'zh') {
-            titleInputZhRef.value?.focus?.();
-          } else {
-            titleInputEnRef.value?.focus?.();
-          }
+          titleInputRef.value?.focus?.();
         });
       } else {
         Message.error((rawMsg && rawMsg !== 'ERROE') ? rawMsg : t('preview.publishFailed'));

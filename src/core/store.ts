@@ -78,6 +78,8 @@ export const store = reactive({
   uniqueIdCounter: 1,
 
   meta: {
+    title: '' as string,
+    description: '' as string,
     profileType: 'customer' as ProfileType,
     baseLocale: '' as string,
     enabledLocales: undefined as string[] | undefined,
@@ -144,7 +146,9 @@ export const store = reactive({
   },
   org: {
     orgId: 0,
-    companyName: ''
+    companyName: '',
+    brandLogo: '',
+    brandIcon: ''
   },
 
   lockedProfileType: null as ProfileType | null,
@@ -886,7 +890,9 @@ export function focusOnPage(pageOrId: string | FormPage, options?: FocusOnPageOp
 
     const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
     const viewportCenterY = viewportHeight / 2;
-    store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
+    const computedY = Math.round(viewportCenterY - visualCenterY * finalScale);
+    const minTopMargin = isRisk.value ? 100 : 88;
+    store.canvasState.y = Math.max(minTopMargin, computedY);
   } else {
     const paddingX = 80;
     const safeWidth = Math.max(200, viewportWidth - paddingX);
@@ -900,7 +906,9 @@ export function focusOnPage(pageOrId: string | FormPage, options?: FocusOnPageOp
 
     const visualCenterY = page.y - (badgeOffset / 2) + realHeight / 2;
     const viewportCenterY = viewportHeight / 2;
-    store.canvasState.y = viewportCenterY - visualCenterY * finalScale;
+    const computedY = Math.round(viewportCenterY - visualCenterY * finalScale);
+    const minTopMargin = isRisk.value ? 100 : 88;
+    store.canvasState.y = Math.max(minTopMargin, computedY);
   }
 }
 
@@ -974,7 +982,7 @@ export function resetCanvasView(options?: { duration?: number }) {
     const visualCenterY = (minY + maxY) / 2;
     const viewportCenterY = viewportHeight / 2;
     const centeredY = Math.round(viewportCenterY - visualCenterY * store.canvasState.scale);
-    const minTopMargin = 56;
+    const minTopMargin = 100;
     store.canvasState.y = Math.max(minTopMargin, centeredY);
     return;
   }
@@ -992,7 +1000,9 @@ export function resetCanvasView(options?: { duration?: number }) {
   const contentCenterY = minY + totalHeight / 2;
 
   store.canvasState.x = viewportWidth / 2 - contentCenterX * targetScale;
-  store.canvasState.y = (viewportHeight / 2) - contentCenterY * targetScale;
+  const computedY = Math.round((viewportHeight / 2) - contentCenterY * targetScale);
+  const minTopMargin = 88;
+  store.canvasState.y = Math.max(minTopMargin, computedY);
 }
 
 // 统一生成纯小写规范表单业务 ID (例如: tpl_20261030_7x8k)
@@ -1055,8 +1065,8 @@ export function buildSchema(): FormSchema {
     ? (activeLocale === 'en' ? 'Risk Assessment' : '风险评估')
     : (activeLocale === 'en' ? 'Untitled Form' : '未命名表单');
 
-  let effectiveTitle = rawTitleZh || rawTitleEn || fallbackUntitled;
-  let effectiveTitleEn = rawTitleEn || rawTitleZh || fallbackUntitled;
+  let effectiveTitle = store.meta.title?.trim() || rawTitleZh || rawTitleEn || fallbackUntitled;
+  let effectiveTitleEn = store.meta.title?.trim() || rawTitleEn || rawTitleZh || fallbackUntitled;
 
   // 若其中一语仍为默认模版名而另一语已被修改为自定义名称，则自动对齐，避免残留默认编码名冲突
   if (defaultTemplateTitles.includes(effectiveTitleEn) && !defaultTemplateTitles.includes(effectiveTitle)) {
@@ -1070,15 +1080,19 @@ export function buildSchema(): FormSchema {
     setMetaTitle('en', effectiveTitleEn);
   }
 
+  const rawDesc = store.meta.description?.trim() || (store.meta.i18n.zh?.description || '').trim() || (store.meta.i18n.en?.description || '').trim();
+
   const metaI18n: Record<string, Record<string, string>> = {};
   for (const loc of enabledLocales) {
     const entry: Record<string, string> = {};
-    const tVal = loc === 'zh'
-      ? effectiveTitle
-      : loc === 'en'
-        ? (effectiveTitleEn || effectiveTitle)
-        : (store.meta.i18n[loc]?.title || '').trim();
-    const dVal = (store.meta.i18n[loc]?.description || '').trim();
+    const tVal = store.meta.title?.trim()
+      ? store.meta.title.trim()
+      : (loc === 'zh'
+        ? effectiveTitle
+        : loc === 'en'
+          ? (effectiveTitleEn || effectiveTitle)
+          : (store.meta.i18n[loc]?.title || effectiveTitle).trim());
+    const dVal = rawDesc || (store.meta.i18n[loc]?.description || '').trim();
     if (tVal) entry.title = tVal;
     if (dVal) entry.description = dVal;
     if (Object.keys(entry).length > 0) {
@@ -1090,6 +1104,8 @@ export function buildSchema(): FormSchema {
     ? {
         formId: ensuredId,
         serialNo: ensuredId,
+        title: effectiveTitle,
+        ...(rawDesc ? { description: rawDesc } : {}),
         profileType: store.meta.profileType || 'customer',
         formType: 'risk',
         baseLocale: store.meta.baseLocale || activeLocale,
@@ -1099,6 +1115,8 @@ export function buildSchema(): FormSchema {
     : {
         formId: ensuredId,
         serialNo: ensuredId,
+        title: effectiveTitle,
+        ...(rawDesc ? { description: rawDesc } : {}),
         profileType: store.meta.profileType || 'customer',
         formType: 'kyc',
         baseLocale: store.meta.baseLocale || activeLocale,
@@ -1650,6 +1668,8 @@ export function loadSchema(schema: FormSchema, options?: { duration?: number }) 
     || 'customer';
   const profileType: ProfileType = rawProfileType === 'client' ? 'customer' : rawProfileType;
   store.meta.profileType = profileType;
+  store.meta.title = schema.meta?.title || '';
+  store.meta.description = schema.meta?.description || '';
   store.meta.source = schema.meta?.source || 'diy';
   store.meta.templateKey = schema.meta?.templateKey || '';
 

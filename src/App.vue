@@ -25,7 +25,27 @@ watch(
   { immediate: true }
 );
 
+function updateBrandIcon() {
+  if (typeof document === 'undefined' || !store.org.brandIcon) return;
+  let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  link.href = store.org.brandIcon;
+}
+
+watch(
+  () => store.org.brandIcon,
+  () => {
+    updateBrandIcon();
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   updateDocTitle();
+  updateBrandIcon();
 });
 </script>

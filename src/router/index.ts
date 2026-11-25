@@ -73,6 +73,8 @@ router.beforeEach(async (to) => {
       store.user.email = res.data.email || store.user.email;
       store.org.orgId = res.data.orgId || store.org.orgId;
       store.org.companyName = res.data.companyName || store.org.companyName;
+      store.org.brandLogo = res.data.brandLogo || store.org.brandLogo;
+      store.org.brandIcon = res.data.brandIcon || store.org.brandIcon;
 
       if (res.data.language && !to.query.lang) {
         store.currentLocale = res.data.language;

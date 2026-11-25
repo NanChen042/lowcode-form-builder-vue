@@ -404,6 +404,7 @@ const editTitleValue = ref('');
 const titleInputRef = ref<HTMLInputElement | null>(null);
 
 const displayTitle = computed(() => {
+  if (store.meta.title?.trim()) return store.meta.title.trim();
   const loc = store.currentLocale === 'en' ? 'en' : 'zh';
   const other = loc === 'en' ? 'zh' : 'en';
   return store.meta.i18n?.[loc]?.title?.trim() || store.meta.i18n?.[other]?.title?.trim() || t('header.untitledForm');
@@ -412,7 +413,7 @@ const displayTitle = computed(() => {
 function startEditTitle() {
   const loc = store.currentLocale === 'en' ? 'en' : 'zh';
   const other = loc === 'en' ? 'zh' : 'en';
-  editTitleValue.value = store.meta.i18n?.[loc]?.title?.trim() || store.meta.i18n?.[other]?.title?.trim() || '';
+  editTitleValue.value = store.meta.title?.trim() || store.meta.i18n?.[loc]?.title?.trim() || store.meta.i18n?.[other]?.title?.trim() || '';
   isEditingTitle.value = true;
   nextTick(() => {
     titleInputRef.value?.focus();
@@ -425,26 +426,18 @@ function handleConfirmTitle() {
   const trimmed = editTitleValue.value.trim();
   const fallback = t('header.untitledForm');
   const newTitle = trimmed || fallback;
-  const defaultTemplateTitles = [
-    'SG_CSP_CUSTOMER_2025', 'SG_CSP_INDIVIDUAL_2025', 'SG_CSP_ENTITY_2025',
-    'SG_CSP_RA_CUSTOMER_2025', 'SG_CSP_RA_INDIVIDUAL_2025', 'SG_CSP_RA_ENTITY_2025',
-    'SG_CDD_CUSTOMER', 'SG_CDD_INDIVIDUAL', 'SG_CDD_ENTITY',
-    'SG_RISK_CUSTOMER', 'SG_RISK_INDIVIDUAL', 'SG_RISK_ENTITY',
-    'SG_CDD_Customer', 'SG_CDD_Individual', 'SG_CDD_Entity',
-    'SG_Risk_Customer', 'SG_Risk_Individual', 'SG_Risk_Entity',
-    '未命名表单', 'Untitled Form'
-  ];
 
-  // 修改当前界面语言对应的标题；另一语言标题为空 / 与旧标题相同 / 仍是默认模板名时同步跟随
-  const curLoc = store.currentLocale === 'en' ? 'en' : 'zh';
-  const otherLoc = curLoc === 'en' ? 'zh' : 'en';
-  const meta = store.meta.i18n;
-  const oldTitle = meta[curLoc]?.title;
-  if (oldTitle !== newTitle) {
-    meta[curLoc] = { ...(meta[curLoc] || {}), title: newTitle };
-    const otherTitle = meta[otherLoc]?.title;
-    if (!otherTitle || otherTitle === oldTitle || defaultTemplateTitles.includes(otherTitle)) {
-      meta[otherLoc] = { ...(meta[otherLoc] || {}), title: newTitle };
+  if (store.meta.title !== newTitle) {
+    store.meta.title = newTitle;
+    if (!store.meta.i18n) store.meta.i18n = {};
+    const allLocales = new Set<string>([
+      'zh',
+      'en',
+      ...(store.meta.enabledLocales || []),
+      ...Object.keys(store.meta.i18n)
+    ]);
+    for (const loc of allLocales) {
+      store.meta.i18n[loc] = { ...(store.meta.i18n[loc] || {}), title: newTitle };
     }
     markDirty();
   }

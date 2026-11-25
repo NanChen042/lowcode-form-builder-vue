@@ -43,7 +43,7 @@ export const FormAPI = {
   },
 
   /** 获取表单模板 */
-  async getTemplate(id: string): Promise<ApiResponse<{ id: string; schema: FormSchema | null }>> {
+  async getTemplate(id: string): Promise<ApiResponse<{ id: string; schema: FormSchema | null; logoConfig?: { logo?: string; icon?: string; title?: string } }>> {
     if (!id || id === 'default') {
       return {
         code: 400,
@@ -61,7 +61,8 @@ export const FormAPI = {
           success: true,
           data: {
             id,
-            schema: res.data.schema
+            schema: res.data.schema,
+            logoConfig: res.data.logo_config
           }
         };
       }
@@ -138,6 +139,8 @@ export interface UserSessionData {
   email?: string;
   orgId: number;
   companyName: string;
+  brandLogo?: string;
+  brandIcon?: string;
   token?: string;
   language?: 'zh' | 'en';
 }
@@ -159,6 +162,8 @@ export const UserAPI = {
             email: user.email,
             orgId: user.org_id,
             companyName: user.company_name,
+            brandLogo: user.brand_logo || '',
+            brandIcon: user.brand_icon || '',
             language: user.language
           }
         };

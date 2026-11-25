@@ -143,6 +143,8 @@ export interface PageConnection {
 }
 
 export interface FormMeta {
+  title?: string;
+  description?: string;
   profileType?: ProfileType;
   formType?: 'kyc' | 'risk';
   baseLocale?: FormLocale;

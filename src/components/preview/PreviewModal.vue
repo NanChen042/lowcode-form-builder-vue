@@ -210,7 +210,12 @@
                       ></div>
                     </div>
                     <div class="flex items-center gap-2 min-w-0 flex-1 mr-2.5">
-                      <img :src="logoUrl" alt="Brand Logo" class="w-5 h-5 rounded-full object-contain shrink-0" />
+                      <img
+                        :src="logoUrl"
+                        alt="Brand Logo"
+                        :class="hasCustomBrandLogo ? 'h-5 w-auto max-w-[84px] object-contain shrink-0' : 'w-5 h-5 rounded-full object-contain shrink-0'"
+                        @error="handleBrandLogoError"
+                      />
                       <span class="text-xs font-semibold text-slate-800 truncate leading-none">
                         {{ formBrandTitle }}
                       </span>
@@ -337,6 +342,7 @@
 import { ref, computed, onMounted, onUnmounted, reactive, watch, nextTick } from 'vue';
 import type { FormSchema, FormElement } from '@/types/schema';
 import { store, isBilingual, primaryLocale, targetLocales } from '@/core/store';
+import { UserAPI } from '@/core/api';
 import {
   t,
   getMetaText,
@@ -370,7 +376,16 @@ const props = defineProps<{
   mode?: 'preview' | 'deploy';
 }>();
 
-const logoUrl = `${import.meta.env.BASE_URL}img/logo-icon.png`;
+const defaultLogoUrl = `${import.meta.env.BASE_URL}img/logo-icon.png`;
+const brandLogoLoadError = ref(false);
+const hasCustomBrandLogo = computed(() => Boolean(store.org?.brandLogo?.trim()) && !brandLogoLoadError.value);
+const logoUrl = computed(() => (hasCustomBrandLogo.value ? store.org.brandLogo.trim() : defaultLogoUrl));
+
+function handleBrandLogoError() {
+  if (hasCustomBrandLogo.value) {
+    brandLogoLoadError.value = true;
+  }
+}
 
 const emit = defineEmits(['close', 'open-publish']);
 
@@ -432,8 +447,16 @@ watch(
   () => props.visible,
   (val) => {
     if (val) {
+      brandLogoLoadError.value = false;
       store.previewLocale = activePreviewLocale.value;
       initFormData();
+      UserAPI.getCurrentUser().then((res) => {
+        if (res.success && res.data && res.data.uid > 0) {
+          if (res.data.companyName) store.org.companyName = res.data.companyName;
+          store.org.brandLogo = res.data.brandLogo || '';
+          store.org.brandIcon = res.data.brandIcon || '';
+        }
+      }).catch(() => {});
     } else {
       store.previewLocale = '';
     }

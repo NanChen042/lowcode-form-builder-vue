@@ -237,6 +237,8 @@ onMounted(async () => {
         store.user.uid = res.data.uid;
         if (res.data.nickname) store.user.nickname = res.data.nickname;
         if (res.data.companyName) store.org.companyName = res.data.companyName;
+        if (res.data.brandLogo) store.org.brandLogo = res.data.brandLogo;
+        if (res.data.brandIcon) store.org.brandIcon = res.data.brandIcon;
         if (res.data.avatar) store.user.avatar = res.data.avatar;
         const cachedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('builder_current_locale') : null;
         if (res.data.language && !lang && !cachedLang) store.currentLocale = res.data.language;
@@ -293,6 +295,17 @@ onMounted(async () => {
   try {
     if (rawId) {
       const res = await FormAPI.getTemplate(rawId);
+      if (res.success && res.data?.logoConfig) {
+        if (res.data.logoConfig.title && !store.org.companyName) {
+          store.org.companyName = res.data.logoConfig.title;
+        }
+        if (res.data.logoConfig.logo && !store.org.brandLogo) {
+          store.org.brandLogo = res.data.logoConfig.logo;
+        }
+        if (res.data.logoConfig.icon && !store.org.brandIcon) {
+          store.org.brandIcon = res.data.logoConfig.icon;
+        }
+      }
       if (res.success && res.data?.schema?.pages && res.data.schema.pages.length > 0) {
         targetTemplate = res.data.schema;
         targetTemplateKey = 'saved';
@@ -464,6 +477,8 @@ function handleWindowMessage(event: MessageEvent) {
       if (payload.email) store.user.email = payload.email;
       if (payload.org_id || payload.sc_org_id) store.org.orgId = payload.org_id || payload.sc_org_id;
       if (payload.company_name || payload.company) store.org.companyName = payload.company_name || payload.company;
+      if (payload.brand_logo || payload.brandLogo) store.org.brandLogo = payload.brand_logo || payload.brandLogo;
+      if (payload.brand_icon || payload.brandIcon) store.org.brandIcon = payload.brand_icon || payload.brandIcon;
       if (payload.language || payload.lang) {
         const l = String(payload.language || payload.lang).toLowerCase();
         store.currentLocale = l.startsWith('en') ? 'en' : 'zh';
